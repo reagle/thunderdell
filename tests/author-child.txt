@@ -1,0 +1,15 @@
+@misc{A51995tf,
+   title = {{Title} Five},
+   date = {1995},
+   author = {A5},
+}
+@misc{A61996ts,
+   title = {{Title} Six},
+   date = {1996},
+   author = {A6},
+}
+@misc{A71997ts,
+   title = {{Title} Seven},
+   date = {1997},
+   author = {A7},
+}

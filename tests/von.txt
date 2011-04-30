@@ -1,0 +1,11 @@
+@article{VonKrogh1998ckc,
+   title = {{Care} in Knowledge Creation},
+   date = {1998},
+   journal = {California Management Review},
+   number = {3},
+   custom1 = {20060504},
+   volume = {40},
+   issue = {Spring},
+   annotation = {A definition of care in corporate organizations, a matrix of types of knowledge management techniques (Care x individual/social): capturing, transacting, bestowing, indwelling; ways of furthering care, and a case example of Unilever},
+   author = {Von Krogh, George},
+}

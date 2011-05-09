@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -511,7 +511,7 @@ def emit_biblatex(entries):
         entry_type_copy = entry['entry_type']
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
-                note = ' Available from: \url{%s}' % entry['url']
+                note = ' Available at: \url{%s}' % entry['url']
                 if 'urldate' in entry:
                     urldate = dateutil.parser.parse(entry['urldate']).strftime(
                         "%d %B %Y")
@@ -572,8 +572,8 @@ def emit_biblatex(entries):
                 # protect case in titles
                 if field in ('title', 'shorttitle'):
                     value = bibformat_title(value)
-                    if opts.bibtex and entry['entry_type'] == 'online':
-                        value += ' [online]'
+                    #if opts.bibtex and entry['entry_type'] == 'online':
+                        #value += ' [online]'
                 opts.outfd.write(u'   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
 

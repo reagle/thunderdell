@@ -521,6 +521,7 @@ def emit_biblatex(entries):
                 entry_type_copy = 'misc'
             if entry['entry_type'] == 'report':
                 entry_type_copy = 'techreport'
+        if opts.bibtex or opts.year:
             if 'date' in entry: 
                 del entry['date']
         else: # remove bibtex fields from biblatex
@@ -1049,6 +1050,9 @@ if __name__ == '__main__':
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
                     help="emit Wikipedia {{Citation}} format")
+    parser.add_option("-y", "--year", default=False,
+                    action="store_true",
+                    help="use year (instead of date) even with biblatex")
     opts, files = parser.parse_args()
     opts.cgi = False
     opts.browser = u"kfmclient openURL '%s' text/html"

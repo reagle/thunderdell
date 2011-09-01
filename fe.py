@@ -652,7 +652,11 @@ def emit_results(entries, query, results_file):
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
         matches = strong_pat.match(text)
         if matches:
-            page = '[' + matches.group(1) + ']'
+            page = matches.group(1)
+            if '-' in page:
+                page = ', pp. ' + page
+            else:
+                page = ', p. ' + page
             text = matches.group(2)
         else:
             page = ''
@@ -661,8 +665,8 @@ def emit_results(entries, query, results_file):
         else:
             hypertext = text
         if node.get('COLOR') not in (CL_CO['default'], CL_CO['cite']):
-            results_file.write('    <li class="%s">%s \\acite%s{%s}</li>\n' %
-                (CO_CL[color], hypertext, page, entry['identifier'].replace(' ','')))
+            results_file.write('    <li class="%s">%s [@%s%s]</li>\n' %
+                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), page))
         else:
             results_file.write('    <li class="%s">%s</li>\n' %
                 (CO_CL[color], hypertext))

@@ -36,6 +36,10 @@ try:
 except KeyError, e:
     HOME = '/home/reagle'
 
+TMP_DIR = HOME + '/tmp/.fe'
+if not os.path.isdir(TMP_DIR):
+    os.makedirs(TMP_DIR)
+
 try:
     from lxml.etree import parse, Element, SubElement, ElementTree
     useLXML = True
@@ -946,7 +950,7 @@ def build_bib(file, output):
             done.append(os.path.abspath(mm_file))
 
     if opts.query:
-        results_file_name = u'/tmp/query-thunderdell.html'
+        results_file_name = TMP_DIR + 'query-thunderdell.html'
         if os.path.exists(results_file_name): os.remove(results_file_name)
         try:
             results_file = codecs.open(results_file_name, "w", "utf-8")
@@ -962,7 +966,7 @@ def build_bib(file, output):
             command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
             os.system(command)
     elif opts.pretty:
-        results_file_name = '/tmp/pretty-print.html'
+        results_file_name = TMP_DIR + 'pretty-print.html'
         try:
             results_file = codecs.open(results_file_name, "w", "utf-8")
         except IOError:

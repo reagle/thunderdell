@@ -628,12 +628,7 @@ RESULT_FILE_HEADER = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transition
     rel="stylesheet" type="text/css" />
 """
 
-RESULT_FILE_QUERY_BOX = u"""    <style type="text/css">
-    p, li, span, th, td {
-        font-size: 12pt
-    }
-    </style>
-    <title>Results for '%s'</title>
+RESULT_FILE_QUERY_BOX = u"""    <title>Results for '%s'</title>
     </head>
     <body>
         <div>

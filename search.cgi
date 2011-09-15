@@ -35,15 +35,8 @@ def cgi_main():
         sys.path.append("/home/reagle/bin/fe")
         sys.path.append("/home/reagle/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
         MINDMAP = ('/home/reagle/data/2web/reagle.org/joseph/readings.mm')
+
         import fe
-        #try:
-            #import fe
-        #except Exception, e:
-            #import time
-            #now = time.localtime(time.time())
-            #print "%s Exception during import:" % time.asctime(now), e
-            #print "sys.path = %s" % sys.path
-            #sys.exit()
         output = fe.emit_results
         fe.opts.query = query
         fe.opts.query_c = re.compile(re.escape(query), re.IGNORECASE)
@@ -52,7 +45,7 @@ def cgi_main():
 
         fe.build_bib(MINDMAP, output)
 
-        fileObj = codecs.open('/tmp/query-thunderdell.html', "r", "utf-8")
+        fileObj = codecs.open(fe.TMP_DIR + 'query-thunderdell.html', "r", "utf-8")
         print fileObj.read()
         fileObj.close()
 
@@ -71,4 +64,4 @@ def print_error(msg):
 
 if __name__ == '__main__':
     cgi_main()
-
+    

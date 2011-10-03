@@ -116,6 +116,7 @@ class scrape_default(object):
         self.comment = comment
         self.html, resp = get_HTML(url, cache_control = 'no-cache')
         self.text = get_text(url)
+        self.zim = None
 
     def get_biblio(self):
         biblio = {
@@ -126,7 +127,8 @@ class scrape_default(object):
             'permalink' : self.get_permalink(),
             'excerpt' : self.get_excerpt(),
             'comment' : self.comment,
-            'url' : self.url
+            'url' : self.url,
+            'zim' : self.zim, # content from zim wiki
         }
         return biblio
 
@@ -526,6 +528,13 @@ def log2work(biblio):
 
     print "to log2work"
     ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
+
+    #if biblio['zim']:
+        #comment = biblio['zim']
+        #activity = ...
+    #else:
+        #>>>
+    ######################## this is traditional
     title = biblio['title']
     activity, sep, comment = biblio['comment'].partition(' ')
     url = biblio['url']
@@ -533,18 +542,20 @@ def log2work(biblio):
     # Replace the line with the '^' character with a hypertext link
     comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
         (escape_XML(url), title), comment)
+
     date_token = get_Now_YMD()
     digest = hashlib.md5(comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
         (uid, date_token, activity, comment)
+    ########################
 
     fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
     content = fd.read()
     fd.close()
 
     insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ol>)')
-    #try:
+
     newcontent = insertion_regexp.sub(u'\\1 \n  %s' %
         log_item, content, re.DOTALL|re.IGNORECASE)
     if newcontent:
@@ -553,10 +564,6 @@ def log2work(biblio):
         fd.close()
     else:
         print_usage("Sorry, output regexp subsitution failed.")
-    #except UnicodeDecodeError, e:
-            #print_usage(e)
-            #print_usage("Sorry, unicode error")
-
 
 #######################################
 # Dispatchers
@@ -623,7 +630,7 @@ if __name__ == "__main__":
     else:
         arguments = ' '.join(sys.argv[1:])
 
-    logger, params = get_logger(arguments)    # where to output
+    logger, params = get_logger(arguments)    # function, (url, scheme, comment)
     comment = params['comment'].strip()
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)

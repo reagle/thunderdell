@@ -36,7 +36,7 @@ try:
 except KeyError, e:
     HOME = '/home/reagle'
 
-TMP_DIR = HOME + '/tmp/.fe'
+TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 

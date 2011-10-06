@@ -21,7 +21,7 @@ import codecs
 import datetime
 import dateutil.parser    # http://labix.org/python-dateutil
 from optparse import OptionParser
-from ordereddict import OrderedDict # http://pypi.python.org/pypi/ordereddict
+from collections import OrderedDict
 import os
 import re
 import sys
@@ -1105,4 +1105,3 @@ else:
         pretty = False          # Print as HTML with citation at end
         query = None            # Query the bibliographies
         query_c = None          # Query re.compiled
-        

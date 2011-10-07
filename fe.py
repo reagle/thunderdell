@@ -33,7 +33,7 @@ import unicodedata
 from os import environ
 try: 
     HOME = environ['HOME']
-except KeyError, e:
+except KeyError as e:
     HOME = '/home/reagle'
 
 TMP_DIR = HOME + '/tmp/.fe/'
@@ -51,7 +51,7 @@ MONTH2DIGIT = {'jan' : '1', 'feb' : '2', 'mar' : '3',
         'apr' : '4', 'may' : '5', 'jun' : '6',
         'jul' : '7', 'aug' : '8', 'sep' : '9',
         'oct' : '10', 'nov' : '11', 'dec' : '12'}
-DIGIT2MONTH = dict((v,k) for k, v in MONTH2DIGIT.iteritems())
+DIGIT2MONTH = dict((v,k) for k, v in list(MONTH2DIGIT.items()))
 
 # happy to keep using bibtex:address alias of bibtex:location
 # keep t, ot, and et straight
@@ -93,7 +93,7 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 've':'venue',
                 'c2':'custom2', 'c3':'catalog', 'c4':'custom4', 'c5':'custom5'}
 
-BIBLATEX_FIELDS = dict([(field, short) for short, field in BIBLATEX_SHORTCUTS.items()])
+BIBLATEX_FIELDS = dict([(field, short) for short, field in list(BIBLATEX_SHORTCUTS.items())])
 
 BIBLATEX_TYPES = ('article',
                 'book',
@@ -126,7 +126,7 @@ CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
     'cite': '#ff33b8', 'author': '#338800',
     'quote': '#166799', 'paraphrase': '#8b12d6',
     'default': '#000000', None: None}
-CO_CL = dict([(label, color) for color, label in CL_CO.items()])
+CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
 
 from xml.sax.saxutils import escape, unescape
 def unescape_XML(s):
@@ -218,7 +218,7 @@ def identity_add_title(ident, title):
 
     suffix = ''
 
-    BORING_WORDS = (u'', u'a', u'of', u'if', u'in', u'an', u'to', u'for', u'the', u'and', u're')
+    BORING_WORDS = ('', 'a', 'of', 'if', 'in', 'an', 'to', 'for', 'the', 'and', 're')
     clean_title = title.replace('Wikipedia:','').replace('Category:','').replace('WikiEN-l','').replace('Wikipedia-l','').replace('Wiki-l','').replace('Wiktionary-l','').replace('Foundation-l','').replace('Textbook-l','').replace('.0','').replace("'","")
 
     not_alphanum_pat = re.compile("[^a-zA-Z0-9']")
@@ -244,14 +244,14 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:    # if it still collides
-        #print "\t trying     ", ident, "collides with", entries[ident]['title']
+        info("\t trying     %s collides with %s" %(ident, entries[ident]['title']))
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
             ident = ident[0:-1] + str(suffix)
         else:
             ident += '1'
-        #print "\t yielded    ", ident
+        info("\t yielded    %s" % ident)
     return ident
 
 def get_ident(entry, entries):
@@ -268,7 +268,7 @@ def get_ident(entry, entries):
         name_part = last_names[0] + 'Etal'
 
     if not 'year' in entry: entry['year'] = '0000'
-    ident = u''.join((name_part, entry['year']))
+    ident = ''.join((name_part, entry['year']))
     # remove spaces and chars not permitted in xml name/id attributes
     ident = ident.replace(' ','').replace(':','').replace("'","")
     # remove some punctuation and strong added by walk_freemind.query_highlight
@@ -337,12 +337,12 @@ def pull_citation(entry):
         cites = equal_pat.split(citation)[1:]
 
         # 2 references to an iterable object are unpacked with '*' and rezipped
-        cite_pairs = zip(*[iter(cites)] * 2)
+        cite_pairs = list(zip(*[iter(cites)] * 2))
         for short, value in cite_pairs:
             try:
                 entry[BIBLATEX_SHORTCUTS[short]] = value.strip()
-            except KeyError, error:
-                print "Key error on ", error, entry['title'], entry['_mm_file']
+            except KeyError as error:
+                print(("Key error on ", error, entry['title'], entry['_mm_file']))
     else: entry['year'] = '0000'
 
     ## If it's an URL and has a read date, insert text
@@ -473,19 +473,19 @@ def emit_wp_citation(entries):
                 prefix = 'editor' + str(name_num) + '-'
                 suffix = ''
             opts.outfd.write(
-                u'| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
+                '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
             opts.outfd.write(
-                u'| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
+                '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
     
     for entry in sorted_dict_values(entries):
-        opts.outfd.write(u'{{ Citation\n')
+        opts.outfd.write('{{ Citation\n')
         if 'booktitle' in entry:
-            opts.outfd.write(u'| ref = %s\n' % entry['title'])
+            opts.outfd.write('| ref = %s\n' % entry['title'])
             entry['title'] = entry['booktitle']
         if 'identifier' in entry:
-            opts.outfd.write(u'| ref = %s\n' % entry['title'])
+            opts.outfd.write('| ref = %s\n' % entry['title'])
             
-        for short, field in BIBLATEX_SHORTCUTS.items():
+        for short, field in list(BIBLATEX_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in ( 'annotation', 'custom1', 'day', 'entry_type', 
@@ -502,7 +502,7 @@ def emit_wp_citation(entries):
                     field = 'accessdate'
                 elif field == 'address':
                     field = 'place'
-                opts.outfd.write(u'| %s = %s\n' % (field, value))
+                opts.outfd.write('| %s = %s\n' % (field, value))
         opts.outfd.write("}}\n")
 
 
@@ -533,9 +533,9 @@ def emit_biblatex(entries):
                 if token in entry:
                     del entry[token] 
 
-        opts.outfd.write(u'@%s{%s,\n' % (entry_type_copy, entry['identifier']))
+        opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in BIBLATEX_SHORTCUTS.items():
+        for short, field in list(BIBLATEX_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
 
                 # skip these conditions
@@ -579,7 +579,7 @@ def emit_biblatex(entries):
                     value = bibformat_title(value)
                     #if opts.bibtex and entry['entry_type'] == 'online':
                         #value += ' [online]'
-                opts.outfd.write(u'   %s = {%s},\n' % (field, value))
+                opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
 
 
@@ -618,7 +618,7 @@ def emit_bibtex_html(file, opts):
     os.system(opts.browser % (fileName + '.bib.html'))
 
 
-RESULT_FILE_HEADER = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+RESULT_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
       "http://www.w3.org/TR/html4/loose.dtd">
     <html>
     <head>
@@ -628,7 +628,7 @@ RESULT_FILE_HEADER = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transition
     rel="stylesheet" type="text/css" />
 """
 
-RESULT_FILE_QUERY_BOX = u"""    <title>Results for '%s'</title>
+RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
     </head>
     <body>
         <div>
@@ -696,12 +696,12 @@ def emit_results(entries, query, results_file):
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
-        token = token.replace(u'<strong>','').replace(u'</strong>','')
+        token = token.replace('<strong>','').replace('</strong>','')
         token = quote(token.encode('utf-8')) # urllib won't accept unicode
-        #print "token = '%s' type = '%s'" %(token, type(token))
+        info("token = '%s' type = '%s'" %(token, type(token)))
         url_query = \
-        escape(u"http://reagle.org/joseph/plan/search.cgi?query=%s") % token
-        #print "url_query = '%s' type = '%s'" %(url_query, type(url_query))
+        escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
+        info("url_query = '%s' type = '%s'" %(url_query, type(url_query)))
         return url_query
 
     def get_url_MM(file):
@@ -713,7 +713,7 @@ def emit_results(entries, query, results_file):
 
     def print_entry(identifier, author, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
 
-        identifier_html = u'<li><a href="%s">%s</a>' % (get_url_query(identifier), identifier)
+        identifier_html = '<li><a href="%s">%s</a>' % (get_url_query(identifier), identifier)
         title_html = '<a href="%s">%s</a>' % (get_url_query(title), title)
         if url:
             link_html = '[<a href="%s">url</a>]' % url
@@ -818,10 +818,10 @@ def commit_entry(entry, entries):
 
 def purge_entries(entries):
     """Delete Null entries"""
-    for entry in entries.keys():
-        #print type(entry), entry
+    for entry in list(entries.keys()):
+        info("%s %s" % (type(entry), entry))
         if entries[entry]['identifier'] == 'Null':
-            #print "   deleting", entry
+            info("   deleting %s" % entry)
             del entries[entry]
 
 def walk_freemind(node, mm_file, entries, links):
@@ -923,24 +923,24 @@ def build_bib(file, output):
     entries = OrderedDict() # dict of {id : {entry}}, by insertion order
     mm_files = []
     mm_files.append(file)  # list of file encountered (e.g., chase option)
-    #print "** mm_files = ", mm_files
+    info("   mm_files = %s" % mm_files)
     for mm_file in mm_files:
         if mm_file in done:
             continue
         else:
-            #print "** processing", mm_file
+            info("   processing %s" % mm_file)
             try:
                 doc = parse(mm_file).getroot()
-            except IOError, err:
-                #print "*** failed to parse", mm_file
+            except IOError as err:
+                info("    failed to parse %s" % mm_file)
                 continue
-            #print "*** successfully parsed %s" % mm_file
+            info("    successfully parsed %s" % mm_file)
             entries, links = walk_freemind(doc, mm_file, entries, links=[])
             if opts.chase:
                 for link in links:
                     link = os.path.abspath(os.path.dirname(mm_file) + '/' +link)
                     if 'syllabus' not in link and link not in done:
-                        #print "*** placing %s in mm_files" %link
+                        info("    placing %s in mm_files" %link)
                         mm_files.append(link)
             done.append(os.path.abspath(mm_file))
 
@@ -950,7 +950,7 @@ def build_bib(file, output):
         try:
             results_file = codecs.open(results_file_name, "w", "utf-8")
         except IOError:
-            print "There was an error writing to", results_file_name
+            print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(RESULT_FILE_QUERY_BOX % (opts.query,opts.query))
@@ -965,11 +965,11 @@ def build_bib(file, output):
         try:
             results_file = codecs.open(results_file_name, "w", "utf-8")
         except IOError:
-            print "There was an error writing to", results_file_name
+            print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
         results_file.write('    <title>Pretty Mind Map></title></head><body><ul>\n')
-        for entry in entries.values():
+        for entry in list(entries.values()):
             opts.query = entry['identifier']
             emit_results(entries, opts.query, results_file)
         results_file.write('</ul></body></html>\n')
@@ -1061,7 +1061,7 @@ if __name__ == '__main__':
     opts, files = parser.parse_args()
 
     log_level = 100 # default
-    if opts.verbose == 1: log_level = logging.CRITICAL # DEBUG
+    if opts.verbose == 1: log_level = logging.CRITICAL
     elif opts.verbose == 2: log_level = logging.INFO
     elif opts.verbose >= 3: log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format = "%(levelno)s %(funcName).5s: %(message)s")
@@ -1070,13 +1070,13 @@ if __name__ == '__main__':
     dbg = logging.debug
     
     opts.cgi = False
-    opts.browser = u"kfmclient openURL '%s' text/html"
+    opts.browser = "kfmclient openURL '%s' text/html"
     opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     if len(files) == 0:     # Default file
         files = (HOME+'/joseph/readings.mm',)
     elif len(files) > 1:
-        print "Warning: ignoring all files but the first"
+        print("Warning: ignoring all files but the first")
     file = os.path.abspath(files[0])
 
     if opts.WP_citation:
@@ -1084,7 +1084,7 @@ if __name__ == '__main__':
     else:
         output = emit_biblatex
     if opts.tests:
-        print "Running doctests"
+        print("Running doctests")
         import doctest
         doctest.testmod()
     if opts.fields:

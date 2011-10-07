@@ -16,18 +16,18 @@
 #20090519: bibformat_title and pull_citation each use about ~7%
 #20100401: should move to using biblatex 0.9 date fields
 
-from cgi import escape
+from cgi import escape, parse_qs
 import codecs
+from collections import OrderedDict
 import datetime
 import dateutil.parser    # http://labix.org/python-dateutil
+import logging
 from optparse import OptionParser
-from collections import OrderedDict
 import os
 import re
 import sys
 import time
 from urllib import quote, unquote
-from cgi import parse_qs
 import unicodedata
 
 from os import environ
@@ -1050,6 +1050,8 @@ if __name__ == '__main__':
     parser.add_option("-t", "--tests",
                     action="store_true", default=False,
                     help="run tests")
+    parser.add_option('-v', '--verbose', dest='verbose', action='count',
+                    help="Increase verbosity (specify multiple times for more)")
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
                     help="emit Wikipedia {{Citation}} format")
@@ -1057,6 +1059,16 @@ if __name__ == '__main__':
                     action="store_true",
                     help="use year (instead of date) even with biblatex")
     opts, files = parser.parse_args()
+
+    log_level = 100 # default
+    if opts.verbose == 1: log_level = logging.CRITICAL # DEBUG
+    elif opts.verbose == 2: log_level = logging.INFO
+    elif opts.verbose >= 3: log_level = logging.DEBUG
+    logging.basicConfig(level=log_level, format = "%(levelno)s %(funcName).5s: %(message)s")
+    critical = logging.critical
+    info = logging.info
+    dbg = logging.debug
+    
     opts.cgi = False
     opts.browser = u"kfmclient openURL '%s' text/html"
     opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')

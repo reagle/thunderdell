@@ -663,7 +663,10 @@ def emit_results(entries, query, results_file):
             hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
         else:
             hypertext = text
-        if node.get('COLOR') not in (CL_CO['default'], CL_CO['cite']):
+        if node.get('COLOR') == CL_CO['quote']:
+            results_file.write('    <li class="%s">&gt; %s [@%s%s]</li>\n' %
+                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), page))
+        elif node.get('COLOR') not in (CL_CO['default'], CL_CO['cite']):
             results_file.write('    <li class="%s">%s [@%s%s]</li>\n' %
                 (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), page))
         else:
@@ -686,7 +689,7 @@ def emit_results(entries, query, results_file):
                 hypertext = text
             results_file.write('%s<li class="%s parent">%s\n'
                 % (spaces, CO_CL[node.get('COLOR','#000000')], hypertext))
-            # I should clean all of this up to use  simpleHTMLwriter
+            # I should clean all of this up to use simpleHTMLwriter
             results_file.write('%s<ul class="container">\n' % spaces)
             for child in node:
                 if CO_CL[child.get('COLOR')] == 'author': # title bug fixed? 110323

@@ -42,6 +42,11 @@ def cgi_main():
         fe.opts.query_c = re.compile(re.escape(query), re.IGNORECASE)
         fe.opts.chase = True
         fe.opts.cgi = True
+        
+        def _ignore(_): pass
+        fe.critical = _ignore
+        fe.info =  _ignore
+        fe.dbg =  _ignore
 
         fe.build_bib(MINDMAP, output)
 
@@ -64,4 +69,4 @@ def print_error(msg):
 
 if __name__ == '__main__':
     cgi_main()
-    
+

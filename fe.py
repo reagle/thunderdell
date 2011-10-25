@@ -646,29 +646,36 @@ def emit_results(entries, query, results_file):
     """Emit the results of the query"""
 
     def reverse_print(node, entry):
-        """Move the page number to the end of the text with the Bibtex key"""
+        """Move the locator number to the end of the text with the Bibtex key"""
         strong_pat = re.compile('^(?:<strong>)?([\-\d]+)(?:</strong>)? (.*)')
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
         matches = strong_pat.match(text)
         if matches:
-            page = matches.group(1)
-            if '-' in page:
-                page = ', pp. ' + page
-            else:
-                page = ', p. ' + page
             text = matches.group(2)
+            locator = matches.group(1)
+            if 'pagination' in entry:
+                if entry['pagination'] == 'section':
+                    locator = ', sec. ' + locator
+                else:
+                    print("unknown locator %s" % entry['pagination'])
+                    sys.exit
+            else:
+                if '-' in locator:
+                    locator = ', pp. ' + locator
+                else:
+                    locator = ', p. ' + locator
         else:
-            page = ''
+            locator = ''
         if 'LINK' in node.attrib:
             hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
         else:
             hypertext = text
         if node.get('COLOR') == CL_CO['quote']:
             results_file.write('    <li class="%s">&gt; %s [@%s%s]</li>\n' %
-                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), page))
+                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
         elif node.get('COLOR') not in (CL_CO['default'], CL_CO['cite']):
             results_file.write('    <li class="%s">%s [@%s%s]</li>\n' %
-                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), page))
+                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
         else:
             results_file.write('    <li class="%s">%s</li>\n' %
                 (CO_CL[color], hypertext))

@@ -286,7 +286,7 @@ def guess_bibtex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
     >>> guess_bibtex_type({'author': [('', '', 'Smith', '')],\
-        'booktitle': 'Proceeedings of WikiSym 08',\
+        'booktitle': 'Proceedings of WikiSym 08',\
         'publisher': 'ACM',\
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
@@ -522,7 +522,7 @@ def emit_biblatex(entries):
                     note += ' [Accessed %s]' % urldate
                 entry['note'] = entry.setdefault('note', '') + note
             if 'eventtitle' in entry and 'booktitle' not in entry:
-               entry['booktitle'] = 'Proceeedings of the ' + entry['eventtitle'] 
+               entry['booktitle'] = 'Proceedings of the ' + entry['eventtitle'] 
             if entry['entry_type'] == 'online':
                 entry_type_copy = 'misc'
             if entry['entry_type'] == 'report':

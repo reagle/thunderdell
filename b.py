@@ -17,6 +17,9 @@ a scraping.
 http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 """
 
+# TODO
+# * archive URLs to e/old/`r=`
+
 import codecs
 import re
 import sys

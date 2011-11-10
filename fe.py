@@ -823,7 +823,11 @@ def commit_entry(entry, entries):
         entry.setdefault('_mm_file', '')
 
         # pull the citation, create an identifier, and enter in entries
-        pull_citation(entry)    # break the citation into more bibliographic keys
+        try:
+            pull_citation(entry)    # break the citation into more bibliographic keys
+        except:
+            print ("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
+            raise
         entry['entry_type'] = guess_bibtex_type(entry) # guess the bibliographic type
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry

@@ -1118,9 +1118,15 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if opts.fields:
-        from pprint import pprint
-        pprint(BIBLATEX_SHORTCUTS)
-        pprint(BIBLATEX_TYPES)
+        def fmtcols(mylist, cols=3):
+            pairs = ["\t".join(
+                ['%20s' %j for j in mylist[i:i+cols]]
+                    ) for i in range(0,len(mylist),cols)]
+            print("\n".join(pairs))
+            print("\n")
+        fmtcols(BIBLATEX_TYPES)
+        fmtcols(sorted(['%s:%s' %(key, value) 
+            for key, value in BIBLATEX_SHORTCUTS.items()]))
         sys.exit()
     if opts.display:
         opts.bibtex = True

@@ -35,6 +35,8 @@ try:
     HOME = environ['HOME']
 except KeyError as e:
     HOME = '/home/reagle'
+DEFAULT_MAPS = (HOME+'/joseph/readings.mm',)
+
 
 TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
@@ -585,13 +587,13 @@ def emit_biblatex(entries):
         opts.outfd.write("}\n")
 
 
-def emit_bibtex_html(file, opts):
+def emit_bibtex_html(file_name, opts):
     """Emit a bibtex file, use bibtex2html, open result in browser
 
     see bibtex2html http://www.lri.fr/~filliatr/bibtex2html/
 
     """
-    fileName, extension = os.path.splitext(file)
+    fileName, extension = os.path.splitext(file_name)
     citeFileName = fileName + '.rl'
     if os.path.exists(citeFileName):
         expr = ('bibtex2html -q -i -a %s -nokeywords '
@@ -716,12 +718,12 @@ def emit_results(entries, query, results_file):
         info("url_query = '%s' type = '%s'" %(url_query, type(url_query)))
         return url_query
 
-    def get_url_MM(file):
+    def get_url_MM(file_name):
         """Return the URL for the source MindMap basedon whether CGI or cmdline"""
         if __name__ == '__main__':
-            return file
+            return file_name
         else:                               # CGI
-            return 'file://' + file
+            return 'file://' + file_name
 
     def print_entry(identifier, author, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
 
@@ -930,7 +932,7 @@ def walk_freemind(node, mm_file, entries, links):
     return entries, links
 
 
-def build_bib(file, output):
+def build_bib(file_name, output):
     """Collect the files to walk and invoke functions to build a bib"""
 
     links = []          # list of other files encountered in the mind map
@@ -938,7 +940,7 @@ def build_bib(file, output):
     entry = {}          # dict of bibliographic data
     entries = OrderedDict() # dict of {id : {entry}}, by insertion order
     mm_files = []
-    mm_files.append(file)  # list of file encountered (e.g., chase option)
+    mm_files.append(file_name)  # list of file encountered (e.g., chase option)
     info("   mm_files = %s" % mm_files)
     for mm_file in mm_files:
         if mm_file in done:
@@ -1043,12 +1045,18 @@ if __name__ == '__main__':
     parser.add_option("-d", "--display",
                     action="store_true", default=False,
                     help="emit bibtex, convert to HTML, display in browser")
-    parser.add_option("-f", "--fields",
+    parser.add_option("-D", "--defaults",
                     action="store_true", default=False,
-                    help="emit biblatex shortcuts, fields, and types")
+                    help="chase, use default map and output file")
     parser.add_option("-k", "--keys", default='-no-keys',
                     action="store_const", const='-use-keys',
-                    help="emit bibtex keys in biblatex HTML")
+                    help="show bibtex keys in displayed HTML")
+    parser.add_option("-f", "--file-out",
+                    action="store_true", default=False,
+                    help="output goes to FILE.bib")
+    parser.add_option("-F", "--fields",
+                    action="store_true", default=False,
+                    help="show biblatex shortcuts, fields, and types used by fe")
     parser.add_option("-l", "--long_url",
                     action="store_true", default=False,
                     help="use long URLs")
@@ -1090,11 +1098,17 @@ if __name__ == '__main__':
     opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     if len(files) == 0:     # Default file
-        files = (HOME+'/joseph/readings.mm',)
+        files = DEFAULT_MAPS
     elif len(files) > 1:
         print("Warning: ignoring all files but the first")
-    file = os.path.abspath(files[0])
+    file_name = os.path.abspath(files[0])
 
+    if opts.defaults:
+        opts.chase = True
+        opts.file_out = True
+    if opts.file_out:
+        output_fn = os.path.splitext(file_name)[0] + '.bib'
+        opts.outfd = codecs.open(output_fn, "w", "utf-8")
     if opts.WP_citation:
         output = emit_wp_citation
     else:
@@ -1110,7 +1124,7 @@ if __name__ == '__main__':
         sys.exit()
     if opts.display:
         opts.bibtex = True
-        fileName, extension = os.path.splitext(file)
+        fileName, extension = os.path.splitext(file_name)
         opts.outfd = codecs.open(fileName + '.bib', 'w', 'utf-8', 'replace')
     if opts.query:
         #u'Péña' == unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')
@@ -1118,10 +1132,10 @@ if __name__ == '__main__':
         opts.query_c = re.compile(re.escape(opts.query), re.IGNORECASE)
         output = emit_results
 
-    build_bib(file, output)
+    build_bib(file_name, output)
 
     if opts.display:
-        emit_bibtex_html(file, opts)
+        emit_bibtex_html(file_name, opts)
     opts.outfd.close()
 else:
     class opts:

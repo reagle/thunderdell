@@ -16,7 +16,7 @@ def regexParse(text):
 
     entries = {}
     key_pat = re.compile('@\w+{(.*),')
-    value_pat = re.compile('[ ]+(\w+) = {(.*)},')
+    value_pat = re.compile('\s+(\w+) = {(.*)},?')
     for line in text:
         key_match = key_pat.match(line)
         if key_match:
@@ -26,9 +26,9 @@ def regexParse(text):
         value_match = value_pat.match(line)
         if value_match:
             field, value = value_match.groups()
-            entries[key][field] = value
+            entries[key][field] = value.replace('{', '').replace('}', '')
     return entries
-
+        
 def xml_escape(text):
     """Remove entities and spurious whitespace"""
     import cgi
@@ -38,14 +38,18 @@ def xml_escape(text):
 
 def process(entries):
 
-    print entries
     fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
 
     for entry in entries.values():
         cite = []
+        reordered_names = []
         names = xml_escape(entry['author'])
+        names = names.split(' and ')
+        for name in names:
+            last, first = name.split(', ')
+            reordered_names.append(first + ' ' + last)
         fdo.write("""  <node COLOR="#338800" TEXT="%s">\n""" \
-            % names)
+            % ', '.join(reordered_names))
 
         if 'url' in entry:
             fdo.write("""    <node COLOR="#090f6b" LINK="%s" TEXT="%s">\n""" \
@@ -74,6 +78,7 @@ def process(entries):
         if 'chapter' in entry:
             cite.append(('ch',entry['chapter']))
         if 'pages' in entry:
+            entry['pages'] = entry['pages'].replace('--', '-'). replace(' ', '')
             cite.append(('pp',entry['pages']))
         if 'journal' in entry:
             cite.append(('j',entry['journal']))
@@ -81,6 +86,8 @@ def process(entries):
             cite.append(('v',entry['volume']))
         if 'number' in entry:
             cite.append(('n',entry['number']))
+        if 'doi' in entry:
+            cite.append(('doi',entry['doi']))
         if 'annote' in entry:
             cite.append(('an',entry['annote']))
         if 'note' in entry:
@@ -101,17 +108,16 @@ if __name__ == "__main__":
 
     import codecs, getopt, os, sys
 
-
     try:
         (options,files) = getopt.getopt (sys.argv[1:],"")
     except getopt.error:
         print 'Error: Unknown option or missing argument.'
 
-    files = [os.path.abspath(file) for file in files]
-    for file in files:
+    files = [os.path.abspath(file_name) for file_name in files]
+    for file_name in files:
         try:
-            src = codecs.open(file, "r", "utf-8", "replace").read()
-            fileOut = os.path.splitext(file)[0] + '.mm'
+            src = codecs.open(file_name, "r", "utf-8", "replace").read()
+            fileOut = os.path.splitext(file_name)[0] + '.mm'
             fdo = codecs.open(fileOut, "wb", "utf-8", "replace")
         except IOError:
             print "    file does not exist"

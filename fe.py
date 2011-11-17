@@ -36,7 +36,7 @@ try:
 except KeyError as e:
     HOME = '/home/reagle'
 DEFAULT_MAPS = (HOME+'/joseph/readings.mm',)
-
+BROWSER = environ['BROWSER']
 
 TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
@@ -1094,7 +1094,7 @@ if __name__ == '__main__':
     dbg = logging.debug
     
     opts.cgi = False
-    opts.browser = "kfmclient openURL '%s' text/html"
+    opts.browser = BROWSER + " '%s'"
     opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     if len(files) == 0:     # Default file

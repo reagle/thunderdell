@@ -84,6 +84,8 @@ KEY_SHORTCUTS = {'alt': 'alternative',
         'ver': 'verifiability',
         'zei': 'zeitgeist'}
 
+MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
+
 #######################################
 # Utility functions
 
@@ -139,16 +141,20 @@ class scrape_default(object):
         '''test against two conditions, return guess of article author'''
 
         # blogs: "By John Smith at 15:55 September, 03 2009"
-        author_regexp1 = "by ([a-z ]*?)(?:-|,|at|on).{,25}?\d\d"
+        author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
         dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
         if dmatch:
-            return dmatch.group(1)
+            #print("*** dmatch1 = '%s'" % dmatch.group())
+            if len(dmatch.group(1)) > 4: # no 0 len "by at least"
+                return dmatch.group(1)
         # newspapers: "By John Smith"
         author_regexp2 = "^ *By (.*)"
         dmatch = re.search(author_regexp2, self.text, re.MULTILINE)
         if dmatch:
+            #print("*** dmatch2 = '%s'" % dmatch.group())
             if len(dmatch.group(1).split()) < 6: # if short byline
                 return dmatch.group(1)
+        print('*** UNKNOWN')
         return 'UNKNOWN'
 
     def get_title(self):
@@ -175,7 +181,7 @@ class scrape_default(object):
 
         from dateutil.parser import parse
 
-        date_regexp = "(\d+,? )?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*(,? \d+)?(,? \d+)"
+        date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return parse(dmatch.group(0)).strftime("%B %d, %Y").split(', ')

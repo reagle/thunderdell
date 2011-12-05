@@ -75,7 +75,7 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 'kw':'keyword',
                 'nt':'note',
                 'or':'organization', 
-                'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher',
+                'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher', 'oy':'origyear',
                 'ot':'type', # organization's type
                 'ps':'pubstate', #in press, submitted
                 'pp':'pages',

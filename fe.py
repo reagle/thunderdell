@@ -31,12 +31,9 @@ from urllib import quote, unquote
 import unicodedata
 
 from os import environ
-try: 
-    HOME = environ['HOME']
-except KeyError as e:
-    HOME = '/home/reagle'
+HOME = environ['HOME'] if 'HOME' in environ else '/home/reagle'
+BROWSER = environ['BROWSER'] if 'BROWSER' in environ else None
 DEFAULT_MAPS = (HOME+'/joseph/readings.mm',)
-BROWSER = environ['BROWSER']
 
 TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):

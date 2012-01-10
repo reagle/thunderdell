@@ -40,8 +40,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
     author = title = citation = ""
     entry = {}
 
-#     print "*** '%s'" % repr(line)
-    if line not in ('','\n',u'\n'):
+    print "*** '%s'" % repr(line)
+    if line not in (u'', u'\r' ,u'\n'):
         if line.lower().startswith('author ='):
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.IGNORECASE)
             if started: # Do I need to close a previous entry

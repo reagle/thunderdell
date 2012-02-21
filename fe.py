@@ -204,11 +204,20 @@ def join_names(names):
     full_names = normalize_whitespace(full_names)
     return full_names
 
+
+ARTICLES = ('a', 'an', 'the')
+CONJUNCTIONS = ('and', 'but', 'for', 'nor', 'or')
+SHORT_PREPOSITIONS = ("on", "in", "out", "to", "from", 
+    "for" "of", "with")
+BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + SHORT_PREPOSITIONS
+
 def identity_add_title(ident, title):
     """Return a non-colliding identity.
 
-    If there's a collision in keys disambiguate by appending the first
-    letters of the title less the namespace (i.e., Wikipedia: Statistics:)
+    Disambiguate keys by appending the first letter of first 
+    3 significant words (i.e., no WP:namespace, articles, conjunctions
+    or short prepositions). If only one word, use first, penultimate,
+    and last character.
 
     >>> identity_add_title('Wikipedia 2008', 'Wikipedia:Neutral Point of View')
     'Wikipedia 2008npv'
@@ -216,8 +225,6 @@ def identity_add_title(ident, title):
     """
 
     suffix = ''
-
-    BORING_WORDS = ('', 'a', 'of', 'if', 'in', 'an', 'to', 'for', 'the', 'and', 're')
     clean_title = title.replace('Wikipedia:','').replace('Category:','').replace('WikiEN-l','').replace('Wikipedia-l','').replace('Wiki-l','').replace('Wiktionary-l','').replace('Foundation-l','').replace('Textbook-l','').replace('.0','').replace("'","")
 
     not_alphanum_pat = re.compile("[^a-zA-Z0-9']")
@@ -1029,7 +1036,11 @@ def _test_results():
     """
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] [FILE.mm]")
+    parser = OptionParser(usage="""usage: %prog [options] [FILE.mm]\n
+    Note: Keys are created by appending the first letter of first 
+    3 significant words (i.e., no WP:namespace, articles, conjunctions
+    or short prepositions). If only one word, use first, penultimate,
+    and last character.""")
     parser.add_option("-a", "--abstract", default='-noabstract',
                     action="store_const", const='-note annotation',
                     help="include abstracts in bibtex2html HTML")

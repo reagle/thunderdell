@@ -655,7 +655,7 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry):
         """Move the locator number to the end of the text with the Bibtex key"""
-        strong_pat = re.compile('^(?:<strong>)?([\-\d]+)(?:</strong>)? (.*)')
+        strong_pat = re.compile('^(?:<strong>)?(\d[-\d]+)(?:</strong>)? (.*)')
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
         matches = strong_pat.match(text)
         if matches:
@@ -678,10 +678,10 @@ def emit_results(entries, query, results_file):
             hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
         else:
             hypertext = text
-        if node.get('COLOR') == CL_CO['quote']:
+        if color == CL_CO['quote']:
             results_file.write('    <li class="%s">&gt; %s [@%s%s]</li>\n' %
                 (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
-        elif node.get('COLOR') not in (CL_CO['default'], CL_CO['cite']):
+        elif color not in (CL_CO['default'], CL_CO['cite']):
             results_file.write('    <li class="%s">%s [@%s%s]</li>\n' %
                 (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
         else:

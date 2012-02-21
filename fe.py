@@ -207,8 +207,8 @@ def join_names(names):
 
 ARTICLES = ('a', 'an', 'the')
 CONJUNCTIONS = ('and', 'but', 'for', 'nor', 'or')
-SHORT_PREPOSITIONS = ("on", "in", "out", "to", "from", 
-    "for" "of", "with")
+SHORT_PREPOSITIONS = ('on', 'in', 'out', 'to', 'from', 
+    'for', 'of', 'with')
 BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + SHORT_PREPOSITIONS
 
 def identity_add_title(ident, title):

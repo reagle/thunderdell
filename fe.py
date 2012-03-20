@@ -655,7 +655,7 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry):
         """Move the locator number to the end of the text with the Bibtex key"""
-        strong_pat = re.compile('^(?:<strong>)?(\d[-\d]+)(?:</strong>)? (.*)')
+        strong_pat = re.compile('^(?:<strong>)?([\d-]+)(?:</strong>)? (.*)')
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
         matches = strong_pat.match(text)
         if matches:

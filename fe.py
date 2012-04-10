@@ -610,6 +610,7 @@ def emit_bibtex_html(file_name, opts):
             % (opts.keys, opts.abstract, opts.style,
             fileName + '.bib', fileName + '.bib'))
     print(expr)
+    os.putenv('TMPDIR', '.')
     os.system(expr)
 
     fdi = codecs.open(fileName +'.bib.html', "r", "utf-8", "replace")

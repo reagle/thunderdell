@@ -25,7 +25,7 @@ import re
 import sys
 import time
 from web_little import get_HTML, unescape_XML, escape_XML # personal utility module
-from sentence_case import sentence_case
+from change_case import sentence_case
 
 from os import environ
 try: 

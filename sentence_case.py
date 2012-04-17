@@ -3,17 +3,30 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2011 by Joseph Reagle
+# (c) Copyright 2009-2012 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-''' Sentence case some text, making use of varied word lists. 
+''' Change the case of some text, making use of varied word lists. 
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
 import codecs
-import os.path
+import locale
+import logging
+from os import chdir, environ, mkdir, rename
+from os.path import abspath, exists, isfile, splitext
 import re
 import sys
+
+HOME = environ['HOME']
+
+log_level = 100 # default
+critical = logging.critical
+info = logging.info
+dbg = logging.debug
+warn = logging.warn
+error = logging.error
+excpt = logging.exception
 
 BORING_WORDS = set(['a', 'an', 'and', 'at', 'by', 'for', 'if', 'in', 
     'of', 'or', 'the', 'to'])
@@ -23,7 +36,7 @@ WORD_LIST_FN = '/usr/share/dict/american-english'
 def create_wordset(file_name):
     '''Add words to set'''
     wordset = set()
-    if os.path.isfile(file_name):
+    if isfile(file_name):
         for line in codecs.open(file_name, 'r', 'utf-8').readlines():
             if line.strip() != '':
                 wordset.add(line.strip())
@@ -103,9 +116,8 @@ def sentence_case(text, force_lower=False):
                 .replace(' . ', '. ') \
                 .replace(' ? ', '? ')
 
-if '__main__' == __name__:
-
-    CASES = (
+def test():
+    TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
         'My defamation 2.0 experience: a story of Wikipedia and a boy',
         'Broadband makes women and Aaron happy',
@@ -125,6 +137,44 @@ if '__main__' == __name__:
         'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed'
         )
             
-    for case in CASES:
-        print(sentence_case(case))
-            
+    for test in TESTS:
+        print(sentence_case(test))
+
+if '__main__' == __name__:
+
+    import argparse # http://docs.python.org/dev/library/argparse.html
+    arg_parser = argparse.ArgumentParser(
+        description='Convert gives text to sentence case.')
+    
+    # positional arguments
+    arg_parser.add_argument('text', nargs='*', metavar='TEXT')
+    # optional arguments
+    arg_parser.add_argument("-t", "--test",
+                    action="store_true", default=False,
+                    help="boolean value")
+    arg_parser.add_argument("-o", "--out-filename",
+                    help="output results to filename", metavar="FILE")
+    arg_parser.add_argument('-l', '--log-to-file',
+                    action="store_true", default=False,
+                    help="log to file %(prog)s.log")
+    arg_parser.add_argument('-v', '--verbose', action='count', default=0,
+                    help="Increase verbosity (specify multiple times for more)")
+    arg_parser.add_argument('--version', action='version', version='TBD')
+    args = arg_parser.parse_args()
+
+    if args.verbose == 1: log_level = logging.CRITICAL
+    elif args.verbose == 2: log_level = logging.INFO
+    elif args.verbose >= 3: log_level = logging.DEBUG
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    if args.log_to_file:
+        logging.basicConfig(filename='PROG-TEMPLATE.log', filemode='w',
+            level=log_level, format = LOG_FORMAT)
+    else:
+        logging.basicConfig(level=log_level, format = LOG_FORMAT)
+
+    if args.test:
+        test()
+        sys.exit()
+    if args.text:
+        text = ' '.join(args.text)
+        print(sentence_case(text))

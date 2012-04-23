@@ -24,7 +24,6 @@ def unescape_XML(s):
 import logging
 import os
 import requests
-import sys
 
 HOMEDIR = os.path.expanduser('~')
 

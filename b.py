@@ -22,6 +22,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 import codecs
 import re
+import string
 import sys
 import time
 from web_little import get_HTML, unescape_XML, escape_XML # personal utility module
@@ -146,14 +147,14 @@ class scrape_default(object):
         if dmatch:
             #print("*** dmatch1 = '%s'" % dmatch.group())
             if len(dmatch.group(1)) > 4: # no 0 len "by at least"
-                return dmatch.group(1)
+                return string.capwords(dmatch.group(1))
         # newspapers: "By John Smith"
         author_regexp2 = "^ *By (.*)"
         dmatch = re.search(author_regexp2, self.text, re.MULTILINE)
         if dmatch:
             #print("*** dmatch2 = '%s'" % dmatch.group())
             if len(dmatch.group(1).split()) < 6: # if short byline
-                return dmatch.group(1)
+                return string.capwords(dmatch.group(1))
         print('*** UNKNOWN')
         return 'UNKNOWN'
 

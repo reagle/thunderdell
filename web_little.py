@@ -50,22 +50,25 @@ def get_HTML(url, referer='', data=None, cookie=None, retry_counter=0, cache_con
         return '', None
     if cache_control:
         headers['cache-control'] = cache_control
+    if cookie:
+        headers['Cookie'] = cookie
     try:
-        if cookie:
-            headers['Cookie'] = response['set-cookie']
         if data:
             response, content = h.request(url, "POST", urllib.urlencode(data), headers=headers, redirections=10)
         else:
             response, content = h.request(url, "GET", headers=headers, redirections=10)
+            
         if 'content-type' in response and 'charset=' in response['content-type']:
             encoding = response['content-type'].split('charset=')[-1]
             if encoding == "none": # a site returned: Content-Type: text/html; charset=none
                 encoding = 'utf-8'
             content = content.decode(encoding, 'replace')
-        else: # assume utf8, it'd be nice to peek at meta http-equiv charset; use chardetect?
+        else: 
             content = content.decode('utf-8', 'replace')
-        # what does httplib2 do when it times out, return a response code 408?
-        if 0 < response.status < 300:
+            # could peek at meta http-equiv charset or use chardetect?
+        if 'set-cookie' in response:
+            cookie = response['set-cookie']
+        if 0 < response.status < 300: # does httplib2 return a 408 on timeout?
             return content, response
         elif response.status in (408, 500, 503, 504, 505):
             critical("Response Code = %s, sleeping before retry %s" % (

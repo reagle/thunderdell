@@ -16,6 +16,7 @@ import logging
 from os import chdir, environ, mkdir, rename
 from os.path import abspath, exists, isfile, splitext
 import re
+import string
 import sys
 
 HOME = environ['HOME']
@@ -30,7 +31,7 @@ excpt = logging.exception
 
 BORING_WORDS = set(['a', 'an', 'and', 'at', 'by', 'for', 'if', 'in', 
     'of', 'or', 'the', 'to'])
-PROPER_NOUNS_FN = 'reagle-proper-nouns.txt' # nltk.pos_tag(nltk.word_tokenize(content))
+PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
 WORD_LIST_FN = '/usr/share/dict/american-english'
 
 def create_wordset(file_name):
@@ -53,8 +54,17 @@ wordset_proper_nouns = set([word for word in wordset_upper if
                         word.lower() not in wordset_lower]) # remove if in both
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
+def safe_capwords(text):
+    '''Like string.capwords() but won't lowercase rest of an acronym.
+    >>> safe_capwords('W3C')
+    'W3C'
+    >>> safe_capwords('the')
+    'The'
+    '''
+    
+    return text[0].capitalize() + text[1:]
 
-def is_proper_noun(word):
+def is_proper_noun(word, text_is_ALLCAPS = False):
     ''' A word is a proper if it has a period or capital letter within, or
     appears in the proper_nouns set. Recurses on hypenated words.
     >>> is_proper_noun('W3C')
@@ -66,10 +76,12 @@ def is_proper_noun(word):
     if '-' in word: # hyphenated
         parts = word.split('-')
         return any(is_proper_noun(part) for part in parts)
-    if (re.search('\.|[A-Z]', word[1:]) or     # capital or period within
-            word in proper_nouns or         
+    #if (re.search('\.|[A-Z]', word[1:]) or     # capital or period within
+    if (word in proper_nouns or
             word.lower() not in wordset_nocase):
+        info(word + " True")        
         return True
+    info(word + " False")        
     return False
 
     
@@ -80,9 +92,15 @@ def sentence_case(text, force_lower=False):
     
     '''
     text = text.strip().replace('  ', ' ')
-    text_abbreviation = ''.join([word[0] for word in # sentence abbreviated sans BORING
+    info("** text = '%s'" % text)
+
+    # create abbreviation sans BORING words
+    text_abbreviation = ''.join([word[0] for word in 
         set(text.split()).difference(BORING_WORDS)]) 
-    text_is_titlecase = text_abbreviation.isupper()     # if all upper, in title case
+    text_is_titlecase = text_abbreviation.isupper()
+    info("text_is_titlecase = '%s'" % text_is_titlecase)
+    text_is_ALLCAPS = text.isupper()
+    info("text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
     
     text = ': ' + text # make first phrase consistent for processing below
     PUNCTUATION = ":.?"
@@ -102,10 +120,17 @@ def sentence_case(text, force_lower=False):
             first_word, rest_of_phrase = words[0], [words[1]]
         else:
             first_word, rest_of_phrase = words[0], []
-        new_text.append(first_word[0].capitalize() + first_word[1:])
-        if text_is_titlecase or force_lower:         # down convert rest of phrase
+            
+        if is_proper_noun(first_word, text_is_ALLCAPS):
+            first_word = first_word
+        else:
+            first_word = first_word.lower()
+            
+        new_text.append(safe_capwords(first_word))
+
+        if text_is_titlecase or force_lower:    # down convert rest of phrase
             for word in rest_of_phrase:
-                if is_proper_noun(word): 
+                if is_proper_noun(word, text_is_ALLCAPS): 
                     pass    
                 else:        
                     word = word.lower()
@@ -134,7 +159,8 @@ def test():
         '<span class="pplri7t-x-x-120">Wikipedia:WikiLove</span>',
         'The Altruism Question: Toward a Social-Psychological Answer',
         '  Human Services:  Cambridge War Memorial Recreation Center',
-        'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed'
+        'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed',
+        'THIS SENTENCE ABOUT AOL IS ALL CAPS'
         )
             
     for test in TESTS:
@@ -144,7 +170,7 @@ if '__main__' == __name__:
 
     import argparse # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description='Convert gives text to sentence case.')
+        description='Change the case of some text, making use of varied word lists.')
     
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')

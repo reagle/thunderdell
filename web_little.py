@@ -22,11 +22,10 @@ def unescape_XML(s):
     return(unescape(s, extras))
 
 import logging
-import httplib2 # http://pypi.python.org/pypi/httplib2/
 import os
-import socket
-import time
-import urllib
+import requests
+import sys
+
 HOMEDIR = os.path.expanduser('~')
 
 log = logging.getLogger("web_little")
@@ -34,51 +33,8 @@ critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
-def get_HTML(url, referer='', data=None, cookie=None, retry_counter=0, cache_control=None):
+def get_HTML(url, referer='', 
+    data=None, cookie=None, retry_counter=0, cache_control=None):
     '''Return [HTML content, response] of a given URL.'''
-    h = httplib2.Http("%s/.cache/httplib2" % HOMEDIR, timeout=20)
-    headers = {'Referer': referer,
-            'Content-type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;'
-                    'rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14',
-            'Accept-Language': 'en, en-US',
-            'Accept-Encoding': 'identity,gzip,deflate'}
-    if retry_counter > 0:
-        critical('Trying Again...')
-    if retry_counter > 3:
-        critical('Could not get source from url: %s' % url)
-        return '', None
-    if cache_control:
-        headers['cache-control'] = cache_control
-    if cookie:
-        headers['Cookie'] = cookie
-    try:
-        if data:
-            response, content = h.request(url, "POST", urllib.urlencode(data), headers=headers, redirections=10)
-        else:
-            response, content = h.request(url, "GET", headers=headers, redirections=10)
-            
-        if 'content-type' in response and 'charset=' in response['content-type']:
-            encoding = response['content-type'].split('charset=')[-1]
-            if encoding == "none": # a site returned: Content-Type: text/html; charset=none
-                encoding = 'utf-8'
-            content = content.decode(encoding, 'replace')
-        else: 
-            content = content.decode('utf-8', 'replace')
-            # could peek at meta http-equiv charset or use chardetect?
-        if 'set-cookie' in response:
-            cookie = response['set-cookie']
-        if 0 < response.status < 300: # does httplib2 return a 408 on timeout?
-            return content, response
-        elif response.status in (408, 500, 503, 504, 505):
-            critical("Response Code = %s, sleeping before retry %s" % (
-                response.status, retry_counter +1))
-            time.sleep((retry_counter * 10 + 5)) # pause before retying
-            return get_HTML(url, referer, data, cookie, retry_counter + 1)
-        else:
-            return None
-    except (AttributeError, httplib2, socket) as e:
-        critical("The server couldn't fulfill the request. for url: %s" % url)
-        critical("Error code: %s" % e)
-        time.sleep((retry_counter * 10 + 5)) # pause before retying
-        return get_HTML(url, referer, data, cookie, retry_counter + 1)
+    r = requests.get(url)
+    return r.content, r.headers

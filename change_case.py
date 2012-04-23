@@ -11,6 +11,7 @@
     https://www.zotero.org/trac/ticket/832 .'''
 
 import codecs
+from fe import BORING_WORDS
 import locale
 import logging
 from os import chdir, environ, mkdir, rename
@@ -29,8 +30,6 @@ warn = logging.warn
 error = logging.error
 excpt = logging.exception
 
-BORING_WORDS = set(['a', 'an', 'and', 'at', 'by', 'for', 'if', 'in', 
-    'of', 'or', 'the', 'to'])
 PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
 WORD_LIST_FN = '/usr/share/dict/american-english'
 
@@ -95,8 +94,10 @@ def sentence_case(text, force_lower=False):
     info("** text = '%s'" % text)
 
     # create abbreviation sans BORING words
+    info(set(text.split()).difference(BORING_WORDS))
     text_abbreviation = ''.join([word[0] for word in 
         set(text.split()).difference(BORING_WORDS)]) 
+    info("text_abbreviation = %s " % text_abbreviation)
     text_is_titlecase = text_abbreviation.isupper()
     info("text_is_titlecase = '%s'" % text_is_titlecase)
     text_is_ALLCAPS = text.isupper()

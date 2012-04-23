@@ -175,9 +175,12 @@ if '__main__' == __name__:
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
     # optional arguments
-    arg_parser.add_argument("-t", "--test",
+    arg_parser.add_argument("-c", "--capwords",
                     action="store_true", default=False,
-                    help="boolean value")
+                    help="Use standard lib string.capwords()")
+    arg_parser.add_argument("-T", "--test",
+                    action="store_true", default=False,
+                    help="Test")
     arg_parser.add_argument("-o", "--out-filename",
                     help="output results to filename", metavar="FILE")
     arg_parser.add_argument('-l', '--log-to-file',
@@ -201,6 +204,9 @@ if '__main__' == __name__:
     if args.test:
         test()
         sys.exit()
-    if args.text:
-        text = ' '.join(args.text)
-        print(sentence_case(text))
+    text = ' '.join(args.text)
+    if args.capwords:
+        text = string.capwords(text)
+    elif args.text:
+        text = sentence_case(text)
+    print(text)

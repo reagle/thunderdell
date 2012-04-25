@@ -20,7 +20,9 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 # TODO
 # * archive URLs to e/old/`r=`
 
+import argparse
 import codecs
+import fe
 import re
 import string
 import sys
@@ -35,8 +37,7 @@ except KeyError, e:
     HOME = '/home/reagle'
 
 # Expansions for common tags/actitivies
-KEY_SHORTCUTS = {
-        # General
+GENERAL_KEY_SHORTCUTS = {
         'con': 'conflict',
         'exi': 'exit',
         'for': 'fork',
@@ -53,8 +54,9 @@ KEY_SHORTCUTS = {
         'str': 'structure',
         'tro': 'trolling',
         'zei': 'zeitgeist',
-        
-        # Comment and feedback
+        }
+
+FB_KEY_SHORTCUTS = {
         'cri' : 'criticism',
         'fee' : 'feedback',
         'ass' : 'assessment',
@@ -63,7 +65,9 @@ KEY_SHORTCUTS = {
         'ran' : 'ranking',
         'com' : 'comment',
         'est' : 'esteem',
-            
+        }
+
+WP_KEY_SHORTCUTS = {
         # Wikipedia
         'alt': 'alternative',
         'aut': 'authority',
@@ -96,6 +100,13 @@ KEY_SHORTCUTS = {
         'uni': 'universal',
         'ver': 'verifiability',
         }
+
+LIST_OF_KEYSHORTCUTS = (GENERAL_KEY_SHORTCUTS, 
+    FB_KEY_SHORTCUTS,WP_KEY_SHORTCUTS)
+
+KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
+for short_dict in LIST_OF_KEYSHORTCUTS[1:]:
+    KEY_SHORTCUTS.update(short_dict)
 
 MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 
@@ -644,15 +655,26 @@ def print_usage(message):
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
 
-    if sys.argv[1] == '-t':        # removed doctests for now, too cumbersome
-        print "Running doctests"
+    parser = argparse.ArgumentParser(description="usage: %prog [options] [URL]")
+    parser.add_argument("-t", "--tests",
+                    action="store_true", default=False,
+                    help="run doc tests")
+    parser.add_argument("-K", "--keyword-shortcuts",
+                action="store_true", default=False,
+                help="show keyword shortcuts")
+    args = parser.parse_args()
+
+    if args.tests:
+        print("Running doctests")
         import doctest
         doctest.testmod()
         sys.exit()
-    else:
-        arguments = ' '.join(sys.argv[1:])
+    if args.keyword_shortcuts:
+        for dictionary in LIST_OF_KEYSHORTCUTS:
+            fe.pretty_tabulate_dict(dictionary,3)
+        sys.exit()
 
-    logger, params = get_logger(arguments)    # function, (url, scheme, comment)
+    logger, params = get_logger(' '.join(arguments))    # <- function, (url, scheme, comment)
     comment = params['comment'].strip()
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)

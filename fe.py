@@ -127,6 +127,17 @@ CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
     'default': '#000000', None: None}
 CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
 
+def pretty_tabulate_list(mylist, cols=3):
+    pairs = ["\t".join(
+        ['%20s' %j for j in mylist[i:i+cols]]
+            ) for i in range(0,len(mylist),cols)]
+    print("\n".join(pairs))
+    print("\n")
+
+def pretty_tabulate_dict(mydict, cols=3):
+    pretty_tabulate_list(sorted(['%s:%s' %(key, value) 
+        for key, value in mydict.items()]), cols)
+     
 from xml.sax.saxutils import escape, unescape
 def unescape_XML(s):
     '''Unescape XML character entities; & < > are defaulted'''
@@ -1127,15 +1138,8 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if opts.fields:
-        def fmtcols(mylist, cols=3):
-            pairs = ["\t".join(
-                ['%20s' %j for j in mylist[i:i+cols]]
-                    ) for i in range(0,len(mylist),cols)]
-            print("\n".join(pairs))
-            print("\n")
-        fmtcols(BIBLATEX_TYPES)
-        fmtcols(sorted(['%s:%s' %(key, value) 
-            for key, value in BIBLATEX_SHORTCUTS.items()]))
+        pretty_tabulate_list(BIBLATEX_TYPES)
+        pretty_tabulate_dict(BIBLATEX_SHORTCUTS)
         sys.exit()
     if opts.display:
         opts.bibtex = True

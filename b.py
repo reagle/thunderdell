@@ -57,14 +57,15 @@ GENERAL_KEY_SHORTCUTS = {
         }
 
 FB_KEY_SHORTCUTS = {
-        'cri' : 'criticism',
-        'fee' : 'feedback',
         'ass' : 'assessment',
         'aut' : 'automated',
-        'rat' : 'rating',
-        'ran' : 'ranking',
         'com' : 'comment',
+        'cri' : 'criticism',
         'est' : 'esteem',
+        'fee' : 'feedback',
+        'ran' : 'ranking',
+        'rat' : 'rating',
+        'soc' : 'sockpuppet',
         }
 
 WP_KEY_SHORTCUTS = {

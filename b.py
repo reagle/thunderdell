@@ -656,13 +656,14 @@ def print_usage(message):
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="usage: %prog [options] [URL]")
+    parser = argparse.ArgumentParser(prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
     parser.add_argument("-t", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")
     parser.add_argument("-K", "--keyword-shortcuts",
                 action="store_true", default=False,
                 help="show keyword shortcuts")
+    parser.add_argument('text', nargs='*')
     args = parser.parse_args()
 
     if args.tests:
@@ -675,7 +676,7 @@ if __name__ == "__main__":
             fe.pretty_tabulate_dict(dictionary,3)
         sys.exit()
 
-    logger, params = get_logger(' '.join(arguments))    # <- function, (url, scheme, comment)
+    logger, params = get_logger(' '.join(args.text))    # <- function, (url, scheme, comment)
     comment = params['comment'].strip()
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)

@@ -308,10 +308,10 @@ class scrape_DOI(scrape_default):
         info("date_parts = %s" % date_parts)
         if len(date_parts) == 3:
             year, month, day = date_parts
-            date = '%s-%s-%s' % (year, month, day)
+            date = '%d%02d%02d' %(int(year), int(month), int(day))
         elif len(date_parts) == 2:
             year, month = date_parts
-            date = '%s-%s' % (year, month)
+            date = '%d-%02d' % (int(year), int(month))
         elif len(date_parts) == 1:
             date = date_parts
         else:
@@ -342,7 +342,8 @@ class scrape_ENWP(scrape_default):
         '''find date within <span id="mw-revision-date">19:09, 1 April 2008</span>'''
         versioned_html, resp = get_HTML(self.get_permalink())
         time, day, month, year = re.search('''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''', versioned_html).groups()
-        return '%s-%s-%s' %(year, month, day)
+        month = fe.MONTH2DIGIT[month[0:3].lower()]        
+        return '%d%02d%02d' %(int(year), int(month), int(day))
 
     def get_org(self):
         return 'Wikipedia'
@@ -465,7 +466,8 @@ class scrape_WMMeta(scrape_default):
         citelink = pre + '?title=Special:Cite&page=' + po
         cite_html, resp = get_HTML(citelink)
         day, month, year = re.search('''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''', cite_html).groups()
-        return '%s-%s-%s' %(year, month, day)
+        month = fe.MONTH2DIGIT[month[0:3].lower()]
+        return '%d%02d%02d' %(int(year), int(month), int(day))
 
     def get_org(self):
         return 'Wikimedia'

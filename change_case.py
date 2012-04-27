@@ -20,8 +20,6 @@ import re
 import string
 import sys
 
-HOME = environ['HOME']
-
 log_level = 100 # default
 critical = logging.critical
 info = logging.info

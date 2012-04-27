@@ -14,7 +14,6 @@
     #2. editors currently have 'and' delimiters in mindmaps
     #3. author-year styles don't like anon authors anyway
 #20090519: bibformat_title and pull_citation each use about ~7%
-#20100401: should move to using biblatex 0.9 date fields
 
 from cgi import escape, parse_qs
 import codecs
@@ -369,10 +368,10 @@ def pull_citation(entry):
 
     if 'custom1' in entry and 'url' in entry:
         try:
-            date = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'], "%Y%m%d"))
+            urldate = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'], "%Y%m%d"))
         except ValueError:
-            date = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'], "%Y%m%d %H:%M UTC"))
-        entry['urldate'] = date
+            urldate = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'], "%Y%m%d %H:%M UTC"))
+        entry['urldate'] = urldate
 
     if 'month' in entry:
         month_tmp = entry['month']
@@ -405,14 +404,21 @@ def pull_citation(entry):
     if 'date' in entry:
         date = entry['date']
         if '/' in date:
-            date = date.split('/')[0]
-        date_parts = date.split('-') # split '2009-05-21'
+            date_parts = date.split('/') # '2009/05/21'
+        elif '-' in date:
+            date_parts = date.split('-') # '2009-05-21'
+        else:                            # '20090521'
+            date_parts = [date[0:4], date[4:6], date[6:8]]
         if len(date_parts) == 3: 
             entry['year'], entry['month'], entry['day'] = date_parts
+            date = '%s-%s-%s' %(date_parts[0], date_parts[1], date_parts[2])
         elif len(date_parts) == 2: 
             entry['year'], entry['month'] = date_parts
+            date = '%s-%s' %(date_parts[0], date_parts[1])
         else:
             entry['year'] = date_parts[0]
+            date = '%s' %(date_parts[0])
+        entry['date'] = date
             
     if ': ' in entry['title']:
         if not entry['title'].startswith('Re:'):
@@ -586,7 +592,7 @@ def emit_biblatex(entries):
                 if field in ('editor', 'translator'):
                     value = value.replace(', ', ' and ')
                 if field == 'month':
-                    value = DIGIT2MONTH[str(int(entry[field]))] # str(int(...)) drops 0s
+                    value = DIGIT2MONTH[str(int(entry[field]))] 
 
                 # remove xml entities and escape for latex
                 value = unescape_XML(value)

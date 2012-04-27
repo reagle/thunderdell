@@ -35,5 +35,10 @@ dbg = logging.debug
 def get_HTML(url, referer='', 
     data=None, cookie=None, retry_counter=0, cache_control=None):
     '''Return [HTML content, response] of a given URL.'''
+    #try:
     r = requests.get(url)
-    return r.content, r.headers
+    info("r.headers['content-type'] = %s" % r.headers['content-type'])
+    if 'html' in r.headers['content-type']:
+        return r.content, r.headers
+    else:
+        raise IOError("URL content is not HTML.")

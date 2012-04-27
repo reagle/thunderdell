@@ -10,7 +10,7 @@
 """
 BusySponge, by Joseph Reagle http://reagle.org/joseph/
 
-BusySponge permit me to easily log and annotate a URL to various loggers
+BusySponge permits me to easily log and annotate a URL to various loggers
 (e.g., mindmap, blogs) with meta/bibliographic data about the URL from
 a scraping.
 
@@ -23,12 +23,18 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 import argparse
 import codecs
 import fe
+import logging
 import re
 import string
 import sys
 import time
 from web_little import get_HTML, unescape_XML, escape_XML # personal utility module
 from change_case import sentence_case
+
+log_level = 100 # default
+critical = logging.critical
+info = logging.info
+dbg = logging.debug
 
 from os import environ
 try: 
@@ -63,6 +69,8 @@ FB_KEY_SHORTCUTS = {
         'cri' : 'criticism',
         'est' : 'esteem',
         'fee' : 'feedback',
+        'mea' : 'mean',
+        'off' : 'offensive',
         'ran' : 'ranking',
         'rat' : 'rating',
         'soc' : 'sockpuppet',
@@ -90,7 +98,6 @@ WP_KEY_SHORTCUTS = {
         'gov': 'governance',
         'his': 'history',
         'mar': 'market',
-        'mea': 'mean',
         'mot': 'motivation',
         'neu': 'neutrality',
         'not': 'notability',
@@ -146,19 +153,17 @@ class scrape_default(object):
         self.comment = comment
         self.html, resp = get_HTML(url, cache_control = 'no-cache')
         self.text = get_text(url)
-        self.zim = None
 
     def get_biblio(self):
         biblio = {
             'author' : self.get_author(),
             'title' : self.get_title(),
             'date' : self.get_date(),
-            'org' : self.get_org(),
+            'organization' : self.get_org(),
             'permalink' : self.get_permalink(),
             'excerpt' : self.get_excerpt(),
             'comment' : self.comment,
             'url' : self.url,
-            'zim' : self.zim, # content from zim wiki
         }
         return biblio
 
@@ -209,12 +214,12 @@ class scrape_default(object):
         date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
-            return parse(dmatch.group(0)).strftime("%B %d, %Y").split(', ')
+            return parse(dmatch.group(0)).strftime("%Y%m%d")
         except:
             now = time.gmtime()
-            year = time.strftime('%Y', now)
-            month = time.strftime('%B %d', now)
-            return month, year
+            date = time.strftime('%Y%m%d', now)
+            info("guessing date = %s" % date)
+            return date
 
     def get_org(self):
         from urlparse import urlparse
@@ -242,7 +247,78 @@ class scrape_default(object):
     def get_permalink(self):
         return self.url
 
+        
+class scrape_DOI(scrape_default):
+    
+    def __init__(self, url, comment):
+        print "Scraping DOI;",
+        self.url = url
+        self.comment = comment
 
+    def get_biblio(self):
+
+        import doi_query
+        import json
+        
+        json_string = doi_query.query(self.url)
+        info("json_string = %s" % json_string)
+        json_bib = json.loads(json_string)
+        biblio = {
+            'permalink' : self.url,
+            'excerpt' : '',
+            'comment' : self.comment,
+        }
+        for key, value in json_bib.items():
+            if value in (None, [], ''):
+                value = 'UNKNOWN'
+            if key == 'author':
+                biblio['author'] = self.get_author(json_bib)
+            elif key == 'date':
+                biblio['date'] = self.get_author(json_bib)
+            elif key == 'page':
+                biblio['pages'] = json_bib['page']
+            elif key == 'container-title':
+                biblio['jounal'] = json_bib['container-title']
+            elif key == 'number':
+                biblio['number'] = json_bib['issue']
+            elif key == 'URL':
+                biblio['url'] = json_bib['URL']
+            else:
+                biblio[key] = json_bib[key]
+        if 'title' not in json_bib:
+            biblio['title'] = 'UNKNOWN'
+        if 'date' not in json_bib:
+            biblio['date'] = '0000'
+        info("biblio = %s" % biblio)
+        return biblio
+    
+    def get_author(self, bib_dict):
+        names = ''
+        if 'author' in bib_dict:
+            for name_dic in bib_dict['author']:
+                info("name_dic.values() = %s" % name_dic.values())
+                names += ' '.join(name_dic.values())
+        else:
+            names = 'UNKNOWN'
+        return names
+
+    def get_date(self, bib_dict):
+        # "issued":{"date-parts":[[2007,3]]}
+        date_parts = bib_dict['issued']['date-parts'][0]
+        info("date_parts = %s" % date_parts)
+        if len(date_parts) == 3:
+            year, month, day = date_parts
+            date = '%s-%s-%s' % (year, month, day)
+        elif len(date_parts) == 2:
+            year, month = date_parts
+            date = '%s-%s' % (year, month)
+        elif len(date_parts) == 1:
+            date = date_parts
+        else:
+            date = '0000'
+        info("date = %s" % date)
+        return date
+        
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
         print "Scraping en.Wikipedia;",
@@ -266,7 +342,7 @@ class scrape_ENWP(scrape_default):
         '''find date within <span id="mw-revision-date">19:09, 1 April 2008</span>'''
         versioned_html, resp = get_HTML(self.get_permalink())
         time, day, month, year = re.search('''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''', versioned_html).groups()
-        return month + ' ' + day, year
+        return '%s-%s-%s' %(year, month, day)
 
     def get_org(self):
         return 'Wikipedia'
@@ -280,6 +356,7 @@ class scrape_ENWP(scrape_default):
                 return line
         return None
 
+        
 class scrape_Signpost(scrape_ENWP):
     def __init__(self, url, comment):
         print "Scraping en.Wikipedia Signpost;",
@@ -323,9 +400,7 @@ class scrape_NupediaL(scrape_default):
     def get_date(self):
         mdate = re.search('''<I>(.*?)</I>''', self.html).group(1)[:16].strip()
         date = time.strptime(mdate, "%a, %d %b %Y")
-        year = time.strftime('%Y', date)
-        month = time.strftime('%B %d', date)
-        return month, year
+        return time.strftime('%Y%m%d', date)
 
     def get_org(self):
         return 'nupedia-l'
@@ -353,9 +428,7 @@ class scrape_WM_lists(scrape_default):
     def get_date(self):
         mdate = re.search('''<I>(.*?)</I>''', self.html).group(1).strip()
         date = time.strptime(mdate, "%a %b %d %H:%M:%S %Z %Y")
-        year = time.strftime('%Y', date)
-        month = time.strftime('%B %d', date)
-        return month, year
+        return time.strftime('%Y%m%d', date)
 
     def get_org(self):
         return re.search('''<TITLE> \[(.*?)\]''', self.html).group(1)
@@ -392,7 +465,7 @@ class scrape_WMMeta(scrape_default):
         citelink = pre + '?title=Special:Cite&page=' + po
         cite_html, resp = get_HTML(citelink)
         day, month, year = re.search('''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''', cite_html).groups()
-        return month + ' ' + day, year
+        return '%s-%s-%s' %(year, month, day)
 
     def get_org(self):
         return 'Wikimedia'
@@ -432,12 +505,10 @@ class scrape_MARC(scrape_default):
     def get_date(self):
         mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html).group(1)
         try:
-            date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
+            date = time.strptime(mdate, "%Y%m%d %I:%M:%S")
         except ValueError:
-            date = time.strptime(mdate, "%Y-%m-%d %H:%M:%S")
-        month = time.strftime('%B %d', date)
-        year = time.strftime('%Y', date)
-        return month, year
+            date = time.strptime(mdate, "%Y%m%d %H:%M:%S")
+        return time.strftime('%Y%m%d', date)
 
     def get_org(self):
         return re.search('''List: *<a href=".*?">(.*?)</a>''', self.html).group(1)
@@ -467,24 +538,32 @@ def log2mm(biblio):
 
     print "to log2mm"
 
-    ofile = HOME+'/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
-    author = biblio['author']
-    title = biblio['title']
-    month, year = biblio['date']
-    keyword, sep, abstract = biblio['comment'].partition(' ')
-    excerpt = biblio['excerpt']
-    org = biblio['org']
-    permalink = biblio['permalink']
-
     now = time.gmtime()
     this_week = time.strftime("%U", now)
     this_year = time.strftime('%Y', now)
-    day_read = time.strftime("%Y%m%d %H:%M UTC",now)
+    date_read = time.strftime("%Y%m%d %H:%M UTC",now)
+    
+    ofile = HOME+'/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
+    info("biblio = %s" %biblio)
+    author = biblio['author']
+    title = biblio['title']
+    keyword, sep, abstract = biblio['comment'].partition(' ')
+    excerpt = biblio['excerpt']
+    permalink = biblio['permalink']
 
-    citation = "or=%s m=%s y=%s r=%s" % (org, month, year, day_read)
+    # Create citation
+    for token in ['author', 'title', 'url', 'permalink', 'type']:
+        if token in biblio: # not needed in citation
+            del biblio[token] 
+    citation = ''
+    for key, value in biblio.items():
+        if key in fe.BIBLATEX_FIELDS:
+            info("key = %s value = %s" %(key, value))
+            citation += '%s=%s ' % (fe.BIBLATEX_FIELDS[key], value)
+    citation += 'r=%s ' % date_read
     if keyword:
         keyword = KEY_SHORTCUTS.get(keyword, keyword)
-        citation += ' kw=' + keyword
+        citation += 'kw=' + keyword
 
     try:
         from xml.etree.cElementTree import parse # fast C implementation
@@ -563,12 +642,6 @@ def log2work(biblio):
     print "to log2work"
     ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
 
-    #if biblio['zim']:
-        #comment = biblio['zim']
-        #activity = ...
-    #else:
-        #>>>
-    ######################## this is traditional
     title = biblio['title']
     activity, sep, comment = biblio['comment'].partition(' ')
     url = biblio['url']
@@ -582,7 +655,6 @@ def log2work(biblio):
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
         (uid, date_token, activity, comment)
-    ########################
 
     fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
     content = fd.read()
@@ -606,7 +678,10 @@ def get_scraper(url, comment):
     '''
     Use the URL to specify a screenscraper.
     '''
-
+    
+    if url.startswith('doi:'):
+        url = 'http://dx.doi.org/' + url[4:]
+        
     dispatch_scraper = (
         ('file://%s/tmp/nupedia-l/' %HOME, scrape_NupediaL),
         ('http://lists.wikimedia.org/pipermail/', scrape_WM_lists),
@@ -614,11 +689,13 @@ def get_scraper(url, comment):
         ('http://en.wikipedia.org/w', scrape_ENWP),
         ('http://meta.wikimedia.org/w', scrape_WMMeta),
         ('http://marc.info/', scrape_MARC),
+        ('http://dx.doi.org/', scrape_DOI),
         ('', scrape_default)     # default: make sure last
     )
 
     for prefix, scraper in dispatch_scraper:
         if url.startswith(prefix):
+            info("scrape = %s " % scraper)
             return scraper(url, comment)    # creates instance
 
 
@@ -656,15 +733,32 @@ def print_usage(message):
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
-    parser.add_argument("-t", "--tests",
+    arg_parser = argparse.ArgumentParser(prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
+    arg_parser.add_argument("-t", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")
-    parser.add_argument("-K", "--keyword-shortcuts",
+    arg_parser.add_argument("-K", "--keyword-shortcuts",
                 action="store_true", default=False,
                 help="show keyword shortcuts")
-    parser.add_argument('text', nargs='*')
-    args = parser.parse_args()
+    arg_parser.add_argument('text', nargs='*')
+    arg_parser.add_argument('-l', '--log-to-file',
+        action="store_true", default=False,
+        help="log to file %(prog)s.log")
+    arg_parser.add_argument('-v', '--verbose', action='count', default=0,
+        help="Increase verbosity (specify multiple times for more)")
+    arg_parser.add_argument('--version', action='version', version='0.1')
+
+    args = arg_parser.parse_args()
+
+    if args.verbose == 1: log_level = logging.CRITICAL
+    elif args.verbose == 2: log_level = logging.INFO
+    elif args.verbose >= 3: log_level = logging.DEBUG
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    if args.log_to_file:
+        logging.basicConfig(filename='doi_query.log', filemode='w',
+            level=log_level, format = LOG_FORMAT)
+    else:
+        logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
     if args.tests:
         print("Running doctests")

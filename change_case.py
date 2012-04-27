@@ -6,33 +6,29 @@
 # (c) Copyright 2009-2012 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-''' Change the case of some text, making use of varied word lists. 
+''' Change the case of some text, making use of varied word lists.
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
 import codecs
 from fe import BORING_WORDS
-import locale
 import logging
-from os import chdir, environ, mkdir, rename
-from os.path import abspath, exists, isfile, splitext
+from os.path import isfile
 import re
 import string
 import sys
 
-log_level = 100 # default
+log_level = 100  # default
 critical = logging.critical
 info = logging.info
 dbg = logging.debug
-warn = logging.warn
-error = logging.error
-excpt = logging.exception
 
 PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
 WORD_LIST_FN = '/usr/share/dict/american-english'
 
+
 def create_wordset(file_name):
-    '''Add words to set'''
+    '''Returns a wordset given a file'''
     wordset = set()
     if isfile(file_name):
         for line in codecs.open(file_name, 'r', 'utf-8').readlines():
@@ -47,36 +43,41 @@ wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
-wordset_proper_nouns = set([word for word in wordset_upper if 
-                        word.lower() not in wordset_lower]) # remove if in both
+wordset_proper_nouns = set([word for word in wordset_upper if
+    word.lower() not in wordset_lower])  # remove if in both
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
+
 
 def safe_capwords(text):
     '''Like string.capwords() but won't lowercase rest of an acronym.
+
     >>> safe_capwords('W3C')
     'W3C'
     >>> safe_capwords('the')
     'The'
+
     '''
-    
+
     return text[0].capitalize() + text[1:]
 
-def is_proper_noun(word, text_is_ALLCAPS = False):
+
+def is_proper_noun(word, text_is_ALLCAPS=False):
     ''' A word is a proper if it has a period or capital letter within, or
     appears in the proper_nouns set. Recurses on hypenated words.
+
     >>> is_proper_noun('W3C')
     True
     >>> is_proper_noun('The')
     False
     
     '''
-    if '-' in word: # hyphenated
+    if '-' in word:  # hyphenated
         parts = word.split('-')
         return any(is_proper_noun(part) for part in parts)
     #if (re.search('\.|[A-Z]', word[1:]) or     # capital or period within
     if (word in proper_nouns or
             word.lower() not in wordset_nocase):
-        info(word + " True")        
+        info(word + " True")
         return True
     info(word + " False")        
     return False
@@ -84,8 +85,9 @@ def is_proper_noun(word, text_is_ALLCAPS = False):
     
 def sentence_case(text, force_lower=False):
     ''' Convert title to sentence case for APA like citations
-    >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia and a Boy')
-    'My defamation 2.0 experience: A story of Wikipedia and a boy'
+    
+    >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
+    'My defamation 2.0 experience: A story of Wikipedia'
     
     '''
     text = text.strip().replace('  ', ' ')
@@ -101,7 +103,7 @@ def sentence_case(text, force_lower=False):
     text_is_ALLCAPS = text.isupper()
     info("text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
     
-    text = ': ' + text # make first phrase consistent for processing below
+    text = ': ' + text  # make first phrase consistent for processing below
     PUNCTUATION = ":.?"
     PUNCTUATION_RE = r'(:|\.|\?) ' # use parens to keep them in the split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
@@ -141,6 +143,7 @@ def sentence_case(text, force_lower=False):
                 .replace(' ? ', '? ')
 
 def test():
+    '''Prints out sentence case for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
         'My defamation 2.0 experience: a story of Wikipedia and a boy',
@@ -154,7 +157,7 @@ def test():
         "Glycogen: A Trojan Horse for Neurons",
         "Characterization of the SKN7 Ortholog of Aspergillus Fumigatus",
         "Wikipedia:Attribution",
-        "Why Do People Write for Wikipedia? Incentives to Contribute to Open-Content Publishing",
+        "Why Do People Write for Wikipedia? Incentives to Contribute",
         '<span class="pplri7t-x-x-120">Wikipedia:WikiLove</span>',
         'The Altruism Question: Toward a Social-Psychological Answer',
         '  Human Services:  Cambridge War Memorial Recreation Center',
@@ -169,7 +172,8 @@ if '__main__' == __name__:
 
     import argparse # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description='Change the case of some text, making use of varied word lists.')
+        description='Change the case of some text, '
+            'making use of varied word lists.')
     
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
@@ -196,7 +200,7 @@ if '__main__' == __name__:
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(filename='change_case.log', filemode='w',
-            level=log_level, format = LOG_FORMAT)
+            level=log_level, format=LOG_FORMAT)
     else:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 

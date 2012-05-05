@@ -271,10 +271,15 @@ class scrape_DOI(scrape_default):
         for key, value in json_bib.items():
             if value in (None, [], ''):
                 value = 'UNKNOWN'
+            #if key == 'issued':  # issued is a dictionary
+                #if 'author' in value:
+                    #biblio['author'] = self.get_author(value)
+                #if 'date-parts' in value:
+                    #biblio['date'] = self.get_date(json_bib)
             if key == 'author':
                 biblio['author'] = self.get_author(json_bib)
-            elif key == 'date':
-                biblio['date'] = self.get_author(json_bib)
+            elif key == 'issued':
+                biblio['date'] = self.get_date(json_bib)
             elif key == 'page':
                 biblio['pages'] = json_bib['page']
             elif key == 'container-title':
@@ -287,8 +292,8 @@ class scrape_DOI(scrape_default):
                 biblio[key] = json_bib[key]
         if 'title' not in json_bib:
             biblio['title'] = 'UNKNOWN'
-        if 'date' not in json_bib:
-            biblio['date'] = '0000'
+        else:
+            biblio['title'] = ' '.join(biblio['title'].split())
         info("biblio = %s" % biblio)
         return biblio
     
@@ -311,7 +316,7 @@ class scrape_DOI(scrape_default):
             date = '%d%02d%02d' %(int(year), int(month), int(day))
         elif len(date_parts) == 2:
             year, month = date_parts
-            date = '%d-%02d' % (int(year), int(month))
+            date = '%d%02d' % (int(year), int(month))
         elif len(date_parts) == 1:
             date = date_parts
         else:
@@ -680,10 +685,11 @@ def get_scraper(url, comment):
     '''
     Use the URL to specify a screenscraper.
     '''
-    
-    if url.startswith('doi:'):
+
+    info("url = '%s'" %(url))
+    if url.lower().startswith('doi:'):
         url = 'http://dx.doi.org/' + url[4:]
-        
+    
     dispatch_scraper = (
         ('file://%s/tmp/nupedia-l/' %HOME, scrape_NupediaL),
         ('http://lists.wikimedia.org/pipermail/', scrape_WM_lists),
@@ -701,7 +707,7 @@ def get_scraper(url, comment):
             return scraper(url, comment)    # creates instance
 
 
-def get_logger(options={}):
+def get_logger(options={re.IGNORECASE}):
     """
     Matches the option string to grammar and output.
     """
@@ -711,7 +717,7 @@ def get_logger(options={}):
             log2goatee),
         (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
             log2work),
-        (r'(?P<url>(\.|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
+        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
             log2mm)
     )
 

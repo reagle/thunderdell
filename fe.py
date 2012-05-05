@@ -766,7 +766,7 @@ def emit_results(entries, query, results_file):
         url = entry.get('url','')
         base_mm_file = os.path.basename(entry['_mm_file'])
         MM_mm_file = get_url_MM(entry['_mm_file'])
-
+        
         # if I am what was queried, print all of me
         if entry['identifier'] == opts.query:
             results_file.write('          <li>\n          <ul class="tit_child">\n'),

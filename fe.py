@@ -341,12 +341,13 @@ def guess_bibtex_type(entry):
 def pull_citation(entry):
     """Modifies entry with parsed citation
 
-    Uses this convention: "y=2003 j=Research Policy v=32 n=7 m=July 23 pp=1217-1241"
+    Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
 
     """
     
     if 'cite' in entry:
         citation = entry['cite']
+        info("citation = '%s'" %(citation))
         # split around tokens of length 1-3; get rid of first empty string of results
 
         equal_pat = re.compile(r'(\w{1,3})=')
@@ -359,7 +360,8 @@ def pull_citation(entry):
                 entry[BIBLATEX_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
                 print(("Key error on ", error, entry['title'], entry['_mm_file']))
-    else: entry['year'] = '0000'
+    else: 
+        entry['date'] = '0000'
 
     ## If it's an URL and has a read date, insert text
     #if 'url' in entry and entry['url'] is not None:
@@ -408,7 +410,8 @@ def pull_citation(entry):
         elif '-' in date:
             date_parts = date.split('-') # '2009-05-21'
         else:                            # '20090521'
-            date_parts = [date[0:4], date[4:6], date[6:8]]
+            date_parts = filter(None, [date[0:4], date[4:6], 
+                date[6:8]])  # filter drops empty strings
         if len(date_parts) == 3: 
             entry['year'], entry['month'], entry['day'] = date_parts
             date = '%s-%s-%s' %(date_parts[0], date_parts[1], date_parts[2])
@@ -533,7 +536,8 @@ def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
     EXCLUDE = ('.amazon', 'search?q=cache', 'proquest') # 'books.google',
     ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
-
+    info("entries = '%s'" %(entries))
+    
     for entry in sorted_dict_values(entries):
         entry_type_copy = entry['entry_type']
         if opts.bibtex:
@@ -562,7 +566,6 @@ def emit_biblatex(entries):
 
         for short, field in list(BIBLATEX_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
-
                 # skip these conditions
                 if field in ('identifier', 'entry_type', 'isbn'):
                     continue
@@ -574,19 +577,16 @@ def emit_biblatex(entries):
                         continue # no url, no 'read on'
                     # if online_only and not (online or online journal) then skip
                     if opts.online_urls_only and not (
-                    entry['entry_type'] == 'online' or
-                    any(j for j in ONLINE_JOURNALS if j in entry['url'])):
+                        entry['entry_type'] == 'online' or
+                        any(j for j in ONLINE_JOURNALS if j in entry['url'])):
                         continue
-                if opts.bibtex and field not in BIBTEX_FIELDS: # skip fields not in bibtex
+                # skip fields not in bibtex
+                if opts.bibtex and field not in BIBTEX_FIELDS:
                         continue
 
                 # if entry[field] not a proper string, make it so
                 if field == 'author':
                     value = join_names(entry[field])
-                    #if value == 'Wikipedia':
-                        #value = 'Wikipedia contributors'
-                    #if 'url' in entry and 'meta.wikimedia' in entry['url']:
-                        #value = 'Meta contributors'
                 else:
                     value = entry[field]
                 if field in ('editor', 'translator'):

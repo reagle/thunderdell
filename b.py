@@ -271,11 +271,6 @@ class scrape_DOI(scrape_default):
         for key, value in json_bib.items():
             if value in (None, [], ''):
                 value = 'UNKNOWN'
-            #if key == 'issued':  # issued is a dictionary
-                #if 'author' in value:
-                    #biblio['author'] = self.get_author(value)
-                #if 'date-parts' in value:
-                    #biblio['date'] = self.get_date(json_bib)
             if key == 'author':
                 biblio['author'] = self.get_author(json_bib)
             elif key == 'issued':
@@ -293,7 +288,8 @@ class scrape_DOI(scrape_default):
         if 'title' not in json_bib:
             biblio['title'] = 'UNKNOWN'
         else:
-            biblio['title'] = ' '.join(biblio['title'].split())
+            biblio['title'] = sentence_case(' '.join(
+                biblio['title'].split()))
         info("biblio = %s" % biblio)
         return biblio
     
@@ -730,6 +726,7 @@ def get_logger(options={re.IGNORECASE}):
         return function, params
     else:
         print_usage("Sorry, your scheme parameters were not correct.")
+        print(params)
     sys.exit()
 
 

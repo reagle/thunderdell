@@ -269,9 +269,10 @@ class scrape_DOI(scrape_default):
             'comment' : self.comment,
         }
         for key, value in json_bib.items():
+            info("key = '%s' value = '%s' type(value) = '%s'" %(key,value,type(value)))
             if value in (None, [], ''):
-                value = 'UNKNOWN'
-            if key == 'author':
+                pass
+            elif key == 'author':
                 biblio['author'] = self.get_author(json_bib)
             elif key == 'issued':
                 biblio['date'] = self.get_date(json_bib)
@@ -674,6 +675,21 @@ def log2work(biblio):
     else:
         print_usage("Sorry, output regexp subsitution failed.")
 
+def log2console(biblio):
+    '''
+    Log to console.
+    '''
+    
+    print('\n')
+    print("author=%s" % biblio['author']),
+    print("title=%s" % biblio['title']),
+    print("date=%s" % biblio['date']),
+    for token in ('author', 'title', 'date', 'permalink', 'type'):
+        del biblio[token]
+    for key,value in biblio.items():
+        print("%s=%s" % (key, value)),
+    print('\n')
+
 #######################################
 # Dispatchers
 
@@ -714,7 +730,9 @@ def get_logger(options={re.IGNORECASE}):
         (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
             log2work),
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
-            log2mm)
+            log2mm),
+        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
+            log2console),
     )
 
     for regexp, logger in dispatch_logger:
@@ -775,7 +793,7 @@ if __name__ == "__main__":
             fe.pretty_tabulate_dict(dictionary,3)
         sys.exit()
 
-    logger, params = get_logger(' '.join(args.text))    # <- function, (url, scheme, comment)
+    logger, params = get_logger(' '.join(args.text))    
     comment = params['comment'].strip()
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)

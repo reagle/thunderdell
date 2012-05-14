@@ -151,12 +151,16 @@ def escape_latex(text):
         .replace('&', '\&') \
         .replace('%', '\%') \
         .replace('#', '\#') \
+        .replace('$', '\$') \
         .replace('_', '\_') \
         .replace('{', '\{') \
         .replace('}', '\}') \
-        .replace('~', '\~') \
-        .replace('^', '\^') \
-        .replace('^', '\textbackslash')
+        .replace('~', '\~{}') \
+        .replace('^', '\^{}') \
+        .replace('\\', '\textbackslash') \
+        .replace('<', '\textless{}') \
+        .replace('>', '\textgreater{}') \
+        .replace('|', '\textbar{}')
     return text
         
 def strip_accents(text):
@@ -948,7 +952,7 @@ def walk_freemind(node, mm_file, entries, links):
                 if d.get('COLOR') == CL_CO['cite']:
                     entry['cite'] = d.get('TEXT')
                 elif d.get('COLOR') == CL_CO['annotation']:
-                    entry['annotation'] = d.get('TEXT')
+                    entry['annotation'] = d.get('TEXT').strip()
                 node_highlighted = query_highlight(d, opts.query_c)
                 if node_highlighted is not None:
                     entry.setdefault('_node_results', []).append(node_highlighted)

@@ -24,6 +24,7 @@ import logging
 from optparse import OptionParser
 import os
 import re
+import string
 import sys
 import time
 from urllib import quote, unquote
@@ -155,23 +156,19 @@ def escape_latex(text):
         .replace('^', '\^') \
         .replace('^', '\textbackslash')
     return text
-
-def not_combining(char):
-    return unicodedata.category(char) != 'Mn'
-
-def strip_accents(text, encoding='utf-8'):
-    """Test if ascii, if not, remove accents."""
-    #>>> strip_accents(u'nôn-åscîî') # fails because of doctest bug
-    #u'non-ascii'
-
+        
+def strip_accents(text):
+    #"""strip accents and those chars that can't be stripped"""
+    ##>>> strip_accents(u'nôn-åscîî') # fails because of doctest bug
+    ##u'non-ascii'
     try:    # test if ascii
         text.encode('ascii')
-    except UnicodeEncodeError:
-        normalized_text= unicodedata.normalize('NFD', text)
-        return filter(not_combining, normalized_text).encode(encoding)
+    except UnicodeEncodeError:    
+        return ''.join(x for x in unicodedata.normalize('NFKD', text) 
+            if x in string.ascii_letters)
     else:
         return text
-
+    
 def normalize_whitespace(text):
     """Remove redundant whitespace from a string, including before comma
     >>> normalize_whitespace('sally, joe , john')
@@ -184,7 +181,9 @@ def normalize_whitespace(text):
 
 def sorted_dict_values(adict):
     """Return a list of values sorted by dict's keys"""
-    return (adict[key] for key in sorted(adict))
+    for key in sorted(adict):
+        info("key = '%s'" %(key))
+        yield adict[key]
 
 def join_names(names):
     """Return the parts of the name joined approriately
@@ -260,14 +259,14 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:    # if it still collides
-        info("\t trying     %s collides with %s" %(ident, entries[ident]['title']))
+        dbg("\t trying     %s collides with %s" %(ident, entries[ident]['title']))
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
             ident = ident[0:-1] + str(suffix)
         else:
             ident += '1'
-        info("\t yielded    %s" % ident)
+        dbg("\t yielded    %s" % ident)
     return ident
 
 def get_ident(entry, entries):
@@ -284,18 +283,20 @@ def get_ident(entry, entries):
         name_part = last_names[0] + 'Etal'
 
     if not 'year' in entry: entry['year'] = '0000'
-    ident = ''.join((name_part, entry['year']))
+    ident = u''.join((name_part, entry['year']))
+    info("ident = %s '%s'" %(type(ident), ident))
     # remove spaces and chars not permitted in xml name/id attributes
     ident = ident.replace(' ','').replace(':','').replace("'","")
     # remove some punctuation and strong added by walk_freemind.query_highlight
     ident = ident.replace('<strong>','').replace('</strong>','')
+    info("ident = %s '%s'" %(type(ident), ident))
     ident = strip_accents(ident) # bibtex doesn't handle unicode in keys well
 
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
-
-    return ident
+    info("ident = %s '%s'" %(type(ident), ident))
+    return unicode(ident)
 
 
 def guess_bibtex_type(entry):
@@ -347,7 +348,7 @@ def pull_citation(entry):
     
     if 'cite' in entry:
         citation = entry['cite']
-        info("citation = '%s'" %(citation))
+        dbg("citation = '%s'" %(citation))
         # split around tokens of length 1-3; get rid of first empty string of results
 
         equal_pat = re.compile(r'(\w{1,3})=')
@@ -536,7 +537,7 @@ def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
     EXCLUDE = ('.amazon', 'search?q=cache', 'proquest') # 'books.google',
     ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
-    info("entries = '%s'" %(entries))
+    dbg("entries = '%s'" %(entries))
     
     for entry in sorted_dict_values(entries):
         entry_type_copy = entry['entry_type']
@@ -734,10 +735,10 @@ def emit_results(entries, query, results_file):
         """Return the URL for an HTML link to the actual title"""
         token = token.replace('<strong>','').replace('</strong>','')
         token = quote(token.encode('utf-8')) # urllib won't accept unicode
-        info("token = '%s' type = '%s'" %(token, type(token)))
+        dbg("token = '%s' type = '%s'" %(token, type(token)))
         url_query = \
         escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
-        info("url_query = '%s' type = '%s'" %(url_query, type(url_query)))
+        dbg("url_query = '%s' type = '%s'" %(url_query, type(url_query)))
         return url_query
 
     def get_url_MM(file_name):
@@ -848,7 +849,7 @@ def commit_entry(entry, entries):
 
         # pull the citation, create an identifier, and enter in entries
         try:
-            pull_citation(entry)    # break the citation into more bibliographic keys
+            pull_citation(entry)    # break the citation up
         except:
             print ("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
             raise
@@ -859,9 +860,9 @@ def commit_entry(entry, entries):
 def purge_entries(entries):
     """Delete Null entries"""
     for entry in list(entries.keys()):
-        info("%s %s" % (type(entry), entry))
+        dbg("%s %s" % (type(entry), entry))
         if entries[entry]['identifier'] == 'Null':
-            info("   deleting %s" % entry)
+            dbg("   deleting %s" % entry)
             del entries[entry]
 
 def walk_freemind(node, mm_file, entries, links):
@@ -963,24 +964,24 @@ def build_bib(file_name, output):
     entries = OrderedDict() # dict of {id : {entry}}, by insertion order
     mm_files = []
     mm_files.append(file_name)  # list of file encountered (e.g., chase option)
-    info("   mm_files = %s" % mm_files)
+    dbg("   mm_files = %s" % mm_files)
     for mm_file in mm_files:
         if mm_file in done:
             continue
         else:
-            info("   processing %s" % mm_file)
+            dbg("   processing %s" % mm_file)
             try:
                 doc = parse(mm_file).getroot()
             except IOError as err:
-                info("    failed to parse %s" % mm_file)
+                dbg("    failed to parse %s" % mm_file)
                 continue
-            info("    successfully parsed %s" % mm_file)
+            dbg("    successfully parsed %s" % mm_file)
             entries, links = walk_freemind(doc, mm_file, entries, links=[])
             if opts.chase:
                 for link in links:
                     link = os.path.abspath(os.path.dirname(mm_file) + '/' +link)
                     if 'syllabus' not in link and link not in done:
-                        info("    placing %s in mm_files" %link)
+                        dbg("    placing %s in mm_files" %link)
                         mm_files.append(link)
             done.append(os.path.abspath(mm_file))
 

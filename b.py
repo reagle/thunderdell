@@ -685,7 +685,8 @@ def log2console(biblio):
     print("title=%s" % biblio['title']),
     print("date=%s" % biblio['date']),
     for token in ('author', 'title', 'date', 'permalink', 'type'):
-        del biblio[token]
+        if token in biblio:
+            del biblio[token]
     for key,value in biblio.items():
         print("%s=%s" % (key, value)),
     print('\n')

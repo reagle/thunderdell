@@ -70,8 +70,8 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 'in':'institution',
                 'i':'isbn',
                 'j':'journal',
-                'lo':'custom2',     # location
                 'kw':'keyword',
+                'mm':'custom2',     # mindmap file name
                 'nt':'note',
                 'or':'organization', 
                 'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher', 'oy':'origyear',
@@ -92,7 +92,7 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 'url':'url',
                 'urld':'urldate',
                 've':'venue',
-                'c2':'custom2', 'c3':'catalog', 'c4':'custom4', 'c5':'custom5'}
+                'c3':'catalog', 'c4':'custom4', 'c5':'custom5'}
 
 BIBLATEX_FIELDS = dict([(field, short) for short, field in list(BIBLATEX_SHORTCUTS.items())])
 
@@ -519,9 +519,9 @@ def emit_wp_citation(entries):
         for short, field in list(BIBLATEX_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                if field in ( 'annotation', 'custom1', 'day', 'entry_type', 
-                    'booktitle', 'identifier', 'keyword', 'month', 
-                    'shorttitle'):
+                if field in ( 'annotation', 'custom1', 'custom2',
+                    'day', 'entry_type', 'booktitle', 'identifier', 
+                    'keyword', 'month', 'shorttitle'):
                     continue
                 elif field == 'author':
                     output_wp_names(field, entry[field])

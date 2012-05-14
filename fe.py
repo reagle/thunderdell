@@ -14,6 +14,7 @@
     #2. editors currently have 'and' delimiters in mindmaps
     #3. author-year styles don't like anon authors anyway
 #20090519: bibformat_title and pull_citation each use about ~7%
+#20120514: biblatex/biber doesn't accept BCE/negative, can use year
 
 from cgi import escape, parse_qs
 import codecs
@@ -69,19 +70,20 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 'in':'institution',
                 'i':'isbn',
                 'j':'journal',
+                'lo':'custom2',     # location
                 'kw':'keyword',
                 'nt':'note',
                 'or':'organization', 
                 'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher', 'oy':'origyear',
-                'ot':'type', # organization's type
-                'ps':'pubstate', #in press, submitted
+                'ot':'type',        # organization's type
+                'ps':'pubstate',    # in press, submitted
                 'pp':'pages',
                 'pa':'pagination',
                 'p':'publisher',
-                'r':'custom1',
+                'r':'custom1',      # read date
                 'sc':'school',
                 'se':'series',
-                't':'entry_type', # bibtex type
+                't':'entry_type',   # bibtex type
                 'tr':'translator',
                 'ti':'title', 'st':'shorttitle',
                 'rt':'retype',
@@ -345,6 +347,8 @@ def pull_citation(entry):
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
 
     """
+    
+    entry['custom2'] = entry['_mm_file'].split('/')[-1]
     
     if 'cite' in entry:
         citation = entry['cite']

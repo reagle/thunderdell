@@ -166,7 +166,8 @@ def strip_accents(text):
         text.encode('ascii')
     except UnicodeEncodeError:    
         return ''.join(x for x in unicodedata.normalize('NFKD', text) 
-            if x in string.ascii_letters)
+            if unicodedata.category(x) != 'Mn')
+            #if x in string.ascii_letters or x in string.digits)
     else:
         return text
     
@@ -546,6 +547,8 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in sorted_dict_values(entries):
+        #if not entry['identifier'][0].lower() == 'z':
+            #continue
         entry_type_copy = entry['entry_type']
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
@@ -575,9 +578,6 @@ def emit_biblatex(entries):
             if field in entry and entry[field] is not None:
                 # skip these conditions
                 if field in ('identifier', 'entry_type', 'isbn'):
-                    continue
-                # turn off for biber diagnostics
-                if field in ('annotation'):
                     continue
                 if field in ('note', 'url'):  
                     if any(ban for ban in EXCLUDE if ban in entry[field]):

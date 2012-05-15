@@ -148,21 +148,16 @@ def unescape_XML(s):
 
 def escape_latex(text):
     text = text.replace('$', '\$') \
-        .replace('&', '\&') \
-        .replace('%', '\%') \
-        .replace('#', '\#') \
-        .replace('$', '\$') \
-        .replace('_', '\_') \
-        .replace('{', '\{') \
-        .replace('}', '\}') \
-        .replace('~', '\~{}') \
-        .replace('^', '\^{}') \
-        .replace('\\', '\textbackslash') \
-        .replace('<', '\textless{}') \
-        .replace('>', '\textgreater{}') \
-        .replace('|', '\textbar{}')
+        .replace('&', r'\&') \
+        .replace('%', r'\%') \
+        .replace('#', r'\#') \
+        .replace('_', r'\_') \
+        .replace('{', r'\{') \
+        .replace('}', r'\}') \
+        .replace('~', r'\~{}') \
+        .replace('^', r'\^{}') 
     return text
-        
+
 def strip_accents(text):
     #"""strip accents and those chars that can't be stripped"""
     ##>>> strip_accents(u'nôn-åscîî') # fails because of doctest bug
@@ -450,45 +445,6 @@ def pull_citation(entry):
             entry['url'] = base + oldid + diff
 
 
-def bibformat_title(title):
-    """Title case text, and preserve/bracket proper names/nouns
-    >>> bibformat_title("Wikirage: What's hot now on Wikipedia")
-    "{Wikirage}: {What}'s Hot Now on {Wikipedia}"
-    >>> bibformat_title('Re: "Suicide methods" article')
-    "{Re}: `{Suicide} Methods' Article"
-
-    """
-    protected_title = cased_title = quoted_title = []
-
-    articles = ['a', 'an', 'the']
-    conjunctions = ['and', 'but', 'for', 'or', 'nor']
-    contractions = ['s', 't', 've', 're']   # following apostrophe
-    others = ['18th', '19th', '20th', '21st']
-    prepositions = 'aboard about above across after against along among around as at before behind below beneath beside  between beyond but by concerning despite down during except for from in  into like near of off on onto out outside over past per regarding since through throughout till to toward under underneath until up  upon vs. versus with within without'.split()
-
-    words2ignore = articles + conjunctions + contractions + others + prepositions
-    words2do = ('oldid')
-
-    whitespace_pat = re.compile(r'(\W+)', re.UNICODE)
-    words = whitespace_pat.split(title)
-
-    for word in words:
-        if len(word) > 0 and (word[0].isupper() or word in words2do):
-            cased_title.append('{' + word + '}')
-        elif word in words2ignore:
-            cased_title.append(word)
-        else:
-            cased_title.append(word.title())
-    quoted_title = ''.join(cased_title)
-
-    # convert quotes to LaTeX then convert doubles to singles within the title
-    quoted_title = quoted_title.replace(' "',' ``').replace(" '"," `") # open quote
-    quoted_title = quoted_title.replace('" ',"'' ") # close quote
-    quoted_title = quoted_title.replace('"',"''") # left-over close quote
-    quoted_title = quoted_title.replace('``','`').replace("''","'") # single quotes
-
-    return quoted_title
-
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{Citation}} template format.
 
@@ -540,6 +496,48 @@ def emit_wp_citation(entries):
                 opts.outfd.write('| %s = %s\n' % (field, value))
         opts.outfd.write("}}\n")
 
+        
+def bibformat_title(title):
+    """Title case text, and preserve/bracket proper names/nouns
+    >>> bibformat_title("Wikirage: What's hot now on Wikipedia")
+    "{Wikirage}: {What}'s Hot Now on {Wikipedia}"
+    >>> bibformat_title('Re: "Suicide methods" article')
+    "{Re}: `{Suicide} Methods' Article"
+
+    """
+    protected_title = cased_title = quoted_title = []
+
+    articles = ['a', 'an', 'the']
+    conjunctions = ['and', 'but', 'for', 'or', 'nor']
+    contractions = ['s', 't', 've', 're']   # following apostrophe
+    others = ['18th', '19th', '20th', '21st']
+    prepositions = 'aboard about above across after against along among around as at before behind below beneath beside  between beyond but by concerning despite down during except for from in  into like near of off on onto out outside over past per regarding since through throughout till to toward under underneath until up  upon vs. versus with within without'.split()
+
+    words2ignore = articles + conjunctions + contractions + others + prepositions
+    words2do = ('oldid')
+
+    whitespace_pat = re.compile(r' ', re.UNICODE)  # (\W+)
+    words = whitespace_pat.split(title)
+
+    for word in words:
+        if len(word) > 0:
+            dbg("word = '%s'" %(word))
+            if (word[0].isupper() or word in words2do):
+                cased_title.append('{' + word + '}')
+            elif word in words2ignore:
+                cased_title.append(word)
+            else:
+                cased_title.append(word.title())
+    quoted_title = ' '.join(cased_title)
+
+    # convert quotes to LaTeX then convert doubles to singles within the title
+    quoted_title = quoted_title.replace(' "',' ``').replace(" '"," `") # open quote
+    quoted_title = quoted_title.replace('" ',"'' ") # close quote
+    quoted_title = quoted_title.replace('"',"''") # left-over close quote
+    quoted_title = quoted_title.replace('``','`').replace("''","'") # single quotes
+
+    return quoted_title
+
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
@@ -578,7 +576,10 @@ def emit_biblatex(entries):
                 # skip these conditions
                 if field in ('identifier', 'entry_type', 'isbn'):
                     continue
-                if field in ('note', 'url'):
+                # turn off for biber diagnostics
+                if field in ('annotation'):
+                    continue
+                if field in ('note', 'url'):  
                     if any(ban for ban in EXCLUDE if ban in entry[field]):
                         continue
                 if field in ('urldate', 'url'):
@@ -605,7 +606,7 @@ def emit_biblatex(entries):
 
                 # remove xml entities and escape for latex
                 value = unescape_XML(value)
-                if field not in ('note', 'url', 'howpublished'):
+                if field not in ('url', 'howpublished'):  # 'note', 
                     value = escape_latex(value) # escape latex except brackets of \url{}
 
                 # protect case in titles
@@ -613,6 +614,7 @@ def emit_biblatex(entries):
                     value = bibformat_title(value)
                     #if opts.bibtex and entry['entry_type'] == 'online':
                         #value += ' [online]'
+
                 opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
 

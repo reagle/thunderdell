@@ -547,8 +547,8 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in sorted_dict_values(entries):
-        #if not entry['identifier'][0].lower() == 'z':
-            #continue
+        if 'eventtitle' in entry and 'booktitle' not in entry:
+            entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         entry_type_copy = entry['entry_type']
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
@@ -558,8 +558,6 @@ def emit_biblatex(entries):
                         "%d %B %Y")
                     note += ' [Accessed %s]' % urldate
                 entry['note'] = entry.setdefault('note', '') + note
-            if 'eventtitle' in entry and 'booktitle' not in entry:
-               entry['booktitle'] = 'Proceedings of the ' + entry['eventtitle'] 
             if entry['entry_type'] == 'online':
                 entry_type_copy = 'misc'
             if entry['entry_type'] == 'report':

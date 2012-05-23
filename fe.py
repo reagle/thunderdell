@@ -220,7 +220,8 @@ ARTICLES = ('a', 'an', 'the')
 CONJUNCTIONS = ('and', 'but', 'for', 'nor', 'or')
 SHORT_PREPOSITIONS = ('on', 'in', 'out', 'to', 'from', 
     'for', 'of', 'with', 'among')
-BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + SHORT_PREPOSITIONS
+BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + \
+    SHORT_PREPOSITIONS
 
 def identity_add_title(ident, title):
     """Return a non-colliding identity.
@@ -519,12 +520,12 @@ def bibformat_title(title):
     words2ignore = articles + conjunctions + contractions + others + prepositions
     words2do = ('oldid')
 
-    whitespace_pat = re.compile(r"([ '])", re.UNICODE)  # (\W+)
+    whitespace_pat = re.compile(r"(\W+)", re.UNICODE)  # (\W+)
     words = whitespace_pat.split(title)
 
     for word in words:
         if len(word) > 0:
-            dbg("word = '%s'" %(word))
+            info("word = '%s'" %(word))
             if (word[0].isupper() or word in words2do):
                 cased_title.append('{' + word + '}')
             elif word in words2ignore:

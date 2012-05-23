@@ -3,7 +3,7 @@
 <node TEXT="pass" POSITION="left"/>
 <node COLOR="#338800" TEXT="A1" POSITION="right">
 <node LINK="http://example.com/1" COLOR="#090f6b" TEXT="Title one">
-<node COLOR="#ff33b8" TEXT="et=article y=1991"/>
+<node COLOR="#ff33b8" TEXT="t=article y=1991"/>
 </node>
 </node>
 <node COLOR="#338800" TEXT="A2" POSITION="right">

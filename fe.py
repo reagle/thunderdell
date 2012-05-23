@@ -55,7 +55,7 @@ DIGIT2MONTH = dict((v,k) for k, v in list(MONTH2DIGIT.items()))
 
 # happy to keep using bibtex:address alias of bibtex:location
 # keep t, ot, and et straight
-BIBLATEX_SHORTCUTS = {'id':'identifier', 
+BIBLATEX_SHORTCUTS = OrderedDict({'id':'identifier', 
                 'a':'address',
                 'ad':'addendum',
                 'an':'annotation',
@@ -92,7 +92,7 @@ BIBLATEX_SHORTCUTS = {'id':'identifier',
                 'url':'url',
                 'urld':'urldate',
                 've':'venue',
-                'c3':'catalog', 'c4':'custom4', 'c5':'custom5'}
+                'c3':'catalog', 'c4':'custom4', 'c5':'custom5'})
 
 BIBLATEX_FIELDS = dict([(field, short) for short, field in list(BIBLATEX_SHORTCUTS.items())])
 
@@ -181,10 +181,10 @@ def normalize_whitespace(text):
     text = ' '.join(text.split())
     return text
 
-def sorted_dict_values(adict):
+def dict_sorted_by_keys(adict):
     """Return a list of values sorted by dict's keys"""
     for key in sorted(adict):
-        info("key = '%s'" %(key))
+        dbg("key = '%s'" %(key))
         yield adict[key]
 
 def join_names(names):
@@ -379,6 +379,7 @@ def pull_citation(entry):
         except ValueError:
             urldate = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'], "%Y%m%d %H:%M UTC"))
         entry['urldate'] = urldate
+        del entry['custom1']
 
     if 'month' in entry:
         month_tmp = entry['month']
@@ -411,7 +412,8 @@ def pull_citation(entry):
     if 'date' in entry:
         date = entry['date']
         if '/' in date:
-            date_parts = date.split('/') # '2009/05/21'
+            # biblatex permits ranges delimited by '/', but I do not
+            raise Exception("'/' should not be in date.")
         elif '-' in date:
             date_parts = date.split('-') # '2009-05-21'
         else:                            # '20090521'
@@ -469,7 +471,7 @@ def emit_wp_citation(entries):
             opts.outfd.write(
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
     
-    for entry in sorted_dict_values(entries):
+    for entry in dict_sorted_by_keys(entries):
         opts.outfd.write('{{ Citation\n')
         if 'booktitle' in entry:
             opts.outfd.write('| ref = %s\n' % entry['title'])
@@ -517,7 +519,7 @@ def bibformat_title(title):
     words2ignore = articles + conjunctions + contractions + others + prepositions
     words2do = ('oldid')
 
-    whitespace_pat = re.compile(r' ', re.UNICODE)  # (\W+)
+    whitespace_pat = re.compile(r"([ '])", re.UNICODE)  # (\W+)
     words = whitespace_pat.split(title)
 
     for word in words:
@@ -529,7 +531,7 @@ def bibformat_title(title):
                 cased_title.append(word)
             else:
                 cased_title.append(word.title())
-    quoted_title = ' '.join(cased_title)
+    quoted_title = ''.join(cased_title)
 
     # convert quotes to LaTeX then convert doubles to singles within the title
     quoted_title = quoted_title.replace(' "',' ``').replace(" '"," `") # open quote
@@ -546,7 +548,7 @@ def emit_biblatex(entries):
     ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
     dbg("entries = '%s'" %(entries))
     
-    for entry in sorted_dict_values(entries):
+    for entry in dict_sorted_by_keys(entries):
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         entry_type_copy = entry['entry_type']
@@ -572,8 +574,9 @@ def emit_biblatex(entries):
 
         opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in list(BIBLATEX_SHORTCUTS.items()):
+        for short, field in sorted(BIBLATEX_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
+                info("short, field = '%s , %s'" %(short, field))
                 # skip these conditions
                 if field in ('identifier', 'entry_type', 'isbn'):
                     continue
@@ -610,8 +613,6 @@ def emit_biblatex(entries):
                 # protect case in titles
                 if field in ('title', 'shorttitle'):
                     value = bibformat_title(value)
-                    #if opts.bibtex and entry['entry_type'] == 'online':
-                        #value += ' [online]'
 
                 opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
@@ -768,7 +769,7 @@ def emit_results(entries, query, results_file):
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
             % (identifier_html, title_html, link_html, from_html, close))
 
-    for entry in sorted_dict_values(entries):
+    for entry in dict_sorted_by_keys(entries):
         identifier = entry['identifier']
         author = join_names(entry['author'])
         title = entry['title']

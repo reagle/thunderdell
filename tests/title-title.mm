@@ -17,6 +17,9 @@
 <node COLOR="#ff33b8" TEXT="y=1997"/>
 </node>
 </node>
+<node COLOR="#090f6b" TEXT="The title&apos;s apostrophes">
+<node COLOR="#ff33b8" TEXT="y=1997"/>
+</node>
 </node>
 </node>
 </map>

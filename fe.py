@@ -141,10 +141,23 @@ def pretty_tabulate_dict(mydict, cols=3):
         for key, value in mydict.items()]), cols)
      
 from xml.sax.saxutils import escape, unescape
-def unescape_XML(s):
+def unescape_XML(o):
     '''Unescape XML character entities; & < > are defaulted'''
     extras = {"&apos;": "'", "&quot;": '"'}
-    return(unescape(s, extras))
+    if isinstance(o, basestring):
+        info("%s is a string" % o)
+        return(unescape(o, extras))
+    elif isinstance(o, list): # it's a list of authors with name parts
+        new_authors = []
+        for author in o:
+            new_author = []
+            for name_part in author:
+                new_author.append(unescape(name_part, extras))
+            new_authors.append(new_author)
+        return(new_authors)
+    else:
+        raise TypeError('o = %s; type = %s' % (o, 
+            type(o)))
 
 def escape_latex(text):
     text = text.replace('$', '\$') \
@@ -187,10 +200,12 @@ def dict_sorted_by_keys(adict):
         dbg("key = '%s'" %(key))
         yield adict[key]
 
-def join_names(names):
-    """Return the parts of the name joined approriately
+def create_bibtex_author(names):
+    """Return the parts of the name joined appropriately. 
+    The BibTex name parsing is best explained in 
+    http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
 
-    >>> join_names([('First Middle', 'von', 'Last', 'Jr.'),\
+    >>> create_bibtex_author([('First Middle', 'von', 'Last', 'Jr.'),\
         ('First', '', 'Last', 'II')])
     'von Last, Jr., First Middle and Last, II, First'
 
@@ -198,8 +213,13 @@ def join_names(names):
     full_names = []
 
     for name in names:
-        first, von, last, jr = name[0:4]
         full_name = ''
+        info("name = '%s'" %(list(name)))
+        first, von, last, jr = name[0:4]
+        
+        if all(s.islower() for s in (first, last)): # {{hooks}, {bell}}
+            first = '{%s}' % first
+            last = '{%s}' % last
 
         if von != '':
             full_name += von + ' '
@@ -597,19 +617,20 @@ def emit_biblatex(entries):
                         continue
 
                 # if entry[field] not a proper string, make it so
+                value = unescape_XML(entry[field]) # remove xml entities
+                info("value = %s; type = %s" %(value, type(value)))
                 if field == 'author':
-                    value = join_names(entry[field])
-                else:
-                    value = entry[field]
+                    value = create_bibtex_author(value)
                 if field in ('editor', 'translator'):
                     value = value.replace(', ', ' and ')
                 if field == 'month':
-                    value = DIGIT2MONTH[str(int(entry[field]))] 
+                    value = DIGIT2MONTH[str(int(value))] 
 
-                # remove xml entities and escape for latex
-                value = unescape_XML(value)
-                if field not in ('url', 'howpublished'):  # 'note', 
-                    value = escape_latex(value) # escape latex except brackets of \url{}
+                # escape latex brackets. 
+                #   url and howpublished shouldn't be changed
+                #   author may have curly brackets that should not be escaped
+                if field not in ('author', 'url', 'howpublished'):  # 'note', 
+                    value = escape_latex(value) 
 
                 # protect case in titles
                 if field in ('title', 'shorttitle'):
@@ -772,7 +793,7 @@ def emit_results(entries, query, results_file):
 
     for entry in dict_sorted_by_keys(entries):
         identifier = entry['identifier']
-        author = join_names(entry['author'])
+        author = create_bibtex_author(entry['author'])
         title = entry['title']
         url = entry.get('url','')
         base_mm_file = os.path.basename(entry['_mm_file'])

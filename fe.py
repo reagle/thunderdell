@@ -214,7 +214,6 @@ def create_bibtex_author(names):
 
     for name in names:
         full_name = ''
-        info("name = '%s'" %(list(name)))
         first, von, last, jr = name[0:4]
         
         if all(s.islower() for s in (first, last)): # {{hooks}, {bell}}

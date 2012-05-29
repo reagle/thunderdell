@@ -9,8 +9,24 @@
 
 """Convert a bibtex file into a mindmap."""
 
+import codecs
+#import locale
+import logging
+from os import chdir, environ, mkdir, rename
+from os.path import abspath, exists, splitext
 import re
 import sys
+
+
+HOME = environ['HOME']
+
+log_level = 100 # default
+critical = logging.critical
+info = logging.info
+dbg = logging.debug
+warn = logging.warn
+error = logging.error
+excpt = logging.exception
 
 def regexParse(text):
 
@@ -41,6 +57,7 @@ def process(entries):
     fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
 
     for entry in entries.values():
+        info("entry = '%s'" %(entry))
         cite = []
         reordered_names = []
         names = xml_escape(entry['author'])
@@ -106,22 +123,42 @@ def process(entries):
 
 if __name__ == "__main__":
 
-    import codecs, getopt, os, sys
 
-    try:
-        (options,files) = getopt.getopt (sys.argv[1:],"")
-    except getopt.error:
-        print 'Error: Unknown option or missing argument.'
+    import argparse # http://docs.python.org/dev/library/argparse.html
+    arg_parser = argparse.ArgumentParser(description='TBD')
+    
+    # positional arguments
+    arg_parser.add_argument('files', nargs='+', metavar='FILE')
+    # optional arguments
+    arg_parser.add_argument('-l', '--log-to-file',
+            action="store_true", default=False,
+            help="log to file %(prog)s.log")
+    arg_parser.add_argument("-n", "--number", type=int, default=10,
+            help="some number (default: %(default)s)")
+    arg_parser.add_argument('-v', '--verbose', action='count', default=0,
+            help="Increase verbosity (specify multiple times for more)")
+    arg_parser.add_argument('--version', action='version', version='TBD')
+    args = arg_parser.parse_args()
 
-    files = [os.path.abspath(file_name) for file_name in files]
+    if args.verbose == 1: log_level = logging.CRITICAL
+    elif args.verbose == 2: log_level = logging.INFO
+    elif args.verbose >= 3: log_level = logging.DEBUG
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    if args.log_to_file:
+        logging.basicConfig(filename='PROG-TEMPLATE.log', filemode='w',
+            level=log_level, format = LOG_FORMAT)
+    else:
+        logging.basicConfig(level=log_level, format = LOG_FORMAT)
+
+    # Do some actual work.
+    files = [abspath(file_name) for file_name in args.files]
     for file_name in files:
         try:
             src = codecs.open(file_name, "r", "utf-8", "replace").read()
-            fileOut = os.path.splitext(file_name)[0] + '.mm'
+            fileOut = splitext(file_name)[0] + '.mm'
             fdo = codecs.open(fileOut, "wb", "utf-8", "replace")
         except IOError:
             print "    file does not exist"
             continue
         entries = regexParse(src.split('\n'))
         process(entries)
-        #os.system('~/bin/freemind/freemind.sh %s' %fileOut)

@@ -73,6 +73,7 @@ FB_KEY_SHORTCUTS = {
         'off' : 'offensive',
         'ran' : 'ranking',
         'rat' : 'rating',
+        'rev' : 'review',
         'soc' : 'sockpuppet',
         }
 

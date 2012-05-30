@@ -300,7 +300,7 @@ class scrape_DOI(scrape_default):
                 biblio['pages'] = json_bib['page']
             elif key == 'container-title':
                 biblio['jounal'] = json_bib['container-title']
-            elif key == 'number':
+            elif key == 'issue':
                 biblio['number'] = json_bib['issue']
             elif key == 'URL':
                 biblio['url'] = json_bib['URL']
@@ -319,7 +319,8 @@ class scrape_DOI(scrape_default):
         if 'author' in bib_dict:
             for name_dic in bib_dict['author']:
                 info("name_dic.values() = %s" % name_dic.values())
-                names += ' '.join(name_dic.values())
+                names = names + ', ' + ' '.join(name_dic.values())
+            names = names[2:] # remove first comma
         else:
             names = 'UNKNOWN'
         return names

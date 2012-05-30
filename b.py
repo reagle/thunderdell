@@ -158,14 +158,13 @@ class scrape_default(object):
     def get_biblio(self):
         biblio = {
             'author' : self.get_author(),
-            'title' : self.get_title(),
             'date' : self.get_date(),
-            'organization' : self.get_org(),
             'permalink' : self.get_permalink(),
             'excerpt' : self.get_excerpt(),
             'comment' : self.comment,
             'url' : self.url,
         }
+        biblio['title'], biblio['organization'] = self.split_title_org()
         return biblio
 
     def get_author(self):
@@ -188,6 +187,52 @@ class scrape_default(object):
         print('*** UNKNOWN')
         return 'UNKNOWN'
 
+    def get_date(self):
+        '''rough match of a date, then pass to dateutil's magic abilities'''
+
+        from dateutil.parser import parse
+
+        date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
+        try:
+            dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
+            return parse(dmatch.group(0)).strftime("%Y%m%d")
+        except:
+            now = time.gmtime()
+            date = time.strftime('%Y%m%d', now)
+            info("guessing date = %s" % date)
+            return date
+
+    def split_title_org(self):
+        '''Often the publishing org is in the title.
+        See if there is a short bit of text (<=35%) at the end of 
+        the string and if so assume that is the org.'''
+        
+        title = self.get_title()
+        org = self.get_org()
+
+        DELIMTER = re.compile('([-\|:;])') # 
+        parts = DELIMTER.split(title)
+        if len(parts) >= 2:
+            beginning, end = ''.join(parts[0:-2]), parts[-1]
+            info("beginning = %s, end = %s" %(beginning, end))
+            end_ratio = float(len(end)) / len(beginning + end)
+            if end_ratio <= 0.35:
+                info(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
+                return beginning.strip(), end.strip()
+        return title, org
+
+    def get_excerpt(self):
+        lines = self.text.split('\n')
+        for line in lines:
+            line = line.strip()
+            if len(line) > 280 and '__' not in line:
+                excerpt = line
+                return excerpt.strip()
+        return None
+
+    def get_permalink(self):
+        return self.url
+
     def get_title(self):
 
         title_regexps = (
@@ -207,21 +252,6 @@ class scrape_default(object):
             title = "UNKNOWN TITLE"
         return title
 
-    def get_date(self):
-        '''rough match of a date, then pass to dateutil's magic abilities'''
-
-        from dateutil.parser import parse
-
-        date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
-        try:
-            dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
-            return parse(dmatch.group(0)).strftime("%Y%m%d")
-        except:
-            now = time.gmtime()
-            date = time.strftime('%Y%m%d', now)
-            info("guessing date = %s" % date)
-            return date
-
     def get_org(self):
         from urlparse import urlparse
 
@@ -235,19 +265,6 @@ class scrape_default(object):
         else:
             org = org_chunks[-2]
         return org.title()
-
-    def get_excerpt(self):
-        lines = self.text.split('\n')
-        for line in lines:
-            line = line.strip()
-            if len(line) > 280 and '__' not in line:
-                excerpt = line
-                return excerpt.strip()
-        return None
-
-    def get_permalink(self):
-        return self.url
-
         
 class scrape_DOI(scrape_default):
     

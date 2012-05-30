@@ -16,11 +16,45 @@ def escape_XML(s): # http://wiki.python.org/moin/EscapingXml
     extras = {'\t' : '  '}
     return escape(s, extras)
 
-def unescape_XML(s):
-    '''Unescape XML character entities; & < > are defaulted'''
-    extras = {"&apos;": "'", "&quot;": '"'}
-    return(unescape(s, extras))
+#def unescape_XML(s):
+    #'''Unescape XML character entities; & < > are defaulted'''
+    #extras = {  "&apos;": "'", 
+                #"&quot;": '"',
+                #"&#8220;": '"',
+                #"&#8221;"; '"',
+                #"&laquo;": u'«',
+                #"&raquo;": u'»',
+                #"&mdash;": '-',}
+    #return(unescape(s, extras))
 
+import re, htmlentitydefs
+def unescape_XML(text):
+    '''
+    Removes HTML or XML character references and entities from a text string.
+    http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
+    
+    '''
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            # character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 16))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            # named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, text)
+    
+    
 import logging
 import os
 import requests

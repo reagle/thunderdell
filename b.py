@@ -221,18 +221,6 @@ class scrape_default(object):
                 return beginning.strip(), end.strip()
         return title, org
 
-    def get_excerpt(self):
-        lines = self.text.split('\n')
-        for line in lines:
-            line = line.strip()
-            if len(line) > 280 and '__' not in line:
-                excerpt = line
-                return excerpt.strip()
-        return None
-
-    def get_permalink(self):
-        return self.url
-
     def get_title(self):
 
         title_regexps = (
@@ -247,7 +235,8 @@ class scrape_default(object):
 
         tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
         if tmatch:
-            title = sentence_case(tmatch.group(1).strip())
+            title = unescape_XML(tmatch.group(1).strip())
+            title = sentence_case(title)
         else:
             title = "UNKNOWN TITLE"
         return title
@@ -265,6 +254,19 @@ class scrape_default(object):
         else:
             org = org_chunks[-2]
         return org.title()
+
+    def get_excerpt(self):
+        lines = self.text.split('\n')
+        for line in lines:
+            line = line.strip()
+            if len(line) > 280 and '__' not in line:
+                excerpt = line
+                return excerpt.strip()
+        return None
+
+    def get_permalink(self):
+        return self.url
+
         
 class scrape_DOI(scrape_default):
     

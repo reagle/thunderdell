@@ -216,9 +216,9 @@ class scrape_default(object):
             beginning, end = ''.join(parts[0:-2]), parts[-1]
             info("beginning = %s, end = %s" %(beginning, end))
             end_ratio = float(len(end)) / len(beginning + end)
-            if end_ratio <= 0.35:
-                info(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
-                return beginning.strip(), end.strip()
+            info(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
+            if end_ratio <= 0.35 or len(end) <= 20:
+                return sentence_case(beginning.strip()), end.strip().title()
         return title, org
 
     def get_title(self):

@@ -49,6 +49,7 @@ GENERAL_KEY_SHORTCUTS = {
         'for': 'fork',
         'gen': 'gender',
         'hum': 'humor',
+        'ide': 'identity',
         'lea': 'leadership',
         'leg': 'legal',
         'ope': 'open',

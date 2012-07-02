@@ -63,19 +63,24 @@ GENERAL_KEY_SHORTCUTS = {
         'zei': 'zeitgeist',
         }
 
-FB_KEY_SHORTCUTS = {
+CC_KEY_SHORTCUTS = {
         'ass' : 'assessment',
         'aut' : 'automated',
-        'com' : 'comment',
+        'bou' : 'boundaries',
+        'com' : 'competitive',
         'cri' : 'criticism',
         'est' : 'esteem',
         'fee' : 'feedback',
+        'inf' : 'informed',
+        'mar': 'market',
         'mea' : 'mean',
         'off' : 'offensive',
         'ran' : 'ranking',
         'rat' : 'rating',
         'rev' : 'review',
-        'soc' : 'sockpuppet',
+        'sel' : 'self',
+        'soc' : 'social',
+        'pup' : 'puppet',
         }
 
 WP_KEY_SHORTCUTS = {
@@ -99,7 +104,6 @@ WP_KEY_SHORTCUTS = {
         'fru': 'frustration',
         'gov': 'governance',
         'his': 'history',
-        'mar': 'market',
         'mot': 'motivation',
         'neu': 'neutrality',
         'not': 'notability',
@@ -112,7 +116,7 @@ WP_KEY_SHORTCUTS = {
         }
 
 LIST_OF_KEYSHORTCUTS = (GENERAL_KEY_SHORTCUTS, 
-    FB_KEY_SHORTCUTS,WP_KEY_SHORTCUTS)
+    CC_KEY_SHORTCUTS,WP_KEY_SHORTCUTS)
 
 KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
 for short_dict in LIST_OF_KEYSHORTCUTS[1:]:

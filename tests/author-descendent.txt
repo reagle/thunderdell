@@ -1,24 +1,24 @@
 @misc{A11991to,
    author = {A1},
    custom2 = {author-descendent.mm},
-   date = {1991},
    title = {{Title} One},
+   year = {1991},
 }
 @misc{A11992tt,
    author = {A1},
    custom2 = {author-descendent.mm},
-   date = {1992},
    title = {{Title} Two},
+   year = {1992},
 }
 @misc{A11994tf,
    author = {A1},
    custom2 = {author-descendent.mm},
-   date = {1994},
    title = {{Title} Four},
+   year = {1994},
 }
 @misc{A21993tt,
    author = {A2},
    custom2 = {author-descendent.mm},
-   date = {1993},
    title = {{Title} Three},
+   year = {1993},
 }

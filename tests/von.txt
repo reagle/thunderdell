@@ -3,10 +3,10 @@
    author = {Von Krogh, George},
    custom1 = {20060504},
    custom2 = {von.mm},
-   date = {1998},
    issue = {Spring},
    journal = {California Management Review},
    number = {3},
    title = {{Care} in Knowledge Creation},
    volume = {40},
+   year = {1998},
 }

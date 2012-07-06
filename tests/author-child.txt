@@ -1,18 +1,18 @@
 @misc{A51995tf,
    author = {A5},
    custom2 = {author-child.mm},
-   date = {1995},
    title = {{Title} Five},
+   year = {1995},
 }
 @misc{A61996ts,
    author = {A6},
    custom2 = {author-child.mm},
-   date = {1996},
    title = {{Title} Six},
+   year = {1996},
 }
 @misc{A71997ts,
    author = {A7},
    custom2 = {author-child.mm},
-   date = {1997},
    title = {{Title} Seven},
+   year = {1997},
 }

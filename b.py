@@ -24,6 +24,7 @@ import argparse
 import codecs
 import fe
 import logging
+from lxml import etree
 import re
 import string
 import sys
@@ -204,7 +205,7 @@ class scrape_default(object):
         except:
             now = time.gmtime()
             date = time.strftime('%Y%m%d', now)
-            info("guessing date = %s" % date)
+            info("making date now = %s" % date)
             return date
 
     def split_title_org(self):
@@ -272,6 +273,66 @@ class scrape_default(object):
     def get_permalink(self):
         return self.url
 
+class scrape_photo_net(object):
+    """
+    Scrape photo.net postings
+    e.g., http://photo.net/site-help-forum/00ajKF
+    """
+    def __init__(self, url, comment):
+        print "Scraping photo.net;",
+        self.url = url
+        self.comment = comment
+        self.html, resp = get_HTML(url, cache_control = 'no-cache')        
+        print(self.html)
+        html_parser = etree.HTMLParser()
+        self.doc = etree.fromstring(self.html, html_parser)
+
+    def get_biblio(self):
+        biblio = {
+            'author' : self.get_author(),
+            'title' : self.get_title(),
+            'date' : self.get_date(),
+            'permalink' : self.url,
+            'excerpt' : self.get_excerpt(),
+            'comment' : self.comment,
+            'url' : self.url,
+        }
+        biblio['organization'] = "photo.net"
+        return biblio
+        
+    def get_author(self):
+
+        author = self.doc.xpath(
+            "//div[@class='originalpost']/p/a[@href]/text()")[0]
+        print("author = %s" % author)
+        return author.strip()
+
+    def get_title(self):
+
+        title = self.doc.xpath("//title/text()")[0]
+        title = title.split('- Photo.net')[0]
+        print("title = %s" % title)
+        return title.strip()
+
+        
+        
+        
+        
+    def get_date(self):
+        from dateutil.parser import parse
+
+        date = self.doc.xpath(
+            "//div[@class='originalpost']/p/text()")[1]
+        date = parse(date).strftime("%Y%m%d")
+        print("date = %s" % date)
+        return date
+
+    def get_excerpt(self):
+        excerpt = self.doc.xpath(
+            "//div[@class='originalpost']/div[@class='message']/p/text()") 
+        print("excerpt = %s" % excerpt)
+        return excerpt
+        
         
 class scrape_DOI(scrape_default):
     
@@ -737,6 +798,7 @@ def get_scraper(url, comment):
         ('http://meta.wikimedia.org/w', scrape_WMMeta),
         ('http://marc.info/', scrape_MARC),
         ('http://dx.doi.org/', scrape_DOI),
+        ('http://photo.net/', scrape_photo_net),
         ('', scrape_default)     # default: make sure last
     )
 
@@ -782,8 +844,8 @@ def print_usage(message):
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
-
-    arg_parser = argparse.ArgumentParser(prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
+    arg_parser = argparse.ArgumentParser(
+        prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
     arg_parser.add_argument("-t", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")

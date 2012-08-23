@@ -313,10 +313,6 @@ class scrape_photo_net(object):
         title = title.split('- Photo.net')[0]
         print("title = %s" % title)
         return title.strip()
-
-        
-        
-        
         
     def get_date(self):
         from dateutil.parser import parse

@@ -22,6 +22,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 import argparse
 import codecs
+from dateutil.parser import parse
 import fe
 import logging
 from lxml import etree
@@ -283,7 +284,6 @@ class scrape_photo_net(object):
         self.url = url
         self.comment = comment
         self.html, resp = get_HTML(url, cache_control = 'no-cache')        
-        print(self.html)
         html_parser = etree.HTMLParser()
         self.doc = etree.fromstring(self.html, html_parser)
 
@@ -304,29 +304,25 @@ class scrape_photo_net(object):
 
         author = self.doc.xpath(
             "//div[@class='originalpost']/p/a[@href]/text()")[0]
-        print("author = %s" % author)
         return author.strip()
 
     def get_title(self):
 
         title = self.doc.xpath("//title/text()")[0]
         title = title.split('- Photo.net')[0]
-        print("title = %s" % title)
         return title.strip()
         
     def get_date(self):
-        from dateutil.parser import parse
 
         date = self.doc.xpath(
             "//div[@class='originalpost']/p/text()")[1]
         date = parse(date).strftime("%Y%m%d")
-        print("date = %s" % date)
         return date
 
     def get_excerpt(self):
+
         excerpt = self.doc.xpath(
-            "//div[@class='originalpost']/div[@class='message']/p/text()") 
-        print("excerpt = %s" % excerpt)
+            "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
         return excerpt
         
         

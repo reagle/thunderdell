@@ -564,7 +564,7 @@ def bibformat_title(title):
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
-    EXCLUDE = ('.amazon', 'search?q=cache', 'proquest') # 'books.google',
+    EXCLUDE = ('search?q=cache', 'proquest') # 'books.google', '.amazon', 
     ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
     dbg("entries = '%s'" %(entries))
     

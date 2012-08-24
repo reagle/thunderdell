@@ -310,7 +310,7 @@ def get_ident(entry, entries):
     # remove spaces and chars not permitted in xml name/id attributes
     ident = ident.replace(' ','').replace(':','').replace("'","")
     # remove some punctuation and strong added by walk_freemind.query_highlight
-    ident = ident.replace('<strong>','').replace('</strong>','')
+    ident = ident.replace('.','').replace('<strong>','').replace('</strong>','')
     info("ident = %s '%s'" %(type(ident), ident))
     ident = strip_accents(ident) # bibtex doesn't handle unicode in keys well
 

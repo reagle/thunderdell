@@ -66,6 +66,7 @@ GENERAL_KEY_SHORTCUTS = {
         }
 
 CC_KEY_SHORTCUTS = {
+        'ano' : 'anonymous',
         'ass' : 'assessment',
         'aut' : 'automated',
         'bou' : 'boundaries',
@@ -74,9 +75,11 @@ CC_KEY_SHORTCUTS = {
         'est' : 'esteem',
         'fee' : 'feedback',
         'inf' : 'informed',
-        'mar': 'market',
+        'gam' : 'gaming',
+        'mar' : 'market',
         'mea' : 'mean',
         'off' : 'offensive',
+        'qua' : 'quant',
         'ran' : 'ranking',
         'rat' : 'rating',
         'rev' : 'review',

@@ -763,6 +763,7 @@ def log2console(biblio):
     '''
 
     keyword, sep, abstract = biblio['comment'].partition(' ')
+    del biblio['comment']
     if keyword:
         biblio['keyword'] = KEY_SHORTCUTS.get(keyword, keyword)
     

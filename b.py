@@ -790,7 +790,7 @@ def get_scraper(url, comment):
         ('http://meta.wikimedia.org/w', scrape_WMMeta),
         ('http://marc.info/', scrape_MARC),
         ('http://dx.doi.org/', scrape_DOI),
-        (' http://photo.net/site-help-forum/', scrape_photo_net),
+        ('http://photo.net/site-help-forum/', scrape_photo_net),
         ('', scrape_default)     # default: make sure last
     )
 

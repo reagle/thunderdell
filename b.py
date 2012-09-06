@@ -768,13 +768,13 @@ def log2console(biblio):
         biblio['keyword'] = KEY_SHORTCUTS.get(keyword, keyword)
     
     print('\n')
-    print("author=%s" % biblio['author']),
-    print("title=%s" % biblio['title']),
-    print("date=%s" % biblio['date']),
+    print("author = %s" % biblio['author']),
+    print("title = %s" % biblio['title']),
+    print("date = %s" % biblio['date']),
     SKIP_TOKENS = ('author', 'title', 'date', 'permalink', 'type', 'excerpt') 
     for key,value in biblio.items():
         if key not in SKIP_TOKENS:
-            print("%s=%s" % (key, value.strip())),
+            print("%s = %s" % (key, value.strip())),
     print('\n')
     print(biblio['excerpt']),
     print('\n')

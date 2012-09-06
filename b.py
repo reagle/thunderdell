@@ -452,9 +452,9 @@ class scrape_Signpost(scrape_ENWP):
         author_regexp3 = "By (.*?), \d\d"
         dmatch = re.search(author_regexp3, self.text, re.IGNORECASE)
         if dmatch:
-			authors = dmatch.group(1)
-			authors = authors.replace(' and ', ', ')
-			return authors
+            authors = dmatch.group(1)
+            authors = authors.replace(' and ', ', ')
+            return authors
         return 'UNKNOWN'
 
     def get_title(self):
@@ -761,16 +761,21 @@ def log2console(biblio):
     '''
     Log to console.
     '''
+
+    keyword, sep, abstract = biblio['comment'].partition(' ')
+    if keyword:
+        biblio['keyword'] = KEY_SHORTCUTS.get(keyword, keyword)
     
     print('\n')
     print("author=%s" % biblio['author']),
     print("title=%s" % biblio['title']),
     print("date=%s" % biblio['date']),
-    for token in ('author', 'title', 'date', 'permalink', 'type'):
-        if token in biblio:
-            del biblio[token]
+    SKIP_TOKENS = ('author', 'title', 'date', 'permalink', 'type', 'excerpt') 
     for key,value in biblio.items():
-        print("%s=%s" % (key, value)),
+        if key not in SKIP_TOKENS:
+            print("%s=%s" % (key, value.strip())),
+    print('\n')
+    print(biblio['excerpt']),
     print('\n')
 
 #######################################

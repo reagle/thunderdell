@@ -300,7 +300,7 @@ class scrape_photo_net(object):
             'comment' : self.comment,
             'url' : self.url,
         }
-        biblio['organization'] = "photo.net"
+        biblio['organization'] = "photo.net Site Help Forum &gt; Photo Critique and Rating"
         return biblio
         
     def get_author(self):

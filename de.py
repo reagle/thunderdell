@@ -71,7 +71,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if 'author' not in entry: entry['author'] = 'Unknown'
             if 'title' not in entry: entry['title'] = 'Untitled'
 
-            fdo.write(u"""<node COLOR="#338800" TEXT="%s">\n"""
+            fdo.write(u"""<node COLOR="#338800" TEXT="%s" POSITION="RIGHT">\n"""
                     % clean(entry['author'].title()))
             if 'url' in entry:
                 fdo.write(u"""  <node COLOR="#090f6b" LINK="%s" TEXT="%s">\n"""

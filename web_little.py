@@ -57,7 +57,7 @@ def unescape_XML(text):
     
 import logging
 import os
-import requests
+import requests # http://docs.python-requests.org/en/latest/
 
 HOMEDIR = os.path.expanduser('~')
 
@@ -74,6 +74,6 @@ def get_HTML(url, referer='',
     r = requests.get(url, headers=agent_headers)
     info("r.headers['content-type'] = %s" % r.headers['content-type'])
     if 'html' in r.headers['content-type']:
-        return r.content, r.headers
+        return r.content.decode(r.encoding), r.headers
     else:
         raise IOError("URL content is not HTML.")

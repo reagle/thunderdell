@@ -18,7 +18,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 """
 
 # TODO
-# * archive URLs to e/old/`r=`
+# * archive URLs to f/old/`r=`
 
 import argparse
 import codecs

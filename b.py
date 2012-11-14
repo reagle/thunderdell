@@ -622,8 +622,8 @@ def log2mm(biblio):
         http://reagle.org/joseph/2009/01/thunderdell.html
     '''
 
-    print "to log2mm"
-
+    print("to log2mm")
+    
     now = time.gmtime()
     this_week = time.strftime("%U", now)
     this_year = time.strftime('%Y', now)
@@ -650,7 +650,10 @@ def log2mm(biblio):
     if keyword:
         keyword = KEY_SHORTCUTS.get(keyword, keyword)
         citation += 'kw=' + keyword
-
+    tenative_ident = fe.get_ident(
+        { 'author' : fe.parse_names(author), 'title' : title,
+        'year' : biblio['date'][0:4]}, {})
+    print(tenative_ident)
     try:
         from xml.etree.cElementTree import parse # fast C implementation
     except ImportError:

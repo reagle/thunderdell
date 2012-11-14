@@ -31,6 +31,11 @@ import time
 from urllib import quote, unquote
 import unicodedata
 
+log_level = 100 # default
+critical = logging.critical
+info = logging.info
+dbg = logging.debug
+
 from os import environ
 HOME = environ['HOME'] if 'HOME' in environ else '/home/reagle'
 BROWSER = environ['BROWSER'] if 'BROWSER' in environ else None
@@ -1150,9 +1155,6 @@ if __name__ == '__main__':
     elif opts.verbose == 2: log_level = logging.INFO
     elif opts.verbose >= 3: log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format = "%(levelno)s %(funcName).5s: %(message)s")
-    critical = logging.critical
-    info = logging.info
-    dbg = logging.debug
     
     opts.cgi = False
     opts.browser = BROWSER + " '%s'"

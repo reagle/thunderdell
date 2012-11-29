@@ -194,7 +194,18 @@ class scrape_default(object):
             #print("*** dmatch2 = '%s'" % dmatch.group())
             if len(dmatch.group(1).split()) < 6: # if short byline
                 return string.capwords(dmatch.group(1))
-        print('*** UNKNOWN')
+        try:
+            import AlchemyAPI.AlchemyAPI as AlchemyAPI
+            alchemyObj = AlchemyAPI.AlchemyAPI()
+            alchemyObj.loadAPIKey(HOME+"/.local/api_keys/alchemy.txt")
+            result = alchemyObj.URLGetAuthor(self.url)
+            root = etree.fromstring(result)
+            if root.find('status').text == 'OK':
+                author = root.find('author').text
+                return author
+        except Exception as e:
+            print('Failed to use AlchemyAPI: %s' %e)
+            pass
         return 'UNKNOWN'
 
     def get_date(self):

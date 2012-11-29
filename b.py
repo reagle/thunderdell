@@ -195,6 +195,7 @@ class scrape_default(object):
             if len(dmatch.group(1).split()) < 6: # if short byline
                 return string.capwords(dmatch.group(1))
         try:
+            # http://www.alchemyapi.com/api/author/urls.html
             import AlchemyAPI.AlchemyAPI as AlchemyAPI
             alchemyObj = AlchemyAPI.AlchemyAPI()
             alchemyObj.loadAPIKey(HOME+"/.local/api_keys/alchemy.txt")

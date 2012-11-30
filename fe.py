@@ -1137,7 +1137,7 @@ if __name__ == '__main__':
     parser.add_option("-t", "--tests",
                     action="store_true", default=False,
                     help="run tests")
-    parser.add_option('-v', '--verbose', dest='verbose', action='count',
+    parser.add_option('-V', '--verbose', dest='verbose', action='count',
                     help="Increase verbosity (specify multiple times for more)")
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",

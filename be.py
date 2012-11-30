@@ -130,12 +130,12 @@ if __name__ == "__main__":
     # positional arguments
     arg_parser.add_argument('files', nargs='+', metavar='FILE')
     # optional arguments
-    arg_parser.add_argument('-l', '--log-to-file',
+    arg_parser.add_argument('-L', '--log-to-file',
             action="store_true", default=False,
             help="log to file %(prog)s.log")
     arg_parser.add_argument("-n", "--number", type=int, default=10,
             help="some number (default: %(default)s)")
-    arg_parser.add_argument('-v', '--verbose', action='count', default=0,
+    arg_parser.add_argument('-V', '--verbose', action='count', default=0,
             help="Increase verbosity (specify multiple times for more)")
     arg_parser.add_argument('--version', action='version', version='TBD')
     args = arg_parser.parse_args()

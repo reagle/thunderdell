@@ -1,6 +1,9 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+# On Webfaction [1] this script and its parent directory must be chmod 711
+# [1]: http://docs.webfaction.com/software/static.html#error-500-internal-server-error
+
 # Main function
 def cgi_main():
     global opts
@@ -10,20 +13,19 @@ def cgi_main():
     sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     env = os.environ
-    #debug = True
 
-    print 'Content-Type: text/html; charset=utf-8\n\n'
+    print('Content-Type: text/html; charset=utf-8\n\n')
 
     form = cgi.FieldStorage()
     charset = form.getfirst('_charset_', 'utf-8')
-    #print "** charset", charset
+
     query = form.getfirst('query', 'Wikipedia2008npv') # Möller2007ecl
+    site = form.getvalue('sitesearch', 'MindMap')
+    #query = form.getfirst('query', 'aux2bib')
+    #site = form.getvalue('sitesearch', 'BusySponge') 
+
     query = unquote(query).decode(charset)
-    #print "** post query", type(query), query
 
-    site = form.getvalue('sitesearch', 'MindMap') # todo: getlist
-
-    #try:
     if site == "BusySponge":
         sys.path.append('/home/reagle/bin')
         import bsq
@@ -43,7 +45,7 @@ def cgi_main():
         fe.opts.chase = True
         fe.opts.cgi = True
         
-        def _ignore(_): pass
+        def _ignore(_): pass # this overrides fe's logging
         fe.critical = _ignore
         fe.info =  _ignore
         fe.dbg =  _ignore
@@ -68,5 +70,7 @@ def print_error(msg):
 
 
 if __name__ == '__main__':
-    cgi_main()
-
+    try:
+        cgi_main()
+    except Exception as e:
+        print_error(e)

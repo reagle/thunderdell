@@ -150,22 +150,18 @@ def get_text(url):
     return unicode(os.popen('lynx -display_charset=utf-8 -width=10000 '
         '-nolist -dump "%s"' %url).read().decode('utf-8', 'replace'))
 
-#def smart_punctuation_to_ascii(s):
-    #'''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
-    #info("old %s s = '%s'" %(type(s), s))
-    #punctuation = { 0x2018:0x27, 0x2019:0x27, 0x201C:0x22, 0x201D:0x22 }
-    #s = s.translate(punctuation)
-    #info("new %s s = '%s'" %(type(s), s))
-    #return s
+def smart_punctuation_to_ascii(s):
+    '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
+    info("old %s s = '%s'" %(type(s), s))
+    punctuation = { 
+        0x2018:0x27, 
+        0x2019:0x27, 
+        0x201C:0x22, 
+        0x201D:0x22 }
+    s = s.translate(punctuation)
+    info("new %s s = '%s'" %(type(s), s))
+    return s
 
-def smart_punctuation_to_ascii(text):
-    punctuation = {
-        u'\u2018': "'",
-        u'\u2019': "'",
-    }
-    for src, dest in punctuation.iteritems():
-        text = text.replace(src, dest)
-    return text
     
 #######################################
 # Screen scrapers
@@ -281,17 +277,11 @@ class scrape_default(object):
         tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
         if tmatch:
             title = tmatch.group(1).strip()
-            info("title1 = '%s'" %(title))
             title = unescape_XML(title)
-            info("title2 = '%s'" %(title))
             title = sentence_case(title)
-            info("title3 = '%s'" %(title))
+            title = smart_punctuation_to_ascii(title)
         else:
             title = "UNKNOWN TITLE"
-        info("title4 = '%s'" %(title))
-        title = smart_punctuation_to_ascii(title)
-        info("title5 = '%s'" %(title))
-        sys.exit()
         return title
 
     def get_org(self):

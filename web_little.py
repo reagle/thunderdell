@@ -68,7 +68,7 @@ def get_HTML(url, referer='',
         info("r.encoding = '%s'" %(r.encoding))
         chardet_encoding = chardet.detect(r.content)
         info("chardet_encoding = %s" %chardet_encoding)
-        if chardet_encoding['confidence'] > 0.95:
+        if chardet_encoding['confidence'] > 0.85:
             content = r.content.decode(chardet_encoding['encoding'])
         else:
             content = r.content.decode(r.encoding)

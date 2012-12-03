@@ -10,22 +10,24 @@
 Web functionality I frequently make use of.
 """
 
+import chardet
+import logging
+import os
+import requests # http://docs.python-requests.org/en/latest/
+import sys
+
+HOMEDIR = os.path.expanduser('~')
+
+log = logging.getLogger("web_little")
+critical = logging.critical
+info = logging.info
+dbg = logging.debug
+
 from xml.sax.saxutils import escape, unescape
 def escape_XML(s): # http://wiki.python.org/moin/EscapingXml
     '''Escape XML character entities; & < > are defaulted'''
     extras = {'\t' : '  '}
     return escape(s, extras)
-
-#def unescape_XML(s):
-    #'''Unescape XML character entities; & < > are defaulted'''
-    #extras = {  "&apos;": "'", 
-                #"&quot;": '"',
-                #"&#8220;": '"',
-                #"&#8221;"; '"',
-                #"&laquo;": u'«',
-                #"&raquo;": u'»',
-                #"&mdash;": '-',}
-    #return(unescape(s, extras))
 
 import re, htmlentitydefs
 def unescape_XML(text):
@@ -54,17 +56,6 @@ def unescape_XML(text):
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
     
-    
-import logging
-import os
-import requests # http://docs.python-requests.org/en/latest/
-
-HOMEDIR = os.path.expanduser('~')
-
-log = logging.getLogger("web_little")
-critical = logging.critical
-info = logging.info
-dbg = logging.debug
 
 def get_HTML(url, referer='', 
     data=None, cookie=None, retry_counter=0, cache_control=None):
@@ -74,6 +65,13 @@ def get_HTML(url, referer='',
     r = requests.get(url, headers=agent_headers)
     info("r.headers['content-type'] = %s" % r.headers['content-type'])
     if 'html' in r.headers['content-type']:
-        return r.content.decode(r.encoding), r.headers
+        info("r.encoding = '%s'" %(r.encoding))
+        chardet_encoding = chardet.detect(r.content)
+        info("chardet_encoding = %s" %chardet_encoding)
+        if chardet_encoding['confidence'] > 0.95:
+            content = r.content.decode(chardet_encoding['encoding'])
+        else:
+            content = r.content.decode(r.encoding)
+        return content, r.headers
     else:
         raise IOError("URL content is not HTML.")

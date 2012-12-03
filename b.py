@@ -184,14 +184,14 @@ class scrape_default(object):
         author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
         dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
         if dmatch:
-            #print("*** dmatch1 = '%s'" % dmatch.group())
+            #info("*** dmatch1 = '%s'" % dmatch.group())
             if len(dmatch.group(1)) > 4: # no 0 len "by at least"
                 return string.capwords(dmatch.group(1))
         # newspapers: "By John Smith"
-        author_regexp2 = "^ *By (.*)"
-        dmatch = re.search(author_regexp2, self.text, re.MULTILINE)
+        author_regexp2 = "^\W+By (.*)"
+        dmatch = re.search(author_regexp2, self.text, re.IGNORECASE)
         if dmatch:
-            #print("*** dmatch2 = '%s'" % dmatch.group())
+            #info("*** dmatch2 = '%s'" % dmatch.group())
             if len(dmatch.group(1).split()) < 6: # if short byline
                 return string.capwords(dmatch.group(1))
         try:

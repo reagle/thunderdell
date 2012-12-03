@@ -150,7 +150,23 @@ def get_text(url):
     return unicode(os.popen('lynx -display_charset=utf-8 -width=10000 '
         '-nolist -dump "%s"' %url).read().decode('utf-8', 'replace'))
 
+#def smart_punctuation_to_ascii(s):
+    #'''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
+    #info("old %s s = '%s'" %(type(s), s))
+    #punctuation = { 0x2018:0x27, 0x2019:0x27, 0x201C:0x22, 0x201D:0x22 }
+    #s = s.translate(punctuation)
+    #info("new %s s = '%s'" %(type(s), s))
+    #return s
 
+def smart_punctuation_to_ascii(text):
+    punctuation = {
+        u'\u2018': "'",
+        u'\u2019': "'",
+    }
+    for src, dest in punctuation.iteritems():
+        text = text.replace(src, dest)
+    return text
+    
 #######################################
 # Screen scrapers
 
@@ -179,21 +195,28 @@ class scrape_default(object):
 
     def get_author(self):
         '''test against two conditions, return guess of article author'''
+        
+        info("looking for author")
 
         # blogs: "By John Smith at 15:55 September, 03 2009"
         author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
         dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
         if dmatch:
-            #info("*** dmatch1 = '%s'" % dmatch.group())
+            info("*** dmatch1 = '%s'" % dmatch.group())
             if len(dmatch.group(1)) > 4: # no 0 len "by at least"
                 return string.capwords(dmatch.group(1))
+        else:
+            info('"%s" failed' % author_regexp1)
         # newspapers: "By John Smith"
-        author_regexp2 = "^\W+By (.*)"
-        dmatch = re.search(author_regexp2, self.text, re.IGNORECASE)
+        author_regexp2 = "^\W*By (.*)"
+        dmatch = re.search(author_regexp2, self.text, 
+            re.MULTILINE|re.IGNORECASE)
         if dmatch:
-            #info("*** dmatch2 = '%s'" % dmatch.group())
+            info("*** dmatch2 = '%s'" % dmatch.group())
             if len(dmatch.group(1).split()) < 6: # if short byline
                 return string.capwords(dmatch.group(1))
+        else:
+            info('"%s" failed' % author_regexp2)
         try:
             # http://www.alchemyapi.com/api/author/urls.html
             import AlchemyAPI.AlchemyAPI as AlchemyAPI
@@ -246,21 +269,29 @@ class scrape_default(object):
     def get_title(self):
 
         title_regexps = (
-            ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
-            ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
-            ('', r'<title>(.*?)</title>')    # default: make sure last
+            ('http://lists.w3.org/.*', u'<!-- subject="(.*?)" -->'),
+            ('http://lists.kde.org/.*', ur"<title>MARC: msg '(.*?)'</title>"),
+            ('', ur'<title>(.*?)</title>')    # default: make sure last
         )
 
         for prefix, regexp in title_regexps:
             if self.url.startswith(prefix):
-                break
-
+                break 
+                
         tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
         if tmatch:
-            title = unescape_XML(tmatch.group(1).strip())
+            title = tmatch.group(1).strip()
+            info("title1 = '%s'" %(title))
+            title = unescape_XML(title)
+            info("title2 = '%s'" %(title))
             title = sentence_case(title)
+            info("title3 = '%s'" %(title))
         else:
             title = "UNKNOWN TITLE"
+        info("title4 = '%s'" %(title))
+        title = smart_punctuation_to_ascii(title)
+        info("title5 = '%s'" %(title))
+        sys.exit()
         return title
 
     def get_org(self):
@@ -700,7 +731,7 @@ def log2mm(biblio):
     if excerpt:
         excerpt_node = SubElement(title_node, 'node', {'TEXT': excerpt, 'COLOR': '#166799'})
 
-    ElementTree(mindmap).write(ofile)
+    ElementTree(mindmap).write(ofile, encoding='utf-8')
 
 
 def log2goatee(biblio):

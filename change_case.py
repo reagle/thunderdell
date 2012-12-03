@@ -91,7 +91,7 @@ def sentence_case(text, force_lower=False):
     
     '''
     text = text.strip().replace('  ', ' ')
-    info("** text = '%s'" % text)
+    info("** %s text = '%s'" %(type(text), text))
 
     # create abbreviation sans BORING words
     info(set(text.split()).difference(BORING_WORDS))

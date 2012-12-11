@@ -204,7 +204,7 @@ class scrape_default(object):
         else:
             info('"%s" failed' % author_regexp1)
         # newspapers: "By John Smith"
-        author_regexp2 = "^\W*By (.*)"
+        author_regexp2 = "^\W*By[:]? (.*)"
         dmatch = re.search(author_regexp2, self.text, 
             re.MULTILINE|re.IGNORECASE)
         if dmatch:
@@ -226,6 +226,7 @@ class scrape_default(object):
         except Exception as e:
             print('Failed to use AlchemyAPI: %s' %e)
             pass
+        sys.exit()
         return 'UNKNOWN'
 
     def get_date(self):

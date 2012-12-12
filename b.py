@@ -226,7 +226,6 @@ class scrape_default(object):
         except Exception as e:
             print('Failed to use AlchemyAPI: %s' %e)
             pass
-        sys.exit()
         return 'UNKNOWN'
 
     def get_date(self):

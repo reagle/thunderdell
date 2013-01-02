@@ -26,8 +26,10 @@ from dateutil.parser import parse
 import fe
 import logging
 from lxml import etree
+from os.path import exists # abspath, basename, splitext
 import re
 import string
+from subprocess import Popen 
 import sys
 import time
 from web_little import get_HTML, unescape_XML, escape_XML # personal utility module
@@ -39,12 +41,14 @@ info = logging.info
 dbg = logging.debug
 
 from os import environ
+EDITOR = environ.get('EDITOR')
 try: 
     HOME = environ['HOME']
 except KeyError, e:
     HOME = '/home/reagle'
 
-# Expansions for common tags/actitivies
+# Expansions for common tags/activities
+
 GENERAL_KEY_SHORTCUTS = {
         'con': 'conflict',
         'exi': 'exit',
@@ -58,9 +62,11 @@ GENERAL_KEY_SHORTCUTS = {
         'nor': 'norms',
         'pat': 'patience',
         'pow': 'power',
+        'pra' : 'praxis',
         'pri': 'privacy',
         'spe': 'speech',
         'str': 'structure',
+        'tec' : 'technology',
         'tro': 'trolling',
         'zei': 'zeitgeist',
         }
@@ -132,15 +138,7 @@ MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 #######################################
 # Utility functions
 
-def get_Now_YMD():
-    '''
-    Now in YearMonthDay format
-    '''
-
-    now = time.localtime()
-
-    date_token = time.strftime("%y%m%d", now)
-    return date_token
+now = time.localtime()
 
 def get_text(url):
     '''Textual version of url'''
@@ -724,21 +722,22 @@ def log2mm(biblio):
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 
 
-def log2goatee(biblio):
+def log2nifty(biblio):
     '''
     Log to personal blog.
     '''
 
     import codecs
 
-    print "to log2goatee"
+    print "to log2nifty"
     ofile = HOME+'/data/2web/goatee.net/nifty-stuff.html'
 
     title = biblio['title']
     comment = biblio['comment']
     url = biblio['url']
 
-    date_token = get_Now_YMD()
+    date_token = time.strftime("%y%m%d", now)
+
     log_item = '<dt><a href="%s">%s</a> (%s)</dt><dd>%s</dd>' % (url, title, date_token, comment)
 
     fd = open(ofile)
@@ -772,7 +771,7 @@ def log2work(biblio):
     comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
         (escape_XML(url), title), comment)
 
-    date_token = get_Now_YMD()
+    date_token = time.strftime("%y%m%d", now)
     digest = hashlib.md5(comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
@@ -815,6 +814,38 @@ def log2console(biblio):
     print(biblio['excerpt']),
     print('\n')
 
+def blog_at_opencodex(biblio):
+    '''
+    Start at a blog entry at opencodex
+    '''
+
+    CODEX_ROOT = '/home/reagle/data/2web/reagle.org/joseph/content/'
+    keyword, sep, entry = biblio['comment'].partition(' ')
+    blog_title, sep, blog_body = entry.partition('.')
+
+    category = 'social'
+    if keyword:
+        category = KEY_SHORTCUTS.get(keyword, keyword)
+    
+    filename = blog_title.lower() \
+        .replace(' ', '-') \
+        .replace( "'", '')
+    filename = CODEX_ROOT + '%s/' % category + filename + '.md'
+    if exists(filename):
+        print("\nfilename '%s' already exists'" % filename)
+        sys.exit()
+    fd = codecs.open(filename, 'w', 'utf-8', 'replace')
+    fd.write('Title: %s\n' % blog_title)
+    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", now))
+    fd.write('Tags: \n')
+    fd.write('Category: %s\n\n' % category)
+    fd.write(blog_body.strip())
+    if 'url' in biblio and 'excerpt' in biblio:
+        fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
+        fd.write('> %s\n' % biblio['excerpt'])
+    fd.close()
+    Popen([EDITOR, filename])
+    
 #######################################
 # Dispatchers
 
@@ -851,14 +882,16 @@ def get_logger(options={re.IGNORECASE}):
     """
     params = None
     dispatch_logger = (
-        (r'(?P<url>(\.|http)\S* )?(?P<scheme>g) (?P<comment>.*)',
-            log2goatee),
+        (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
+            log2nifty),
         (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
             log2work),
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
             log2mm),
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
             log2console),
+        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
+            blog_at_opencodex),
     )
 
     for regexp, logger in dispatch_logger:

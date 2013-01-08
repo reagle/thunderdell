@@ -211,19 +211,6 @@ class scrape_default(object):
                 return string.capwords(dmatch.group(1))
         else:
             info('"%s" failed' % author_regexp2)
-        try:
-            # http://www.alchemyapi.com/api/author/urls.html
-            import AlchemyAPI.AlchemyAPI as AlchemyAPI
-            alchemyObj = AlchemyAPI.AlchemyAPI()
-            alchemyObj.loadAPIKey(HOME+"/.local/api_keys/alchemy.txt")
-            result = alchemyObj.URLGetAuthor(self.url)
-            root = etree.fromstring(result)
-            if root.find('status').text == 'OK':
-                author = root.find('author').text
-                return author
-        except Exception as e:
-            print('Failed to use AlchemyAPI: %s' %e)
-            pass
         return 'UNKNOWN'
 
     def get_date(self):

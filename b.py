@@ -172,8 +172,14 @@ class scrape_default(object):
         print "Scraping default Web page;",
         self.url = url
         self.comment = comment
-        self.html, resp = get_HTML(url, cache_control = 'no-cache')
-        self.text = get_text(url)
+        try:
+            self.html, resp = get_HTML(url, cache_control = 'no-cache')
+        except IOError:
+            self.html, resp = None, None
+            
+        self.text = None
+        if self.html:
+            self.text = get_text(url)
 
     def get_biblio(self):
         biblio = {
@@ -192,25 +198,26 @@ class scrape_default(object):
         
         info("looking for author")
 
-        # blogs: "By John Smith at 15:55 September, 03 2009"
-        author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
-        dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
-        if dmatch:
-            info("*** dmatch1 = '%s'" % dmatch.group())
-            if len(dmatch.group(1)) > 4: # no 0 len "by at least"
-                return string.capwords(dmatch.group(1))
-        else:
-            info('"%s" failed' % author_regexp1)
-        # newspapers: "By John Smith"
-        author_regexp2 = "^\W*By[:]? (.*)"
-        dmatch = re.search(author_regexp2, self.text, 
-            re.MULTILINE|re.IGNORECASE)
-        if dmatch:
-            info("*** dmatch2 = '%s'" % dmatch.group())
-            if len(dmatch.group(1).split()) < 6: # if short byline
-                return string.capwords(dmatch.group(1))
-        else:
-            info('"%s" failed' % author_regexp2)
+        if self.text:
+            # blogs: "By John Smith at 15:55 September, 03 2009"
+            author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
+            dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
+            if dmatch:
+                info("*** dmatch1 = '%s'" % dmatch.group())
+                if len(dmatch.group(1)) > 4: # no 0 len "by at least"
+                    return string.capwords(dmatch.group(1))
+            else:
+                info('"%s" failed' % author_regexp1)
+            # newspapers: "By John Smith"
+            author_regexp2 = "^\W*By[:]? (.*)"
+            dmatch = re.search(author_regexp2, self.text, 
+                re.MULTILINE|re.IGNORECASE)
+            if dmatch:
+                info("*** dmatch2 = '%s'" % dmatch.group())
+                if len(dmatch.group(1).split()) < 6: # if short byline
+                    return string.capwords(dmatch.group(1))
+            else:
+                info('"%s" failed' % author_regexp2)
         return 'UNKNOWN'
 
     def get_date(self):
@@ -258,13 +265,14 @@ class scrape_default(object):
         for prefix, regexp in title_regexps:
             if self.url.startswith(prefix):
                 break 
-                
-        tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
-        if tmatch:
-            title = tmatch.group(1).strip()
-            title = unescape_XML(title)
-            title = sentence_case(title)
-            title = smart_punctuation_to_ascii(title)
+        
+        if self.html:
+            tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
+            if tmatch:
+                title = tmatch.group(1).strip()
+                title = unescape_XML(title)
+                title = sentence_case(title)
+                title = smart_punctuation_to_ascii(title)
         else:
             title = "UNKNOWN TITLE"
         return title
@@ -284,12 +292,13 @@ class scrape_default(object):
         return org.title()
 
     def get_excerpt(self):
-        lines = self.text.split('\n')
-        for line in lines:
-            line = line.strip()
-            if len(line) > 280 and '__' not in line:
-                excerpt = line
-                return excerpt.strip()
+        if self.text:
+            lines = self.text.split('\n')
+            for line in lines:
+                line = line.strip()
+                if len(line) > 280 and '__' not in line:
+                    excerpt = line
+                    return excerpt.strip()
         return None
 
     def get_permalink(self):
@@ -833,6 +842,58 @@ def blog_at_opencodex(biblio):
     fd.close()
     Popen([EDITOR, filename])
     
+def blog_at_goatee(biblio):
+    '''
+    Start at a blog entry at goatee
+    '''
+    
+    GOATEE_ROOT = '/home/reagle/data/2web/goatee.net/content/'
+    keyword, sep, entry = biblio['comment'].partition(' ')
+    blog_title, sep, blog_body = entry.partition('.')
+
+    category = 'misc'
+    if keyword:
+        category = KEY_SHORTCUTS.get(keyword, keyword)
+        
+    PHOTO_RE = re.compile('.*/photo/web/(\d\d\d\d/\d\d)' \
+                '/\d\d-\d\d\d\d-(.*)\.jpe?g')
+    url = biblio.get('url', None)
+    filename = blog_title.lower()
+    if 'goatee.net/photo/' in url:
+        photo_match = re.match(PHOTO_RE, url)
+        if photo_match:
+            blog_date = re.match(PHOTO_RE, url).group(1).replace('/', '-')
+            blog_title = re.match(PHOTO_RE, url).group(2)
+            filename = blog_date + '-' + blog_title
+            blog_title = blog_title.replace('-', ' ')
+    filename = filename.replace(' ', '-').replace("'", '') 
+    filename = GOATEE_ROOT + '%s/' % category + filename + '.md'
+    if exists(filename):
+        print("\nfilename '%s' already exists'" % filename)
+        sys.exit()
+    fd = codecs.open(filename, 'w', 'utf-8', 'replace')
+    fd.write('Title: %s\n' % blog_title.title())
+    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", now))
+    fd.write('Tags: \n')
+    fd.write('Category: %s\n\n' % category)
+    fd.write(blog_body.strip())
+    
+    if 'url':
+        if biblio.get('except', False):
+            fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
+            fd.write('> %s\n' % biblio['excerpt'])
+        if photo_match:
+            thumb_url = url.replace('/web/', '/thumbs/')
+            alt_text = blog_title.replace('-', ' ')
+            fd.write(
+                '''<p><a href="%s"><img alt="%s" class="thumb" src="%s"/></a></p>\n''' 
+                % (url, alt_text, thumb_url, ))
+            fd.write(
+                '''<p><a href="%s"><img alt="%s" class="view" src="%s"/></a></p>''' 
+                % (url, alt_text, url))
+    fd.close()
+    Popen([EDITOR, filename])
+    
 #######################################
 # Dispatchers
 
@@ -879,6 +940,8 @@ def get_logger(options={re.IGNORECASE}):
             log2console),
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
             blog_at_opencodex),
+        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
+            blog_at_goatee),
     )
 
     for regexp, logger in dispatch_logger:

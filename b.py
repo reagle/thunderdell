@@ -194,30 +194,30 @@ class scrape_default(object):
         return biblio
 
     def get_author(self):
-        '''test against two conditions, return guess of article author'''
-        
-        info("looking for author")
-
+        '''test against two conditions, return guess of article author'''        
+        AUTHOR_REGEXS = (
+            "by ([a-z ]*?)(?:-|, | at | on | posted ).{,17}?\d\d\d\d",
+            "^\W*By[:]? (.*)",
+            "\d\d\d\d{,4}? by ([a-z ]*)",
+            )
         if self.text:
-            # blogs: "By John Smith at 15:55 September, 03 2009"
-            author_regexp1 = "by ([a-z ]*?)(?:-|, | at | on ).{,17}?\d\d\d\d"
-            dmatch = re.search(author_regexp1, self.text, re.IGNORECASE)
-            if dmatch:
-                info("*** dmatch1 = '%s'" % dmatch.group())
-                if len(dmatch.group(1)) > 4: # no 0 len "by at least"
-                    return string.capwords(dmatch.group(1))
-            else:
-                info('"%s" failed' % author_regexp1)
-            # newspapers: "By John Smith"
-            author_regexp2 = "^\W*By[:]? (.*)"
-            dmatch = re.search(author_regexp2, self.text, 
-                re.MULTILINE|re.IGNORECASE)
-            if dmatch:
-                info("*** dmatch2 = '%s'" % dmatch.group())
-                if len(dmatch.group(1).split()) < 6: # if short byline
-                    return string.capwords(dmatch.group(1))
-            else:
-                info('"%s" failed' % author_regexp2)
+            #info(self.text)
+            for regex in AUTHOR_REGEXS:
+                info("looking for author")
+                dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
+                if dmatch:
+                    info('matched: "%s"' % regex)
+                    author = dmatch.group(1).strip()
+                    MAX_MATCH = 30
+                    if ' and ' in author: 
+                        MAX_MATCH += 35
+                        if ', ' in author: 
+                            MAX_MATCH += 35
+                    info("author = '%s'" % dmatch.group())
+                    if len(author) > 4 and len(author) < MAX_MATCH: 
+                        return string.capwords(author)
+                else:
+                    info('failed: "%s"' % regex)
         return 'UNKNOWN'
 
     def get_date(self):

@@ -138,7 +138,7 @@ MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 #######################################
 # Utility functions
 
-now = time.localtime()
+NOW = time.localtime()
 
 def get_text(url):
     '''Textual version of url'''
@@ -231,9 +231,9 @@ class scrape_default(object):
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return parse(dmatch.group(0)).strftime("%Y%m%d")
         except:
-            now = time.gmtime()
-            date = time.strftime('%Y%m%d', now)
-            info("making date now = %s" % date)
+            NOW = time.gmtime()
+            date = time.strftime('%Y%m%d', NOW)
+            info("making date NOW = %s" % date)
             return date
 
     def split_title_org(self):
@@ -652,9 +652,9 @@ def log2mm(biblio):
 
     print("to log2mm")
     
-    now = time.gmtime()
-    this_week = time.strftime("%U", now)
-    this_year = time.strftime('%Y', now)
+    #now = time.gmtime()
+    this_week = time.strftime("%U", NOW)
+    this_year = time.strftime('%Y', NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC",now)
     
     ofile = HOME+'/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
@@ -733,7 +733,7 @@ def log2nifty(biblio):
     comment = biblio['comment']
     url = biblio['url']
 
-    date_token = time.strftime("%y%m%d", now)
+    date_token = time.strftime("%y%m%d", NOW)
 
     log_item = '<dt><a href="%s">%s</a> (%s)</dt><dd>%s</dd>' % (url, title, date_token, comment)
 
@@ -768,7 +768,7 @@ def log2work(biblio):
     comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
         (escape_XML(url), title), comment)
 
-    date_token = time.strftime("%y%m%d", now)
+    date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
@@ -833,7 +833,7 @@ def blog_at_opencodex(biblio):
         sys.exit()
     fd = codecs.open(filename, 'w', 'utf-8', 'replace')
     fd.write('Title: %s\n' % blog_title)
-    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", now))
+    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", NOW))
     fd.write('Tags: \n')
     fd.write('Category: %s\n\n' % category)
     fd.write(blog_body.strip())
@@ -849,17 +849,15 @@ def blog_at_goatee(biblio):
     '''
     
     GOATEE_ROOT = '/home/reagle/data/2web/goatee.net/content/'
-    keyword, sep, entry = biblio['comment'].partition(' ')
-    blog_title, sep, blog_body = entry.partition('.')
+    blog_title, sep, blog_body = biblio['comment'].partition('. ')
 
-    category = 'misc'
-    if keyword:
-        category = KEY_SHORTCUTS.get(keyword, keyword)
+    this_year, this_month = time.strftime("%Y %m", NOW).split()
+    url = biblio.get('url', None)
+    filename = blog_title.lower()
         
     PHOTO_RE = re.compile('.*/photo/web/(\d\d\d\d/\d\d)' \
                 '/\d\d-\d\d\d\d-(.*)\.jpe?g')
-    url = biblio.get('url', None)
-    filename = blog_title.lower()
+    photo_match = False
     if 'goatee.net/photo/' in url:
         photo_match = re.match(PHOTO_RE, url)
         if photo_match:
@@ -868,15 +866,15 @@ def blog_at_goatee(biblio):
             filename = blog_date + '-' + blog_title
             blog_title = blog_title.replace('-', ' ')
     filename = filename.replace(' ', '-').replace("'", '') 
-    filename = GOATEE_ROOT + '%s/' % category + filename + '.md'
+    filename = GOATEE_ROOT + '%s/%s-%s.md' % (this_year, this_month, filename)
     if exists(filename):
         print("\nfilename '%s' already exists'" % filename)
         sys.exit()
     fd = codecs.open(filename, 'w', 'utf-8', 'replace')
     fd.write('Title: %s\n' % blog_title.title())
-    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", now))
+    fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", NOW))
     fd.write('Tags: \n')
-    fd.write('Category: %s\n\n' % category)
+    fd.write('Category: \n\n')
     fd.write(blog_body.strip())
     
     if 'url':

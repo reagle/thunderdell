@@ -194,13 +194,27 @@ class scrape_default(object):
         return biblio
 
     def get_author(self):
-        '''test against two conditions, return guess of article author'''        
+        '''return guess of article author'''        
+
+        AUTHOR_XPATHS = (
+            '''//meta[@name='author']/@content''',
+            '''//meta[@name='authors']/@content''',
+        )
+        if self.html:
+            html_parser = etree.HTMLParser()
+            self.doc = etree.fromstring(self.html, html_parser)
+            for path in AUTHOR_XPATHS:
+                xpath_result = self.doc.xpath(path)
+                if xpath_result:
+                    return string.capwords(xpath_result[0])
+
         AUTHOR_REGEXS = (
             "by ([a-z ]*?)(?:-|, | at | on | posted ).{,17}?\d\d\d\d",
             "^\W*By[:]? (.*)",
             "^\W*(?:posted )?By[:]? (.*)",
             "\d\d\d\d{,4}? by ([a-z ]*)",
-            )
+            # Jane Ciabattari reports."
+        )
         if self.text:
             #info(self.text)
             for regex in AUTHOR_REGEXS:
@@ -655,7 +669,7 @@ def log2mm(biblio):
     #now = time.gmtime()
     this_week = time.strftime("%U", NOW)
     this_year = time.strftime('%Y', NOW)
-    date_read = time.strftime("%Y%m%d %H:%M UTC",now)
+    date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
     
     ofile = HOME+'/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
     info("biblio = %s" %biblio)

@@ -199,6 +199,7 @@ class scrape_default(object):
         AUTHOR_XPATHS = (
             '''//meta[@name='author']/@content''',
             '''//meta[@name='authors']/@content''',
+            '''//a[@rel='author']/text()''',
         )
         if self.html:
             html_parser = etree.HTMLParser()
@@ -212,8 +213,7 @@ class scrape_default(object):
             "by ([a-z ]*?)(?:-|, | at | on | posted ).{,17}?\d\d\d\d",
             "^\W*By[:]? (.*)",
             "^\W*(?:posted )?By[:]? (.*)",
-            "\d\d\d\d{,4}? by ([a-z ]*)",
-            # Jane Ciabattari reports."
+            "\d\d\d\d.{,6}? by ([a-z ]*)",
         )
         if self.text:
             #info(self.text)
@@ -251,18 +251,21 @@ class scrape_default(object):
             return date
 
     def split_title_org(self):
-        '''Often the publishing org is in the title.
-        See if there is a short bit of text (<=35%) at the end of 
-        the string and if so assume that is the org.'''
+        '''Separate the title by a delimiter and test if latter half is the
+        organization (if it has certain words (blog) or is it short)'''
+        
+        ORG_WORDS = ['blog']
         
         title = self.get_title()
         org = self.get_org()
-
-        DELIMTER = re.compile('([-\|:;])') # 
+        DELIMTER = re.compile('([-\|:;«])') # 
         parts = DELIMTER.split(title)
         if len(parts) >= 2:
             beginning, end = ''.join(parts[0:-2]), parts[-1]
             info("beginning = %s, end = %s" %(beginning, end))
+            title_lower = title.lower()
+            if any(org_word in title_lower for org_word in ORG_WORDS):
+                return sentence_case(beginning.strip()), end.strip().title()
             end_ratio = float(len(end)) / len(beginning + end)
             info(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
             if end_ratio <= 0.35 or len(end) <= 20:
@@ -453,8 +456,12 @@ class scrape_ENWP(scrape_default):
     def get_author(self):
         return 'Wikipedia'
 
+    def split_title_org(self):
+        return self.get_title(),  self.get_org()
+
     def get_title(self):
         title = scrape_default.get_title(self)    # use super()?
+        info("title = '%s'" %(title))
         return title.replace(' - Wikipedia, the free encyclopedia','')
 
     def get_permalink(self):
@@ -892,7 +899,7 @@ def blog_at_goatee(biblio):
     fd.write(blog_body.strip())
     
     if 'url':
-        if biblio.get('except', False):
+        if biblio.get('excerpt', False):
             fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
             fd.write('> %s\n' % biblio['excerpt'])
         if photo_match:

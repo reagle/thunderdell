@@ -26,6 +26,7 @@ from optparse import OptionParser
 import os
 import re
 import string
+from subprocess import call, Popen
 import sys
 import time
 from urllib import quote, unquote
@@ -664,7 +665,7 @@ def emit_bibtex_html(file_name, opts):
             fileName + '.bib', fileName + '.bib'))
     print(expr)
     os.putenv('TMPDIR', '.')
-    os.system(expr)
+    Popen(expr, shell=True)
 
     fdi = codecs.open(fileName +'.bib.html', "r", "utf-8", "replace")
     fdo = codecs.open(fileName +'.bib.html.tmp', "w", "utf-8", "replace")
@@ -677,7 +678,7 @@ def emit_bibtex_html(file_name, opts):
     fdo.close()
 
     os.rename(fileName +'.bib.html.tmp', fileName +'.bib.html')
-    os.system(opts.browser % (fileName + '.bib.html'))
+    Popen(opts.browser % (fileName + '.bib.html'), shell=True)
 
 
 RESULT_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -1036,7 +1037,7 @@ def build_bib(file_name, output):
         results_file.close()
         if not opts.cgi:
             command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            os.system(command)
+            Popen(command, shell=True)
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1053,7 +1054,7 @@ def build_bib(file_name, output):
         results_file.close()
         if not opts.cgi:
             command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            os.system(command)
+            Popen(command, shell=True)
     else:
         output(entries)
     return
@@ -1062,30 +1063,30 @@ def _test_results():
     """
     Tests the overall parsing of Mindmap XML and the relationships between authors with multiple titles and nested authors.
 
-    >>> os.system('fe ~/bin/fe/tests/author-child.mm > \
+    >>> call('fe ~/bin/fe/tests/author-child.mm > \
     /tmp/author-child.txt; \
-    diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt')
+    diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/author-descendent.mm > \
+    >>> call('fe ~/bin/fe/tests/author-descendent.mm > \
     /tmp/author-descendent.txt; \
-    diff ~/bin/fe/tests/author-descendent.txt /tmp/author-descendent.txt')
+    diff ~/bin/fe/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/date.mm > /tmp/date.txt; \
-    diff ~/bin/fe/tests/date.txt /tmp/date.txt')
+    >>> call('fe ~/bin/fe/tests/date.mm > /tmp/date.txt; \
+    diff ~/bin/fe/tests/date.txt /tmp/date.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/online.mm > /tmp/online.txt; \
-    diff ~/bin/fe/tests/online.txt /tmp/online.txt')
+    >>> call('fe ~/bin/fe/tests/online.mm > /tmp/online.txt; \
+    diff ~/bin/fe/tests/online.txt /tmp/online.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/title-escapes.mm > \
+    >>> call('fe ~/bin/fe/tests/title-escapes.mm > \
     /tmp/title-escapes.txt; \
-    diff ~/bin/fe/tests/title-escapes.txt /tmp/title-escapes.txt')
+    diff ~/bin/fe/tests/title-escapes.txt /tmp/title-escapes.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/title-title.mm > \
+    >>> call('fe ~/bin/fe/tests/title-title.mm > \
     /tmp/title-title.txt; \
-    diff ~/bin/fe/tests/title-title.txt /tmp/title-title.txt')
+    diff ~/bin/fe/tests/title-title.txt /tmp/title-title.txt', shell=True)
     0
-    >>> os.system('fe ~/bin/fe/tests/von.mm > /tmp/von.txt; \
-    diff ~/bin/fe/tests/von.txt /tmp/von.txt')
+    >>> call('fe ~/bin/fe/tests/von.mm > /tmp/von.txt; \
+    diff ~/bin/fe/tests/von.txt /tmp/von.txt', shell=True)
     0
 
     """

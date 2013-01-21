@@ -200,6 +200,7 @@ class scrape_default(object):
             '''//meta[@name='author']/@content''',
             '''//meta[@name='authors']/@content''',
             '''//a[@rel='author']/text()''',
+            '''//*[contains(@class,'contributor')]/text()''',
         )
         if self.html:
             html_parser = etree.HTMLParser()
@@ -284,6 +285,7 @@ class scrape_default(object):
             if self.url.startswith(prefix):
                 break 
         
+        title = "UNKNOWN TITLE"
         if self.html:
             tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
             if tmatch:
@@ -291,8 +293,6 @@ class scrape_default(object):
                 title = unescape_XML(title)
                 title = sentence_case(title)
                 title = smart_punctuation_to_ascii(title)
-        else:
-            title = "UNKNOWN TITLE"
         return title
 
     def get_org(self):

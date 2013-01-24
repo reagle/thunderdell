@@ -199,19 +199,22 @@ class scrape_default(object):
         AUTHOR_XPATHS = (
             '''//meta[@name='author']/@content''',
             '''//meta[@name='authors']/@content''',
-            '''//a[@rel='author']/*/text()''',
+            '''//a[@rel='author']//text()''',
             '''//*[contains(@class,'contributor')]/text()''',
         )
-            #'''//*[@rel='author']/*[@itemprop='name']/text()''',
         if self.html:
             html_parser = etree.HTMLParser()
             self.doc = etree.fromstring(self.html, html_parser)
             for path in AUTHOR_XPATHS:
                 xpath_result = self.doc.xpath(path)
                 if xpath_result:
-                    info("author = '%s'; xpath = '%s'" %( 
-                        string.capwords(xpath_result[0]), path))
-                    return string.capwords(xpath_result[0])
+                    critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
+                    author = ''.join(xpath_result).strip()
+                    critical("author = '%s'; xpath = '%s'" %(author, path))
+                    if author != '':
+                        return author
+                    else:
+                        continue
 
         AUTHOR_REGEXS = (
             "by ([a-z ]*?)(?:-|, | at | on | posted ).{,17}?\d\d\d\d",

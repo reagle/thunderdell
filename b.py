@@ -201,6 +201,8 @@ class scrape_default(object):
             '''//meta[@name='authors']/@content''',
             '''//a[@rel='author']//text()''',
             '''//*[contains(@class,'contributor')]/text()''',
+            '''//span[@class='name']/text()''',
+            '''//span[contains(@class, 'byline')]//text()''',
         )
         if self.html:
             html_parser = etree.HTMLParser()
@@ -215,31 +217,34 @@ class scrape_default(object):
                         return author
                     else:
                         continue
-
+                    
         AUTHOR_REGEXS = (
-            "by ([a-z ]*?)(?:-|, | at | on | posted ).{,17}?\d\d\d\d",
-            "^\W*By[:]? (.*)",
+            "by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
             "^\W*(?:posted )?By[:]? (.*)",
             "\d\d\d\d.{,6}? by ([a-z ]*)",
+            "^\W*By[:]? (.*)",
         )
         if self.text:
             #info(self.text)
             for regex in AUTHOR_REGEXS:
-                info("looking for author")
+                critical("looking for author")
                 dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
                 if dmatch:
-                    info('matched: "%s"' % regex)
+                    critical('matched: "%s"' % regex)
                     author = dmatch.group(1).strip()
                     MAX_MATCH = 30
                     if ' and ' in author: 
                         MAX_MATCH += 35
                         if ', ' in author: 
                             MAX_MATCH += 35
-                    info("author = '%s'" % dmatch.group())
+                    critical("author = '%s'" % dmatch.group())
                     if len(author) > 4 and len(author) < MAX_MATCH: 
                         return string.capwords(author)
+                    else:
+                        critical('length %d is <4 or > %d' %(len(author), MAX_MATCH)) 
                 else:
-                    info('failed: "%s"' % regex)
+                    critical('failed: "%s"' % regex)
+
         return 'UNKNOWN'
 
     def get_date(self):
@@ -912,7 +917,7 @@ def blog_at_goatee(biblio):
             thumb_url = url.replace('/web/', '/thumbs/')
             alt_text = blog_title.replace('-', ' ')
             fd.write(
-                '''<p><a href="%s"><img alt="%s" class="thumb" src="%s"/></a></p>\n''' 
+                '''<p><a href="%s"><img alt="%s" class="thumb right" src="%s"/></a></p>\n\n''' 
                 % (url, alt_text, thumb_url, ))
             fd.write(
                 '''<p><a href="%s"><img alt="%s" class="view" src="%s"/></a></p>''' 

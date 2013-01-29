@@ -145,8 +145,8 @@ def get_text(url):
 
     import os
 
-    return unicode(os.popen('lynx -display_charset=utf-8 -width=10000 '
-        '-nolist -dump "%s"' %url).read().decode('utf-8', 'replace'))
+    return unicode(os.popen('w3m -O utf8 -cols 10000 '
+        '-dump "%s"' %url).read().decode('utf-8', 'replace'))
 
 def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''

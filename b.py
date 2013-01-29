@@ -203,11 +203,14 @@ class scrape_default(object):
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
             '''//span[contains(@class, 'byline')]//text()''',
+            '''//meta[@http-equiv='author']/@content''',
         )
         if self.html:
+            critical('checking xpaths')
             html_parser = etree.HTMLParser()
             self.doc = etree.fromstring(self.html, html_parser)
             for path in AUTHOR_XPATHS:
+                critical("trying = '%s'" % path)
                 xpath_result = self.doc.xpath(path)
                 if xpath_result:
                     critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
@@ -226,8 +229,9 @@ class scrape_default(object):
         )
         if self.text:
             #info(self.text)
+            critical('checking regexs')
             for regex in AUTHOR_REGEXS:
-                critical("looking for author")
+                critical("trying = '%s'" % regex)
                 dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
                 if dmatch:
                     critical('matched: "%s"' % regex)

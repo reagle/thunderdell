@@ -196,14 +196,16 @@ class scrape_default(object):
     def get_author(self):
         '''return guess of article author'''        
 
+        # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
             '''//meta[@name='author']/@content''',
+            '''//meta[@name='AUTHOR']/@content''',
             '''//meta[@name='authors']/@content''',
+            '''//meta[@http-equiv='author']/@content''',
             '''//a[@rel='author']//text()''',
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
             '''//span[contains(@class, 'byline')]//text()''',
-            '''//meta[@http-equiv='author']/@content''',
         )
         if self.html:
             critical('checking xpaths')

@@ -205,7 +205,7 @@ class scrape_default(object):
             '''//a[@rel='author']//text()''',
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
-            '''//span[contains(@class, 'byline')]//text()''',
+            '''//*[contains(@class, 'byline')]//text()''',
         )
         if self.html:
             critical('checking xpaths')

@@ -225,9 +225,9 @@ class scrape_default(object):
                     
         AUTHOR_REGEXS = (
             "by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
-            "^\W*(?:posted )?By[:]? (.*)",
+            "^\W*(?:posted )?by[:]? (.*)",
             "\d\d\d\d.{,6}? by ([a-z ]*)",
-            "^\W*By[:]? (.*)",
+            "\s{3,}by[:]? (.*)",
         )
         if self.text:
             #info(self.text)

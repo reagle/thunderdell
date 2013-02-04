@@ -199,6 +199,7 @@ class scrape_default(object):
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
             '''//meta[@name='author']/@content''',
+            '''//meta[@name='Author']/@content''',
             '''//meta[@name='AUTHOR']/@content''',
             '''//meta[@name='authors']/@content''',
             '''//meta[@http-equiv='author']/@content''',

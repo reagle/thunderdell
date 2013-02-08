@@ -207,6 +207,7 @@ class scrape_default(object):
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
             '''//*[contains(@class, 'byline')]//text()''',
+            '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
         if self.html:
             critical('checking xpaths')
@@ -217,7 +218,7 @@ class scrape_default(object):
                 xpath_result = self.doc.xpath(path)
                 if xpath_result:
                     critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
-                    author = ''.join(xpath_result).strip()
+                    author = string.capwords(''.join(xpath_result).strip())
                     critical("author = '%s'; xpath = '%s'" %(author, path))
                     if author != '':
                         return author
@@ -276,17 +277,18 @@ class scrape_default(object):
         ORG_WORDS = ['blog']
         
         title = self.get_title()
+        critical("title = '%s'" %(title))
         org = self.get_org()
         DELIMTER = re.compile('([-\|:;«])') # 
         parts = DELIMTER.split(title)
         if len(parts) >= 2:
             beginning, end = ''.join(parts[0:-2]), parts[-1]
-            info("beginning = %s, end = %s" %(beginning, end))
+            critical("beginning = %s, end = %s" %(beginning, end))
             title_lower = title.lower()
             if any(org_word in title_lower for org_word in ORG_WORDS):
                 return sentence_case(beginning.strip()), end.strip().title()
             end_ratio = float(len(end)) / len(beginning + end)
-            info(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
+            critical(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
             if end_ratio <= 0.35 or len(end) <= 20:
                 return sentence_case(beginning.strip()), end.strip().title()
         return title, org

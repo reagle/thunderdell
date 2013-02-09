@@ -802,18 +802,18 @@ def log2work(biblio):
     ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
 
     title = biblio['title']
-    activity, sep, comment = biblio['comment'].partition(' ')
+    tag, sep, comment = biblio['comment'].partition(' ')
     url = biblio['url']
 
     # Replace the line with the '^' character with a hypertext link
-    comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
+    html_comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
         (escape_XML(url), title), comment)
 
     date_token = time.strftime("%y%m%d", NOW)
-    digest = hashlib.md5(comment.encode('utf-8', 'replace')).hexdigest()
+    digest = hashlib.md5(html_comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
-        (uid, date_token, activity, comment)
+        (uid, date_token, tag, html_comment)
 
     fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
     content = fd.read()
@@ -829,6 +829,10 @@ def log2work(biblio):
         fd.close()
     else:
         print_usage("Sorry, output regexp subsitution failed.")
+
+    if args.publish:
+        yasn_publish(title, comment.replace('^', url), tag)
+
 
 def log2console(biblio):
     '''
@@ -970,10 +974,13 @@ def get_logger(options={re.IGNORECASE}):
     """
     params = None
     dispatch_logger = (
+        # nifty: b URL n DESCRIPTION
         (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
             log2nifty),
+        # work: b URL j KEYWORD MESSAGE [with ^ replaced by url]
         (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
             log2work),
+        # mindmap: b URL m KEYWORD. ABSTRACT
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
             log2mm),
         (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
@@ -996,22 +1003,32 @@ def get_logger(options={re.IGNORECASE}):
         print(params)
     sys.exit()
 
-
 def print_usage(message):
     print message
     print "Usage: b [url]? scheme [scheme parameters]? comment"
-
+    
+def yasn_publish(title, comment, tag):
+    title_room = 134 - len(comment) - len(tag)
+    info("%d < %d" %(len(title), title_room))
+    if len(title) > title_room:
+        title = title[0:title_room] + '...'
+    message = "%s %s #%s" %(title, comment, tag)
+    info(len(message))
+    print("twitter set '%s'" %message)
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
         prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
-    arg_parser.add_argument("-t", "--tests",
+    arg_parser.add_argument("-T", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")
     arg_parser.add_argument("-K", "--keyword-shortcuts",
                 action="store_true", default=False,
                 help="show keyword shortcuts")
+    arg_parser.add_argument('-p', '--publish',
+        action="store_true", default=False,
+        help="publish to social networks")
     arg_parser.add_argument('text', nargs='*')
     arg_parser.add_argument('-L', '--log-to-file',
         action="store_true", default=False,
@@ -1044,8 +1061,13 @@ if __name__ == "__main__":
 
     logger, params = get_logger(' '.join(args.text))    
     comment = params['comment'].strip()
+    #print ("logger = '%s', params = '%s', comment = '%s'" %(logger, params, comment))
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)
-        logger(scraper.get_biblio())
+        biblio = scraper.get_biblio()
+        logger(biblio)
     else:
         logger({'title' : '', 'url': '', 'comment' : comment})
+    #if args.publish:
+        #yasn_publish(biblio)
+        

@@ -1019,8 +1019,8 @@ def do_console_annotation(biblio):
     while True:
         line = raw_input('\nAnnotation?\n').decode(sys.stdin.encoding)
         if not line: break
-        if line.startswith('a='):
-            biblio['author']=line[2:]
+        if re.search('a\w* ?= ?', line):
+            biblio['author']=line.split('=', 1)[1].strip()
         else:
             console_annotations += '\n\n' + line
     biblio['excerpt'] += console_annotations

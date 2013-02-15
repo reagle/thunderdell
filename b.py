@@ -169,7 +169,7 @@ class scrape_default(object):
     Default and base class scraper.
     """
     def __init__(self, url, comment):
-        print "Scraping default Web page;",
+        print("Scraping default Web page;")
         self.url = url
         self.comment = comment
         try:
@@ -348,7 +348,7 @@ class scrape_photo_net(object):
     e.g., http://photo.net/site-help-forum/00ajKF
     """
     def __init__(self, url, comment):
-        print "Scraping photo.net;",
+        print("Scraping photo.net;")
         self.url = url
         self.comment = comment
         self.html, resp = get_HTML(url, cache_control = 'no-cache')        
@@ -397,7 +397,7 @@ class scrape_photo_net(object):
 class scrape_DOI(scrape_default):
     
     def __init__(self, url, comment):
-        print "Scraping DOI;",
+        print("Scraping DOI;")
         self.url = url
         self.comment = comment
 
@@ -470,7 +470,7 @@ class scrape_DOI(scrape_default):
         
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
-        print "Scraping en.Wikipedia;",
+        print("Scraping en.Wikipedia;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -513,7 +513,7 @@ class scrape_ENWP(scrape_default):
         
 class scrape_Signpost(scrape_ENWP):
     def __init__(self, url, comment):
-        print "Scraping en.Wikipedia Signpost;",
+        print("Scraping en.Wikipedia Signpost;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -538,7 +538,7 @@ class scrape_Signpost(scrape_ENWP):
 
 class scrape_NupediaL(scrape_default):
     def __init__(self, url, comment):
-        print "Scraping local Nupedia archive;",
+        print("Scraping local Nupedia archive;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -569,7 +569,7 @@ class scrape_NupediaL(scrape_default):
 class scrape_WM_lists(scrape_default):
 
     def __init__(self, url, comment):
-        print "Scraping Wikimedia Lists;",
+        print("Scraping Wikimedia Lists;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -593,7 +593,7 @@ class scrape_WM_lists(scrape_default):
         for para in msg_paras:
             if len(para) > 240 and para.count('>') < 1:
                 excerpt = para.replace('\n',' ')
-                print excerpt
+                print(excerpt)
                 return excerpt.strip()
         return None
 
@@ -604,7 +604,7 @@ class scrape_WM_lists(scrape_default):
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
-        print "Scraping Wikimedia Meta;",
+        print("Scraping Wikimedia Meta;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -635,7 +635,7 @@ class scrape_WMMeta(scrape_default):
 
 class scrape_MARC(scrape_default):
     def __init__(self, url, comment):
-        print "Scraping MARC;",
+        print("Scraping MARC;")
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -719,10 +719,6 @@ def log2mm(biblio):
     if keyword:
         keyword = KEY_SHORTCUTS.get(keyword, keyword)
         citation += 'kw=' + keyword
-    tenative_ident = fe.get_ident(
-        { 'author' : fe.parse_names(author), 'title' : title,
-        'year' : biblio['date'][0:4]}, {})
-    print(tenative_ident)
     try:
         from xml.etree.cElementTree import parse # fast C implementation
     except ImportError:
@@ -736,16 +732,16 @@ def log2mm(biblio):
             year_node = mm_year
             break
     else:
-        print "creating", year
+        print("creating %s" % year)
         year_node = SubElement(mm_years, 'node', {'TEXT': this_year, 'POSITION': 'right'})
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
     for week_node in year_node:
         if week_node.get('TEXT') == this_week:
-            print "found week", this_week
+            print("found week %s" % this_week)
             break
     else:
-        print "creating", this_week
+        print("creating %d" % this_week)
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
     author_node = SubElement(week_node, 'node', {'TEXT': author, 'COLOR': '#338800'})
@@ -767,7 +763,7 @@ def log2nifty(biblio):
 
     import codecs
 
-    print "to log2nifty"
+    print("to log2nifty\n")
     ofile = HOME+'/data/2web/goatee.net/nifty-stuff.html'
 
     title = biblio['title']
@@ -798,7 +794,7 @@ def log2work(biblio):
     '''
     import hashlib
 
-    print "to log2work"
+    print("to log2work\n")
     ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
 
     title = biblio['title']
@@ -1003,10 +999,34 @@ def get_logger(options={re.IGNORECASE}):
         print(params)
     sys.exit()
 
-def print_usage(message):
-    print message
-    print "Usage: b [url]? scheme [scheme parameters]? comment"
+#######################################
+# Miscellaneous
     
+def print_usage(message):
+    print(message)
+    print("Usage: b [url]? scheme [scheme parameters]? comment")
+
+def do_console_annotation(biblio):
+    '''Augment biblio with console annotations'''
+
+    tenative_ident = fe.get_ident(
+        { 'author' : fe.parse_names(biblio['author']), 
+        'title' : biblio['title'],
+        'year' : biblio['date'][0:4]}, {})
+    print(tenative_ident)
+    
+    console_annotations = ''
+    while True:
+        line = raw_input('\nAnnotation?\n').decode(sys.stdin.encoding)
+        if not line: break
+        if line.startswith('a='):
+            biblio['author']=line[2:]
+        else:
+            console_annotations += '\n\n' + line
+    biblio['excerpt'] += console_annotations
+    
+    return biblio
+        
 def yasn_publish(title, comment, tag):
     title_room = 134 - len(comment) - len(tag)
     info("%d < %d" %(len(title), title_room))
@@ -1065,9 +1085,13 @@ if __name__ == "__main__":
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)
         biblio = scraper.get_biblio()
-        logger(biblio)
     else:
-        logger({'title' : '', 'url': '', 'comment' : comment})
+        biblio = {'title' : '', 'url': '', 'comment' : comment}
+
+    biblio = do_console_annotation(biblio)
+
+    logger(biblio)
+
     #if args.publish:
         #yasn_publish(biblio)
         

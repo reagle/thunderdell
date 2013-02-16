@@ -692,6 +692,7 @@ def log2mm(biblio):
     '''
 
     print("to log2mm")
+    biblio = do_console_annotation(biblio)
     
     #now = time.gmtime()
     this_week = time.strftime("%U", NOW)
@@ -1087,9 +1088,6 @@ if __name__ == "__main__":
         biblio = scraper.get_biblio()
     else:
         biblio = {'title' : '', 'url': '', 'comment' : comment}
-
-    biblio = do_console_annotation(biblio)
-
     logger(biblio)
 
     #if args.publish:

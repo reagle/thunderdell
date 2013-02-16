@@ -169,7 +169,7 @@ class scrape_default(object):
     Default and base class scraper.
     """
     def __init__(self, url, comment):
-        print("Scraping default Web page;")
+        print("Scraping default Web page;"),
         self.url = url
         self.comment = comment
         try:
@@ -348,7 +348,7 @@ class scrape_photo_net(object):
     e.g., http://photo.net/site-help-forum/00ajKF
     """
     def __init__(self, url, comment):
-        print("Scraping photo.net;")
+        print("Scraping photo.net;"),
         self.url = url
         self.comment = comment
         self.html, resp = get_HTML(url, cache_control = 'no-cache')        
@@ -397,7 +397,7 @@ class scrape_photo_net(object):
 class scrape_DOI(scrape_default):
     
     def __init__(self, url, comment):
-        print("Scraping DOI;")
+        print("Scraping DOI;"),
         self.url = url
         self.comment = comment
 
@@ -470,7 +470,7 @@ class scrape_DOI(scrape_default):
         
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping en.Wikipedia;")
+        print("Scraping en.Wikipedia;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -513,7 +513,7 @@ class scrape_ENWP(scrape_default):
         
 class scrape_Signpost(scrape_ENWP):
     def __init__(self, url, comment):
-        print("Scraping en.Wikipedia Signpost;")
+        print("Scraping en.Wikipedia Signpost;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -538,7 +538,7 @@ class scrape_Signpost(scrape_ENWP):
 
 class scrape_NupediaL(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping local Nupedia archive;")
+        print("Scraping local Nupedia archive;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -569,7 +569,7 @@ class scrape_NupediaL(scrape_default):
 class scrape_WM_lists(scrape_default):
 
     def __init__(self, url, comment):
-        print("Scraping Wikimedia Lists;")
+        print("Scraping Wikimedia Lists;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -604,7 +604,7 @@ class scrape_WM_lists(scrape_default):
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
-        print("Scraping Wikimedia Meta;")
+        print("Scraping Wikimedia Meta;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -635,7 +635,7 @@ class scrape_WMMeta(scrape_default):
 
 class scrape_MARC(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping MARC;")
+        print("Scraping MARC;"),
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -1014,11 +1014,11 @@ def do_console_annotation(biblio):
         { 'author' : fe.parse_names(biblio['author']), 
         'title' : biblio['title'],
         'year' : biblio['date'][0:4]}, {})
-    print(tenative_ident)
+    print('%s; annotate?' % tenative_ident)
     
     console_annotations = ''
     while True:
-        line = raw_input('\nAnnotation?\n').decode(sys.stdin.encoding)
+        line = raw_input('').decode(sys.stdin.encoding)
         if not line: break
         if re.search('a\w* ?= ?', line):
             biblio['author']=line.split('=', 1)[1].strip()

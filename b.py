@@ -742,7 +742,7 @@ def log2mm(biblio):
             print("found week %s" % this_week)
             break
     else:
-        print("creating %d" % this_week)
+        print("creating %s" % this_week)
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
     author_node = SubElement(week_node, 'node', {'TEXT': author, 'COLOR': '#338800'})

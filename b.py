@@ -891,11 +891,14 @@ def blog_at_goatee(biblio):
     '''
     
     GOATEE_ROOT = '/home/reagle/data/2web/goatee.net/content/'
+    info("biblio['comment'] = '%s'" %(biblio['comment']))
     blog_title, sep, blog_body = biblio['comment'].partition('. ')
 
-    this_year, this_month = time.strftime("%Y %m", NOW).split()
+    this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     url = biblio.get('url', None)
     filename = blog_title.lower()
+    info("blog_title = %s" % blog_title)
+    info("filename = %s" % filename)
         
     PHOTO_RE = re.compile('.*/photo/web/(\d\d\d\d/\d\d)' \
                 '/\d\d-\d\d\d\d-(.*)\.jpe?g')
@@ -905,10 +908,12 @@ def blog_at_goatee(biblio):
         if photo_match:
             blog_date = re.match(PHOTO_RE, url).group(1).replace('/', '-')
             blog_title = re.match(PHOTO_RE, url).group(2)
-            filename = blog_date + '-' + blog_title
+            filename = blog_title
             blog_title = blog_title.replace('-', ' ')
     filename = filename.replace(' ', '-').replace("'", '') 
-    filename = GOATEE_ROOT + '%s/%s-%s.md' % (this_year, this_month, filename)
+    info("blog_title = %s" % blog_title)
+    info("filename = %s" % filename)
+    filename = GOATEE_ROOT + '%s/%s%s-%s.md' % (this_year, this_month, this_day, filename)
     if exists(filename):
         print("\nfilename '%s' already exists'" % filename)
         sys.exit()

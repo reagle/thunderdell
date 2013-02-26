@@ -1029,7 +1029,10 @@ def do_console_annotation(biblio):
             biblio['author']=line.split('=', 1)[1].strip()
         else:
             console_annotations += '\n\n' + line
-    biblio['excerpt'] += console_annotations
+    if biblio['excerpt']:
+        biblio['excerpt'] += console_annotations
+    else:
+        biblio['excerpt'] = console_annotations
     
     return biblio
         

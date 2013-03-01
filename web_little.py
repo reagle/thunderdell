@@ -12,6 +12,7 @@ Web functionality I frequently make use of.
 
 import chardet
 import logging
+from lxml import etree
 import os
 import requests # http://docs.python-requests.org/en/latest/
 import sys
@@ -56,6 +57,35 @@ def unescape_XML(text):
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
     
+    
+def get_HTML_content(url, referer='', 
+    data=None, cookie=None, retry_counter=0, cache_control=None):
+    '''Return [HTML content, headers] of a given URL.
+    Note: I try to guess the encoding and return unicode. However, etree
+    will not parse unicode with an encoding declaration within it.
+    However, get_HTM will return a parse tree if that's what you need.
+    '''
+    
+    agent_headers = {"User-Agent" : "Thunderdell/BusySponge"}
+    r = requests.get(url, headers=agent_headers)
+    info("r.headers['content-type'] = %s" % r.headers['content-type'])
+    if 'html' in r.headers['content-type']:
+        info("r       encoding = '%s'" %(r.encoding))
+        chardet_encoding = chardet.detect(r.content)
+        info("chardet_encoding = %s" %chardet_encoding)
+        if chardet_encoding['confidence'] > 0.85:
+            try:
+                info("chardet encoding = '%s'" %(chardet_encoding['encoding']))
+                content_uni = r.content.decode(chardet_encoding['encoding'])
+            except UnicodeDecodeError:
+                info("r       encoding = '%s'" %(r.encoding))
+                content_uni = r.content.decode(r.encoding)
+        else:
+            info("r       encoding = '%s'" %(r.encoding))
+            content_uni = r.content.decode(r.encoding)
+        return content_uni, r.headers
+    else:
+        raise IOError("URL content is not HTML.")
 
 def get_HTML(url, referer='', 
     data=None, cookie=None, retry_counter=0, cache_control=None):
@@ -65,16 +95,22 @@ def get_HTML(url, referer='',
     r = requests.get(url, headers=agent_headers)
     info("r.headers['content-type'] = %s" % r.headers['content-type'])
     if 'html' in r.headers['content-type']:
-        info("r.encoding = '%s'" %(r.encoding))
-        chardet_encoding = chardet.detect(r.content)
-        info("chardet_encoding = %s" %chardet_encoding)
-        if chardet_encoding['confidence'] > 0.85:
-            try:
-                content = r.content.decode(chardet_encoding['encoding'])
-            except UnicodeDecodeError:
-                content = r.content.decode(r.encoding)
-        else:
-            content = r.content.decode(r.encoding)
-        return content, r.headers
+        HTML_bytes = r.content        
     else:
         raise IOError("URL content is not HTML.")
+
+    parser_html = etree.HTMLParser()
+    doc = etree.fromstring(HTML_bytes, parser_html)
+    HTML_parsed = doc
+    
+    HTML_unicode = etree.tostring(HTML_parsed, encoding=unicode)
+    
+    return HTML_bytes, HTML_parsed, HTML_unicode, r
+
+def get_text(url):
+    '''Textual version of url'''
+
+    import os
+
+    return unicode(os.popen('w3m -O utf8 -cols 10000 '
+        '-dump "%s"' %url).read().decode('utf-8', 'replace'))

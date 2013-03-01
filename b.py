@@ -32,7 +32,8 @@ import string
 from subprocess import Popen 
 import sys
 import time
-from web_little import get_HTML, unescape_XML, escape_XML # personal utility module
+# personal Web utility module
+from web_little import get_HTML, get_text, unescape_XML, escape_XML 
 from change_case import sentence_case
 
 log_level = 100 # default
@@ -140,14 +141,6 @@ MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 
 NOW = time.localtime()
 
-def get_text(url):
-    '''Textual version of url'''
-
-    import os
-
-    return unicode(os.popen('w3m -O utf8 -cols 10000 '
-        '-dump "%s"' %url).read().decode('utf-8', 'replace'))
-
 def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
     info("old %s s = '%s'" %(type(s), s))
@@ -173,12 +166,14 @@ class scrape_default(object):
         self.url = url
         self.comment = comment
         try:
-            self.html, resp = get_HTML(url, cache_control = 'no-cache')
+            self.html_b, self.html_p, self.html_u, resp = get_HTML(
+                url, cache_control = 'no-cache')
         except IOError:
-            self.html, resp = None, None
+            self.html_b, self.html_p, self.html_u, resp = (None, None, 
+                None, None)
             
         self.text = None
-        if self.html:
+        if self.html_b:
             self.text = get_text(url)
 
     def get_biblio(self):
@@ -209,13 +204,11 @@ class scrape_default(object):
             '''//*[contains(@class, 'byline')]//text()''',
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
-        if self.html:
+        if self.html_p:
             critical('checking xpaths')
-            html_parser = etree.HTMLParser()
-            self.doc = etree.fromstring(self.html, html_parser)
             for path in AUTHOR_XPATHS:
                 critical("trying = '%s'" % path)
-                xpath_result = self.doc.xpath(path)
+                xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
                     author = string.capwords(''.join(xpath_result).strip())
@@ -306,8 +299,8 @@ class scrape_default(object):
                 break 
         
         title = "UNKNOWN TITLE"
-        if self.html:
-            tmatch = re.search(regexp, self.html, re.DOTALL|re.IGNORECASE)
+        if self.html_u:
+            tmatch = re.search(regexp, self.html_u, re.DOTALL|re.IGNORECASE)
             if tmatch:
                 title = tmatch.group(1).strip()
                 title = unescape_XML(title)
@@ -351,9 +344,6 @@ class scrape_photo_net(object):
         print("Scraping photo.net;"),
         self.url = url
         self.comment = comment
-        self.html, resp = get_HTML(url, cache_control = 'no-cache')        
-        html_parser = etree.HTMLParser()
-        self.doc = etree.fromstring(self.html, html_parser)
 
     def get_biblio(self):
         biblio = {
@@ -370,26 +360,26 @@ class scrape_photo_net(object):
         
     def get_author(self):
 
-        author = self.doc.xpath(
+        author = self.html_p.xpath(
             "//div[@class='originalpost']/p/a[@href]/text()")[0]
         return author.strip()
 
     def get_title(self):
 
-        title = self.doc.xpath("//title/text()")[0]
+        title = self.html_p.xpath("//title/text()")[0]
         title = title.split('- Photo.net')[0]
         return title.strip()
         
     def get_date(self):
 
-        date = self.doc.xpath(
+        date = self.html_p.xpath(
             "//div[@class='originalpost']/p/text()")[1]
         date = parse(date).strftime("%Y%m%d")
         return date
 
     def get_excerpt(self):
 
-        excerpt = self.doc.xpath(
+        excerpt = self.html_p.xpath(
             "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
         return excerpt
         
@@ -486,14 +476,14 @@ class scrape_ENWP(scrape_default):
 
     def get_permalink(self):
         if "oldid" not in self.url:
-            permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html).group(1)
+            permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
             return unescape_XML(permalink)
         else:
             return self.url
 
     def get_date(self):
         '''find date within <span id="mw-revision-date">19:09, 1 April 2008</span>'''
-        versioned_html, resp = get_HTML(self.get_permalink())
+        _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
         time, day, month, year = re.search('''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''', versioned_html).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]        
         return '%d%02d%02d' %(int(year), int(month), int(day))
@@ -542,17 +532,17 @@ class scrape_NupediaL(scrape_default):
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
-        author = re.search('''<B>(.*)''', self.html).group(1)
+        author = re.search('''<B>(.*)''', self.html_u).group(1)
         author = author.replace('</B>','')
         return author
 
     def get_title(self):
-        title = re.search('''<H1>(.*)''', self.html).group(1)
+        title = re.search('''<H1>(.*)''', self.html_u).group(1)
         return title.replace('</H1>','').replace('nupedia-l','')\
             .replace('[Nupedia-l]','')
 
     def get_date(self):
-        mdate = re.search('''<I>(.*?)</I>''', self.html).group(1)[:16].strip()
+        mdate = re.search('''<I>(.*?)</I>''', self.html_u).group(1)[:16].strip()
         date = time.strptime(mdate, "%a, %d %b %Y")
         return time.strftime('%Y%m%d', date)
 
@@ -573,19 +563,19 @@ class scrape_WM_lists(scrape_default):
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
-        return re.search('''<B>(.*?)</B>''', self.html).group(1)
+        return re.search('''<B>(.*?)</B>''', self.html_u).group(1)
 
     def get_title(self):
-        return re.search('''<H1>.*\](.*?)</H1>''', self.html).group(1) \
+        return re.search('''<H1>.*\](.*?)</H1>''', self.html_u).group(1) \
             .replace(' [Foundation-l] ','')
 
     def get_date(self):
-        mdate = re.search('''<I>(.*?)</I>''', self.html).group(1).strip()
+        mdate = re.search('''<I>(.*?)</I>''', self.html_u).group(1).strip()
         date = time.strptime(mdate, "%a %b %d %H:%M:%S %Z %Y")
         return time.strftime('%Y%m%d', date)
 
     def get_org(self):
-        return re.search('''<TITLE> \[(.*?)\]''', self.html).group(1)
+        return re.search('''<TITLE> \[(.*?)\]''', self.html_u).group(1)
 
     def get_excerpt(self):
         msg_body = '\n'.join(self.text.splitlines()[12:-10])
@@ -617,7 +607,7 @@ class scrape_WMMeta(scrape_default):
     def get_date(self): # Meta is often foobar because of proxy bugs
         pre, po = self.get_permalink().split('?title=')
         citelink = pre + '?title=Special:Cite&page=' + po
-        cite_html, resp = get_HTML(citelink)
+        _, _, cite_HTML_u, resp = get_HTML(citelink)
         day, month, year = re.search('''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''', cite_html).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' %(int(year), int(month), int(day))
@@ -629,7 +619,7 @@ class scrape_WMMeta(scrape_default):
         return None            # no good way to identify first paragraph at Meta
 
     def get_permalink(self):
-        permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html).group(1)
+        permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
         return unescape_XML(permalink)
 
 
@@ -640,9 +630,9 @@ class scrape_MARC(scrape_default):
 
     def get_author(self):
         try:
-            author = re.search('''From: *<a href=".*?">(.*?)</a>''', self.html)
+            author = re.search('''From: *<a href=".*?">(.*?)</a>''', self.html_u)
         except AttributeError:
-            author = re.search('''From: *(.*)''', self.html)
+            author = re.search('''From: *(.*)''', self.html_u)
         author = author.group(1)
         author = author.replace(' () ','@').replace(' ! ','.')\
             .replace('&lt;', '<').replace('&gt;', '>')
@@ -651,14 +641,14 @@ class scrape_MARC(scrape_default):
         return author
 
     def get_title(self):
-        subject = re.search('''Subject: *(.*)''', self.html).group(1)
+        subject = re.search('''Subject: *(.*)''', self.html_u).group(1)
         if subject.startswith('<a href'):
             subject = re.search('''<a href=".*?">(.*?)</a>''',subject).group(1)
         subject = subject.replace('[Wikipedia-l] ', '').replace('[WikiEN-l] ', '')
         return subject
 
     def get_date(self):
-        mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html).group(1)
+        mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
         try:
             date = time.strptime(mdate, "%Y%m%d %I:%M:%S")
         except ValueError:
@@ -666,11 +656,11 @@ class scrape_MARC(scrape_default):
         return time.strftime('%Y%m%d', date)
 
     def get_org(self):
-        return re.search('''List: *<a href=".*?">(.*?)</a>''', self.html).group(1)
+        return re.search('''List: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
 
     def get_excerpt(self):
         excerpt = ''
-        msg_body = '\n'.join(self.html.splitlines()[13:-17])
+        msg_body = '\n'.join(self.html_u.splitlines()[13:-17])
         msg_paras = msg_body.split('\n\n')
         for para in msg_paras:
             if para.count('\n') > 2:

@@ -193,6 +193,7 @@ class scrape_default(object):
 
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
+            '''//meta[@name='DC.Contributor']/@content''',
             '''//meta[@name='author']/@content''',
             '''//meta[@name='Author']/@content''',
             '''//meta[@name='AUTHOR']/@content''',
@@ -204,7 +205,7 @@ class scrape_default(object):
             '''//*[contains(@class, 'byline')]//text()''',
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
-        if self.html_p:
+        if self.html_p is not None:
             critical('checking xpaths')
             for path in AUTHOR_XPATHS:
                 critical("trying = '%s'" % path)
@@ -1005,6 +1006,7 @@ def print_usage(message):
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
 
+    info("biblio['author'] = '%s'" %(biblio['author']))
     tenative_ident = fe.get_ident(
         { 'author' : fe.parse_names(biblio['author']), 
         'title' : biblio['title'],

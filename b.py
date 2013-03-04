@@ -485,7 +485,7 @@ class scrape_ENWP(scrape_default):
     def get_date(self):
         '''find date within <span id="mw-revision-date">19:09, 1 April 2008</span>'''
         _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
-        time, day, month, year = re.search('''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''', versioned_html).groups()
+        time, day, month, year = re.search('''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''', versioned_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]        
         return '%d%02d%02d' %(int(year), int(month), int(day))
 

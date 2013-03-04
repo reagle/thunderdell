@@ -501,97 +501,6 @@ class scrape_ENWP(scrape_default):
                 return line
         return None
 
-        
-class scrape_Signpost(scrape_ENWP):
-    def __init__(self, url, comment):
-        print("Scraping en.Wikipedia Signpost;"),
-        scrape_default.__init__(self, url, comment)
-
-    def get_author(self):
-        '''guess author in: By Thomas888b and HaeB, 21 March 2011'''
-        author_regexp3 = "By (.*?), \d\d"
-        dmatch = re.search(author_regexp3, self.text, re.IGNORECASE)
-        if dmatch:
-            authors = dmatch.group(1)
-            authors = authors.replace(' and ', ', ')
-            return authors
-        return 'UNKNOWN'
-
-    def get_title(self):
-        title = scrape_default.get_title(self)
-        title = title.replace(' - Wikipedia, the free encyclopedia','')
-        title = title.split('/', 1)[-1]
-        return title
-
-    def get_org(self):
-        return 'Wikipedia Signpost'
-
-
-class scrape_NupediaL(scrape_default):
-    def __init__(self, url, comment):
-        print("Scraping local Nupedia archive;"),
-        scrape_default.__init__(self, url, comment)
-
-    def get_author(self):
-        author = re.search('''<B>(.*)''', self.html_u).group(1)
-        author = author.replace('</B>','')
-        return author
-
-    def get_title(self):
-        title = re.search('''<H1>(.*)''', self.html_u).group(1)
-        return title.replace('</H1>','').replace('nupedia-l','')\
-            .replace('[Nupedia-l]','')
-
-    def get_date(self):
-        mdate = re.search('''<I>(.*?)</I>''', self.html_u).group(1)[:16].strip()
-        date = time.strptime(mdate, "%a, %d %b %Y")
-        return time.strftime('%Y%m%d', date)
-
-    def get_org(self):
-        return 'nupedia-l'
-
-    def get_excerpt(self):
-        return None
-
-    def get_permalink(self):
-        return 'http://web.archive.org/web/20030822044803/http://www.nupedia.com/pipermail/' + self.url[24:]
-
-
-class scrape_WM_lists(scrape_default):
-
-    def __init__(self, url, comment):
-        print("Scraping Wikimedia Lists;"),
-        scrape_default.__init__(self, url, comment)
-
-    def get_author(self):
-        return re.search('''<B>(.*?)</B>''', self.html_u).group(1)
-
-    def get_title(self):
-        return re.search('''<H1>.*\](.*?)</H1>''', self.html_u).group(1) \
-            .replace(' [Foundation-l] ','')
-
-    def get_date(self):
-        mdate = re.search('''<I>(.*?)</I>''', self.html_u).group(1).strip()
-        date = time.strptime(mdate, "%a %b %d %H:%M:%S %Z %Y")
-        return time.strftime('%Y%m%d', date)
-
-    def get_org(self):
-        return re.search('''<TITLE> \[(.*?)\]''', self.html_u).group(1)
-
-    def get_excerpt(self):
-        msg_body = '\n'.join(self.text.splitlines()[12:-10])
-        msg_paras = msg_body.split('\n\n')
-        for para in msg_paras:
-            if len(para) > 240 and para.count('>') < 1:
-                excerpt = para.replace('\n',' ')
-                print(excerpt)
-                return excerpt.strip()
-        return None
-
-    def get_permalink(self):
-        return self.url
-
-
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
@@ -651,9 +560,9 @@ class scrape_MARC(scrape_default):
     def get_date(self):
         mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
         try:
-            date = time.strptime(mdate, "%Y%m%d %I:%M:%S")
+            date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
         except ValueError:
-            date = time.strptime(mdate, "%Y%m%d %H:%M:%S")
+            date = time.strptime(mdate, "%Y-%m-%d %H:%M:%S")
         return time.strftime('%Y%m%d', date)
 
     def get_org(self):
@@ -944,9 +853,6 @@ def get_scraper(url, comment):
         url = 'http://dx.doi.org/' + url[4:]
     
     dispatch_scraper = (
-        ('file://%s/tmp/nupedia-l/' %HOME, scrape_NupediaL),
-        ('http://lists.wikimedia.org/pipermail/', scrape_WM_lists),
-        ('http://en.wikipedia.org/wiki/Wikipedia:Wikipedia_Signpost/', scrape_Signpost),
         ('http://en.wikipedia.org/w', scrape_ENWP),
         ('http://meta.wikimedia.org/w', scrape_WMMeta),
         ('http://marc.info/', scrape_MARC),

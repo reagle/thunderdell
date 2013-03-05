@@ -166,10 +166,10 @@ class scrape_default(object):
         self.url = url
         self.comment = comment
         try:
-            self.html_b, self.HTML_p, self.html_u, resp = get_HTML(
+            self.html_b, self.HTML_p, self.html_u, self.resp = get_HTML(
                 url, cache_control = 'no-cache')
         except IOError:
-            self.html_b, self.HTML_p, self.html_u, resp = (None, None, 
+            self.html_b, self.HTML_p, self.html_u, self.resp = (None, None, 
                 None, None)
             
         self.text = None

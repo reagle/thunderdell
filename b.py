@@ -166,10 +166,10 @@ class scrape_default(object):
         self.url = url
         self.comment = comment
         try:
-            self.html_b, self.html_p, self.html_u, resp = get_HTML(
+            self.html_b, self.HTML_p, self.html_u, resp = get_HTML(
                 url, cache_control = 'no-cache')
         except IOError:
-            self.html_b, self.html_p, self.html_u, resp = (None, None, 
+            self.html_b, self.HTML_p, self.html_u, resp = (None, None, 
                 None, None)
             
         self.text = None
@@ -205,11 +205,11 @@ class scrape_default(object):
             '''//*[contains(@class, 'byline')]//text()''',
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
-        if self.html_p is not None:
+        if self.HTML_p is not None:
             critical('checking xpaths')
             for path in AUTHOR_XPATHS:
                 critical("trying = '%s'" % path)
-                xpath_result = self.html_p.xpath(path)
+                xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
                     critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
                     author = string.capwords(''.join(xpath_result).strip())
@@ -336,55 +336,7 @@ class scrape_default(object):
     def get_permalink(self):
         return self.url
 
-class scrape_photo_net(object):
-    """
-    Scrape photo.net postings
-    e.g., http://photo.net/site-help-forum/00ajKF
-    """
-    def __init__(self, url, comment):
-        print("Scraping photo.net;"),
-        self.url = url
-        self.comment = comment
 
-    def get_biblio(self):
-        biblio = {
-            'author' : self.get_author(),
-            'title' : self.get_title(),
-            'date' : self.get_date(),
-            'permalink' : self.url,
-            'excerpt' : self.get_excerpt(),
-            'comment' : self.comment,
-            'url' : self.url,
-        }
-        biblio['organization'] = "photo.net Site Help Forum &gt; Photo Critique and Rating"
-        return biblio
-        
-    def get_author(self):
-
-        author = self.html_p.xpath(
-            "//div[@class='originalpost']/p/a[@href]/text()")[0]
-        return author.strip()
-
-    def get_title(self):
-
-        title = self.html_p.xpath("//title/text()")[0]
-        title = title.split('- Photo.net')[0]
-        return title.strip()
-        
-    def get_date(self):
-
-        date = self.html_p.xpath(
-            "//div[@class='originalpost']/p/text()")[1]
-        date = parse(date).strftime("%Y%m%d")
-        return date
-
-    def get_excerpt(self):
-
-        excerpt = self.html_p.xpath(
-            "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
-        return excerpt
-        
-        
 class scrape_DOI(scrape_default):
     
     def __init__(self, url, comment):
@@ -459,6 +411,57 @@ class scrape_DOI(scrape_default):
         info("date = %s" % date)
         return date
         
+        
+class scrape_MARC(scrape_default):
+    def __init__(self, url, comment):
+        print("Scraping MARC;"),
+        scrape_default.__init__(self, url, comment)
+
+    def get_author(self):
+        try:
+            author = re.search('''From: *<a href=".*?">(.*?)</a>''', self.html_u)
+        except AttributeError:
+            author = re.search('''From: *(.*)''', self.html_u)
+        author = author.group(1)
+        author = author.replace(' () ','@').replace(' ! ','.')\
+            .replace('&lt;', '<').replace('&gt;', '>')
+        author = author.split(' <')[0]
+        author = author.replace('"','')
+        return author
+
+    def get_title(self):
+        subject = re.search('''Subject: *(.*)''', self.html_u).group(1)
+        if subject.startswith('<a href'):
+            subject = re.search('''<a href=".*?">(.*?)</a>''',subject).group(1)
+        subject = subject.replace('[Wikipedia-l] ', '').replace('[WikiEN-l] ', '')
+        return subject
+
+    def get_date(self):
+        mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
+        try:
+            date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
+        except ValueError:
+            date = time.strptime(mdate, "%Y-%m-%d %H:%M:%S")
+        return time.strftime('%Y%m%d', date)
+
+    def get_org(self):
+        return re.search('''List: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
+
+    def get_excerpt(self):
+        excerpt = ''
+        msg_body = '\n'.join(self.html_u.splitlines()[13:-17])
+        msg_paras = msg_body.split('\n\n')
+        for para in msg_paras:
+            if para.count('\n') > 2:
+                if not para.count('&gt;') >1:
+                    excerpt = para.replace('\n',' ')
+                    break
+        return excerpt.strip()
+
+    def get_permalink(self):
+        return self.url
+
+
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
         print("Scraping en.Wikipedia;"),
@@ -532,55 +535,74 @@ class scrape_WMMeta(scrape_default):
         permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
         return unescape_XML(permalink)
 
-
-class scrape_MARC(scrape_default):
+class scrape_photo_net(scrape_default):
+    """
+    Scrape photo.net postings
+    e.g., http://photo.net/site-help-forum/00ajKF
+    """
     def __init__(self, url, comment):
-        print("Scraping MARC;"),
+        print("Scraping photo.net;"),
+        self.url = url
+        self.comment = comment
         scrape_default.__init__(self, url, comment)
 
+    def get_biblio(self):
+        biblio = {
+            'author' : self.get_author(),
+            'title' : self.get_title(),
+            'date' : self.get_date(),
+            'permalink' : self.url,
+            'excerpt' : self.get_excerpt(),
+            'comment' : self.comment,
+            'url' : self.url,
+        }
+        biblio['organization'] = "photo.net Site Help Forum &gt; Photo Critique and Rating"
+        return biblio
+        
     def get_author(self):
-        try:
-            author = re.search('''From: *<a href=".*?">(.*?)</a>''', self.html_u)
-        except AttributeError:
-            author = re.search('''From: *(.*)''', self.html_u)
-        author = author.group(1)
-        author = author.replace(' () ','@').replace(' ! ','.')\
-            .replace('&lt;', '<').replace('&gt;', '>')
-        author = author.split(' <')[0]
-        author = author.replace('"','')
-        return author
+
+        author = self.HTML_p.xpath(
+            "//div[@class='originalpost']/p/a[@href]/text()")[0]
+        return author.strip()
 
     def get_title(self):
-        subject = re.search('''Subject: *(.*)''', self.html_u).group(1)
-        if subject.startswith('<a href'):
-            subject = re.search('''<a href=".*?">(.*?)</a>''',subject).group(1)
-        subject = subject.replace('[Wikipedia-l] ', '').replace('[WikiEN-l] ', '')
-        return subject
 
+        title = self.HTML_p.xpath("//title/text()")[0]
+        title = title.split('- Photo.net')[0]
+        return title.strip()
+        
     def get_date(self):
-        mdate = re.search('''Date: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
-        try:
-            date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
-        except ValueError:
-            date = time.strptime(mdate, "%Y-%m-%d %H:%M:%S")
-        return time.strftime('%Y%m%d', date)
 
-    def get_org(self):
-        return re.search('''List: *<a href=".*?">(.*?)</a>''', self.html_u).group(1)
+        date = self.HTML_p.xpath(
+            "//div[@class='originalpost']/p/text()")[1]
+        date = parse(date).strftime("%Y%m%d")
+        return date
 
     def get_excerpt(self):
-        excerpt = ''
-        msg_body = '\n'.join(self.html_u.splitlines()[13:-17])
-        msg_paras = msg_body.split('\n\n')
-        for para in msg_paras:
-            if para.count('\n') > 2:
-                if not para.count('&gt;') >1:
-                    excerpt = para.replace('\n',' ')
-                    break
-        return excerpt.strip()
 
-    def get_permalink(self):
-        return self.url
+        excerpt = self.HTML_p.xpath(
+            "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
+        return excerpt
+
+    
+class scrape_geekfeminism_wiki(scrape_default):
+    def __init__(self, url, comment):
+        print("Scraping geekfeminism wiki"),
+        scrape_default.__init__(self, url, comment)
+
+    def get_biblio(self):
+        biblio = {
+            'author' : 'Geek Feminism',
+            'date' : self.get_date(),
+            'permalink' : self.get_permalink(),
+            'excerpt' : self.get_excerpt(),
+            'comment' : self.comment,
+            'url' : self.url,
+        }
+        biblio['title'], biblio['organization'] = self.split_title_org()
+        biblio['organization'] = 'Wikia'
+        return biblio
+    
 
 #######################################
 # Output loggers
@@ -858,6 +880,7 @@ def get_scraper(url, comment):
         ('http://marc.info/', scrape_MARC),
         ('http://dx.doi.org/', scrape_DOI),
         ('http://photo.net/site-help-forum/', scrape_photo_net),
+        ('http://geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
         ('', scrape_default)     # default: make sure last
     )
 

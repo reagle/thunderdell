@@ -103,7 +103,8 @@ def get_HTML(url, referer='',
     doc = etree.fromstring(HTML_bytes, parser_html)
     HTML_parsed = doc
     
-    HTML_unicode = etree.tostring(HTML_parsed, encoding=unicode)
+    HTML_utf8 = etree.tostring(HTML_parsed, encoding='utf-8')
+    HTML_unicode = HTML_utf8.decode('utf-8', 'replace')
     
     return HTML_bytes, HTML_parsed, HTML_unicode, r
 

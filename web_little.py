@@ -27,22 +27,22 @@ dbg = logging.debug
 from xml.sax.saxutils import escape, unescape
 def escape_XML(s): # http://wiki.python.org/moin/EscapingXml
     '''Escape XML character entities; & < > are defaulted'''
-    extras = {'\t' : '  '}
+    extras = {u'\t' : u'  '}
     return escape(s, extras)
 
 import re, htmlentitydefs
 def unescape_XML(text):
     '''
-    Removes HTML or XML character references and entities from a text string.
+    Removes HTML or XML character references and entities from text.
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
     
     '''
     def fixup(m):
         text = m.group(0)
-        if text[:2] == "&#":
+        if text[:2] == u"&#":
             # character reference
             try:
-                if text[:3] == "&#x":
+                if text[:3] == u"&#x":
                     return unichr(int(text[3:-1], 16))
                 else:
                     return unichr(int(text[2:-1]))
@@ -55,7 +55,7 @@ def unescape_XML(text):
             except KeyError:
                 pass
         return text # leave as is
-    return re.sub("&#?\w+;", fixup, text)
+    return re.sub(u"&#?\w+;", fixup, text)
     
     
 def get_HTML_content(url, referer='', 

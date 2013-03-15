@@ -935,19 +935,27 @@ def print_usage(message):
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
 
+    def get_tentative_ident(bibio):
+        return fe.get_ident(
+            { 'author' : fe.parse_names(biblio['author']), 
+            'title' : biblio['title'],
+            'year' : biblio['date'][0:4]}, {})
+
     info("biblio['author'] = '%s'" %(biblio['author']))
-    tenative_ident = fe.get_ident(
-        { 'author' : fe.parse_names(biblio['author']), 
-        'title' : biblio['title'],
-        'year' : biblio['date'][0:4]}, {})
-    print('%s; annotate?' % tenative_ident)
+    tentative_id = get_tentative_ident(biblio)
+    print('%s; annotate?' % tentative_id)
     
+    EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     while True:
         line = raw_input('').decode(sys.stdin.encoding)
         if not line: break
-        if re.search('a\w* ?= ?', line):
-            biblio['author']=line.split('=', 1)[1].strip()
+        if '=' in line:
+            cites = EQUAL_PAT.split(line)[1:]
+            # 2 refs to an iterable are '*' unpacked and rezipped
+            cite_pairs = list(zip(*[iter(cites)] * 2))
+            for short, value in cite_pairs:
+                biblio[fe.BIBLATEX_SHORTCUTS[short]] = value.strip()
         else:
             console_annotations += '\n\n' + line
     if biblio['excerpt']:
@@ -955,6 +963,9 @@ def do_console_annotation(biblio):
     else:
         biblio['excerpt'] = console_annotations
     
+    tweaked_id = get_tentative_ident(biblio)
+    if tweaked_id != tentative_id:
+        print('%s; annotate?' % get_tentative_ident(biblio))
     return biblio
         
 def yasn_publish(title, comment, tag):

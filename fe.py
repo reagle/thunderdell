@@ -381,10 +381,10 @@ def pull_citation(entry):
         dbg("citation = '%s'" %(citation))
         # split around tokens of length 1-3; get rid of first empty string of results
 
-        equal_pat = re.compile(r'(\w{1,3})=')
-        cites = equal_pat.split(citation)[1:]
+        EQUAL_PAT = re.compile(r'(\w{1,3})=')
+        cites = EQUAL_PAT.split(citation)[1:]
 
-        # 2 references to an iterable object are unpacked with '*' and rezipped
+        # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = list(zip(*[iter(cites)] * 2))
         for short, value in cite_pairs:
             try:

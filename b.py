@@ -405,7 +405,7 @@ class scrape_DOI(scrape_default):
             year, month = date_parts
             date = '%d%02d' % (int(year), int(month))
         elif len(date_parts) == 1:
-            date = date_parts
+            date = str(date_parts[0])
         else:
             date = '0000'
         info("date = %s" % date)
@@ -936,6 +936,7 @@ def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
 
     def get_tentative_ident(bibio):
+        info(biblio)
         return fe.get_ident(
             { 'author' : fe.parse_names(biblio['author']), 
             'title' : biblio['title'],

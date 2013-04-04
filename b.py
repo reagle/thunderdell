@@ -22,6 +22,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 import argparse
 import codecs
+from datetime import datetime
 from dateutil.parser import parse
 import fe
 import logging
@@ -603,6 +604,51 @@ class scrape_geekfeminism_wiki(scrape_default):
         biblio['organization'] = 'Wikia'
         return biblio
     
+class scrape_twitter(scrape_default):
+    def __init__(self, url, comment):
+        print("Scraping twitter"),
+        scrape_default.__init__(self, url, comment)
+
+    def get_biblio(self):
+        biblio = {
+            'author' : self.get_author(),
+            'title' : self.get_title(),
+            'date' : self.get_date(),
+            'permalink' : self.get_permalink(),
+            'excerpt' : self.get_excerpt(),
+            'comment' : self.comment,
+            'url' : self.url,
+            'organization': 'Twitter',
+        }
+        return biblio
+
+    def get_author(self):
+
+        author = self.HTML_p.xpath(
+            "//div[@data-user-id]/@data-name")[0]
+        return author.strip()
+
+    def get_title(self):
+
+        authororg_title = self.HTML_p.xpath("//title/text()")[0]
+        author_org, title = authororg_title.split(':')
+        #author = author_org.split('/')[1]
+        return title.strip()
+
+    def get_date(self):
+
+        date = self.HTML_p.xpath(
+            "//a[contains(@class,'tweet-timestamp')]/span/@data-time")[0]
+        date = datetime.fromtimestamp(int(date)).strftime('%Y%m%d')
+        return date
+
+    def get_excerpt(self):
+
+        excerpt = self.HTML_p.xpath(
+            "//p[contains(@class,'tweet-text')]/text()")[0]
+        return excerpt
+
+
 
 #######################################
 # Output loggers
@@ -881,6 +927,7 @@ def get_scraper(url, comment):
         ('http://dx.doi.org/', scrape_DOI),
         ('http://photo.net/site-help-forum/', scrape_photo_net),
         ('http://geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
+        ('https://twitter.com/', scrape_twitter),
         ('', scrape_default)     # default: make sure last
     )
 

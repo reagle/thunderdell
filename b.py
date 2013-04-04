@@ -201,6 +201,7 @@ class scrape_default(object):
             '''//meta[@name='authors']/@content''',
             '''//meta[@http-equiv='author']/@content''',
             '''//a[@rel='author']//text()''',
+            '''//*[@itemprop='author']/text()''', # engadget
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
             '''//*[contains(@class, 'byline')]//text()''',

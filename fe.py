@@ -1047,7 +1047,7 @@ def build_bib(file_name, output):
             print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
-        results_file.write('    <title>Pretty Mind Map></title></head><body><ul>\n')
+        results_file.write('    <title>Pretty Mind Map</title></head><body><ul>\n')
         for entry in list(entries.values()):
             opts.query = entry['identifier']
             emit_results(entries, opts.query, results_file)

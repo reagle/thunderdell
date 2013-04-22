@@ -150,8 +150,9 @@ def smart_punctuation_to_ascii(s):
         0x2019:0x27, 
         0x201C:0x22, 
         0x201D:0x22 }
-    s = s.translate(punctuation)
-    info("new %s s = '%s'" %(type(s), s))
+    if s:
+        s = s.translate(punctuation)
+        info("new %s s = '%s'" %(type(s), s))
     return s
 
     

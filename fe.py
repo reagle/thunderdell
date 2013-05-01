@@ -744,22 +744,13 @@ def emit_results(entries, query, results_file):
                 (CO_CL[color], hypertext))
 
     def pretty_print(node, entry=None, spaces='          '):
-        """Pretty print a node and descendents into indented HTML"""
+        """Pretty print a node and descendants into indented HTML"""
         # bug: nested titles are printed twice. 101217
         spaces = spaces + '  '  # indent the next list
-        if len(node) == 0:      # print only a child spinster node
-            if node.get('TEXT') is not None:
-                reverse_print(node, entry)
-        else:
-            # print a parent node
-            text = node.get('TEXT')
-            if 'LINK' in node.attrib:
-                hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
-            else:
-                hypertext = text
-            results_file.write('%s<li class="%s parent">%s\n'
-                % (spaces, CO_CL[node.get('COLOR','#000000')], hypertext))
-            # I should clean all of this up to use simpleHTMLwriter
+        if node.get('TEXT') is not None:
+            reverse_print(node, entry)
+        # I should clean all of this up to use simpleHTMLwriter
+        if len(node) > 0:      # print only a child spinster node
             results_file.write('%s<ul class="container">\n' % spaces)
             for child in node:
                 if CO_CL[child.get('COLOR')] == 'author': # title bug fixed? 110323

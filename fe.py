@@ -9,6 +9,10 @@
 
 """Extract a bibliography from a Freemind mindmap"""
 
+# TODO
+# *  use argparse; `--display` requires $TMPDIR
+# * authorless bibs 
+
 #20080509: tried to get authorless+editor entries to work.
     #1. author is often formatted differently, so no easy equivelent
     #2. editors currently have 'and' delimiters in mindmaps

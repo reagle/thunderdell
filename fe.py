@@ -11,12 +11,7 @@
 
 # TODO
 # *  use argparse; `--display` requires $TMPDIR
-# * authorless bibs 
 
-#20080509: tried to get authorless+editor entries to work.
-    #1. author is often formatted differently, so no easy equivelent
-    #2. editors currently have 'and' delimiters in mindmaps
-    #3. author-year styles don't like anon authors anyway
 #20090519: bibformat_title and pull_citation each use about ~7%
 #20120514: biblatex/biber doesn't accept BCE/negative, can use year
 
@@ -221,7 +216,7 @@ def create_bibtex_author(names):
 
     """
     full_names = []
-
+    
     for name in names:
         full_name = ''
         first, von, last, jr = name[0:4]
@@ -579,6 +574,11 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in dict_sorted_by_keys(entries):
+        # if author == org don't reorder the orgs name
+        if 'organization' in entry and \
+            entry['organization'] == entry['ori_author']:
+                bibtex_author = entry['ori_author'].replace(' ', '{\ }')
+                entry['author'] = [('', '', bibtex_author, ''),]
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         entry_type_copy = entry['entry_type']
@@ -608,7 +608,7 @@ def emit_biblatex(entries):
             if field in entry and entry[field] is not None:
                 info("short, field = '%s , %s'" %(short, field))
                 # skip these conditions
-                if field in ('identifier', 'entry_type', 'isbn'):
+                if field in ('identifier', 'entry_type', 'isbn', 'ori_author'):
                     continue
                 if field in ('note', 'url'):  
                     if any(ban for ban in EXCLUDE if ban in entry[field]):
@@ -847,6 +847,7 @@ def parse_names(names):
     suffixes = ("Jr.", "Sr.", "II", "III", "IV")
     names_p = []
     
+    info("names = '%s'" %(names))
     names_split = names.split(',')
     for name in names_split:
         info("name = '%s'" %(name))
@@ -959,7 +960,8 @@ def walk_freemind(node, mm_file, entries, links):
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
-                entry['author'] = parse_names(author_node.get('TEXT'))
+                entry['ori_author'] = author_node.get('TEXT')
+                entry['author'] = parse_names(entry['ori_author'])
                 author_highlighted = query_highlight(author_node, opts.query_c)
                 if author_highlighted is not None:
                     entry['_author_result'] = author_highlighted
@@ -1059,6 +1061,10 @@ def _test_results():
     """
     Tests the overall parsing of Mindmap XML and the relationships between authors with multiple titles and nested authors.
 
+    >>> call('fe ~/bin/fe/tests/authorless.mm > \
+    /tmp/authorless.txt; \
+    diff ~/bin/fe/tests/authorless.txt /tmp/authorless.txt', shell=True)
+    0
     >>> call('fe ~/bin/fe/tests/author-child.mm > \
     /tmp/author-child.txt; \
     diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt', shell=True)

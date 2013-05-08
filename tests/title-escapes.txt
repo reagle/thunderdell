@@ -1,5 +1,5 @@
 @online{Wikipedia2009beg,
-   author = {Wikipedia},
+   author = {{Wikipedia}},
    custom2 = {title-escapes.mm},
    day = {08},
    keyword = {test},

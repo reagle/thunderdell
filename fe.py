@@ -577,7 +577,7 @@ def emit_biblatex(entries):
         # if author == org don't reorder the orgs name
         if 'organization' in entry and \
             entry['organization'] == entry['ori_author']:
-                bibtex_author = entry['ori_author'].replace(' ', '{\ }')
+                bibtex_author = '{' + entry['ori_author'] +'}'
                 entry['author'] = [('', '', bibtex_author, ''),]
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
@@ -1137,7 +1137,7 @@ if __name__ == '__main__':
     parser.set_defaults(query_c=None)
     parser.add_option("-s", "--style", default="apalike",
                     help="use bibtex stylesheet (default: %default)", metavar="BST")
-    parser.add_option("-t", "--tests",
+    parser.add_option("-T", "--tests",
                     action="store_true", default=False,
                     help="run tests")
     parser.add_option('-V', '--verbose', dest='verbose', action='count',

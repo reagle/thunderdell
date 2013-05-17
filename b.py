@@ -939,7 +939,6 @@ def get_scraper(url, comment):
             info("scrape = %s " % scraper)
             return scraper(url, comment)    # creates instance
 
-
 DISPATCH_LOGGER = (
     (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
         'nifty:\t b URL n MESSAGE',
@@ -953,11 +952,11 @@ DISPATCH_LOGGER = (
     (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
         'console:\t b URL/DOI c MESSAGE',
         log2console),
-    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
-        'blog codex:\t b URL/DOI o MESSAGE',
+    (r'(?P<url>(\.|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
+        'blog codex:\t b URL o',
         blog_at_opencodex),
-    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
-        'blog goatee:\t b URL/DOI g MESSAGE',
+    (r'(?P<url>(\.|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
+        'blog goatee:\t b URL g',
         blog_at_goatee),
 )
 DISPATCH_LOGGER_EXPRESSIONS = '  ' + '\n  '.join(

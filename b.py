@@ -21,6 +21,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 # * archive URLs to f/old/`r=`
 
 import argparse
+from argparse import RawTextHelpFormatter
 import codecs
 from datetime import datetime
 from dateutil.parser import parse
@@ -939,30 +940,35 @@ def get_scraper(url, comment):
             return scraper(url, comment)    # creates instance
 
 
+DISPATCH_LOGGER = (
+    (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
+        'nifty:\t b URL n MESSAGE',
+        log2nifty),
+    (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
+        'work plan:\t b URL j KEYWORD MESSAGE [with ^ replaced by url title]',
+        log2work),
+    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
+        'mindmap:\t b URL m KEYWORD. ABSTRACT',
+        log2mm),
+    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
+        'console:\t b URL/DOI c MESSAGE',
+        log2console),
+    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
+        'blog codex:\t b URL/DOI o MESSAGE',
+        blog_at_opencodex),
+    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
+        'blog goatee:\t b URL/DOI g MESSAGE',
+        blog_at_goatee),
+)
+DISPATCH_LOGGER_EXPRESSIONS = '  ' + '\n  '.join(
+    logger[1] for logger in DISPATCH_LOGGER)
 def get_logger(options={re.IGNORECASE}):
     """
     Matches the option string to grammar and output.
     """
     params = None
-    dispatch_logger = (
-        # nifty: b URL n DESCRIPTION
-        (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
-            log2nifty),
-        # work: b URL j KEYWORD MESSAGE [with ^ replaced by url]
-        (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
-            log2work),
-        # mindmap: b URL m KEYWORD. ABSTRACT
-        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
-            log2mm),
-        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
-            log2console),
-        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
-            blog_at_opencodex),
-        (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
-            blog_at_goatee),
-    )
 
-    for regexp, logger in dispatch_logger:
+    for regexp, doc, logger in DISPATCH_LOGGER:
         if re.match(regexp, options):
             function = logger
             params = re.match(regexp, options, re.DOTALL|re.IGNORECASE).groupdict()
@@ -1030,7 +1036,8 @@ def yasn_publish(title, comment, tag):
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
-        prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]')
+        prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]',
+        description=DISPATCH_LOGGER_EXPRESSIONS, formatter_class=RawTextHelpFormatter)
     arg_parser.add_argument("-T", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")

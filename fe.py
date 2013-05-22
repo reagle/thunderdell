@@ -714,38 +714,36 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry):
         """Move the locator number to the end of the text with the Bibtex key"""
-        strong_pat = re.compile('^(?:<strong>)?([\d-]+)(?:</strong>)? (.*)')
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
-        matches = strong_pat.match(text)
-        if matches:
-            text = matches.group(2)
-            locator = matches.group(1)
-            if 'pagination' in entry:
-                if entry['pagination'] == 'section':
-                    locator = ', sec. ' + locator
-                else:
-                    print("unknown locator %s" % entry['pagination'])
-                    sys.exit
-            else:
-                if '-' in locator:
-                    locator = ', pp. ' + locator
-                else:
-                    locator = ', p. ' + locator
+        prefix = '&gt ' if color == CL_CO['quote'] else ''
+        if len(text) < 50: # don't reverse short texts
+            cite = ''
         else:
             locator = ''
+            locator_pat = re.compile('^(?:<strong>)?([\d-]+)(?:</strong>)? (.*)')
+            matches = locator_pat.match(text)
+            if matches:
+                text = matches.group(2)
+                locator = matches.group(1)
+                if 'pagination' in entry:
+                    if entry['pagination'] == 'section':
+                        locator = ', sec. ' + locator
+                    else:
+                        print("unknown locator %s" % entry['pagination'])
+                        sys.exit
+                else:
+                    if '-' in locator:
+                        locator = ', pp. ' + locator
+                    else:
+                        locator = ', p. ' + locator
+            cite = ' [@%s%s]' %(entry['identifier'].replace(' ',''), locator)
+
+        hypertext = text
         if 'LINK' in node.attrib:
             hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
-        else:
-            hypertext = text
-        if color == CL_CO['quote']:
-            results_file.write('    <li class="%s">&gt; %s [@%s%s]</li>\n' %
-                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
-        elif color not in (CL_CO['default'], CL_CO['cite']):
-            results_file.write('    <li class="%s">%s [@%s%s]</li>\n' %
-                (CO_CL[color], hypertext, entry['identifier'].replace(' ',''), locator))
-        else:
-            results_file.write('    <li class="%s">%s</li>\n' %
-                (CO_CL[color], hypertext))
+
+        results_file.write('    <li class="%s">%s%s%s</li>\n' %
+            (CO_CL[color], prefix, hypertext, cite))
 
     def pretty_print(node, entry=None, spaces='          '):
         """Pretty print a node and descendants into indented HTML"""
@@ -754,7 +752,7 @@ def emit_results(entries, query, results_file):
         if node.get('TEXT') is not None:
             reverse_print(node, entry)
         # I should clean all of this up to use simpleHTMLwriter
-        if len(node) > 0:      # print only a child spinster node
+        if len(node) > 0:     
             results_file.write('%s<ul class="container">\n' % spaces)
             for child in node:
                 if CO_CL[child.get('COLOR')] == 'author': # title bug fixed? 110323

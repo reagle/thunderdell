@@ -632,7 +632,7 @@ def emit_biblatex(entries):
                     value = create_bibtex_author(value)
                 if field in ('editor', 'translator'):
                     value = value.replace(', ', ' and ')
-                if field == 'month':
+                if opts.bibtex and field == 'month':
                     value = DIGIT2MONTH[str(int(value))] 
 
                 # escape latex brackets. 

@@ -531,6 +531,8 @@ def bibformat_title(title):
     "{Wikirage}: {What}'s Hot Now on {Wikipedia}"
     >>> bibformat_title('Re: "Suicide methods" article')
     "{Re}: `{Suicide} Methods' Article"
+    >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
+    "`{Am} {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
     """
     protected_title = cased_title = quoted_title = []
@@ -559,6 +561,8 @@ def bibformat_title(title):
     quoted_title = ''.join(cased_title)
 
     # convert quotes to LaTeX then convert doubles to singles within the title
+    if quoted_title[0] == '"': # First char is a quote
+        quoted_title = '``' + quoted_title[1:]
     quoted_title = quoted_title.replace(' "',' ``').replace(" '"," `") # open quote
     quoted_title = quoted_title.replace('" ',"'' ") # close quote
     quoted_title = quoted_title.replace('"',"''") # left-over close quote

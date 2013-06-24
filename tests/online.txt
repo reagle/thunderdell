@@ -16,7 +16,7 @@
    author = {Reagle, Joseph},
    custom2 = {online.mm},
    journal = {M/C: A Journal of Media and Culture},
-   month = {jul},
+   month = {07},
    number = {3},
    title = {{Open} Content Communities},
    url = {http://journal.media-culture.org.au/0406/06_Reagle.rft.php},

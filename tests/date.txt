@@ -2,7 +2,7 @@
    author = {A1},
    custom2 = {date.mm},
    day = {05},
-   month = {jul},
+   month = {07},
    title = {{T1}},
    url = {http://example.com/},
    urldate = {2004-07-10},
@@ -12,7 +12,7 @@
    author = {A1},
    custom2 = {date.mm},
    day = {15},
-   month = {jun},
+   month = {06},
    title = {{T2}},
    year = {2005},
 }

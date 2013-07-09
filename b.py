@@ -277,8 +277,9 @@ class scrape_default(object):
         title = self.get_title()
         critical("title = '%s'" %(title))
         org = self.get_org()
-        DELIMTER = re.compile('([-\|:;«])') # 
+        DELIMTER = re.compile(u'([-\|:;—«])') # 
         parts = DELIMTER.split(title)
+        info("parts = '%s'" %(parts))
         if len(parts) >= 2:
             beginning, end = ''.join(parts[0:-2]), parts[-1]
             critical("beginning = %s, end = %s" %(beginning, end))

@@ -1,0 +1,14 @@
+@misc{Org1995to,
+   author = {{Some Org}},
+   custom2 = {authorless.mm},
+   organization = {Some Org},
+   title = {{Title} One},
+   year = {1995},
+}
+@misc{Turner1996tt,
+   author = {Turner, Bob},
+   custom2 = {authorless.mm},
+   organization = {A6},
+   title = {{Title} Two},
+   year = {1996},
+}

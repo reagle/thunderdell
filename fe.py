@@ -60,7 +60,9 @@ DIGIT2MONTH = dict((v,k) for k, v in list(MONTH2DIGIT.items()))
 
 # happy to keep using bibtex:address alias of bibtex:location
 # keep t, ot, and et straight
-BIBLATEX_SHORTCUTS = OrderedDict({'id':'identifier', 
+BIB_SHORTCUTS = OrderedDict({
+                # these are from biblatex
+                'id':'identifier', 
                 'a':'address',
                 'ad':'addendum',
                 'an':'annotation',
@@ -97,11 +99,21 @@ BIBLATEX_SHORTCUTS = OrderedDict({'id':'identifier',
                 'url':'url',
                 'urld':'urldate',
                 've':'venue',
-                'c3':'catalog', 'c4':'custom4', 'c5':'custom5'})
+                'c3':'catalog', 'c4':'custom4', 'c5':'custom5',
+                # title (csl:container) fields that also give type 
+                # hints towards the richer csl:types
+                'cj':'containing_journal',
+                'cm':'containing_magazine',
+                'cn':'containing_newspaper',
+                'cd':'containing_dictionary',
+                'cy':'containing_encyclopedia',
+                'cb':'containing_blog',
+                'cw':'containing_web',
+                })
 
-BIBLATEX_FIELDS = dict([(field, short) for short, field in list(BIBLATEX_SHORTCUTS.items())])
+BIB_FIELDS = dict([(field, short) for short, field in list(BIB_SHORTCUTS.items())])
 
-BIBLATEX_TYPES = ('article',
+BIB_TYPES = ('article',
                 'book',
                 'booklet',
                 'collection',# biblatex:collection replace conferece
@@ -117,7 +129,28 @@ BIBLATEX_TYPES = ('article',
                 'patent',
                 'periodical',
                 'proceedings',
-                'online')
+                'online',           # csl:webpage
+                # richer csl:types
+                'article-journal',
+                'article-magazine',
+                'article-newspaper',
+                'entry',
+                'entry-dictionary',
+                'entry-encyclopedia',
+                'post',
+                'post-weblog'
+                )
+
+BIBLATEX_FIELDS = [
+ 'addendum', 'address', 'annotation', 'author', 'booktitle', 
+ 'catalog', 'custom1', 'custom2', 'custom4', 'custom5', 'chapter', 
+ 'date', 'day', 'doi', 'edition', 'editor', 'entry_type', 'eventtitle', 
+ 'howpublished', 'identifier', 'institution', 'isbn', 'issue', 'journal', 
+ 'keyword', 'month', 'note', 'number', 
+ 'organization', 'origdate', 'origlanguage', 'origpublisher''origyear', 
+ 'pages', 'pagination', 'publisher', 'pubstate', 
+ 'retype', 'school', 'series', 'shorttitle', 'title', 'translator', 'type', 
+ 'url', 'urldate', 'venue', 'volume', 'year']
 
 BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter', 
 'crossref', 'edition', 'editor', 'howpublished', 'institution', 'journal', 
@@ -387,7 +420,7 @@ def pull_citation(entry):
         cite_pairs = list(zip(*[iter(cites)] * 2))
         for short, value in cite_pairs:
             try:
-                entry[BIBLATEX_SHORTCUTS[short]] = value.strip()
+                entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
                 print(("Key error on ", error, entry['title'], entry['_mm_file']))
     else: 
@@ -504,7 +537,7 @@ def emit_wp_citation(entries):
         if 'identifier' in entry:
             opts.outfd.write('| ref = %s\n' % entry['title'])
             
-        for short, field in list(BIBLATEX_SHORTCUTS.items()):
+        for short, field in list(BIB_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in ( 'annotation', 'custom1', 'custom2',
@@ -586,6 +619,7 @@ def emit_biblatex(entries):
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         entry_type_copy = entry['entry_type']
+        # bibtex syntax accommodations
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
                 note = ' Available at: \url{%s}' % entry['url']
@@ -606,12 +640,34 @@ def emit_biblatex(entries):
                 if token in entry:
                     del entry[token] 
 
+        # CSL type and field conversions
+        info("entry = %s" %entry)
+        for field in ('containing_blog', 'containing_web'):
+            if field in entry:
+                entry_type_copy = 'online'
+                entry['organization'] = entry[field]
+                del entry[field]
+                continue
+        for field in ('containing_journal', 'containing_magazine', 
+                        'containing_newspaper'):
+            if field in entry:
+                entry_type_copy = 'article'
+                entry['journal'] = entry[field]
+                del entry[field]
+                continue
+        for field in ('containing_dictionary', 'containing_encyclopedia'):
+            if field in entry:
+                entry_type_copy = 'inreference'
+                entry['booktitle'] = entry[field]
+                del entry[field]
+                continue
+
         opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in sorted(BIBLATEX_SHORTCUTS.items(), key=lambda t: t[1]):
+        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 info("short, field = '%s , %s'" %(short, field))
-                # skip these conditions
+                # skip these fields
                 if field in ('identifier', 'entry_type', 'isbn', 'ori_author'):
                     continue
                 if field in ('note', 'url'):  
@@ -1186,8 +1242,8 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if opts.fields:
-        pretty_tabulate_list(BIBLATEX_TYPES)
-        pretty_tabulate_dict(BIBLATEX_SHORTCUTS)
+        pretty_tabulate_list(BIB_TYPES)
+        pretty_tabulate_dict(BIB_SHORTCUTS)
         sys.exit()
     if opts.display:
         opts.bibtex = True

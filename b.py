@@ -685,9 +685,9 @@ def log2mm(biblio):
             del biblio[token] 
     citation = ''
     for key, value in biblio.items():
-        if key in fe.BIBLATEX_FIELDS:
+        if key in fe.BIB_FIELDS:
             info("key = %s value = %s" %(key, value))
-            citation += '%s=%s ' % (fe.BIBLATEX_FIELDS[key], value)
+            citation += '%s=%s ' % (fe.BIB_FIELDS[key], value)
     citation += 'r=%s ' % date_read
     if keyword:
         keyword = KEY_SHORTCUTS.get(keyword, keyword)
@@ -1011,7 +1011,7 @@ def do_console_annotation(biblio):
             # 2 refs to an iterable are '*' unpacked and rezipped
             cite_pairs = list(zip(*[iter(cites)] * 2))
             for short, value in cite_pairs:
-                biblio[fe.BIBLATEX_SHORTCUTS[short]] = value.strip()
+                biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
         else:
             console_annotations += '\n\n' + line
     if biblio['excerpt']:

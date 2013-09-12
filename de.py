@@ -80,14 +80,14 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 fdo.write(u"""  <node COLOR="#090f6b" TEXT="%s">\n"""
                     % clean(entry['title']))
 
-            #print '***', BIBLATEX_FIELDS
+            #print '***', BIB_FIELDS
             for token, value in sorted(entry.items()):
                 if token not in ('author', 'title', 'url'):
-                    if token in BIBLATEX_SHORTCUTS:
+                    if token in BIB_SHORTCUTS:
                         t, v = token.lower(),value
                     else:
-                        if token.lower() in BIBLATEX_FIELDS:
-                            t, v = BIBLATEX_FIELDS[token.lower()], value
+                        if token.lower() in BIB_FIELDS:
+                            t, v = BIB_FIELDS[token.lower()], value
                         else:
                             print "* Unknown token '%s' in %s" %(token, entry['author'])
                             sys.exit
@@ -197,8 +197,8 @@ def check(text, fdo):
 if __name__ == "__main__":
 ## Parse the command line arguments for optional message and files.
 
-    from fe import BIBLATEX_SHORTCUTS   # a dict of shotcuts yeilding a field
-    from fe import BIBLATEX_FIELDS      # a dict of a field yielding its shortcut
+    from fe import BIB_SHORTCUTS   # a dict of shotcuts yeilding a field
+    from fe import BIB_FIELDS      # a dict of a field yielding its shortcut
 
     import chardet, codecs, getopt, os, subprocess, sys
 

@@ -563,11 +563,11 @@ def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
     See http://nwalsh.com/tex/texhelp/bibtx-24.html
     >>> bibformat_title("Wikirage: What's hot now on Wikipedia")
-    "{Wikirage}: {What}'s Hot Now on {Wikipedia}"
+    "{Wikirage:} {What's} Hot Now on {Wikipedia}"
     >>> bibformat_title('Re: "Suicide methods" article')
-    "{Re}: `{Suicide} Methods' Article"
+    "{Re:} `{Suicide} Methods' Article"
     >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
-    "`{Am} {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
+    "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
     """
     protected_title = cased_title = quoted_title = []
@@ -575,14 +575,26 @@ def bibformat_title(title):
     articles = ['a', 'an', 'the']
     conjunctions = ['and', 'but', 'for', 'or', 'nor']
     contractions = ['s', 't', 've', 're']   # following apostrophe
-    others = ['18th', '19th', '20th', '21st']
+    others = []
     prepositions = 'aboard about above across after against along among around as at before behind below beneath beside  between beyond but by concerning despite down during except for from in  into like near of off on onto out outside over past per regarding since through throughout till to toward under underneath until up  upon vs. versus with within without'.split()
 
     words2ignore = articles + conjunctions + contractions + others + prepositions
     words2do = ('oldid')
 
-    whitespace_pat = re.compile(r"(\W+)", re.UNICODE)  # (\W+)
+    whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE) # \W+
     words = whitespace_pat.split(title)
+    
+    chunk_pat = re.compile(r"""([-:])""", re.UNICODE)
+    def my_title(text):
+        '''title case after some chars -- but not ['.] like .title()'''
+    
+        text_list = list(text)
+        text_list[0] = text_list[0].upper()
+        for chunk in chunk_pat.finditer(text):
+            index = chunk.start()
+            if index+1 < len(text_list):
+                text_list[index+1] = text_list[index+1].upper()
+        return ''.join(text_list)
 
     for word in words:
         if len(word) > 0:
@@ -592,9 +604,9 @@ def bibformat_title(title):
             elif word in words2ignore:
                 cased_title.append(word)
             elif (word[0].isupper() or word in words2do):
-                cased_title.append('{' + word + '}')
+                cased_title.append('{' + my_title(word) + '}')
             else:
-                cased_title.append(word.title())
+                cased_title.append(my_title(word))
     quoted_title = ''.join(cased_title)
 
     # convert quotes to LaTeX then convert doubles to singles within the title

@@ -102,13 +102,14 @@ BIB_SHORTCUTS = OrderedDict({
                 'c3':'catalog', 'c4':'custom4', 'c5':'custom5',
                 # title (csl:container) fields that also give type 
                 # hints towards the richer csl:types
-                'cj':'containing_journal',
-                'cm':'containing_magazine',
-                'cn':'containing_newspaper',
-                'cd':'containing_dictionary',
-                'cy':'containing_encyclopedia',
-                'cb':'containing_blog',
-                'cw':'containing_web',
+                'cj':'c_journal', #containing_journal
+                'cm':'c_magazine',
+                'cn':'c_newspaper',
+                'cd':'c_dictionary',
+                'cy':'c_encyclopedia',
+                'cf':'c_forum', # for post
+                'cb':'c_blog',
+                'cw':'c_web',
                 })
 
 BIB_FIELDS = dict([(field, short) for short, field in list(BIB_SHORTCUTS.items())])
@@ -560,6 +561,7 @@ def emit_wp_citation(entries):
         
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
+    See http://nwalsh.com/tex/texhelp/bibtx-24.html
     >>> bibformat_title("Wikirage: What's hot now on Wikipedia")
     "{Wikirage}: {What}'s Hot Now on {Wikipedia}"
     >>> bibformat_title('Re: "Suicide methods" article')
@@ -585,10 +587,12 @@ def bibformat_title(title):
     for word in words:
         if len(word) > 0:
             info("word = '%s'" %(word))
-            if (word[0].isupper() or word in words2do):
-                cased_title.append('{' + word + '}')
+            if (word[0].isdigit()):
+                cased_title.append(word)
             elif word in words2ignore:
                 cased_title.append(word)
+            elif (word[0].isupper() or word in words2do):
+                cased_title.append('{' + word + '}')
             else:
                 cased_title.append(word.title())
     quoted_title = ''.join(cased_title)
@@ -642,20 +646,20 @@ def emit_biblatex(entries):
 
         # CSL type and field conversions
         info("entry = %s" %entry)
-        for field in ('containing_blog', 'containing_web'):
+        for field in ('c_blog', 'c_web', 'c_forum'):
             if field in entry:
                 entry_type_copy = 'online'
                 entry['organization'] = entry[field]
                 del entry[field]
                 continue
-        for field in ('containing_journal', 'containing_magazine', 
-                        'containing_newspaper'):
+        for field in ('c_journal', 'c_magazine', 
+                        'c_newspaper'):
             if field in entry:
                 entry_type_copy = 'article'
                 entry['journal'] = entry[field]
                 del entry[field]
                 continue
-        for field in ('containing_dictionary', 'containing_encyclopedia'):
+        for field in ('c_dictionary', 'c_encyclopedia'):
             if field in entry:
                 entry_type_copy = 'inreference'
                 entry['booktitle'] = entry[field]

@@ -587,7 +587,7 @@ def bibformat_title(title):
     for word in words:
         if len(word) > 0:
             info("word = '%s'" %(word))
-            if (word[0].isdigit()):
+            if not (word[0].isalpha()):
                 cased_title.append(word)
             elif word in words2ignore:
                 cased_title.append(word)

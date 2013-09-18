@@ -69,7 +69,7 @@ GENERAL_KEY_SHORTCUTS = {
         'pri': 'privacy',
         'spe': 'speech',
         'str': 'structure',
-        'tec' : 'technology',
+        'tec': 'technology',
         'tro': 'trolling',
         'zei': 'zeitgeist',
         }
@@ -830,18 +830,27 @@ def blog_at_opencodex(biblio):
     Start at a blog entry at opencodex
     '''
 
+    blog_title = blog_body = ''
     CODEX_ROOT = '/home/reagle/data/2web/reagle.org/joseph/content/'
+    this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
+    blog_title = ' '.join(biblio['title'].split(' ')[0:3])
     keyword, sep, entry = biblio['comment'].partition(' ')
-    blog_title, sep, blog_body = entry.partition('.')
+    if entry:
+        blog_title, sep, blog_body = entry.partition('.')
+        info("blog_title='%s' sep='%s' blog_body='%s'" %(
+            blog_title.strip(), sep, blog_body.strip()))
+    info("blog_title='%s'" %(blog_title))
 
     category = 'social'
     if keyword:
         category = KEY_SHORTCUTS.get(keyword, keyword)
     
     filename = blog_title.lower() \
+        .replace(':', '') \
         .replace(' ', '-') \
         .replace( "'", '')
-    filename = CODEX_ROOT + '%s/' % category + filename + '.md'
+    filename = '%s%s/%s-%s.md' % (CODEX_ROOT, category, this_year, filename)
+    info("filename = %s" %filename)
     if exists(filename):
         print("\nfilename '%s' already exists'" % filename)
         sys.exit()
@@ -954,7 +963,7 @@ DISPATCH_LOGGER = (
         'console:\t b URL/DOI c MESSAGE',
         log2console),
     (r'(?P<url>(\.|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
-        'blog codex:\t b URL o',
+        'blog codex:\t b URL o keyword[pra|soc|tec] title. body',
         blog_at_opencodex),
     (r'(?P<url>(\.|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
         'blog goatee:\t b URL g',

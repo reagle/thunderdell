@@ -576,10 +576,10 @@ def bibformat_title(title):
     conjunctions = ['and', 'but', 'for', 'or', 'nor']
     contractions = ['s', 't', 've', 're']   # following apostrophe
     others = []
-    prepositions = 'aboard about above across after against along among around as at before behind below beneath beside  between beyond but by concerning despite down during except for from in  into like near of off on onto out outside over past per regarding since through throughout till to toward under underneath until up  upon vs. versus with within without'.split()
+    prepositions = 'aboard about above across after against along among around as at before behind below beneath beside  between beyond but by concerning despite down during except for from in  into like near of off on onto out outside over past per regarding since through throughout till to toward under underneath until up  upon versus with within without'.split()
 
     words2ignore = articles + conjunctions + contractions + others + prepositions
-    words2do = ('oldid')
+    words2protect = ('vs.', 'oldid')
 
     whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE) # \W+
     words = whitespace_pat.split(title)
@@ -600,12 +600,19 @@ def bibformat_title(title):
         if len(word) > 0:
             info("word = '%s'" %(word))
             if not (word[0].isalpha()):
+                info("not (word[0].isalpha())")
                 cased_title.append(word)
             elif word in words2ignore:
+                info("word in words2ignore")
                 cased_title.append(word)
-            elif (word[0].isupper() or word in words2do):
+            elif (word in words2protect):
+                info("protecting lower '%s'" %(word))
+                cased_title.append('{' + word + '}')                
+            elif (word[0].isupper()):
+                info("protecting title '%s'" %(word))
                 cased_title.append('{' + my_title(word) + '}')
             else:
+                info("else nothing")
                 cased_title.append(my_title(word))
     quoted_title = ''.join(cased_title)
 
@@ -627,11 +634,15 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in dict_sorted_by_keys(entries):
-        # if author == org don't reorder the orgs name
+        # # if author == org don't reorder the orgs name
+        # if 'organization' in entry and \
+        #     entry['organization'] == entry['ori_author']:
+        #         bibtex_author = '{' + entry['ori_author'] +'}'
+        #         entry['author'] = [('', '', bibtex_author, ''),]
+        # if author == org skip author
         if 'organization' in entry and \
             entry['organization'] == entry['ori_author']:
-                bibtex_author = '{' + entry['ori_author'] +'}'
-                entry['author'] = [('', '', bibtex_author, ''),]
+                del entry['author']
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         entry_type_copy = entry['entry_type']

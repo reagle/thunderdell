@@ -112,6 +112,9 @@ BIB_SHORTCUTS = OrderedDict({
                 'cw':'c_web',
                 })
 
+CONTAINERS = [BIB_SHORTCUTS[x] for x in ['or', 'cj','cm', 'cn', 'cd', 
+                                         'cy', 'cf', 'cb', 'cw']]
+
 BIB_FIELDS = dict([(field, short) for short, field in list(BIB_SHORTCUTS.items())])
 
 BIB_TYPES = ('article',
@@ -245,7 +248,7 @@ def create_bibtex_author(names):
     The BibTex name parsing is best explained in 
     http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
 
-    >>> create_bibtex_author([('First Middle', 'von', 'Last', 'Jr.'),\
+    >>> create_bibtex_author([,\
         ('First', '', 'Last', 'II')])
     'von Last, Jr., First Middle and Last, II, First'
 
@@ -507,14 +510,52 @@ def pull_citation(entry):
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
 
-def emit_yaml(entries):
+def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
     
-    See: TBD
-
+    See: http://www.yaml.org/spec/1.2/spec.html
+        http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
+        
     """
-    pass
+    import yaml
 
+    def emit_json_people(people):
+                    
+        for person in people:
+            info("person = '%s'" %(' '.join(person)))
+            #bibtex ('First Middle', 'von', 'Last', 'Jr.')
+            #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
+            opts.outfd.write('  author:\n')
+            given, particle, family, suffix = [unescape_XML(chunk) 
+                                               for chunk in person]
+            if family:
+                opts.outfd.write('  - family: %s\n' % family)
+            if given:
+                opts.outfd.write('    given: %s\n' % given)
+            if suffix:
+                opts.outfd.write('    suffix: %s\n' % suffix)
+            if particle:
+                opts.outfd.write('    non-dropping-particle: %s\n' % particle)
+    
+    opts.outfd.write('---\n')
+    for entry in dict_sorted_by_keys(entries):
+        opts.outfd.write('- %s\n' % entry['identifier'])
+
+        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
+            if field in entry and entry[field] is not None:
+                info("short, field = '%s , %s'" %(short, field))
+                # skipped fields
+                if field in ('identifier', 'ori_author'):
+                    continue
+
+                # special format fields
+                if field == 'author':
+                    emit_json_people(entry['author'])
+                    continue
+
+                value = unescape_XML(entry[field])
+                opts.outfd.write('  %s: %s\n' % (field, value))
+    opts.outfd.write('...\n')
 
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{Citation}} template format.
@@ -643,19 +684,15 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in dict_sorted_by_keys(entries):
-        # # if author == org don't reorder the orgs name
-        # if 'organization' in entry and \
-        #     entry['organization'] == entry['ori_author']:
-        #         bibtex_author = '{' + entry['ori_author'] +'}'
-        #         entry['author'] = [('', '', bibtex_author, ''),]
-        # if author == org skip author
-        if 'organization' in entry and \
-            entry['organization'] == entry['ori_author']:
-                del entry['author']
+        entry_type_copy = entry['entry_type']
+        # if author is replicated in container then delete
+        container_values = [entry[c] for c in CONTAINERS if c in entry]
+        if entry['ori_author'] in container_values:
+            del entry['author']
+                
+        # bibtex syntax accommodations
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
-        entry_type_copy = entry['entry_type']
-        # bibtex syntax accommodations
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
                 note = ' Available at: \url{%s}' % entry['url']
@@ -1239,6 +1276,9 @@ if __name__ == '__main__':
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
                     help="emit Wikipedia {{Citation}} format")
+    parser.add_option("-y", "--YAML-CSL", default=False,
+                    action="store_true",
+                    help="emit YAML/CSL for use with pandoc")
     ## Defaulting to true because hs-citeproc (via bibutils) 
     ## doesn't grok partial dates such as d=2012
     #parser.add_option("-y", "--year", default=False,
@@ -1271,6 +1311,8 @@ if __name__ == '__main__':
         opts.outfd = codecs.open(output_fn, "w", "utf-8")
     if opts.WP_citation:
         output = emit_wp_citation
+    elif opts.YAML_CSL:
+        output = emit_yaml_csl
     else:
         output = emit_biblatex
     if opts.tests:

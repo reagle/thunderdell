@@ -1,5 +1,4 @@
 @misc{Org1995to,
-   author = {{Some Org}},
    custom2 = {authorless.mm},
    organization = {Some Org},
    title = {{Title} One},

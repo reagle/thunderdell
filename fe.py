@@ -138,6 +138,7 @@ BIB_TYPES = ('article',
                 'entry',
                 'entry-dictionary',
                 'entry-encyclopedia',
+                'legal_case',
                 'post',
                 'post-weblog'
                 )
@@ -505,6 +506,14 @@ def pull_citation(entry):
             oldid = '/?oldid=' + oldid
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
+
+def emit_yaml(entries):
+    """Emit citations in YAML/CSL for input to pandoc
+    
+    See: TBD
+
+    """
+    pass
 
 
 def emit_wp_citation(entries):

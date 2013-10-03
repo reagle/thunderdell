@@ -52,6 +52,10 @@ except:
     from xml.etree.cElementTree import parse, Element, SubElement, ElementTree
     useLXML = False
 
+#################################################################
+# Constants and mappings
+#################################################################
+
 MONTH2DIGIT = {'jan' : '1', 'feb' : '2', 'mar' : '3',
         'apr' : '4', 'may' : '5', 'jun' : '6',
         'jul' : '7', 'aug' : '8', 'sep' : '9',
@@ -81,7 +85,7 @@ BIB_SHORTCUTS = OrderedDict({
                 'mm':'custom2',     # mindmap file name
                 'nt':'note',
                 'or':'organization', 
-                'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher', 'oy':'origyear',
+                'ol':'origlanguage', 'od':'origdate', 'op':'origpublisher',
                 'ot':'type',        # organization's type
                 'ps':'pubstate',    # in press, submitted
                 'pp':'pages',
@@ -112,10 +116,10 @@ BIB_SHORTCUTS = OrderedDict({
                 'cw':'c_web',
                 })
 
+BIB_FIELDS = dict([(field, short) for short, field in list(BIB_SHORTCUTS.items())])
+
 CONTAINERS = [BIB_SHORTCUTS[x] for x in ['or', 'cj','cm', 'cn', 'cd', 
                                          'cy', 'cf', 'cb', 'cw']]
-
-BIB_FIELDS = dict([(field, short) for short, field in list(BIB_SHORTCUTS.items())])
 
 BIB_TYPES = ('article',
                 'book',
@@ -171,6 +175,10 @@ CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
     'quote': '#166799', 'paraphrase': '#8b12d6',
     'default': '#000000', None: None}
 CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
+
+#################################################################
+# Utility functions
+#################################################################
 
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
@@ -243,40 +251,9 @@ def dict_sorted_by_keys(adict):
         dbg("key = '%s'" %(key))
         yield adict[key]
 
-def create_bibtex_author(names):
-    """Return the parts of the name joined appropriately. 
-    The BibTex name parsing is best explained in 
-    http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
-
-    >>> create_bibtex_author([,\
-        ('First', '', 'Last', 'II')])
-    'von Last, Jr., First Middle and Last, II, First'
-
-    """
-    full_names = []
-    
-    for name in names:
-        full_name = ''
-        first, von, last, jr = name[0:4]
-        
-        if all(s.islower() for s in (first, last)): # {{hooks}, {bell}}
-            first = '{%s}' % first
-            last = '{%s}' % last
-
-        if von != '':
-            full_name += von + ' '
-        if last != '':
-            full_name += last
-        if jr != '':
-            full_name += ', ' + jr
-        if first != '':
-            full_name += ', ' + first
-        full_names.append(full_name)
-
-    full_names = " and ".join(full_names)
-    full_names = normalize_whitespace(full_names)
-    return full_names
-
+#################################################################
+# Entry construction 
+#################################################################
 
 ARTICLES = ('a', 'an', 'the')
 CONJUNCTIONS = ('and', 'but', 'for', 'nor', 'or')
@@ -362,47 +339,6 @@ def get_ident(entry, entries):
         ident = identity_increment(ident, entries)
     info("ident = %s '%s'" %(type(ident), ident))
     return unicode(ident)
-
-
-def guess_bibtex_type(entry):
-    """Guess whether the type of this entry is book, article, etc.
-
-    >>> guess_bibtex_type({'author': [('', '', 'Smith', '')],\
-        'booktitle': 'Proceedings of WikiSym 08',\
-        'publisher': 'ACM',\
-        'title': 'A Great Paper',\
-        'venue': 'Porto, Portugal California',\
-        'year': '2008'})
-    'inbook'
-
-    """
-    if 'entry_type' in entry:         # already has a type
-        return entry['entry_type']
-    else:
-        et = 'misc'
-        if 'eventtitle' in entry:           et = 'inproceedings'
-        elif 'booktitle' in entry:
-            if 'editor' in entry:             et = 'incollection'
-            elif 'organization' in entry:    et = 'inproceedings'
-            else:                            et = 'inbook'
-        elif 'journal' in entry:             et = 'article'
-
-        elif 'author' in entry and 'title' in entry and 'publisher' in entry:
-                                            et = 'book'
-        elif not 'author' in entry:
-            if 'venue' in entry:             et = 'proceedings'
-            if 'editor' in entry:             et = 'collection'
-        elif 'institution' in entry:
-            et = 'report' # if 'editor' in entry
-            if 'type' in entry:
-                if 'report' in entry['type'].lower(): et = 'report'
-                if 'thesis' in entry['type'].lower(): et = 'mastersthesis'
-                if 'dissertation' in entry['type'].lower(): et = 'phdthesis'
-        elif 'url' in entry:                et = 'online'
-        elif 'doi' in entry:                et = 'online'
-        elif 'year' not in entry:            et = 'unpublished'
-
-        return et
 
 def pull_citation(entry):
     """Modifies entry with parsed citation
@@ -510,105 +446,85 @@ def pull_citation(entry):
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
 
-def emit_yaml_csl(entries):
-    """Emit citations in YAML/CSL for input to pandoc
-    
-    See: http://www.yaml.org/spec/1.2/spec.html
-        http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
-        
-    """
-    import yaml
+#################################################################
+# Bibtex utilities
+#################################################################
 
-    def emit_json_people(people):
-                    
-        for person in people:
-            info("person = '%s'" %(' '.join(person)))
-            #bibtex ('First Middle', 'von', 'Last', 'Jr.')
-            #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
-            opts.outfd.write('  author:\n')
-            given, particle, family, suffix = [unescape_XML(chunk) 
-                                               for chunk in person]
-            if family:
-                opts.outfd.write('  - family: %s\n' % family)
-            if given:
-                opts.outfd.write('    given: %s\n' % given)
-            if suffix:
-                opts.outfd.write('    suffix: %s\n' % suffix)
-            if particle:
-                opts.outfd.write('    non-dropping-particle: %s\n' % particle)
-    
-    opts.outfd.write('---\n')
-    for entry in dict_sorted_by_keys(entries):
-        opts.outfd.write('- %s\n' % entry['identifier'])
+def create_bibtex_author(names):
+    """Return the parts of the name joined appropriately. 
+    The BibTex name parsing is best explained in 
+    http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
 
-        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
-            if field in entry and entry[field] is not None:
-                info("short, field = '%s , %s'" %(short, field))
-                # skipped fields
-                if field in ('identifier', 'ori_author'):
-                    continue
-
-                # special format fields
-                if field == 'author':
-                    emit_json_people(entry['author'])
-                    continue
-
-                value = unescape_XML(entry[field])
-                opts.outfd.write('  %s: %s\n' % (field, value))
-    opts.outfd.write('...\n')
-
-def emit_wp_citation(entries):
-    """Emit citations in Wikipedia's {{Citation}} template format.
-
-    See: http://en.wikipedia.org/wiki/Template:Cite
+    >>> create_bibtex_author([('First Middle', 'von', 'Last', 'Jr.'),\
+        ('First', '', 'Last', 'II')])
+    'von Last, Jr., First Middle and Last, II, First'
 
     """
-
-    def output_wp_names(field, names):
-        """Rejigger names for WP odd author and editor conventions."""
-        name_num = 0
-        for name in names:
-            name_num += 1
-            if field == 'author':
-                prefix = ''
-                suffix = name_num
-            elif field == 'editor':
-                prefix = 'editor' + str(name_num) + '-'
-                suffix = ''
-            opts.outfd.write(
-                '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
-            opts.outfd.write(
-                '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
+    full_names = []
     
-    for entry in dict_sorted_by_keys(entries):
-        opts.outfd.write('{{ Citation\n')
-        if 'booktitle' in entry:
-            opts.outfd.write('| ref = %s\n' % entry['title'])
-            entry['title'] = entry['booktitle']
-        if 'identifier' in entry:
-            opts.outfd.write('| ref = %s\n' % entry['title'])
-            
-        for short, field in list(BIB_SHORTCUTS.items()):
-            if field in entry and entry[field] is not None:
-                value = entry[field]
-                if field in ( 'annotation', 'custom1', 'custom2',
-                    'day', 'entry_type', 'booktitle', 'identifier', 
-                    'keyword', 'month', 'shorttitle'):
-                    continue
-                elif field == 'author':
-                    output_wp_names(field, entry[field])
-                    continue
-                elif field == 'editor':
-                    output_wp_names(field, parse_names(entry[field]))
-                    continue
-                elif field == 'urldate':
-                    field = 'accessdate'
-                elif field == 'address':
-                    field = 'place'
-                opts.outfd.write('| %s = %s\n' % (field, value))
-        opts.outfd.write("}}\n")
-
+    for name in names:
+        full_name = ''
+        first, von, last, jr = name[0:4]
         
+        if all(s.islower() for s in (first, last)): # {{hooks}, {bell}}
+            first = '{%s}' % first
+            last = '{%s}' % last
+
+        if von != '':
+            full_name += von + ' '
+        if last != '':
+            full_name += last
+        if jr != '':
+            full_name += ', ' + jr
+        if first != '':
+            full_name += ', ' + first
+        full_names.append(full_name)
+
+    full_names = " and ".join(full_names)
+    full_names = normalize_whitespace(full_names)
+    return full_names
+
+
+def guess_bibtex_type(entry):
+    """Guess whether the type of this entry is book, article, etc.
+
+    >>> guess_bibtex_type({'author': [('', '', 'Smith', '')],\
+        'booktitle': 'Proceedings of WikiSym 08',\
+        'publisher': 'ACM',\
+        'title': 'A Great Paper',\
+        'venue': 'Porto, Portugal California',\
+        'year': '2008'})
+    'inbook'
+
+    """
+    if 'entry_type' in entry:         # already has a type
+        return entry['entry_type']
+    else:
+        et = 'misc'
+        if 'eventtitle' in entry:           et = 'inproceedings'
+        elif 'booktitle' in entry:
+            if 'editor' in entry:             et = 'incollection'
+            elif 'organization' in entry:    et = 'inproceedings'
+            else:                            et = 'inbook'
+        elif 'journal' in entry:             et = 'article'
+
+        elif 'author' in entry and 'title' in entry and 'publisher' in entry:
+                                            et = 'book'
+        elif not 'author' in entry:
+            if 'venue' in entry:             et = 'proceedings'
+            if 'editor' in entry:             et = 'collection'
+        elif 'institution' in entry:
+            et = 'report' # if 'editor' in entry
+            if 'type' in entry:
+                if 'report' in entry['type'].lower(): et = 'report'
+                if 'thesis' in entry['type'].lower(): et = 'mastersthesis'
+                if 'dissertation' in entry['type'].lower(): et = 'phdthesis'
+        elif 'url' in entry:                et = 'online'
+        elif 'doi' in entry:                et = 'online'
+        elif 'year' not in entry:            et = 'unpublished'
+
+        return et
+
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
     See http://nwalsh.com/tex/texhelp/bibtx-24.html
@@ -676,6 +592,9 @@ def bibformat_title(title):
 
     return quoted_title
 
+#################################################################
+# Emitters
+#################################################################
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
@@ -780,6 +699,126 @@ def emit_biblatex(entries):
 
                 opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
+
+def emit_yaml_csl(entries):
+    """Emit citations in YAML/CSL for input to pandoc
+    
+    See: http://www.yaml.org/spec/1.2/spec.html
+        http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
+        
+    """
+    
+    def emit_yaml_people(people):
+        """yaml writer for authors and editors"""
+                    
+        for person in people:
+            info("person = '%s'" %(' '.join(person)))
+            #bibtex ('First Middle', 'von', 'Last', 'Jr.')
+            #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
+            opts.outfd.write('  author:\n')
+            given, particle, family, suffix = [unescape_XML(chunk) 
+                                               for chunk in person]
+            opts.outfd.write('  - family: %s\n' % family)
+            if given:
+                opts.outfd.write('    given: %s\n' % given)
+            if suffix:
+                opts.outfd.write('    suffix: %s\n' % suffix)
+            if particle:
+                opts.outfd.write('    non-dropping-particle: %s\n' % particle)
+
+    def emit_yaml_date(date):
+        """yaml writer for dates"""
+        info("date '%s'" %date)
+        year, month, day = date.split('-')
+        opts.outfd.write('    year: %s\n' %year)
+        opts.outfd.write('    month: %s\n' %month)
+        opts.outfd.write('    day: %s\n' %day)
+        
+    # begin YAML file
+    opts.outfd.write('---\n')
+    for entry in dict_sorted_by_keys(entries):
+        opts.outfd.write('- %s\n' % entry['identifier'])
+        opts.outfd.write('  type: %s\n' % entry['entry_type'])
+
+        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
+            if field in entry and entry[field] is not None:
+                info("short, field = '%s , %s'" %(short, field))
+                # skipped fields
+                if field in ('identifier', 'entry_type',
+                             'day', 'month', 'year',):
+                    continue
+
+                # special format fields
+                if field in ('author', 'editor'):
+                    emit_yaml_people(entry[field])
+                    continue
+                if field in ('date', 'origdate', 'urldate'):
+                    if field == 'date':
+                        opts.outfd.write('  issued:\n')
+                        emit_yaml_date(entry[field])
+                    if field == 'origdate':
+                        opts.outfd.write('  original-date:\n')
+                        emit_yaml_date(entry[field])
+                    if field == 'urldate':
+                        opts.outfd.write('  accessed:\n')
+                        emit_yaml_date(entry[field])
+                    continue
+
+                value = unescape_XML(entry[field])
+                opts.outfd.write('  %s: %s\n' % (field, value))
+    opts.outfd.write('...\n')
+
+
+def emit_wp_citation(entries):
+    """Emit citations in Wikipedia's {{Citation}} template format.
+
+    See: http://en.wikipedia.org/wiki/Template:Cite
+
+    """
+
+    def output_wp_names(field, names):
+        """Rejigger names for WP odd author and editor conventions."""
+        name_num = 0
+        for name in names:
+            name_num += 1
+            if field == 'author':
+                prefix = ''
+                suffix = name_num
+            elif field == 'editor':
+                prefix = 'editor' + str(name_num) + '-'
+                suffix = ''
+            opts.outfd.write(
+                '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
+            opts.outfd.write(
+                '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
+    
+    for entry in dict_sorted_by_keys(entries):
+        opts.outfd.write('{{ Citation\n')
+        if 'booktitle' in entry:
+            opts.outfd.write('| ref = %s\n' % entry['title'])
+            entry['title'] = entry['booktitle']
+        if 'identifier' in entry:
+            opts.outfd.write('| ref = %s\n' % entry['title'])
+            
+        for short, field in list(BIB_SHORTCUTS.items()):
+            if field in entry and entry[field] is not None:
+                value = entry[field]
+                if field in ( 'annotation', 'custom1', 'custom2',
+                    'day', 'entry_type', 'booktitle', 'identifier', 
+                    'keyword', 'month', 'shorttitle'):
+                    continue
+                elif field == 'author':
+                    output_wp_names(field, entry[field])
+                    continue
+                elif field == 'editor':
+                    output_wp_names(field, parse_names(entry[field]))
+                    continue
+                elif field == 'urldate':
+                    field = 'accessdate'
+                elif field == 'address':
+                    field = 'place'
+                opts.outfd.write('| %s = %s\n' % (field, value))
+        opts.outfd.write("}}\n")
 
 
 def emit_bibtex_html(file_name, opts):
@@ -954,6 +993,10 @@ def emit_results(entries, query, results_file):
         elif '_title_result' in entry:
             title = entry['_title_result'].get('TEXT')
             print_entry(identifier, author, title, url, MM_mm_file, base_mm_file)
+
+#################################################################
+# Mindmap parsing and bib building
+#################################################################
 
 def parse_names(names):
     """Do author parsing magic to figure out name components.

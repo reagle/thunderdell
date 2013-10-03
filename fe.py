@@ -717,9 +717,11 @@ def emit_yaml_csl(entries):
             #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
             given, particle, family, suffix = [unescape_XML(chunk) 
                                                for chunk in person]
-            opts.outfd.write('  - family: %s\n' % family)
+            opts.outfd.write('    family: %s\n' % family)
             if given:
-                opts.outfd.write('    given: %s\n' % given)
+                opts.outfd.write('    given:\n')
+                for given_part in given.split(' '):
+                    opts.outfd.write('    - %s\n' % given_part)
             if suffix:
                 opts.outfd.write('    suffix: %s\n' % suffix)
             if particle:
@@ -747,8 +749,8 @@ def emit_yaml_csl(entries):
             if field in entry and entry[field] is not None:
                 info("short, field = '%s , %s'" %(short, field))
                 # skipped fields
-                if field in ('identifier', 'entry_type',):
-                             #'day', 'month', 'year',):
+                if field in ('identifier', 'entry_type',
+                             'day', 'month', 'year',):
                     continue
 
                 # special format fields

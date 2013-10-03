@@ -715,7 +715,6 @@ def emit_yaml_csl(entries):
             info("person = '%s'" %(' '.join(person)))
             #bibtex ('First Middle', 'von', 'Last', 'Jr.')
             #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
-            opts.outfd.write('  author:\n')
             given, particle, family, suffix = [unescape_XML(chunk) 
                                                for chunk in person]
             opts.outfd.write('  - family: %s\n' % family)
@@ -729,10 +728,13 @@ def emit_yaml_csl(entries):
     def emit_yaml_date(date):
         """yaml writer for dates"""
         info("date '%s'" %date)
-        year, month, day = date.split('-')
-        opts.outfd.write('    year: %s\n' %year)
-        opts.outfd.write('    month: %s\n' %month)
-        opts.outfd.write('    day: %s\n' %day)
+        year, month, day = (date.split('-') +3*[None])[0:3]
+        if year:
+            opts.outfd.write('    year: %s\n' %year)
+        if month:
+            opts.outfd.write('    month: %s\n' %month)
+        if day:
+            opts.outfd.write('    day: %s\n' %day)
         
     # begin YAML file
     opts.outfd.write('---\n')
@@ -745,13 +747,23 @@ def emit_yaml_csl(entries):
             if field in entry and entry[field] is not None:
                 info("short, field = '%s , %s'" %(short, field))
                 # skipped fields
-                if field in ('identifier', 'entry_type',
-                             'day', 'month', 'year',):
+                if field in ('identifier', 'entry_type',):
+                             #'day', 'month', 'year',):
                     continue
 
                 # special format fields
                 if field in ('author', 'editor'):
-                    emit_yaml_people(entry[field])
+                    if field == 'author':
+                        opts.outfd.write('  author:\n')
+                        emit_yaml_people(entry[field])
+                    if field == 'editor':
+                        opts.outfd.write('  editor:\n')
+                        # bibtex legacy: replace 'and' delimited
+                        editors = entry[field]
+                        if ' and ' in entry[field]:
+                            editors.replace(' and ', ', ')
+                        editors_list = parse_names(editors)
+                        emit_yaml_people(editors_list)
                     continue
                 if field in ('date', 'origdate', 'urldate'):
                     if field == 'date':

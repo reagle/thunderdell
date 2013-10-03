@@ -736,8 +736,9 @@ def emit_yaml_csl(entries):
         
     # begin YAML file
     opts.outfd.write('---\n')
+    opts.outfd.write('references:\n')
     for entry in dict_sorted_by_keys(entries):
-        opts.outfd.write('- %s\n' % entry['identifier'])
+        opts.outfd.write('- id: %s\n' % entry['identifier'])
         opts.outfd.write('  type: %s\n' % entry['entry_type'])
 
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):

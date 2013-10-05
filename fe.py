@@ -836,66 +836,6 @@ def emit_wp_citation(entries):
         opts.outfd.write("}}\n")
 
 
-def emit_bibtex_html(file_name, opts):
-    """Emit a bibtex file, use bibtex2html, open result in browser
-
-    see bibtex2html http://www.lri.fr/~filliatr/bibtex2html/
-
-    """
-    fileName, extension = os.path.splitext(file_name)
-    citeFileName = fileName + '.rl'
-    if os.path.exists(citeFileName):
-        expr = ('bibtex2html -q -i -a %s -nokeywords '
-            '-rawurl %s --nobibsource -s %s -citefile %s -o %s %s'
-            % (opts.keys, opts.abstract, opts.style, citeFileName,
-            fileName +'.bib', fileName + '.bib'))
-    else:
-        expr = ('bibtex2html -d -q -i -a %s -nokeywords '
-            '-rawurl %s --nobibsource -s %s -o %s %s'
-            % (opts.keys, opts.abstract, opts.style,
-            fileName + '.bib', fileName + '.bib'))
-    print(expr)
-    os.putenv('TMPDIR', '.')
-    Popen(expr, shell=True)
-
-    fdi = codecs.open(fileName +'.bib.html', "r", "utf-8", "replace")
-    fdo = codecs.open(fileName +'.bib.html.tmp', "w", "utf-8", "replace")
-    old_text = fdi.read()
-    link_str = r"""from\..*?\[(.*?)\]"""
-    link_obj = re.compile(link_str, re.MULTILINE| re.DOTALL)
-    new_text = link_obj.sub(r"""from <\1>.""", old_text)
-    fdo.write(new_text)
-    fdi.close()
-    fdo.close()
-
-    os.rename(fileName +'.bib.html.tmp', fileName +'.bib.html')
-    Popen(opts.browser % (fileName + '.bib.html'), shell=True)
-
-
-RESULT_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-      "http://www.w3.org/TR/html4/loose.dtd">
-    <html>
-    <head>
-    <meta http-equiv="Content-Type"
-    content="text/html; charset=UTF-8" />
-    <link href="http://reagle.org/joseph/2005/01/mm-print.css"
-    rel="stylesheet" type="text/css" />
-"""
-
-RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
-    </head>
-    <body>
-        <div>
-            <form method="get" action="http://reagle.org/joseph/plan/search.cgi">
-            <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
-            name="query" maxlength="80" /> <input type="radio" name="sitesearch"
-            value="BusySponge" /> BS <input type="radio" name="sitesearch"
-            checked="checked" value="MindMap" /> MM</form>
-        </div>
-        <h2>Results for '%s'</h2>
-        <ul>
-"""
-
 def emit_results(entries, query, results_file):
     """Emit the results of the query"""
 
@@ -1288,9 +1228,6 @@ if __name__ == '__main__':
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.""")
-    parser.add_option("-a", "--abstract", default='-noabstract',
-                    action="store_const", const='-note annotation',
-                    help="include abstracts in bibtex2html HTML")
     parser.add_option("-b", "--bibtex", default=False,
                     action="store_true",
                     help="emit bibtex fields rather than biblatex")
@@ -1381,10 +1318,6 @@ if __name__ == '__main__':
         pretty_tabulate_list(BIB_TYPES)
         pretty_tabulate_dict(BIB_SHORTCUTS)
         sys.exit()
-    if opts.display:
-        opts.bibtex = True
-        fileName, extension = os.path.splitext(file_name)
-        opts.outfd = codecs.open(fileName + '.bib', 'w', 'utf-8', 'replace')
     if opts.query:
         #u'Péña' == unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')
         opts.query = unquote(opts.query).decode('utf-8')
@@ -1400,7 +1333,6 @@ else:
     class opts:
         cgi = True              # called from cgi
         chase = True            # Follow freemind links to other local maps
-        web = False             # Generate a html page using bibtex2html
         long_url = False        # Use short 'oldid' URLs for mediawikis
         online_urls_only = False # Emit urls for @online only
         pretty = False          # Print as HTML with citation at end

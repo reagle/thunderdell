@@ -762,8 +762,8 @@ def emit_yaml_csl(entries):
                         opts.outfd.write('  editor:\n')
                         # bibtex legacy: replace 'and' delimited
                         editors = entry[field]
-                        if ' and ' in entry[field]:
-                            editors.replace(' and ', ', ')
+                        #if ' and ' in entry[field]:
+                            #editors.replace(' and ', ', ')
                         editors_list = parse_names(editors)
                         emit_yaml_people(editors_list)
                     continue

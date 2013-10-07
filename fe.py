@@ -1114,6 +1114,30 @@ def walk_freemind(node, mm_file, entries, links):
     return entries, links
 
 
+RESULT_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+      "http://www.w3.org/TR/html4/loose.dtd">
+    <html>
+    <head>
+    <meta http-equiv="Content-Type"
+    content="text/html; charset=UTF-8" />
+    <link href="http://reagle.org/joseph/2005/01/mm-print.css"
+    rel="stylesheet" type="text/css" />
+"""
+
+RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
+    </head>
+    <body>
+        <div>
+            <form method="get" action="http://reagle.org/joseph/plan/search.cgi">
+            <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
+            name="query" maxlength="80" /> <input type="radio" name="sitesearch"
+            value="BusySponge" /> BS <input type="radio" name="sitesearch"
+            checked="checked" value="MindMap" /> MM</form>
+        </div>
+        <h2>Results for '%s'</h2>
+        <ul>
+"""
+
 def build_bib(file_name, output):
     """Collect the files to walk and invoke functions to build a bib"""
 

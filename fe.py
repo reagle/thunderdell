@@ -600,7 +600,9 @@ def guess_csl_type(entry):
         else:
             print("Unknown entry_type = %s" %et)
             sys.exit()
+    et = 'no-type'
     if any(c in entry for c in CONTAINERS):
+        info("looking at containers for %s" %entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'
         if 'c_newspaper' in entry:          et = 'article-newspaper'
@@ -610,7 +612,6 @@ def guess_csl_type(entry):
         if 'c_blog' in entry:               et = 'post-webblog'
         if 'c_web' in entry:                et = 'webpage'
     else:
-        et = 'no-type'
         if 'eventtitle' in entry:           et = 'paper-conference'
         elif 'booktitle' in entry:
             if 'editor' in entry:           # collection or incollection
@@ -636,7 +637,7 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
 
-        return et
+    return et
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -862,6 +863,7 @@ def emit_yaml_csl(entries):
 
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
+                value = unescape_XML(entry[field])
                 info("short, field = '%s , %s'" %(short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
@@ -889,8 +891,9 @@ def emit_yaml_csl(entries):
                         opts.outfd.write('  accessed:\n')
                         emit_yaml_date(entry[field])
                     continue
-
-                value = unescape_XML(entry[field])
+                info('CONTAINERS = %s field = %s' %(CONTAINERS, field))
+                if field in CONTAINERS:
+                    field = 'container-title'
                 opts.outfd.write('  %s: %s\n' % (field, value))
     opts.outfd.write('...\n')
 
@@ -1126,7 +1129,6 @@ def commit_entry(entry, entries):
         except:
             print ("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
             raise
-        #entry['entry_type'] = guess_bibtex_type(entry) 
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
 

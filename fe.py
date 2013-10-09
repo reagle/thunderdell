@@ -86,7 +86,7 @@ BIBLATEX_SHORTCUTS = OrderedDict([
         ('nt','note'),
         ('or','organization'), 
         ('ol','origlanguage'), ('od','origdate'), ('op','origpublisher'),
-        ('ot','type'),        # org's type of a manual or report, eg W3C REC
+        ('ot','type'),        # org's manual or report subtype, eg W3C REC
         ('ps','pubstate'),    # in press, submitted
         ('pp','pages'),
         ('pa','pagination'),
@@ -162,28 +162,29 @@ CSL_TYPES =  (
 
 BIB_TYPES = BIBLATEX_TYPES + CSL_TYPES
 
-CSL_BIBLATEX_MAPPING = OrderedDict([
+CSL_BIBLATEX_TYPE_MAP = OrderedDict([
         # ordering is important so in the reverse mapping online => webpage
-        ('article-journal',  'article'),
-        ('article-magazine', 'article'),
-        ('article-newspaper','article'),
-        ('article',          'article'),
-        ('book',             'book'),
-        ('chapter',          'incollection'),
-        ('entry',            'incollection'),
-        ('entry-dictionary', 'inreference'),
-        ('entry-encyclopedia','inreference'),
-        ('pamphlet',         'booklet'),
-        ('paper-conference', 'inproceedings'),
+        ('article-journal',     'article'),
+        ('article-magazine',    'article'),
+        ('article-newspaper',   'article'),
+        ('article',             'article'),
+        ('book',                'book'),
+        ('chapter',             'incollection'),
+        ('entry',               'incollection'),
+        ('entry-dictionary',    'inreference'),
+        ('entry-encyclopedia',  'inreference'),
+        ('legal_case',          'misc'),
+        ('pamphlet',            'booklet'),
+        ('paper-conference',    'inproceedings'),
         ('personal_communication','letter'),
-        ('post',             'online'),
-        ('post-weblog',      'online'),
-        ('thesis',           'thesis'),
-        ('webpage',          'online'),
+        ('post',                'online'),
+        ('post-weblog',         'online'),
+        ('thesis',              'thesis'),
+        ('webpage',             'online'),
         ])
 
-BIBLATEX_CSL_MAPPING = OrderedDict((v,k) for k, v in 
-                                   CSL_BIBLATEX_MAPPING.items())
+BIBLATEX_CSL_TYPE_MAP = OrderedDict((v,k) for k, v in 
+                                   CSL_BIBLATEX_TYPE_MAP.items())
 
 
 BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter', 
@@ -533,6 +534,17 @@ def guess_bibtex_type(entry):
 
     """
     if 'entry_type' in entry:         # already has a type
+        et = entry['entry_type']
+        if et in CSL_TYPES:
+            et = CSL_BIBLATEX_TYPE_MAP[et]
+        elif et in BIBLATEX_TYPES:
+            pass
+        else:
+            print("Unknown entry_type = %s" %et)
+            sys.exit()
+        return et 
+
+    if 'entry_type' in entry:         # already has a type
         return entry['entry_type']
     else:
         et = 'misc'
@@ -571,51 +583,58 @@ def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
     >>> guess_csl_type({'author': [('', '', 'Smith', '')],\
-        'booktitle': 'Proceedings of WikiSym 08',\
+        'eventtitle': 'Proceedings of WikiSym 08',\
         'publisher': 'ACM',\
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
         'year': '2008'})
-    'inbook'
+    'paper-conference'
 
     """
     if 'entry_type' in entry:         # already has a type
         et = entry['entry_type']
         if et in BIBLATEX_TYPES:
-            et = BIBLATEX_CSL_MAPPING[et]
+            return BIBLATEX_CSL_TYPE_MAP[et]
         elif et in CSL_TYPES:
-            pass
+            return et
         else:
             print("Unknown entry_type = %s" %et)
             sys.exit()
-        return et 
+    if any(c in entry for c in CONTAINERS):
+        if 'c_journal' in entry:            et = 'article-journal'
+        if 'c_magazine' in entry:           et = 'article-magazine'
+        if 'c_newspaper' in entry:          et = 'article-newspaper'
+        if 'c_dictionary' in entry:         et = 'entry-dictionary'
+        if 'c_encyclopedia' in entry:       et = 'entry-encyclopedia'
+        if 'c_forum' in entry:              et = 'post'
+        if 'c_blog' in entry:               et = 'post-webblog'
+        if 'c_web' in entry:                et = 'webpage'
     else:
         et = 'no-type'
-        if 'eventtitle' in entry:           et = 'inproceedings'
+        if 'eventtitle' in entry:           et = 'paper-conference'
         elif 'booktitle' in entry:
             if 'editor' in entry:           # collection or incollection
-                if 'chapter' in entry:
-                    et = 'incollection'
-                else:
-                    et= 'collection'
-            elif 'organization' in entry:    et = 'inproceedings'
-            else:                            et = 'inbook'
-        elif 'journal' in entry:             et = 'article'
+                if 'chapter' in entry:      et = 'chapter'
+                else:                       et = 'book'   # ? collection
+            elif 'organization' in entry:   et = 'paper-conference'
+            else:                           et = 'chapter'
+        elif 'journal' in entry:            et = 'article-journal'
 
         elif 'author' in entry and 'title' in entry and 'publisher' in entry:
                                             et = 'book'
         elif not 'author' in entry:
-            if 'venue' in entry:             et = 'proceedings'
-            if 'editor' in entry:             et = 'collection'
+            if 'venue' in entry:            et = 'book'         # ? proceedings
+            if 'editor' in entry:           et = 'book'         # ? collection
         elif 'institution' in entry:
-            et = 'report' # if 'editor' in entry
+            et = 'report'
             if 'type' in entry:
-                if 'report' in entry['type'].lower(): et = 'report'
-                if 'thesis' in entry['type'].lower(): et = 'mastersthesis'
-                if 'dissertation' in entry['type'].lower(): et = 'phdthesis'
-        elif 'url' in entry:                et = 'online'
-        elif 'doi' in entry:                et = 'online'
-        elif 'year' not in entry:            et = 'unpublished'
+                org_subtype = entry['type'].lower()
+                if 'report' in org_subtype: et = 'report'
+                if 'thesis' in org_subtype or 'dissertation' in org_subtype:
+                                            et = 'thesis'
+        elif 'url' in entry:                et = 'webpage'
+        elif 'doi' in entry:                et = 'article'
+        elif 'year' not in entry:           et = 'manuscript'
 
         return et
 
@@ -697,7 +716,8 @@ def emit_biblatex(entries):
     dbg("entries = '%s'" %(entries))
     
     for entry in dict_sorted_by_keys(entries):
-        entry_type_copy = entry['entry_type']
+        entry_type = guess_bibtex_type(entry)
+        entry_type_copy = entry_type
         # if author is replicated in container then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
@@ -714,9 +734,9 @@ def emit_biblatex(entries):
                         "%d %B %Y")
                     note += ' [Accessed %s]' % urldate
                 entry['note'] = entry.setdefault('note', '') + note
-            if entry['entry_type'] == 'online':
+            if entry_type == 'online':
                 entry_type_copy = 'misc'
-            if entry['entry_type'] == 'report':
+            if entry_type == 'report':
                 entry_type_copy = 'techreport'
         if opts.bibtex or opts.year:
             if 'date' in entry: 
@@ -764,7 +784,7 @@ def emit_biblatex(entries):
                         continue # no url, no 'read on'
                     # if online_only and not (online or online journal) then skip
                     if opts.online_urls_only and not (
-                        entry['entry_type'] == 'online' or
+                        entry_type == 'online' or
                         any(j for j in ONLINE_JOURNALS if j in entry['url'])):
                         continue
                 # skip fields not in bibtex
@@ -836,8 +856,9 @@ def emit_yaml_csl(entries):
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
     for entry in dict_sorted_by_keys(entries):
+        entry_type = guess_csl_type(entry)
         opts.outfd.write('- id: %s\n' % entry['identifier'])
-        opts.outfd.write('  type: %s\n' % entry['entry_type'])
+        opts.outfd.write('  type: %s\n' % entry_type)
 
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
@@ -1105,7 +1126,7 @@ def commit_entry(entry, entries):
         except:
             print ("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
             raise
-        entry['entry_type'] = guess_bibtex_type(entry) 
+        #entry['entry_type'] = guess_bibtex_type(entry) 
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
 

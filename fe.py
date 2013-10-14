@@ -551,21 +551,16 @@ def guess_bibtex_type(entry):
         if 'eventtitle' in entry:           
             if 'author' in entry:           et = 'inproceedings'
             else:                           et = 'proceedings'
-        elif 'booktitle' in entry:
-            if 'editor' in entry:           # collection or incollection
-                if 'chapter' in entry:
-                    et = 'incollection'
-                else:
-                    et= 'collection'
-            elif 'organization' in entry:    et = 'inproceedings'
-            else:                            et = 'inbook'
+        elif 'booktitle' in entry:          
+            if not 'editor' in entry:       et = 'inbook'
+            else:
+                if 'author' in entry or \
+                    'chapter' in entry:      et = 'incollection'
+                else:                        et= 'collection'
         elif 'journal' in entry:             et = 'article'
 
         elif 'author' in entry and 'title' in entry and 'publisher' in entry:
                                             et = 'book'
-        elif not 'author' in entry:
-            if 'venue' in entry:             et = 'proceedings'
-            if 'editor' in entry:            et = 'collection'
         elif 'institution' in entry:
             et = 'report' 
             if 'type' in entry:

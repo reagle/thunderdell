@@ -792,7 +792,7 @@ def log2work(biblio):
 
     insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ol>)')
 
-    newcontent = insertion_regexp.sub(u'\\1 \n  %s' %
+    newcontent = insertion_regexp.sub(u'\\1 \n  %s\n' %
         log_item, content, re.DOTALL|re.IGNORECASE)
     if newcontent:
         fd = codecs.open(ofile, 'w', 'utf-8', 'replace')

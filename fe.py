@@ -370,6 +370,8 @@ def get_ident(entry, entries):
     ident = ident.replace('.','').replace('<strong>','').replace('</strong>','')
     info("ident = %s '%s'" %(type(ident), ident))
     ident = strip_accents(ident) # bibtex doesn't handle unicode in keys well
+    if ident[0].isdigit(): # pandoc forbids keys starting with digits
+        ident = 'a' + ident
 
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision

@@ -485,6 +485,11 @@ def pull_citation(entry):
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
 
+    if 'editor' in entry:
+        entry['editor'] = parse_names(entry['editor'])
+    if 'translator' in entry:
+        entry['translator'] = parse_names(entry['translator'])
+
 #################################################################
 # Bibtex utilities
 #################################################################
@@ -712,7 +717,7 @@ def emit_biblatex(entries):
     EXCLUDE = ('search?q=cache', 'proquest') # 'books.google', '.amazon', 
     ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
     dbg("entries = '%s'" %(entries))
-    
+
     for entry in dict_sorted_by_keys(entries):
         entry_type = guess_bibtex_type(entry)
         entry_type_copy = entry_type
@@ -720,7 +725,7 @@ def emit_biblatex(entries):
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
             del entry['author']
-                
+
         # bibtex syntax accommodations
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
@@ -743,6 +748,13 @@ def emit_biblatex(entries):
             for token in ('year', 'month', 'day'):
                 if token in entry:
                     del entry[token] 
+
+        # if an edited collection, remove author and booktitle
+        if all(f in entry for f in ('author', 'editor', 'title', 'booktitle')): 
+            if entry['author'] == entry['editor'] and \
+                entry['title'] == entry['booktitle']:
+                    del entry['author']
+                    del entry['booktitle']
 
         # CSL type and field conversions
         info("entry = %s" %entry)
@@ -792,10 +804,8 @@ def emit_biblatex(entries):
                 # if entry[field] not a proper string, make it so
                 value = unescape_XML(entry[field]) # remove xml entities
                 info("value = %s; type = %s" %(value, type(value)))
-                if field == 'author':
+                if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
-                if field in ('editor', 'translator'):
-                    value = value.replace(', ', ' and ')
                 if opts.bibtex and field == 'month':
                     value = DIGIT2MONTH[str(int(value))] 
 
@@ -868,14 +878,9 @@ def emit_yaml_csl(entries):
                     continue
 
                 # special format fields
-                if field in ('author', 'editor'):
-                    if field == 'author':
-                        opts.outfd.write('  author:\n')
-                        emit_yaml_people(entry[field])
-                    if field == 'editor':
-                        opts.outfd.write('  editor:\n')
-                        emit_yaml_people(parse_names(entry[field]))
-                        emit_yaml_people(editors_list)
+                if field in ('author', 'editor', 'translator'):
+                    opts.outfd.write('  %s:\n' %field)
+                    emit_yaml_people(entry[field])
                     continue
                 if field in ('date', 'origdate', 'urldate'):
                     if field == 'date':

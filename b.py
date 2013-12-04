@@ -31,7 +31,7 @@ from lxml import etree
 from os.path import exists # abspath, basename, splitext
 import re
 import string
-from subprocess import Popen 
+from subprocess import call, Popen 
 import sys
 import time
 # personal Web utility module
@@ -802,7 +802,7 @@ def log2work(biblio):
         print_usage("Sorry, output regexp subsitution failed.")
 
     if args.publish:
-        yasn_publish(title, comment.replace('^', url), tag)
+        yasn_publish(comment.replace('^', ''), title, url, tag)
 
 
 def log2console(biblio):
@@ -811,21 +811,27 @@ def log2console(biblio):
     '''
 
     keyword, sep, abstract = biblio['comment'].partition(' ')
-    del biblio['comment']
     if keyword:
         biblio['keyword'] = KEY_SHORTCUTS.get(keyword, keyword)
-    
+    else:
+        biblio['keyword'] = ''
+        
     print('\n')
-    print("author = %s" % biblio['author']),
-    print("title = %s" % biblio['title']),
-    print("date = %s" % biblio['date']),
-    SKIP_TOKENS = ('author', 'title', 'date', 'permalink', 'type', 'excerpt') 
-    for key,value in biblio.items():
-        if key not in SKIP_TOKENS:
-            print("%s = %s" % (key, value.strip())),
-    print('\n')
-    print(biblio['excerpt']),
-    print('\n')
+    TOKENS = ('author', 'title', 'url', 'date', 'comment', 'excerpt')
+    print(biblio)
+    for token in TOKENS:
+        if token in biblio:
+            print('%s = %s' % (token, biblio[token]))
+        else:
+            if token == 'url':
+                biblio['url'] = ''
+            if token == 'title':
+                biblio['title'] = ''
+
+    if args.publish:
+        yasn_publish(abstract.replace('^', ''), 
+                     biblio['title'], biblio['url'], biblio['keyword'])
+
 
 def blog_at_opencodex(biblio):
     '''
@@ -1035,15 +1041,20 @@ def do_console_annotation(biblio):
         print('%s; annotate?' % get_tentative_ident(biblio))
     return biblio
         
-def yasn_publish(title, comment, tag):
-    title_room = 134 - len(comment) - len(tag)
-    info("%d < %d" %(len(title), title_room))
-    if len(title) > title_room:
-        title = title[0:title_room] + '...'
-    message = "%s %s #%s" %(title, comment, tag)
+def yasn_publish(comment, title, url, tag):
+    comment = comment.strip() + ': ' + title.strip()
+    url = url.strip()
+    tag = tag.strip()
+    comment_room = 134 - len(comment) - len(tag)
+    info("%d < %d" %(len(comment), comment_room))
+    if len(comment) > comment_room:
+        comment = comment[0:comment_room] + '...'
+    message = "%s %s #%s" %(comment, url, tag)
     info(len(message))
     print("twitter set '%s'" %message)
+    call(['twidge', 'update', '%s' %message]) # tweet via twidge
 
+    
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
@@ -1097,7 +1108,3 @@ if __name__ == "__main__":
     else:
         biblio = {'title' : '', 'url': '', 'comment' : comment}
     logger(biblio)
-
-    #if args.publish:
-        #yasn_publish(biblio)
-        

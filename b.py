@@ -272,9 +272,9 @@ class scrape_default(object):
 
     def split_title_org(self):
         '''Separate the title by a delimiter and test if latter half is the
-        organization (if it has certain words (blog) or is it short)'''
+        organization (if it has certain words (blog) or is too short)'''
         
-        ORG_WORDS = ['blog']
+        ORG_WORDS = ['blog', 'lab', 'center']
         
         title = self.get_title()
         critical("title = '%s'" %(title))
@@ -283,15 +283,19 @@ class scrape_default(object):
         parts = DELIMTER.split(title)
         info("parts = '%s'" %(parts))
         if len(parts) >= 2:
-            beginning, end = ''.join(parts[0:-2]), parts[-1]
+            beginning, end = parts[0], parts[-1]
+            title, org = beginning, end
             critical("beginning = %s, end = %s" %(beginning, end))
-            title_lower = title.lower()
-            if any(org_word in title_lower for org_word in ORG_WORDS):
-                return sentence_case(beginning.strip()), end.strip().title()
             end_ratio = float(len(end)) / len(beginning + end)
-            critical(" %d / %d = %.2f" %( len(end),  len(beginning + end), end_ratio))
-            if end_ratio <= 0.35 or len(end) <= 20:
-                return sentence_case(beginning.strip()), end.strip().title()
+            critical(" %d / %d = %.2f" %(
+                len(end), len(beginning + end), end_ratio))
+            # if beginning has org_word or end is very large: switch
+            if end_ratio >= 3 or \
+                    any(word.lower() in beginning for word in ORG_WORDS):
+                title = end
+                org = beginning
+            title = sentence_case(title.strip())
+            org = org.strip()
         return title, org
 
     def get_title(self):
@@ -1042,16 +1046,18 @@ def do_console_annotation(biblio):
     return biblio
         
 def yasn_publish(comment, title, url, tag):
-    comment = comment.strip() + ': ' + title.strip()
+    comment = comment.strip()
+    comment_delim = ": " if comment else ""
+    comment = comment + comment_delim + title.strip()
     url = url.strip()
     tag = tag.strip()
-    comment_room = 134 - len(comment) - len(tag)
+    comment_room = 140 - len(comment) - len(tag) - len(url)
     info("%d < %d" %(len(comment), comment_room))
-    if len(comment) > comment_room:
-        comment = comment[0:comment_room] + '...'
+    if comment_room < 0:    # the comment is too big
+        comment = comment[0:-17] + '...' # url will be shorten to 20 chars
     message = "%s %s #%s" %(comment, url, tag)
-    info(len(message))
-    print("twitter set '%s'" %message)
+    info('message length = %s' %len(message))
+    print("tweeted '%s' %s" %(message, comment_room))
     call(['twidge', 'update', '%s' %message]) # tweet via twidge
 
     

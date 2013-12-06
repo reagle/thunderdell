@@ -190,7 +190,7 @@ class scrape_default(object):
             'comment' : self.comment,
             'url' : self.url,
         }
-        biblio['title'], biblio['organization'] = self.split_title_org()
+        biblio['title'], biblio['c_web'] = self.split_title_org()
         return biblio
 
     def get_author(self):
@@ -380,7 +380,8 @@ class scrape_DOI(scrape_default):
             'comment' : self.comment,
         }
         for key, value in json_bib.items():
-            info("key = '%s' value = '%s' type(value) = '%s'" %(key,value,type(value)))
+            info("key = '%s' value = '%s' type(value) = '%s'" %(
+                key, value, type(value)))
             if value in (None, [], ''):
                 pass
             elif key == 'author':

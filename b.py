@@ -276,24 +276,35 @@ class scrape_default(object):
         
         ORG_WORDS = ['blog', 'lab', 'center']
         
-        title = self.get_title()
-        critical("title = '%s'" %(title))
-        org = self.get_org()
-        DELIMTER = re.compile(u'([-\|:;—«])') # 
-        parts = DELIMTER.split(title)
+        title = title_ori = self.get_title()
+        critical("title_ori = '%s'" %(title_ori))
+        org = org_ori = self.get_org()
+        critical("org_ori = '%s'" %(org_ori))
+        DELIMTER = re.compile(u'([\|:;—«])') # 
+        parts = DELIMTER.split(title_ori)
         info("parts = '%s'" %(parts))
         if len(parts) >= 2:
             beginning, end = parts[0], parts[-1]
             title, org = beginning, end
-            critical("beginning = %s, end = %s" %(beginning, end))
-            end_ratio = float(len(end)) / len(beginning + end)
-            critical(" %d / %d = %.2f" %(
-                len(end), len(beginning + end), end_ratio))
-            # if beginning has org_word or end is very large: switch
-            if end_ratio >= 3 or \
-                    any(word.lower() in beginning for word in ORG_WORDS):
-                title = end
-                org = beginning
+            title_c14n = title.replace(' ','').lower()
+            org_c14n = org.replace(' ','').lower()
+            if org_ori.lower() in org_c14n.lower(): # org_ori in org: pass
+                critical("org_ori.lower() in org_c14n.lower(): pass")
+                pass
+            elif org_ori.lower() in title.lower(): # org_ori in title: switch
+                critical("org_ori.lower() in title.lower(): switch")
+                title, org = end, beginning
+            else:
+                critical("beginning = %s, end = %s" %(beginning, end))
+                end_ratio = float(len(end)) / len(beginning + end)
+                critical(" end_ratio: %d / %d = %.2f" %(
+                    len(end), len(beginning + end), end_ratio))
+                # if beginning has org_word or end is large (>50%): switch
+                if end_ratio > 0.5 or \
+                        any(word.lower() in beginning for word in ORG_WORDS):
+                    critical("ratio and org_word: switch")
+                    title = end
+                    org = beginning
             title = sentence_case(title.strip())
             org = org.strip()
         return title, org
@@ -1058,7 +1069,7 @@ def yasn_publish(comment, title, url, tag):
     message = "%s %s #%s" %(comment, url, tag)
     info('message length = %s' %len(message))
     print("tweeted '%s' %s" %(message, comment_room))
-    call(['twidge', 'update', '%s' %message]) # tweet via twidge
+    #call(['twidge', 'update', '%s' %message]) # tweet via twidge
 
     
 #Check to see if the script is executing as main.

@@ -987,10 +987,10 @@ DISPATCH_LOGGER = (
         'console:\t b URL/DOI c MESSAGE',
         log2console),
     (r'(?P<url>(\.|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
-        'blog codex:\t b URL o keyword[pra|soc|tec] title. body',
+        'blog codex:\t b URL o keyword[pra|soc|tec] TITLE. BODY',
         blog_at_opencodex),
     (r'(?P<url>(\.|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
-        'blog goatee:\t b URL g',
+        'blog goatee:\t b URL g TITLE. BODY',
         blog_at_goatee),
 )
 DISPATCH_LOGGER_EXPRESSIONS = '  ' + '\n  '.join(

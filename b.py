@@ -1058,19 +1058,17 @@ def do_console_annotation(biblio):
     return biblio
         
 def yasn_publish(comment, title, url, tag):
-    comment = comment.strip()
+    comment, title, url, tag = [v.strip() for v in [comment, title, url, tag]]
     comment_delim = ": " if comment else ""
-    comment = comment + comment_delim + title.strip()
-    url = url.strip()
-    tag = tag.strip()
+    comment = comment + comment_delim + title
     comment_room = 140 - len(comment) - len(tag) - len(url)
     info("%d < %d" %(len(comment), comment_room))
     if comment_room < 0:    # the comment is too big
-        comment = comment[0:-17] + '...' # url will be shorten to 20 chars
+        comment = comment[0:-17] + '...' # url will be shortened to 20 chars
     message = "%s %s #%s" %(comment, url, tag)
     info('message length = %s' %len(message))
     print("tweeted '%s' %s" %(message, comment_room))
-    call(['twidge', 'update', '%s' %message]) # tweet via twidge
+    #call(['twidge', 'update', '%s' %message]) # tweet via twidge
 
     
 #Check to see if the script is executing as main.

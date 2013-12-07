@@ -1070,7 +1070,7 @@ def yasn_publish(comment, title, url, tag):
     message = "%s %s #%s" %(comment, url, tag)
     info('message length = %s' %len(message))
     print("tweeted '%s' %s" %(message, comment_room))
-    #call(['twidge', 'update', '%s' %message]) # tweet via twidge
+    call(['twidge', 'update', '%s' %message]) # tweet via twidge
 
     
 #Check to see if the script is executing as main.

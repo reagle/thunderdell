@@ -16,13 +16,18 @@ try:
 except KeyError, e:
     HOME = '/home/reagle'
 
-def clean(token):
-#     sys.stdout.write("before: '%s'\n" % token)
-    token = token.strip(', \f\r\n')
-    token = token.replace('&', '&amp;').replace('"', '&quot;').replace("'", '&apos;') \
-        .replace(u'“', '&quot;').replace(u'”', '&quot;')
-#     sys.stdout.write("after : '%s'\n\n" % token)
-    return token
+def clean(text):
+    
+    text = text.strip(', \f\r\n')
+    REPLACEMENTS = [
+        (u'&', '&amp;'),     (u"'", '&apos;'),
+        (u'"', '&quot;'),    (u'“', '&quot;'),   (u'”', '&quot;'),
+        (u"‘", u"'"),         (u"’", u"'"),
+        (u" – ", u" -- "), (u"–", u" -- ")]
+        
+    for v1, v2 in REPLACEMENTS:
+        text = text.replace(v1, v2)
+    return text
 
 def get_date():
     import string, time

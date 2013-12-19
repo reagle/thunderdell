@@ -62,12 +62,13 @@ GENERAL_KEY_SHORTCUTS = {
         'ide': 'identity',
         'lea': 'leadership',
         'leg': 'legal',
-        'lf' : 'lifehack',
+        'lh' : 'lifehack',
         'ope': 'open',
         'nor': 'norms',
         'pat': 'patience',
+        'pol': 'policing',
         'pow': 'power',
-        'pra' : 'praxis',
+        'pra': 'praxis',
         'pri': 'privacy',
         'spe': 'speech',
         'str': 'structure',
@@ -80,7 +81,6 @@ CC_KEY_SHORTCUTS = {
         'ano' : 'anonymous',
         'ass' : 'assessment',
         'aut' : 'automated',
-        'bou' : 'boundaries',
         'com' : 'competitive',
         'cri' : 'criticism',
         'est' : 'esteem',
@@ -208,7 +208,7 @@ class scrape_default(object):
             '''//*[@itemprop='author']/text()''', # engadget
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
-            '''//*[contains(@class, 'byline')]//text()''',
+            '''//*[1][contains(@class, 'byline')]//text()''', # first of many
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
         if self.HTML_p is not None:
@@ -277,32 +277,38 @@ class scrape_default(object):
         ORG_WORDS = ['blog', 'lab', 'center']
         
         title = title_ori = self.get_title()
-        critical("title_ori = '%s'" %(title_ori))
+        info("title_ori = '%s'" %(title_ori))
         org = org_ori = self.get_org()
-        critical("org_ori = '%s'" %(org_ori))
-        DELIMTER = re.compile(u'([\|:;—«])') # 
-        parts = DELIMTER.split(title_ori)
+        info("org_ori = '%s'" %(org_ori))
+        STRONG_DELIMTERS = re.compile(u'\s[\|—«»]\s')
+        WEAK_DELIMITERS = re.compile(u'[:;-]\s')
+        if STRONG_DELIMTERS.search(title_ori):
+            info("STRONG_DELIMTERS")
+            parts = STRONG_DELIMTERS.split(title_ori)
+        else:
+            info("WEAK_DELIMITERS")
+            parts = WEAK_DELIMITERS.split(title_ori)            
         info("parts = '%s'" %(parts))
         if len(parts) >= 2:
             beginning, end = parts[0], parts[-1]
             title, org = beginning, end
             title_c14n = title.replace(' ','').lower()
             org_c14n = org.replace(' ','').lower()
-            if org_ori.lower() in org_c14n.lower(): # org_ori in org: pass
-                critical("org_ori.lower() in org_c14n.lower(): pass")
-                pass
-            elif org_ori.lower() in title.lower(): # org_ori in title: switch
-                critical("org_ori.lower() in title.lower(): switch")
-                title, org = end, beginning
+            if org_ori.lower() in org_c14n.lower(): 
+                info("org_ori.lower() in org_c14n.lower(): pass")
+                title, org = ' '.join(parts[0:-1]), parts[-1]
+            elif org_ori.lower() in title_c14n: 
+                info("org_ori.lower() in title_c14n: switch")
+                title, org = parts[-1], ' '.join(parts[0:-1])
             else:
-                critical("beginning = %s, end = %s" %(beginning, end))
+                info("beginning = %s, end = %s" %(beginning, end))
                 end_ratio = float(len(end)) / len(beginning + end)
-                critical(" end_ratio: %d / %d = %.2f" %(
+                info(" end_ratio: %d / %d = %.2f" %(
                     len(end), len(beginning + end), end_ratio))
                 # if beginning has org_word or end is large (>50%): switch
                 if end_ratio > 0.5 or \
                         any(word.lower() in beginning for word in ORG_WORDS):
-                    critical("ratio and org_word: switch")
+                    info("ratio and org_word: switch")
                     title = end
                     org = beginning
             title = sentence_case(title.strip())
@@ -693,7 +699,7 @@ def log2mm(biblio):
     info("biblio = %s" %biblio)
     author = biblio['author']
     title = biblio['title']
-    keyword, sep, abstract = biblio['comment'].partition(' ')
+    abstract = biblio['comment']
     excerpt = biblio['excerpt']
     permalink = biblio['permalink']
 
@@ -707,9 +713,14 @@ def log2mm(biblio):
             info("key = %s value = %s" %(key, value))
             citation += '%s=%s ' % (fe.BIB_FIELDS[key], value)
     citation += 'r=%s ' % date_read
-    if keyword:
-        keyword = KEY_SHORTCUTS.get(keyword, keyword)
-        citation += 'kw=' + keyword
+    if biblio['tags']:
+        tags = biblio['tags']
+        for tag in tags.strip().split(' '):
+            keyword = KEY_SHORTCUTS.get(tag, tag)
+            citation += 'kw=' + keyword + ' '
+        citation = citation.strip()
+    else:
+        tags = ''
     try:
         from xml.etree.cElementTree import parse # fast C implementation
     except ImportError:
@@ -745,6 +756,9 @@ def log2mm(biblio):
         excerpt_node = SubElement(title_node, 'node', {'TEXT': excerpt, 'COLOR': '#166799'})
 
     ElementTree(mindmap).write(ofile, encoding='utf-8')
+
+    if args.publish: 
+        yasn_publish('', title, permalink, tags)
 
 
 def log2nifty(biblio):
@@ -786,21 +800,29 @@ def log2work(biblio):
     import hashlib
 
     print("to log2work\n")
+    info("biblio = '%s'" %(biblio))
     ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
 
-    title = biblio['title']
-    tag, sep, comment = biblio['comment'].partition(' ')
-    url = biblio['url']
-
-    # Replace the line with the '^' character with a hypertext link
-    html_comment = re.sub('(.*)\^(.*)',u'\\1<a href="%s">%s</a>\\2' %
-        (escape_XML(url), title), comment)
+    title = biblio['title'].strip()
+    url = biblio['url'].strip()
+    comment = biblio['comment'].strip() if biblio['comment'] else ''
+    if biblio['tags']:
+        hashtags = ''
+        for tag in biblio['tags'].strip().split(' '):
+            hashtags += '#%s ' %tag
+        hashtags = hashtags.strip()
+    else:
+        hashtags = '#misc'
+    info("hashtags = '%s'" %(hashtags))
+    html_comment = comment + ' ' + '<a href="%s">%s</a>' % (escape_XML(url), 
+                                                            title)
 
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
-        (uid, date_token, tag, html_comment)
+        (uid, date_token, hashtags, html_comment)
+    info(log_item)
 
     fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
     content = fd.read()
@@ -818,22 +840,16 @@ def log2work(biblio):
         print_usage("Sorry, output regexp subsitution failed.")
 
     if args.publish:
-        yasn_publish(comment.replace('^', ''), title, url, tag)
+        yasn_publish(comment, title, url, hashtags)
 
 
 def log2console(biblio):
     '''
     Log to console.
     '''
-
-    keyword, sep, abstract = biblio['comment'].partition(' ')
-    if keyword:
-        biblio['keyword'] = KEY_SHORTCUTS.get(keyword, keyword)
-    else:
-        biblio['keyword'] = ''
-        
+      
     print('\n')
-    TOKENS = ('author', 'title', 'url', 'date', 'comment', 'excerpt')
+    TOKENS = ('author', 'title', 'tags', 'url', 'date', 'comment', 'excerpt')
     print(biblio)
     for token in TOKENS:
         if token in biblio:
@@ -844,11 +860,6 @@ def log2console(biblio):
             if token == 'title':
                 biblio['title'] = ''
 
-    if args.publish:
-        yasn_publish(abstract.replace('^', ''), 
-                     biblio['title'], biblio['url'], biblio['keyword'])
-
-
 def blog_at_opencodex(biblio):
     '''
     Start at a blog entry at opencodex
@@ -858,16 +869,24 @@ def blog_at_opencodex(biblio):
     CODEX_ROOT = '/home/reagle/data/2web/reagle.org/joseph/content/'
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = ' '.join(biblio['title'].split(' ')[0:3])
-    keyword, sep, entry = biblio['comment'].partition(' ')
+    entry = biblio['comment']
+
+    category = 'social'
+    if biblio['tags']:
+        tags = biblio['tags'].strip().split(' ')
+        category = KEY_SHORTCUTS.get(tags[0], tags[0])
+        tags_expanded = ''
+        for tag in tags:
+            tag = KEY_SHORTCUTS.get(tag, tag)
+            tags_expanded += tag + ','
+        tags = tags_expanded[0:-1] # removes last comma
+
     if entry:
         blog_title, sep, blog_body = entry.partition('.')
         info("blog_title='%s' sep='%s' blog_body='%s'" %(
             blog_title.strip(), sep, blog_body.strip()))
     info("blog_title='%s'" %(blog_title))
 
-    category = 'social'
-    if keyword:
-        category = KEY_SHORTCUTS.get(keyword, keyword)
     
     filename = blog_title.lower() \
         .replace(':', '') \
@@ -881,7 +900,7 @@ def blog_at_opencodex(biblio):
     fd = codecs.open(filename, 'w', 'utf-8', 'replace')
     fd.write('Title: %s\n' % blog_title)
     fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", NOW))
-    fd.write('Tags: \n')
+    fd.write('Tags: %s\n' % tags)
     fd.write('Category: %s\n\n' % category)
     fd.write(blog_body.strip())
     if 'url' in biblio and 'excerpt' in biblio:
@@ -973,44 +992,29 @@ def get_scraper(url, comment):
             info("scrape = %s " % scraper)
             return scraper(url, comment)    # creates instance
 
-DISPATCH_LOGGER = (
-    (r'(?P<url>(\.|http)\S* )?(?P<scheme>n) (?P<comment>.*)',
-        'nifty:\t b URL n MESSAGE',
-        log2nifty),
-    (r'(?P<url>(\.|http)\S* )?(?P<scheme>j) (?P<comment>.*)',
-        'work plan:\t b URL j KEYWORD MESSAGE [with ^ replaced by url title]',
-        log2work),
-    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>m) ?(?P<comment>.*)',
-        'mindmap:\t b URL m KEYWORD. ABSTRACT',
-        log2mm),
-    (r'(?P<url>(\.|doi|http)\S* )?(?P<scheme>c) ?(?P<comment>.*)',
-        'console:\t b URL/DOI c MESSAGE',
-        log2console),
-    (r'(?P<url>(\.|http)\S* )?(?P<scheme>o) ?(?P<comment>.*)',
-        'blog codex:\t b URL o keyword[pra|soc|tec] TITLE. BODY',
-        blog_at_opencodex),
-    (r'(?P<url>(\.|http)\S* )?(?P<scheme>g) ?(?P<comment>.*)',
-        'blog goatee:\t b URL g TITLE. BODY',
-        blog_at_goatee),
-)
-DISPATCH_LOGGER_EXPRESSIONS = '  ' + '\n  '.join(
-    logger[1] for logger in DISPATCH_LOGGER)
-def get_logger(options={re.IGNORECASE}):
+def get_logger(text):
     """
-    Matches the option string to grammar and output.
+    Given the argument return a function and parameters.
     """
-    params = None
+    LOG_REGEX = re.compile(
+        r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?(?P<url>(\.|doi|http)\S*)?(?P<comment> .*)?')
 
-    for regexp, doc, logger in DISPATCH_LOGGER:
-        if re.match(regexp, options):
-            function = logger
-            params = re.match(regexp, options, re.DOTALL|re.IGNORECASE).groupdict()
-            break
-    if params:
-        return function, params
+    if LOG_REGEX.match(text):
+        params = LOG_REGEX.match(text).groupdict()
+        critical("params = '%s'" %(params))
+        function = None
+        if params['scheme'] == 'n':   function = log2nifty
+        elif params['scheme'] == 'j': function = log2work
+        elif params['scheme'] == 'm': function = log2mm
+        elif params['scheme'] == 'c': function = log2console
+        elif params['scheme'] == 'o': function = blog_at_opencodex
+        elif params['scheme'] == 'g': function = blog_at_goatee
+        if function:
+            return function, params
+        else:
+            print_usage("Sorry, unknown scheme: '%s'." % params['scheme'])
     else:
-        print_usage("Sorry, your scheme parameters were not correct.")
-        print(params)
+        print_usage("Sorry, I can't parse the message: '%s'." % text)
     sys.exit()
 
 #######################################
@@ -1018,7 +1022,7 @@ def get_logger(options={re.IGNORECASE}):
     
 def print_usage(message):
     print(message)
-    print("Usage: b [url]? scheme [scheme parameters]? comment")
+    print("Usage: b scheme [tags ]?[url ]?[comment ]?")
 
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
@@ -1057,25 +1061,34 @@ def do_console_annotation(biblio):
         print('%s; annotate?' % get_tentative_ident(biblio))
     return biblio
         
-def yasn_publish(comment, title, url, tag):
-    comment, title, url, tag = [v.strip() for v in [comment, title, url, tag]]
+def yasn_publish(comment, title, url, tags):
+    if tags and tags[0] != '#': # they've not yet been hashified
+        tags = ' '.join(['#'+tag for tag in tags.strip().split(' ')])
+    comment, title, url, tags = [v.strip() for v in [comment, title, url, tags]]
     comment_delim = ": " if comment else ""
     comment = comment + comment_delim + title
-    comment_room = 140 - len(comment) - len(tag) - len(url)
+    comment_room = 140 - len(comment) - len(tags) - len(url)
     info("%d < %d" %(len(comment), comment_room))
     if comment_room < 0:    # the comment is too big
         comment = comment[0:-17] + '...' # url will be shortened to 20 chars
-    message = "%s %s #%s" %(comment, url, tag)
+    message = "%s %s %s" %(comment, url, tags)
     info('message length = %s' %len(message))
     print("tweeted '%s' %s" %(message, comment_room))
-    call(['twidge', 'update', '%s' %message]) # tweet via twidge
+    call(['twidge', 'update', '%s' %message]) # TODO: unicode
 
-    
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
+    DESCRIPTION = '''
+    nifty:         b n TAGS URL|DOI MESSAGE
+    work plan:     b j TAGS URL|DOI MESSAGE
+    mindmap:       b m TAGS URL|DOI ABSTRACT
+    console:       b c TAGS URL|DOI MESSAGE
+    blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
+    blog goatee:   b g URL|DOI TITLE. BODY'''
+    
     arg_parser = argparse.ArgumentParser(
         prog='b', usage='%(prog)s [options] [URL] logger [keyword] [text]',
-        description=DISPATCH_LOGGER_EXPRESSIONS, formatter_class=RawTextHelpFormatter)
+        description=DESCRIPTION, formatter_class=RawTextHelpFormatter)
     arg_parser.add_argument("-T", "--tests",
                     action="store_true", default=False,
                     help="run doc tests")
@@ -1115,12 +1128,14 @@ if __name__ == "__main__":
             fe.pretty_tabulate_dict(dictionary,3)
         sys.exit()
 
-    logger, params = get_logger(' '.join(args.text))    
-    comment = params['comment'].strip()
-    #print ("logger = '%s', params = '%s', comment = '%s'" %(logger, params, comment))
+    logger, params = get_logger(' '.join(args.text)) 
+    critical("params = '%s'" %(params))
+    comment = '' if not params['comment'] else params['comment']
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)
         biblio = scraper.get_biblio()
     else:
-        biblio = {'title' : '', 'url': '', 'comment' : comment}
+        biblio = {'title' : '', 'url': '', 'comment': comment}
+    biblio['tags'] = params['tags']
+    critical("biblio = '%s'" %(biblio))
     logger(biblio)

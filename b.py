@@ -1045,6 +1045,16 @@ def do_console_annotation(biblio):
             'title' : biblio['title'],
             'year' : biblio['date'][0:4]}, {})
 
+    def print_console_msg():
+        print('''\tHELP:\n'''
+            '''\tEnter excerpts OR metadata in the form of abbreviated\n''' 
+            '''\tfields and their values. End with CTRL-D.\n'''
+            '''\tFor example:\n'''
+            '''\t\tau=John Smith d=2001 et=cb\n'''
+            '''\tEntry types (et) values must be a type shortcut:''')
+        for key, value in fe.CSL_SHORTCUTS.items():
+            print('\t\t%s = %s' % (key, value))
+
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
     print('%s; annotate?' % tentative_id)
@@ -1054,19 +1064,28 @@ def do_console_annotation(biblio):
     while True:
         try:
             line = raw_input('').decode(sys.stdin.encoding)
+            if line == '?':
+                print_console_msg()
             if '=' in line:
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))
                 for short, value in cite_pairs:
-                    biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
+                    if short == 'et': # et=cj -> cj = 'Nature'
+                        biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
+                        del biblio['c_web']
+                    else:
+                        biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
             else:
                 if line:
                     console_annotations += '\n\n' + line
         except EOFError:    # catch ctrl-D
             break
-        except:             # trap all other errors
-            print("Bad input: '%s'" %line)
+        except KeyError as e:
+            print("Bad type shorcut: %s", e)
+            print_console_msg()
+        except Exception as e:             # trap all other errors
+            print("Bad input: %s: '%s'" %(e, line))
     biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
     
     tweaked_id = get_tentative_ident(biblio)

@@ -753,7 +753,9 @@ def log2mm(biblio):
     if abstract:
         abstract_node = SubElement(title_node, 'node', {'TEXT': abstract, 'COLOR': '#999999'})
     if excerpt:
-        excerpt_node = SubElement(title_node, 'node', {'TEXT': excerpt, 'COLOR': '#166799'})
+        for exc in excerpt.split('\n\n'):
+            excerpt_node = SubElement(title_node, 'node', {'TEXT': exc, 'COLOR': '#166799'})     
+        #excerpt_node = SubElement(title_node, 'node', {'TEXT': excerpt, 'COLOR': '#166799'})
 
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 

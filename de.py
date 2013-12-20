@@ -11,12 +11,18 @@
 import sys
 
 from os import environ
+
 try: 
     HOME = environ['HOME']
 except KeyError, e:
     HOME = '/home/reagle'
 
+
+
 def clean(text):
+    '''clean and encode text'''
+    # TODO: Maybe make use of b.smart_punctuation_to_ascii() and 
+    # web_little.escape_XML()
     
     text = text.strip(', \f\r\n')
     REPLACEMENTS = [

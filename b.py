@@ -23,6 +23,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 import argparse
 from argparse import RawTextHelpFormatter
 import codecs
+from collections import Counter
 from datetime import datetime
 from dateutil.parser import parse
 import fe
@@ -149,12 +150,13 @@ def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
     info("old %s s = '%s'" %(type(s), s))
     punctuation = { 
-        0x2018:0x27, 
-        0x2019:0x27, 
-        0x201C:0x22, 
-        0x201D:0x22 }
+        0x2018:u"'",    #apostrophe
+        0x2019:u"'", 
+        0x201C:u'"',    # quotation
+        0x201D:u'"' }
     if s:
         s = s.translate(punctuation)
+        s = s.replace(u"—", "--")
         info("new %s s = '%s'" %(type(s), s))
     return s
 
@@ -352,13 +354,19 @@ class scrape_default(object):
         return org.title()
 
     def get_excerpt(self):
+        '''Select a paragraph if is is long enough and textual'''
+        
         if self.text:
             lines = self.text.split('\n')
             for line in lines:
-                line = line.strip()
-                if len(line) > 280 and '__' not in line:
-                    excerpt = line
-                    return excerpt.strip()
+                if len(line) >= 250: 
+                    line = ' '.join(line.split()) # removes redundant space
+                    line = smart_punctuation_to_ascii(line)
+                    #info("line = '%s'" %(line))
+                    #info("length = %s; 2nd_char = '%s'" %(len(line), line[1]))
+                    if line[1].isalpha():
+                        excerpt = line
+                        return excerpt.strip()
         return None
 
     def get_permalink(self):
@@ -1046,7 +1054,6 @@ def do_console_annotation(biblio):
     while True:
         try:
             line = raw_input('').decode(sys.stdin.encoding)
-            #if not line: break
             if '=' in line:
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
@@ -1056,14 +1063,11 @@ def do_console_annotation(biblio):
             else:
                 if line:
                     console_annotations += '\n\n' + line
-        except EOFError:    # catch Ctrl-D
+        except EOFError:    # catch ctrl-D
             break
         except:             # trap all other errors
             print("Bad input: '%s'" %line)
-    if biblio['excerpt']:
-        biblio['excerpt'] += console_annotations
-    else:
-        biblio['excerpt'] = console_annotations
+    biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
     
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:

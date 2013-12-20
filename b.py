@@ -755,7 +755,6 @@ def log2mm(biblio):
     if excerpt:
         for exc in excerpt.split('\n\n'):
             excerpt_node = SubElement(title_node, 'node', {'TEXT': exc, 'COLOR': '#166799'})     
-        #excerpt_node = SubElement(title_node, 'node', {'TEXT': excerpt, 'COLOR': '#166799'})
 
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 
@@ -1028,6 +1027,8 @@ def print_usage(message):
 
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
+    
+    import readline # gives raw_input cursor and history support
 
     def get_tentative_ident(bibio):
         info(biblio)
@@ -1043,16 +1044,22 @@ def do_console_annotation(biblio):
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     while True:
-        line = raw_input('').decode(sys.stdin.encoding)
-        if not line: break
-        if '=' in line:
-            cites = EQUAL_PAT.split(line)[1:]
-            # 2 refs to an iterable are '*' unpacked and rezipped
-            cite_pairs = list(zip(*[iter(cites)] * 2))
-            for short, value in cite_pairs:
-                biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
-        else:
-            console_annotations += '\n\n' + line
+        try:
+            line = raw_input('').decode(sys.stdin.encoding)
+            #if not line: break
+            if '=' in line:
+                cites = EQUAL_PAT.split(line)[1:]
+                # 2 refs to an iterable are '*' unpacked and rezipped
+                cite_pairs = list(zip(*[iter(cites)] * 2))
+                for short, value in cite_pairs:
+                    biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
+            else:
+                if line:
+                    console_annotations += '\n\n' + line
+        except EOFError:    # catch Ctrl-D
+            break
+        except:             # trap all other errors
+            print("Bad input: '%s'" %line)
     if biblio['excerpt']:
         biblio['excerpt'] += console_annotations
     else:

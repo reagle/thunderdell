@@ -367,7 +367,7 @@ class scrape_default(object):
                     if line[1].isalpha():
                         excerpt = line
                         return excerpt.strip()
-        return None
+        return ''
 
     def get_permalink(self):
         return self.url
@@ -1086,6 +1086,8 @@ def do_console_annotation(biblio):
             print_console_msg()
         except Exception as e:             # trap all other errors
             print("Bad input: %s: '%s'" %(e, line))
+    info("biblio.get('excerpt', '') = '%s'" %(biblio.get('excerpt', '')))
+    info("console_annotations = '%s'" %(console_annotations))
     biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
     
     tweaked_id = get_tentative_ident(biblio)

@@ -25,7 +25,7 @@ from optparse import OptionParser
 import os
 import re
 import string
-from subprocess import call, Popen
+from subprocess import call, Popen, STDOUT
 import sys
 import time
 from urllib import quote, unquote
@@ -1303,7 +1303,8 @@ def build_bib(file_name, output):
         results_file.close()
         if not opts.cgi:
             command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            Popen(command, shell=True)
+            Popen(command, shell=True, 
+                  stdout=open(os.devnull, 'w'), stderr=STDOUT)
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1320,7 +1321,8 @@ def build_bib(file_name, output):
         results_file.close()
         if not opts.cgi:
             command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            Popen(command, shell=True)
+            Popen(command, shell=True,
+                  stdout=open(os.devnull, 'w'), stderr=STDOUT)
     else:
         output(entries)
     return

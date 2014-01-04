@@ -616,7 +616,7 @@ def guess_csl_type(entry):
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
         'year': '2008'})
-    'paper-conference'
+    ('paper-conference', None)
 
     """
     genre = None
@@ -635,7 +635,7 @@ def guess_csl_type(entry):
             print("Unknown entry_type = %s" %et)
             sys.exit()
     et = 'no-type'
-    if any(c in entry for c in CONTAINERS):
+    if any(c in entry for c in CSL_SHORTCUTS.values()):
         info("looking at containers for %s" %entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'

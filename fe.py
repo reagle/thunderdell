@@ -10,7 +10,7 @@
 """Extract a bibliography from a Freemind mindmap"""
 
 # TODO
-# *  use argparse; `--display` requires $TMPDIR
+# *  use argparse; 
 
 #20090519: bibformat_title and pull_citation each use about ~7%
 #20120514: biblatex/biber doesn't accept BCE/negative, can use year
@@ -149,38 +149,64 @@ BIBLATEX_TYPES = (
         )
 
 CSL_TYPES =  (
-        'article-journal',
-        'article-magazine',
-        'article-newspaper',
-        'entry',
-        'entry-dictionary',
-        'entry-encyclopedia',
-        'legal_case',
-        'post',
-        'post-weblog'
+        'article', 
+        'article-magazine', 
+        'article-newspaper', 
+        'article-journal', 
+        'bill', 
+        'book', 
+        'broadcast', 
+        'chapter', 
+        'dataset', 
+        'entry', 
+        'entry-dictionary', 
+        'entry-encyclopedia', 
+        'figure', 
+        'graphic', 
+        'interview', 
+        'legislation', 
+        'legal_case', 
+        'manuscript', 
+        'map', 
+        'motion_picture', 
+        'musical_score', 
+        'pamphlet', 
+        'paper-conference', 
+        'patent', 
+        'post', 
+        'post-weblog', 
+        'personal_communication', 
+        'report', 
+        'review', 
+        'review-book', 
+        'song', 
+        'speech', 
+        'thesis', 
+        'treaty', 
+        'webpage', 
         )
 
 BIB_TYPES = BIBLATEX_TYPES + CSL_TYPES
 
 CSL_BIBLATEX_TYPE_MAP = OrderedDict([
         # ordering is important so in the reverse mapping online => webpage
-        ('article-journal',     'article'),
-        ('article-magazine',    'article'),
-        ('article-newspaper',   'article'),
-        ('article',             'article'),
-        ('book',                'book'),
-        ('chapter',             'incollection'),
-        ('entry',               'incollection'),
-        ('entry-dictionary',    'inreference'),
-        ('entry-encyclopedia',  'inreference'),
-        ('legal_case',          'misc'),
-        ('pamphlet',            'booklet'),
-        ('paper-conference',    'inproceedings'),
-        ('personal_communication','letter'),
-        ('post',                'online'),
-        ('post-weblog',         'online'),
-        ('thesis',              'thesis'),
-        ('webpage',             'online'),
+        ('article-journal',         'article'),
+        ('article-magazine',        'article'),
+        ('article-newspaper',       'article'),
+        ('chapter',                 'incollection'),
+        ('entry',                   'incollection'),
+        ('entry-dictionary',        'inreference'),
+        ('entry-encyclopedia',      'inreference'),
+        ('legal_case',              'misc'),
+        ('manuscript',              'unpublished'),
+        ('thesis',                  'phdthesis'), 
+        ('thesis',                  'mastersthesis'), 
+        ('pamphlet',                'booklet'),
+        ('paper-conference',        'inproceedings'),
+        ('personal_communication',  'letter'),
+        ('post',                    'online'),
+        ('post-weblog',             'online'),
+        ('webpage',                 'online'),
         ])
 
 BIBLATEX_CSL_TYPE_MAP = OrderedDict((v,k) for k, v in 
@@ -542,10 +568,10 @@ def guess_bibtex_type(entry):
     """
     if 'entry_type' in entry:         # already has a type
         et = entry['entry_type']
-        if et in CSL_TYPES:
-            et = CSL_BIBLATEX_TYPE_MAP[et]
-        elif et in BIBLATEX_TYPES:
+        if et in BIBLATEX_TYPES:
             pass
+        elif et in CSL_TYPES:
+            et = CSL_BIBLATEX_TYPE_MAP[et]
         else:
             print("Unknown entry_type = %s" %et)
             sys.exit()
@@ -593,12 +619,18 @@ def guess_csl_type(entry):
     'paper-conference'
 
     """
+    genre = None
     if 'entry_type' in entry:         # already has a type
         et = entry['entry_type']
-        if et in BIBLATEX_TYPES:
-            return BIBLATEX_CSL_TYPE_MAP[et]
-        elif et in CSL_TYPES:
-            return et
+        if et in CSL_TYPES:
+            return et, genre
+        elif et in BIBLATEX_TYPES:
+            if et == 'mastersthesis':
+                return 'thesis', "Master's thesis"
+            elif et == 'phdthesis':
+                return 'thesis', "PhD thesis"
+            else:
+                return BIBLATEX_CSL_TYPE_MAP[et], genre
         else:
             print("Unknown entry_type = %s" %et)
             sys.exit()
@@ -639,7 +671,7 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
 
-    return et
+    return et, genre
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -864,10 +896,12 @@ def emit_yaml_csl(entries):
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
     for entry in dict_sorted_by_keys(entries):
-        entry_type = guess_csl_type(entry)
+        entry_type, genre = guess_csl_type(entry)
         opts.outfd.write('- id: %s\n' % entry['identifier'])
         opts.outfd.write('  type: %s\n' % entry_type)
-
+        if genre:
+            opts.outfd.write('  genre: %s\n' % genre)
+            
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 value = unescape_XML(entry[field])
@@ -1375,9 +1409,6 @@ if __name__ == '__main__':
     parser.add_option("-c", "--chase",
                     action="store_true", default=False,
                     help="chase links between MMs")
-    parser.add_option("-d", "--display",
-                    action="store_true", default=False,
-                    help="emit bibtex, convert to HTML, display in browser")
     parser.add_option("-D", "--defaults",
                     action="store_true", default=False,
                     help="chase, use default map and output file")
@@ -1467,8 +1498,6 @@ if __name__ == '__main__':
 
     build_bib(file_name, output)
 
-    if opts.display:
-        emit_bibtex_html(file_name, opts)
     opts.outfd.close()
 else:
     class opts:

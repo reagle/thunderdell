@@ -1005,6 +1005,8 @@ def emit_results(entries, query, results_file):
                 if 'pagination' in entry:
                     if entry['pagination'] == 'section':
                         locator = ', sec. ' + locator
+                    elif entry['pagination'] == 'location':
+                        locator = ', loc. ' + locator
                     else:
                         print("unknown locator %s" % entry['pagination'])
                         sys.exit

@@ -1057,9 +1057,12 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''%s: au=%s t=%s cw=%s''' % (tentative_id,
-          biblio['title'], biblio['author'], biblio['c_web']))
-    
+    print('''%s: au=%s t=%s''' % (tentative_id, 
+                                  biblio['author'], biblio['title'])),
+    if 'c_web' in biblio:
+        print(''' cw=%s''' % (biblio['c_web']))
+    else:
+        print
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     while True:

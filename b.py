@@ -748,7 +748,7 @@ def log2mm(biblio):
 
     for week_node in year_node:
         if week_node.get('TEXT') == this_week:
-            print("found week %s" % this_week)
+            print("week %s" % this_week)
             break
     else:
         print("creating %s" % this_week)
@@ -1096,7 +1096,7 @@ def do_console_annotation(biblio):
     
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
-        print('%s; annotate?' % get_tentative_ident(biblio))
+        print('logged: %s to' % get_tentative_ident(biblio)),
     return biblio
         
 def yasn_publish(comment, title, url, tags):

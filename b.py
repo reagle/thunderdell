@@ -1050,14 +1050,14 @@ def do_console_annotation(biblio):
             '''\tEnter excerpts OR metadata in the form of abbreviated\n''' 
             '''\tfields and their values. End with CTRL-D.\n'''
             '''\tFor example:\n'''
-            '''\t\tau=John Smith d=2001 et=cb\n'''
+            '''\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
             '''\tEntry types (et) values must be a type shortcut:''')
         for key, value in fe.CSL_SHORTCUTS.items():
             print('\t\t%s = %s' % (key, value))
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''%s: au=%s t=%s''' % (tentative_id, 
+    print('''%s: au=%s ti=%s''' % (tentative_id, 
                                   biblio['author'], biblio['title'])),
     if 'c_web' in biblio:
         print(''' cw=%s''' % (biblio['c_web']))

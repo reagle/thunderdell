@@ -32,7 +32,7 @@ from urllib import quote, unquote
 import unicodedata
 
 log_level = 100 # default
-critical = logging.critical
+crtl = logging.critical
 info = logging.info
 dbg = logging.debug
 
@@ -1228,6 +1228,7 @@ def walk_freemind(node, mm_file, entries, links):
         if 'LINK' in d.attrib:                  # found a local reference link
             if not d.get('LINK').startswith('http:') and d.get('LINK').endswith('.mm'):
                 links.append(d.get('LINK'))
+                if '05-alienated-2' in d.get('LINK'):
         if 'COLOR' in d.attrib: # don't pick up structure nodes and my comments
             if d.get('COLOR') == CL_CO['author']:
                 # pass author as it will be fetched upon new title

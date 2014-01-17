@@ -359,11 +359,11 @@ class scrape_default(object):
         if self.text:
             lines = self.text.split('\n')
             for line in lines:
+                line = ' '.join(line.split()) # removes redundant space
                 if len(line) >= 250: 
-                    line = ' '.join(line.split()) # removes redundant space
                     line = smart_punctuation_to_ascii(line)
-                    #info("line = '%s'" %(line))
-                    #info("length = %s; 2nd_char = '%s'" %(len(line), line[1]))
+                    info("line = '%s'" %(line))
+                    info("length = %s; 2nd_char = '%s'" %(len(line), line[1]))
                     if line[1].isalpha():
                         excerpt = line
                         return excerpt.strip()

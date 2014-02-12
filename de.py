@@ -224,7 +224,8 @@ if __name__ == "__main__":
                 stdout=open('%s.txt' % file[0:-4], 'w'))
             file = file[0:-4] + '.txt'
         try:
-            encoding = chardet.detect(open(file).read())['encoding']
+            encoding = 'UTF-8'
+            #encoding = chardet.detect(open(file).read())['encoding']
             fdi = codecs.open(file, "rb", encoding)
             text = fdi.read()
             if encoding == 'UTF-8':

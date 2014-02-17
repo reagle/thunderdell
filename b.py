@@ -933,7 +933,7 @@ def blog_at_goatee(biblio):
     info("blog_title = %s" % blog_title)
     info("filename = %s" % filename)
         
-    PHOTO_RE = re.compile('.*/photo/web/(\d\d\d\d/\d\d)' \
+    PHOTO_RE = re.compile('.*/photo/gallery/(\d\d\d\d/\d\d)' \
                 '/\d\d-\d\d\d\d-(.*)\.jpe?g')
     photo_match = False
     if 'goatee.net/photo/' in url:
@@ -962,7 +962,9 @@ def blog_at_goatee(biblio):
             fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
             fd.write('> %s\n' % biblio['excerpt'])
         if photo_match:
-            thumb_url = url.replace('/web/', '/thumbs/')
+            path, jpg = url.rsplit('/', 1)
+            thumb_url = path + '/thumbnails/' + jpg
+            #thumb_url = url.replace('/web/', '/thumbs/')
             alt_text = blog_title.replace('-', ' ')
             fd.write(
                 '''<p><a href="%s"><img alt="%s" class="thumb right" src="%s"/></a></p>\n\n''' 

@@ -25,6 +25,9 @@ def cgi_main():
     #site = form.getvalue('sitesearch', 'BusySponge') 
 
     query = unquote(query).decode(charset)
+    
+    if query.startswith('@'):
+        query = query[1:]
 
     if site == "BusySponge":
         sys.path.append('/home/reagle/bin')

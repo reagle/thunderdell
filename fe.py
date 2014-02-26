@@ -1476,7 +1476,8 @@ if __name__ == '__main__':
         opts.chase = True
         opts.file_out = True
     if opts.file_out:
-        output_fn = os.path.splitext(file_name)[0] + '.bib'
+        extension = '.bib' if not opts.YAML_CSL else '.yaml'
+        output_fn = os.path.splitext(file_name)[0] + extension
         opts.outfd = codecs.open(output_fn, "w", "utf-8")
     if opts.WP_citation:
         output = emit_wp_citation

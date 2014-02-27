@@ -188,6 +188,7 @@ CSL_TYPES =  (
 
 BIB_TYPES = BIBLATEX_TYPES + CSL_TYPES
 
+# http://reagle.org/joseph/2013/08/bib-mapping.html
 CSL_BIBLATEX_TYPE_MAP = OrderedDict([
         # ordering is important so in the reverse mapping online => webpage
         ('article-journal',         'article'),
@@ -211,6 +212,32 @@ CSL_BIBLATEX_TYPE_MAP = OrderedDict([
 
 BIBLATEX_CSL_TYPE_MAP = OrderedDict((v,k) for k, v in 
                                    CSL_BIBLATEX_TYPE_MAP.items())
+
+BIBLATEX_CSL_FIELD_MAP = OrderedDict([
+        ('address',        'publisher-place'),         
+        ('annotation',     'abstract'),                
+        ('booktitle',      'container-title'),         
+        ('chapter',        'chapter-number'),          
+        ('doi',            'DOI'),                     
+        ('eventtitle',     'event'),                   
+        ('institution',    'publisher'),               
+        ('isbn',           'ISBN'),                    
+        ('journal',        'container-title'),         
+        ('organization',   'publisher'),               
+        ('genre',          'type'),                    
+        ('page',           'pages'),                   
+        ('pagination',     'locators'),                
+        ('school',         'publisher'),               
+        ('series',         'collection-title'),        
+        ('shorttitle',     'title-short'),             
+        ('url',            'URL'),                     
+        ('urldate',        'accessed'),                
+        ('venue',          'event-place'),             
+        ('catalog',        'call-number'),             
+        ])
+
+CSL_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
+                                   BIBLATEX_CSL_FIELD_MAP.items())
 
 
 BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter', 
@@ -259,7 +286,7 @@ def unescape_XML(o):
     '''Unescape XML character entities; & < > are defaulted'''
     extras = {"&apos;": "'", "&quot;": '"'}
     if isinstance(o, basestring):
-        info("%s is a string" % o)
+        #info("%s is a string" % o)
         return(unescape(o, extras))
     elif isinstance(o, list): # it's a list of authors with name parts
         new_authors = []
@@ -643,7 +670,7 @@ def guess_csl_type(entry):
         if 'c_dictionary' in entry:         et = 'entry-dictionary'
         if 'c_encyclopedia' in entry:       et = 'entry-encyclopedia'
         if 'c_forum' in entry:              et = 'post'
-        if 'c_blog' in entry:               et = 'post-webblog'
+        if 'c_blog' in entry:               et = 'post-weblog'
         if 'c_web' in entry:                et = 'webpage'
     else:
         if 'eventtitle' in entry:           et = 'paper-conference'
@@ -861,13 +888,13 @@ def emit_yaml_csl(entries):
         http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
         
     """
-    import yaml
+    #import yaml
     
     def esc_yaml(s):
         if s: # faster to just quote than testing for YAML_INDICATORS
             s = s.replace('"', r'\"')
             s = '"' + s + '"'
-        #return s
+        return s
         
     def emit_yaml_people(people):
         """yaml writer for authors and editors"""
@@ -935,10 +962,15 @@ def emit_yaml_csl(entries):
                         opts.outfd.write('  accessed:\n')
                         emit_yaml_date(entry[field])
                     continue
-                info('CONTAINERS = %s field = %s' %(CONTAINERS, field))
+                info('field = %s' %(field))
+                #info('CONTAINERS = %s' %(CONTAINERS))
                 if field in CONTAINERS:
                     field = 'container-title'
-                #value_esc = '"' + value.replace('"', "'") + '"'
+                info(BIBLATEX_CSL_FIELD_MAP)
+                if field in BIBLATEX_CSL_FIELD_MAP:
+                    info("field FROM =  %s" %(field))
+                    field = BIBLATEX_CSL_FIELD_MAP[field]
+                    info("field TO   = %s" %(field))
                 opts.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
     opts.outfd.write('...\n')
 

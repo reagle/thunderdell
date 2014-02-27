@@ -861,7 +861,14 @@ def emit_yaml_csl(entries):
         http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
         
     """
+    import yaml
     
+    def esc_yaml(s):
+        if s: # faster to just quote than testing for YAML_INDICATORS
+            s = s.replace('"', r'\"')
+            s = '"' + s + '"'
+        #return s
+        
     def emit_yaml_people(people):
         """yaml writer for authors and editors"""
                     
@@ -871,15 +878,16 @@ def emit_yaml_csl(entries):
             #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
             given, particle, family, suffix = [unescape_XML(chunk) 
                                                for chunk in person]
-            opts.outfd.write('    family: %s\n' % family)
+            opts.outfd.write('    family: %s\n' % esc_yaml(family))
             if given:
                 opts.outfd.write('    given:\n')
                 for given_part in given.split(' '):
-                    opts.outfd.write('    - %s\n' % given_part)
+                    opts.outfd.write('    - %s\n' % esc_yaml(given_part))
             if suffix:
-                opts.outfd.write('    suffix: %s\n' % suffix)
+                opts.outfd.write('    suffix: %s\n' % esc_yaml(suffix))
             if particle:
-                opts.outfd.write('    non-dropping-particle: %s\n' % particle)
+                opts.outfd.write('    non-dropping-particle: %s\n' %
+                                 esc_yaml(particle))
 
     def emit_yaml_date(date):
         """yaml writer for dates"""
@@ -930,7 +938,8 @@ def emit_yaml_csl(entries):
                 info('CONTAINERS = %s field = %s' %(CONTAINERS, field))
                 if field in CONTAINERS:
                     field = 'container-title'
-                opts.outfd.write('  %s: %s\n' % (field, value))
+                #value_esc = '"' + value.replace('"', "'") + '"'
+                opts.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
     opts.outfd.write('...\n')
 
 

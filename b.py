@@ -71,6 +71,7 @@ GENERAL_KEY_SHORTCUTS = {
         'pow': 'power',
         'pra': 'praxis',
         'pri': 'privacy',
+        'qs' : 'qself',
         'spe': 'speech',
         'str': 'structure',
         'tec': 'technology',

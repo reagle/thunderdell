@@ -222,7 +222,6 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
         ('eventtitle',     'event'),                   
         ('institution',    'publisher'),               
         ('isbn',           'ISBN'),    
-        ('issue',          'season'),
         ('journal',        'container-title'),         
         ('organization',   'publisher'),               
         ('type',           'genre'),                    
@@ -917,7 +916,7 @@ def emit_yaml_csl(entries):
                 opts.outfd.write('    non-dropping-particle: %s\n' %
                                  esc_yaml(particle))
 
-    def emit_yaml_date(date):
+    def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
         info("date '%s'" %date)
         year, month, day = (date.split('-') +3*[None])[0:3]
@@ -927,6 +926,8 @@ def emit_yaml_csl(entries):
             opts.outfd.write('    month: %s\n' %month)
         if day:
             opts.outfd.write('    day: %s\n' %day)
+        if season:
+            opts.outfd.write('    season: %s\n' %season)
         
     # begin YAML file
     opts.outfd.write('---\n')
@@ -944,7 +945,7 @@ def emit_yaml_csl(entries):
                 info("short, field = '%s , %s'" %(short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
-                             'day', 'month', 'year',):
+                             'day', 'month', 'year', 'issue'):
                     continue
 
                 # special format fields
@@ -954,8 +955,9 @@ def emit_yaml_csl(entries):
                     continue
                 if field in ('date', 'origdate', 'urldate'):
                     if field == 'date':
+                        season = entry['issue'] if 'issue' in entry else None
                         opts.outfd.write('  issued:\n')
-                        emit_yaml_date(entry[field])
+                        emit_yaml_date(entry[field], season)
                     if field == 'origdate':
                         opts.outfd.write('  original-date:\n')
                         emit_yaml_date(entry[field])

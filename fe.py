@@ -893,6 +893,7 @@ def emit_yaml_csl(entries):
     def esc_yaml(s):
         if s: # faster to just quote than testing for YAML_INDICATORS
             s = s.replace('"', r'\"')
+            s = s.replace("#", r"\\#") # pandoc md escaping
             s = '"' + s + '"'
         return s
         

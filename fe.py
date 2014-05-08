@@ -844,20 +844,22 @@ def emit_biblatex(entries):
 
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
-                info("short, field = '%s , %s'" %(short, field))
+                crtl("short, field = '%s , %s'" %(short, field))
                 # skip these fields
                 if field in ('identifier', 'entry_type', 'isbn', 'ori_author'):
                     continue
-                if field in ('urldate', 'url'):
-                    if field == 'urldate' and 'url' not in entry:
-                        continue # no url, no 'read on'
+                if field == 'urldate' and 'url' not in entry:
+                    continue # no url, no 'read on'
                 if field in ('url'):  
+                    crtl("url = %s" %entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                        crtl("banned")
                         continue
                     # if online_only and not (online or online journal) then skip
                     if opts.online_urls_only and not (
                         entry_type == 'online' or
                         any(j for j in ONLINE_JOURNALS if j in entry['url'])):
+                        crtl("not online")
                         continue
 
                 # skip fields not in bibtex
@@ -974,15 +976,25 @@ def emit_yaml_csl(entries):
                         opts.outfd.write('  accessed:\n')
                         emit_yaml_date(entry[field])
                     continue
-                if field == 'url':  
-                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
-                        continue
-                    # if online_only and not (online_type) then skip
-                    if opts.online_urls_only and not (
-                        entry_type in ('post', 'post-weblog', 'webpage') or
-                        any(j for j in ONLINE_JOURNALS if j in entry['url'])):
-                        continue
 
+                if field == 'urldate' and 'url' not in entry:
+                    continue # no url, no 'read on'
+                if field == 'url':  
+                    info("url = %s" %entry[field])
+                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                        info("banned")
+                        continue
+                    # skip URL articles with no pagination and other offline types
+                    if opts.online_urls_only:
+                        info("online_urls_only")
+                        # don't skip online types
+                        if entry_type in ('post', 'post-weblog', 'webpage'):
+                            pass
+                        # skip items that are paginated
+                        elif 'pages' in entry:
+                                info("  skipping url, paginated item")
+                                continue
+                      
                 info('field = %s' %(field))
                 #info('CONTAINERS = %s' %(CONTAINERS))
                 if field in CONTAINERS:

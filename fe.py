@@ -226,7 +226,7 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
         ('organization',   'publisher'),   
         ('number',         'issue'),
         ('type',           'genre'),                    
-        ('page',           'pages'),                   
+        ('pages',          'page'),                   
         ('pagination',     'locators'),                
         ('school',         'publisher'),               
         ('series',         'collection-title'),        

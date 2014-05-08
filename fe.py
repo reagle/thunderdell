@@ -772,10 +772,12 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
+EXCLUDE_URLS = ('search?q=cache', 'proquest', 'books.google', '.amazon') 
+ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org', 'salon.com', 
+    'slate.com')
+
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
-    EXCLUDE = ('search?q=cache', 'proquest') # 'books.google', '.amazon', 
-    ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org')
     dbg("entries = '%s'" %(entries))
 
     for entry in dict_sorted_by_keys(entries):
@@ -846,17 +848,18 @@ def emit_biblatex(entries):
                 # skip these fields
                 if field in ('identifier', 'entry_type', 'isbn', 'ori_author'):
                     continue
-                if field in ('note', 'url'):  
-                    if any(ban for ban in EXCLUDE if ban in entry[field]):
-                        continue
                 if field in ('urldate', 'url'):
                     if field == 'urldate' and 'url' not in entry:
                         continue # no url, no 'read on'
+                if field in ('url'):  
+                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                        continue
                     # if online_only and not (online or online journal) then skip
                     if opts.online_urls_only and not (
                         entry_type == 'online' or
                         any(j for j in ONLINE_JOURNALS if j in entry['url'])):
                         continue
+
                 # skip fields not in bibtex
                 if opts.bibtex and field not in BIBTEX_FIELDS:
                         continue
@@ -971,6 +974,15 @@ def emit_yaml_csl(entries):
                         opts.outfd.write('  accessed:\n')
                         emit_yaml_date(entry[field])
                     continue
+                if field == 'url':  
+                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                        continue
+                    # if online_only and not (online_type) then skip
+                    if opts.online_urls_only and not (
+                        entry_type in ('post', 'post-weblog', 'webpage') or
+                        any(j for j in ONLINE_JOURNALS if j in entry['url'])):
+                        continue
+
                 info('field = %s' %(field))
                 #info('CONTAINERS = %s' %(CONTAINERS))
                 if field in CONTAINERS:
@@ -1473,10 +1485,10 @@ if __name__ == '__main__':
     parser.add_option("-F", "--fields",
                     action="store_true", default=False,
                     help="show biblatex shortcuts, fields, and types used by fe")
-    parser.add_option("-l", "--long_url",
+    parser.add_option("-l", "--long-url",
                     action="store_true", default=False,
                     help="use long URLs")
-    parser.add_option("-o", "--online_urls_only",
+    parser.add_option("-o", "--online-urls-only",
                     action="store_true", default=False,
                     help="emit URLs for online resources only")
     parser.add_option("-p", "--pretty",

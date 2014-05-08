@@ -223,7 +223,8 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
         ('institution',    'publisher'),               
         ('isbn',           'ISBN'),    
         ('journal',        'container-title'),         
-        ('organization',   'publisher'),               
+        ('organization',   'publisher'),   
+        ('number',         'issue'),
         ('type',           'genre'),                    
         ('page',           'pages'),                   
         ('pagination',     'locators'),                
@@ -884,7 +885,8 @@ def emit_biblatex(entries):
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
     
-    See: http://www.yaml.org/spec/1.2/spec.html
+    See: http://reagle.org/joseph/2013/08/bib-mapping.html 
+        http://www.yaml.org/spec/1.2/spec.html
         http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
         
     """
@@ -894,6 +896,7 @@ def emit_yaml_csl(entries):
         if s: # faster to just quote than testing for YAML_INDICATORS
             s = s.replace('"', r'\"')
             s = s.replace("#", r"\\#") # pandoc md escaping
+            s = s.replace("@", r"\\@") 
             s = '"' + s + '"'
         return s
         
@@ -906,11 +909,12 @@ def emit_yaml_csl(entries):
             #CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle' 
             given, particle, family, suffix = [unescape_XML(chunk) 
                                                for chunk in person]
-            opts.outfd.write('    family: %s\n' % esc_yaml(family))
+            opts.outfd.write('  - family: %s\n' % esc_yaml(family))
             if given:
-                opts.outfd.write('    given:\n')
-                for given_part in given.split(' '):
-                    opts.outfd.write('    - %s\n' % esc_yaml(given_part))
+                opts.outfd.write('    given: %s\n' % esc_yaml(given))
+                # opts.outfd.write('    given:\n')
+                # for given_part in given.split(' '):
+                #     opts.outfd.write('    - %s\n' % esc_yaml(given_part))
             if suffix:
                 opts.outfd.write('    suffix: %s\n' % esc_yaml(suffix))
             if particle:
@@ -931,6 +935,7 @@ def emit_yaml_csl(entries):
             opts.outfd.write('    season: %s\n' %season)
         
     # begin YAML file
+    # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
     for entry in dict_sorted_by_keys(entries):

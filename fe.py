@@ -994,6 +994,10 @@ def emit_yaml_csl(entries):
                         elif 'pages' in entry:
                                 info("  skipping url, paginated item")
                                 continue
+                if field == 'eventtitle' and 'container-title' not in entry:
+                    opts.outfd.write('  container-title: "Proceedings of %s"\n'
+                        %entry['eventtitle'])
+                    # opts.outfd.write('  eventtitle: "%s"\n' %entry['eventtitle'])
                       
                 info('field = %s' %(field))
                 #info('CONTAINERS = %s' %(CONTAINERS))

@@ -674,7 +674,9 @@ def guess_csl_type(entry):
         if 'c_blog' in entry:               et = 'post-weblog'
         if 'c_web' in entry:                et = 'webpage'
     else:
-        if 'eventtitle' in entry:           et = 'paper-conference'
+        if 'eventtitle' in entry:    
+            if 'publisher' in entry:        et = 'paper-conference'
+            else:                           et = 'speech'
         elif 'booktitle' in entry:
             if 'editor' in entry:           # collection or incollection
                 if 'chapter' in entry:      et = 'chapter'
@@ -1001,9 +1003,12 @@ def emit_yaml_csl(entries):
                       
                 info('field = %s' %(field))
                 #info('CONTAINERS = %s' %(CONTAINERS))
+                info(BIBLATEX_CSL_FIELD_MAP)
                 if field in CONTAINERS:
                     field = 'container-title'
-                info(BIBLATEX_CSL_FIELD_MAP)
+                # containers already in titlecase, so protect from csl:lowercase+titlecase
+                if field == 'container-title':
+                    value = "<span class='nocase'>%s</span>" % value 
                 if field in BIBLATEX_CSL_FIELD_MAP:
                     info("field FROM =  %s" %(field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]

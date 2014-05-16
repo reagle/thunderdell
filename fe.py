@@ -1006,9 +1006,9 @@ def emit_yaml_csl(entries):
                 info(BIBLATEX_CSL_FIELD_MAP)
                 if field in CONTAINERS:
                     field = 'container-title'
-                # containers already in titlecase, so protect from csl:lowercase+titlecase
-                if field == 'container-title':
-                    value = "<span class='nocase'>%s</span>" % value 
+                # # containers already in titlecase, so protect from csl:lowercase+titlecase
+                # if field == 'container-title':
+                #     value = "<span class='nocase'>%s</span>" % value 
                 if field in BIBLATEX_CSL_FIELD_MAP:
                     info("field FROM =  %s" %(field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]

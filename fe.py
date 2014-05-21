@@ -774,7 +774,8 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
-EXCLUDE_URLS = ('search?q=cache', 'proquest', 'books.google', '.amazon') 
+EXCLUDE_URLS = ('search?q=cache', 'proquest', 'books.google', 
+    'amazon.com/reader', 'amazon.com/gp/reader') 
 ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org', 'salon.com', 
     'slate.com')
 
@@ -988,9 +989,9 @@ def emit_yaml_csl(entries):
                     continue # no url, no 'read on'
                 if field == 'url':  
                     info("url = %s" %entry[field])
-                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
-                        info("banned")
-                        continue
+                    # if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                    #     info("banned")
+                    #     continue
                     # skip URL articles with no pagination and other offline types
                     if opts.online_urls_only:
                         info("online_urls_only")

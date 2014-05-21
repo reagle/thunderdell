@@ -785,7 +785,7 @@ def emit_biblatex(entries):
     for entry in dict_sorted_by_keys(entries):
         entry_type = guess_bibtex_type(entry)
         entry_type_copy = entry_type
-        # if author is replicated in container then delete
+        # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
             del entry['author']
@@ -951,6 +951,11 @@ def emit_yaml_csl(entries):
         opts.outfd.write('  type: %s\n' % entry_type)
         if genre:
             opts.outfd.write('  genre: %s\n' % genre)
+        
+        # if authorless (replicated in container) then delete
+        container_values = [entry[c] for c in CONTAINERS if c in entry]
+        if entry['ori_author'] in container_values:
+            del entry['author']
             
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:

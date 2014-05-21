@@ -964,7 +964,7 @@ def blog_at_goatee(biblio):
             fd.write('> %s\n' % biblio['excerpt'])
         if photo_match:
             path, jpg = url.rsplit('/', 1)
-            thumb_url = path + '/thumbnails/' + jpg
+            thumb_url = path + '/thumbs/' + jpg
             #thumb_url = url.replace('/web/', '/thumbs/')
             alt_text = blog_title.replace('-', ' ')
             fd.write(

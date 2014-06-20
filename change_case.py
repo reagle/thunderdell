@@ -173,14 +173,17 @@ if '__main__' == __name__:
     import argparse # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description='Change the case of some text, '
-            'making use of varied word lists.')
+            ' defaulting to sentence case.')
     
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
     # optional arguments
     arg_parser.add_argument("-c", "--capwords",
                     action="store_true", default=False,
-                    help="Use standard lib string.capwords()")
+                    help="Capitalize via string.capwords()")
+    arg_parser.add_argument("-s", "--safe",
+                    action="store_true", default=False,
+                    help="Capitalize safely, such as preserving abbreviations")
     arg_parser.add_argument("-T", "--test",
                     action="store_true", default=False,
                     help="Test")
@@ -209,7 +212,10 @@ if '__main__' == __name__:
         sys.exit()
     text = ' '.join(args.text)
     if args.capwords:
-        text = string.capwords(text)
+        if args.safe:
+            text = safe_capwords(text)
+        else:
+            text = string.capwords(text)
     elif args.text:
         text = sentence_case(text)
     print(text)

@@ -1494,7 +1494,10 @@ if __name__ == '__main__':
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.""")
-    parser.add_option("-b", "--bibtex", default=False,
+    parser.add_option("-b", "--biblatex", default=False,
+                    action="store_true",
+                    help="emit biblatex fields")
+    parser.add_option("--bibtex", default=False,
                     action="store_true",
                     help="emit bibtex fields rather than biblatex")
     parser.add_option("-c", "--chase",
@@ -1502,7 +1505,7 @@ if __name__ == '__main__':
                     help="chase links between MMs")
     parser.add_option("-D", "--defaults",
                     action="store_true", default=False,
-                    help="chase, use default map and output file")
+                    help="chase, output YAML, use default map and output file")
     parser.add_option("-k", "--keys", default='-no-keys',
                     action="store_const", const='-use-keys',
                     help="show bibtex keys in displayed HTML")
@@ -1536,7 +1539,7 @@ if __name__ == '__main__':
                     help="emit Wikipedia {{Citation}} format")
     parser.add_option("-y", "--YAML-CSL", default=False,
                     action="store_true",
-                    help="emit YAML/CSL for use with pandoc")
+                    help="emit YAML/CSL for use with pandoc [default]")
     ## Defaulting to true because hs-citeproc (via bibutils) 
     ## doesn't grok partial dates such as d=2012
     #parser.add_option("-y", "--year", default=False,
@@ -1561,19 +1564,26 @@ if __name__ == '__main__':
         print("Warning: ignoring all files but the first")
     file_name = os.path.abspath(files[0])
 
+
+    if opts.WP_citation:
+        output = emit_wp_citation
+    elif opts.bibtex or opts.biblatex:
+        output = emit_biblatex
+    else:
+        opts.YAML_CSL = True
+        output = emit_yaml_csl
     if opts.defaults:
         opts.chase = True
         opts.file_out = True
     if opts.file_out:
-        extension = '.bib' if not opts.YAML_CSL else '.yaml'
+        if opts.YAML_CSL:
+            extension = '.yaml'
+        elif opts.bibtex or opts.biblatex:
+            extension = '.bib'
+        elif opts.WP_citation:
+            extension = '.wiki'
         output_fn = os.path.splitext(file_name)[0] + extension
         opts.outfd = codecs.open(output_fn, "w", "utf-8")
-    if opts.WP_citation:
-        output = emit_wp_citation
-    elif opts.YAML_CSL:
-        output = emit_yaml_csl
-    else:
-        output = emit_biblatex
     if opts.tests:
         print("Running doctests")
         import doctest

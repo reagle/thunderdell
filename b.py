@@ -57,13 +57,10 @@ GENERAL_KEY_SHORTCUTS = {
         'con': 'conflict',
         'exi': 'exit',
         'for': 'fork',
-        'gen': 'gender',
-        'gf' : 'geekfeminism',
         'hum': 'humor',
         'ide': 'identity',
         'lea': 'leadership',
         'leg': 'legal',
-        'lh' : 'lifehack',
         'ope': 'open',
         'nor': 'norms',
         'pat': 'patience',
@@ -71,7 +68,6 @@ GENERAL_KEY_SHORTCUTS = {
         'pow': 'power',
         'pra': 'praxis',
         'pri': 'privacy',
-        'qs' : 'qself',
         'spe': 'speech',
         'str': 'structure',
         'tec': 'technology',
@@ -79,7 +75,21 @@ GENERAL_KEY_SHORTCUTS = {
         'zei': 'zeitgeist',
         }
 
+GF_KEY_SHORTCUTS = {
+        # Geek Feminism
+        'gen': 'gender',
+        'sex': 'sexism',
+        'gf' : 'gfem',
+        }
+
+LH_KEY_SHORTCUTS = {
+        # Lifehack
+        'lh' : 'lhack',
+        'qs' : 'qself',
+        }
+
 CC_KEY_SHORTCUTS = {
+        # Comments
         'ano' : 'anonymous',
         'ass' : 'assessment',
         'aut' : 'automated',

@@ -78,14 +78,17 @@ GENERAL_KEY_SHORTCUTS = {
 GF_KEY_SHORTCUTS = {
         # Geek Feminism
         'gen': 'gender',
-        'sex': 'sexism',
         'gf' : 'gfem',
+        'sex': 'sexism',
         }
 
 LH_KEY_SHORTCUTS = {
         # Lifehack
         'lh' : 'lhack',
+        'his': 'history',
         'qs' : 'qself',
+        'sh' : 'shelp',
+        'too': 'tool'
         }
 
 CC_KEY_SHORTCUTS = {
@@ -131,7 +134,6 @@ WP_KEY_SHORTCUTS = {
         'fai': 'faith',
         'fru': 'frustration',
         'gov': 'governance',
-        'his': 'history',
         'mot': 'motivation',
         'neu': 'neutrality',
         'not': 'notability',

@@ -552,7 +552,7 @@ class scrape_ENWP(scrape_default):
             if (len(line) > 280 and 'This page documents' not in line) or \
             ('This page in a nutshell' in line):
                 return line
-        return None
+        return ''
 
 class scrape_WMMeta(scrape_default):
 
@@ -579,7 +579,7 @@ class scrape_WMMeta(scrape_default):
         return 'Wikimedia'
 
     def get_excerpt(self):
-        return None            # no good way to identify first paragraph at Meta
+        return ''            # no good way to identify first paragraph at Meta
 
     def get_permalink(self):
         permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)

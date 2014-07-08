@@ -1038,7 +1038,7 @@ def get_logger(text):
         else:
             print_usage("Sorry, unknown scheme: '%s'." % params['scheme'])
     else:
-        print_usage("Sorry, I can't parse the message: '%s'." % text)
+        print_usage("Sorry, I can't parse the argument: '%s'." % text)
     sys.exit()
 
 #######################################
@@ -1120,22 +1120,29 @@ def yasn_publish(comment, title, url, tags):
     comment, title, url, tags = [v.strip() for v in [comment, title, url, tags]]
     comment_delim = ": " if comment else ""
     comment = comment + comment_delim + title
-    comment_room = 140 - len(comment) - len(tags) - len(url)
-    info("%d < %d" %(len(comment), comment_room))
-    if comment_room < 0:    # the comment is too big
-        comment = comment[0:-17] + '...' # url will be shortened to 20 chars
-    message = "%s %s %s" %(comment, url, tags)
-    info('message length = %s' %len(message))
-    print("tweeted '%s' %s" %(message, comment_room))
-    call(['twidge', 'update', '%s' %message]) # TODO: unicode
+
+    TWEET_LEN = 140
+    SHORTENER_LEN = 19 # twidge uses is.gd
+    tweet_room = TWEET_LEN - len(comment) - len(tags) - len(url)
+    info("length_comment = %d; tweet_room = %d" %(len(comment), tweet_room))
+    if tweet_room < 0:    # the comment is too big
+        shortened_room = TWEET_LEN - len(comment) - len(tags) - SHORTENER_LEN
+        info("length_comment = %d; shortened_room = %d" %(
+            len(comment), shortened_room))
+        if shortened_room < 0:
+            comment = comment[0:shortened_room-3] + '...'
+    tweet = "%s %s %s" %(comment, url, tags)
+    info('tweet length = %s' %len(tweet))
+    print("tweeted '%s' %s %s" %(tweet, tweet_room, shortened_room))
+    # call(['twidge', 'update', '%s' %tweet]) # TODO: unicode
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
     DESCRIPTION = '''
-    nifty:         b n TAGS URL|DOI MESSAGE
-    work plan:     b j TAGS URL|DOI MESSAGE
+    nifty:         b n TAGS URL|DOI COMMENT
+    work plan:     b j TAGS URL|DOI COMMENT
     mindmap:       b m TAGS URL|DOI ABSTRACT
-    console:       b c TAGS URL|DOI MESSAGE
+    console:       b c TAGS URL|DOI COMMENT
     blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
     blog goatee:   b g URL|DOI TITLE. BODY'''
     

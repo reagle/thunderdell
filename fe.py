@@ -431,6 +431,7 @@ def get_ident(entry, entries):
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
     info("ident = %s '%s'" %(type(ident), ident))
+    ident = ident.replace('@', '') # '@' is citation designator, so just remove
     return unicode(ident)
 
 def pull_citation(entry):

@@ -1124,10 +1124,11 @@ def yasn_publish(comment, title, url, tags):
     TWEET_LEN = 140
     SHORTENER_LEN = 19 # twidge uses is.gd
     tweet_room = TWEET_LEN - len(comment) - len(tags) - len(url)
-    info("length_comment = %d; tweet_room = %d" %(len(comment), tweet_room))
+    shortened_room = 'n/a'
+    info("length_comment = %s; tweet_room = %s" %(len(comment), tweet_room))
     if tweet_room < 0:    # the comment is too big
         shortened_room = TWEET_LEN - len(comment) - len(tags) - SHORTENER_LEN
-        info("length_comment = %d; shortened_room = %d" %(
+        info("length_comment = %s; shortened_room = %s" %(
             len(comment), shortened_room))
         if shortened_room < 0:
             comment = comment[0:shortened_room-3] + '...'

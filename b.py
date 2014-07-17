@@ -633,7 +633,6 @@ class scrape_photo_net(scrape_default):
         excerpt = self.HTML_p.xpath(
             "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
         return excerpt
-
     
 class scrape_geekfeminism_wiki(scrape_default):
     def __init__(self, url, comment):
@@ -999,20 +998,21 @@ def get_scraper(url, comment):
     info("url = '%s'" %(url))
     if url.lower().startswith('doi:'):
         url = 'http://dx.doi.org/' + url[4:]
+    host_path = url.split('//')[1]
     
     dispatch_scraper = (
-        ('http://en.wikipedia.org/w', scrape_ENWP),
-        ('http://meta.wikimedia.org/w', scrape_WMMeta),
-        ('http://marc.info/', scrape_MARC),
-        ('http://dx.doi.org/', scrape_DOI),
-        ('http://photo.net/site-help-forum/', scrape_photo_net),
-        ('http://geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
-        ('https://twitter.com/', scrape_twitter),
+        ('en.wikipedia.org/w', scrape_ENWP),
+        ('meta.wikimedia.org/w', scrape_WMMeta),
+        ('marc.info/', scrape_MARC),
+        ('dx.doi.org/', scrape_DOI),
+        ('photo.net/site-help-forum/', scrape_photo_net),
+        ('geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
+        ('twitter.com/', scrape_twitter),
         ('', scrape_default)     # default: make sure last
     )
 
     for prefix, scraper in dispatch_scraper:
-        if url.startswith(prefix):
+        if host_path.startswith(prefix):
             info("scrape = %s " % scraper)
             return scraper(url, comment)    # creates instance
 

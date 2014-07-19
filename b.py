@@ -1135,7 +1135,7 @@ def yasn_publish(comment, title, url, tags):
     tweet = "%s %s %s" %(comment, url, tags)
     info('tweet length = %s' %len(tweet))
     print("tweeted '%s' %s %s" %(tweet, tweet_room, shortened_room))
-    # call(['twidge', 'update', '%s' %tweet]) # TODO: unicode
+    call(['twidge', 'update', '%s' %tweet]) # TODO: unicode
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":

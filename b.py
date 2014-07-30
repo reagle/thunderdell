@@ -708,7 +708,7 @@ def log2mm(biblio):
     '''
 
     print("to log2mm")
-    biblio = do_console_annotation(biblio)
+    biblio, args.publish = do_console_annotation(biblio)
     
     #now = time.gmtime()
     this_week = time.strftime("%U", NOW)
@@ -1080,9 +1080,12 @@ def do_console_annotation(biblio):
         print
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
+    do_publish = False
     while True:
         try:
             line = raw_input('').decode(sys.stdin.encoding)
+            if line == '-p':
+                do_publish = True
             if line == '?':
                 print_console_msg()
             if '=' in line:
@@ -1112,7 +1115,7 @@ def do_console_annotation(biblio):
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
         print('logged: %s to' % get_tentative_ident(biblio)),
-    return biblio
+    return biblio, do_publish
         
 def yasn_publish(comment, title, url, tags):
     if tags and tags[0] != '#': # they've not yet been hashified

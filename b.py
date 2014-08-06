@@ -398,6 +398,7 @@ class scrape_DOI(scrape_default):
         import doi_query
         import json
         
+        info("url = %s" % self.url)
         json_string = doi_query.query(self.url)
         info("json_string = %s" % json_string)
         json_bib = json.loads(json_string)
@@ -1080,7 +1081,7 @@ def do_console_annotation(biblio):
         print
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
-    do_publish = False
+    do_publish = args.publish
     while True:
         try:
             line = raw_input('').decode(sys.stdin.encoding)

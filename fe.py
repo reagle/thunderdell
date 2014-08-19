@@ -1049,18 +1049,15 @@ def emit_wp_citation(entries):
     
     for entry in dict_sorted_by_keys(entries):
         opts.outfd.write('{{ Citation\n')
-        if 'booktitle' in entry:
-            opts.outfd.write('| ref = %s\n' % entry['title'])
-            entry['title'] = entry['booktitle']
         if 'identifier' in entry:
-            opts.outfd.write('| ref = %s\n' % entry['title'])
+            opts.outfd.write('| ref = %s\n' % entry['identifier'])
             
         for short, field in list(BIB_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in ( 'annotation', 'custom1', 'custom2',
-                    'day', 'entry_type', 'booktitle', 'identifier', 
-                    'keyword', 'month', 'shorttitle'):
+                    'day', 'entry_type', 'identifier', 'chapter',
+                    'keyword', 'month', 'shorttitle', 'year'):
                     continue
                 elif field == 'author':
                     output_wp_names(field, entry[field])
@@ -1068,6 +1065,11 @@ def emit_wp_citation(entries):
                 elif field == 'editor':
                     output_wp_names(field, entry[field])
                     continue
+                elif field == 'title':
+                    if 'booktitle' in entry:
+                        field = 'chapter'
+                elif field == 'booktitle':
+                    field = 'title'
                 elif field == 'urldate':
                     field = 'accessdate'
                 elif field == 'address':

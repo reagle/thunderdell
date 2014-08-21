@@ -1539,8 +1539,9 @@ if __name__ == '__main__':
                     help="Increase verbosity (specify multiple times for more)")
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
-                    help="emit Wikipedia {{Citation}} format\n"
-                    "http://en.wikipedia.org/wiki/Template:Cite")
+                    help="emit Wikipedia {{Citation}} format which can be "
+                    "cited via {{sfn|keyid|p=120}}. "
+                    "See: http://en.wikipedia.org/wiki/Template:Cite")
     parser.add_option("-y", "--YAML-CSL", default=False,
                     action="store_true",
                     help="emit YAML/CSL for use with pandoc [default]")

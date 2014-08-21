@@ -1025,7 +1025,7 @@ def emit_yaml_csl(entries):
 
 
 def emit_wp_citation(entries):
-    """Emit citations in Wikipedia's {{Citation}} template format.
+    """Emit citations in Wikipedia's {{citation}} template format.
 
     See: http://en.wikipedia.org/wiki/Template:Cite
 
@@ -1048,7 +1048,7 @@ def emit_wp_citation(entries):
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
     
     for entry in dict_sorted_by_keys(entries):
-        opts.outfd.write('{{ Citation\n')
+        opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
             opts.outfd.write('| ref = %s\n' % entry['identifier'])
             

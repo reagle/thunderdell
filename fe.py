@@ -1050,7 +1050,7 @@ def emit_wp_citation(entries):
     for entry in dict_sorted_by_keys(entries):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
-            opts.outfd.write('| ref = %s\n' % entry['identifier'])
+            opts.outfd.write('| ref = {{sfnref|%s}}\n' % entry['identifier'])
             
         for short, field in list(BIB_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
@@ -1539,8 +1539,8 @@ if __name__ == '__main__':
                     help="Increase verbosity (specify multiple times for more)")
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
-                    help="emit Wikipedia {{Citation}} format which can be "
-                    "cited via {{sfn|keyid|p=120}}. "
+                    help="emit Wikipedia {{citation}} format which can be "
+                    "cited via {{sfn|Author2004|loc=p. 45}}. "
                     "See: http://en.wikipedia.org/wiki/Template:Cite")
     parser.add_option("-y", "--YAML-CSL", default=False,
                     action="store_true",

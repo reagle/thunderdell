@@ -846,23 +846,23 @@ def log2work(biblio):
         (uid, date_token, hashtags, html_comment)
     info(log_item)
 
-    # fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
-    # content = fd.read()
-    # fd.close()
+    fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
+    content = fd.read()
+    fd.close()
 
-    # insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ol>)')
+    insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ol>)')
 
-    # newcontent = insertion_regexp.sub(u'\\1 \n  %s\n' %
-    #     log_item, content, re.DOTALL|re.IGNORECASE)
-    # if newcontent:
-    #     fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
-    #     fd.write(newcontent)
-    #     fd.close()
-    # else:
-    #     print_usage("Sorry, output regexp subsitution failed.")
+    newcontent = insertion_regexp.sub(u'\\1 \n  %s\n' %
+        log_item, content, re.DOTALL|re.IGNORECASE)
+    if newcontent:
+        fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
+        fd.write(newcontent)
+        fd.close()
+    else:
+        print_usage("Sorry, output regexp subsitution failed.")
 
-    # if args.publish:
-    #     yasn_publish(comment, title, url, hashtags)
+    if args.publish:
+        yasn_publish(comment, title, url, hashtags)
 
 
 def log2console(biblio):

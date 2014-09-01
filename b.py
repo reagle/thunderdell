@@ -894,6 +894,7 @@ def blog_at_opencodex(biblio):
     entry = biblio['comment']
 
     category = 'social'
+    tags = ''
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
         category = KEY_SHORTCUTS.get(tags[0], tags[0])

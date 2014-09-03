@@ -1148,7 +1148,7 @@ def emit_results(entries, query, results_file):
         else:                               # CGI
             return 'file://' + file_name
 
-    def print_entry(identifier, author, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
+    def print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
 
         identifier_html = '<li><a href="%s">%s</a>' % (get_url_query(identifier), identifier)
         title_html = '<a href="%s">%s</a>' % (get_url_query(title), title)
@@ -1164,6 +1164,7 @@ def emit_results(entries, query, results_file):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
         title = entry['title']
+        date = entry['date']
         url = entry.get('url','')
         base_mm_file = os.path.basename(entry['_mm_file'])
         MM_mm_file = get_url_MM(entry['_mm_file'])
@@ -1173,13 +1174,18 @@ def emit_results(entries, query, results_file):
             results_file.write('          <li>\n          <ul class="tit_child">\n'),
             results_file.write('<li style="text-align: right">[<a href="%s">%s</a>]</li>' %(MM_mm_file,base_mm_file),)
             fl_names = ', '.join(name[0] + ' ' + name[2] for name in entry['author'])
+            title_mdn = "%s" % (title)
+            if url:
+                title_mdn = "[%s](%s)" % (title, url)
+            results_file.write('<li class="mdn">[%s]: %s, %s, "%s".</li>'
+                % (identifier, fl_names, date[0:4], title_mdn))
             results_file.write('<li class="author">%s</li>' % fl_names)
             pretty_print(entry['_title_node'], entry)
-            results_file.write('          </ul>\n         </li>\n'),
+            results_file.write('          </ul>\n<ul>         \n'),
 
         # if I have some nodes that were matched, PP with citation info reversed
         if '_node_results' in entry:
-            print_entry(identifier, author, title, url, MM_mm_file, base_mm_file,
+            print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file,
                 '<ul>\n')
             for node in entry['_node_results']:
                 reverse_print(node, entry)
@@ -1188,10 +1194,10 @@ def emit_results(entries, query, results_file):
         # if my author or title matched, print biblio with link to complete entry
         elif '_author_result' in entry:
             author = entry['_author_result'].get('TEXT') + entry['year']
-            print_entry(identifier, author, title, url, MM_mm_file, base_mm_file)
+            print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file)
         elif '_title_result' in entry:
             title = entry['_title_result'].get('TEXT')
-            print_entry(identifier, author, title, url, MM_mm_file, base_mm_file)
+            print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file)
 
 #################################################################
 # Mindmap parsing and bib building

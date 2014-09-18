@@ -402,24 +402,24 @@ def identity_increment(ident, entries):
         dbg("\t yielded    %s" % ident)
     return ident
 
-def get_ident(entry, entries):
+def get_ident(entry, entries, delim=u""):
     """Create an identifier (key) for the entry"""
 
     last_names = []
     for first, von, last, jr in entry['author']:
-        last_names.append(von + last)
+        last_names.append(von.replace(' ','') + last.replace(' ',''))
     if len(last_names) == 1: name_part = last_names[0]
-    elif len(last_names) == 2: name_part = last_names[0] + last_names[1]
-    elif len(last_names) == 3: name_part = last_names[0] + \
-        last_names[1] + last_names[2]
+    elif len(last_names) == 2: name_part = delim.join(last_names[0:2])
+    elif len(last_names) == 3: name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
         name_part = last_names[0] + 'Etal'
 
     if not 'year' in entry: entry['year'] = '0000'
-    ident = u''.join((name_part, entry['year']))
+    year_delim = ' ' if delim else ''
+    ident = year_delim.join((name_part, entry['year']))
     info("ident = %s '%s'" %(type(ident), ident))
-    # remove spaces and chars not permitted in xml name/id attributes
-    ident = ident.replace(' ','').replace(':','').replace("'","")
+    # remove chars not permitted in xml name/id attributes
+    ident = ident.replace(':','').replace("'","")
     # remove some punctuation and strong added by walk_freemind.query_highlight
     ident = ident.replace('.','').replace('<strong>','').replace('</strong>','')
     info("ident = %s '%s'" %(type(ident), ident))
@@ -1050,7 +1050,8 @@ def emit_wp_citation(entries):
     for entry in dict_sorted_by_keys(entries):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
-            opts.outfd.write('| ref = {{sfnref|%s}}\n' % entry['identifier'])
+            wp_ident = get_ident(entry, entries, delim=u" & ")
+            opts.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
             
         for short, field in list(BIB_SHORTCUTS.items()):
             if field in entry and entry[field] is not None:
@@ -1065,7 +1066,7 @@ def emit_wp_citation(entries):
                 elif field == 'editor':
                     output_wp_names(field, entry[field])
                     continue
-                elif field == 'title':
+                elif field == 'title': # TODO: convert value to title case?
                     if 'booktitle' in entry:
                         field = 'chapter'
                 elif field == 'booktitle':

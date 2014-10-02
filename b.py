@@ -832,7 +832,7 @@ def log2work(biblio):
     if biblio['tags']:
         hashtags = ''
         for tag in biblio['tags'].strip().split(' '):
-            hashtags += '#%s ' %tag
+            hashtags += '#%s ' %KEY_SHORTCUTS.get(tag, tag)
         hashtags = hashtags.strip()
     else:
         hashtags = '#misc'
@@ -876,6 +876,13 @@ def log2console(biblio):
     print(biblio)
     for token in TOKENS:
         if token in biblio:
+            if biblio['tags']:
+                tags = biblio['tags'].strip().split(' ')
+                tags_expanded = ''
+                for tag in tags:
+                    tag = KEY_SHORTCUTS.get(tag, tag)
+                    tags_expanded += tag + ','
+                biblio['tags'] = tags_expanded[0:-1] # removes last comma
             print('%s = %s' % (token, biblio[token]))
         else:
             if token == 'url':

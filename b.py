@@ -70,6 +70,7 @@ GENERAL_KEY_SHORTCUTS = {
         'pri': 'privacy',
         'spe': 'speech',
         'str': 'structure',
+        'tea': 'teaching',
         'tec': 'technology',
         'tro': 'trolling',
         'zei': 'zeitgeist',

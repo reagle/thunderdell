@@ -1500,6 +1500,7 @@ def _test_results():
 
 if __name__ == '__main__':
     parser = OptionParser(usage="""usage: %prog [options] [FILE.mm]\n
+    Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first 
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
@@ -1515,7 +1516,7 @@ if __name__ == '__main__':
                     help="chase links between MMs")
     parser.add_option("-D", "--defaults",
                     action="store_true", default=False,
-                    help="chase, output YAML, use default map and output file")
+                    help="chase, output YAML/CSL, use default map and output file")
     parser.add_option("-k", "--keys", default='-no-keys',
                     action="store_const", const='-use-keys',
                     help="show bibtex keys in displayed HTML")

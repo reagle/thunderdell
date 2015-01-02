@@ -1602,7 +1602,11 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if opts.fields:
+        print("                           _BIBTEX_TYPES_ (deprecated)\n")
+        pretty_tabulate_list(BIBLATEX_TYPES)
+        print("                            _CSL_TYPES_ (preferred)\n")
         pretty_tabulate_list(BIB_TYPES)
+        print("                               _FIELD_SHORTCUTS_\n")
         pretty_tabulate_dict(BIB_SHORTCUTS)
         sys.exit()
     if opts.query:

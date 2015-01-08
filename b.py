@@ -81,6 +81,8 @@ GF_KEY_SHORTCUTS = {
         'gen': 'gender',
         'gf' : 'gfem',
         'sex': 'sexism',
+        'mer': 'meritocracy',
+        'prv': 'privilege',
         }
 
 LH_KEY_SHORTCUTS = {

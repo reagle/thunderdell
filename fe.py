@@ -850,7 +850,7 @@ def emit_biblatex(entries):
             if field in entry and entry[field] is not None:
                 crtl("short, field = '%s , %s'" %(short, field))
                 # skip these fields
-                if field in ('identifier', 'entry_type', 'isbn', 'ori_author'):
+                if field in ('identifier', 'entry_type', 'ori_author'): #'isbn'
                     continue
                 if field == 'urldate' and 'url' not in entry:
                     continue # no url, no 'read on'

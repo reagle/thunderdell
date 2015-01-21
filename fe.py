@@ -1085,7 +1085,7 @@ def emit_results(entries, query, results_file):
     def reverse_print(node, entry):
         """Move the locator number to the end of the text with the Bibtex key"""
         color, text = node.get('COLOR','#000000'), node.get('TEXT')
-        prefix = '&gt ' if color == CL_CO['quote'] else ''
+        prefix = '&gt; ' if color == CL_CO['quote'] else ''
         if len(text) < 50: # don't reverse short texts
             cite = ''
         else:
@@ -1130,7 +1130,7 @@ def emit_results(entries, query, results_file):
                 if CO_CL[child.get('COLOR')] == 'author': # title bug fixed? 110323
                     break
                 pretty_print(child, entry, spaces)
-            results_file.write('%s</ul>%s</li>\n' % (spaces, spaces))
+            results_file.write('%s</ul>%s\n' % (spaces, spaces))
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
@@ -1151,7 +1151,7 @@ def emit_results(entries, query, results_file):
 
     def print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
 
-        identifier_html = '<li><a href="%s">%s</a>' % (get_url_query(identifier), identifier)
+        identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (get_url_query(identifier), identifier)
         title_html = '<a href="%s">%s</a>' % (get_url_query(title), title)
         if url:
             link_html = '[<a href="%s">url</a>]' % url
@@ -1172,7 +1172,7 @@ def emit_results(entries, query, results_file):
         
         # if I am what was queried, print all of me
         if entry['identifier'] == opts.query:
-            results_file.write('          <li>\n          <ul class="tit_child">\n'),
+            results_file.write('          <li class="li_entry_identifier">\n          <ul class="tit_child">\n'),
             results_file.write('<li style="text-align: right">[<a href="%s">%s</a>]</li>' %(MM_mm_file,base_mm_file),)
             fl_names = ', '.join(name[0] + ' ' + name[2] for name in entry['author'])
             title_mdn = "%s" % (title)
@@ -1182,12 +1182,12 @@ def emit_results(entries, query, results_file):
                 % (identifier, fl_names, date[0:4], title_mdn))
             results_file.write('<li class="author">%s</li>' % fl_names)
             pretty_print(entry['_title_node'], entry)
-            results_file.write('          </ul>\n<ul>         \n'),
+            results_file.write('\n          </ul>\n</li>\n'),
 
         # if I have some nodes that were matched, PP with citation info reversed
         if '_node_results' in entry:
             print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file,
-                '<ul>\n')
+                '<ul class="li_node_results">\n')
             for node in entry['_node_results']:
                 reverse_print(node, entry)
             results_file.write( '  </ul></li>\n')
@@ -1448,7 +1448,7 @@ def build_bib(file_name, output):
             print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
-        results_file.write('    <title>Pretty Mind Map</title></head><body><ul>\n')
+        results_file.write('    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n')
         for entry in list(entries.values()):
             opts.query = entry['identifier']
             emit_results(entries, opts.query, results_file)

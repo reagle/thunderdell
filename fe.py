@@ -1221,7 +1221,7 @@ def parse_names(names):
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
     """
-    particles = ("al", "bin", "da", "de", "de la", "la",
+    particles = ("al", "bin", "da", "de", "de la", "Du", "la",
                 "van", "van den", "van der", "von",
                 "Van", "Von")
     suffixes = ("Jr.", "Sr.", "II", "III", "IV")

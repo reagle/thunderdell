@@ -72,7 +72,7 @@ GENERAL_KEY_SHORTCUTS = {
         'str': 'structure',
         'tea': 'teaching',
         'tec': 'technology',
-        'tro': 'trolling',
+        'tro': 'troll',
         'zei': 'zeitgeist',
         }
 

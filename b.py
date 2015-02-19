@@ -1098,9 +1098,9 @@ def do_console_annotation(biblio):
             line = raw_input('').decode(sys.stdin.encoding)
             if line == '-p':
                 do_publish = True
-            if line == '?':
+            elif line == '?':
                 print_console_msg()
-            if '=' in line:
+            elif '=' in line:
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))

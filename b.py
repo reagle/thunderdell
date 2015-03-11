@@ -778,7 +778,19 @@ def log2mm(biblio):
         abstract_node = SubElement(title_node, 'node', {'TEXT': abstract, 'COLOR': '#999999'})
     if excerpt:
         for exc in excerpt.split('\n\n'):
-            excerpt_node = SubElement(title_node, 'node', {'TEXT': exc, 'COLOR': '#166799'})     
+            if exc.startswith(', '):
+                attr_color = '#8b12d6' # paraphrase: purple
+                exc = exc[2:]
+            elif exc.startswith('. '):
+                attr_color = '#999999' # summary: gray 
+                exc = exc[2:]
+            elif exc.startswith('-- '):
+                attr_color = '#000000' # note: black
+                exc = exc[3:]
+            else:
+                attr_color = '#166799' # blue excerpt
+            excerpt_node = SubElement(title_node, 'node', {'TEXT': exc, 
+                'COLOR': attr_color})     
 
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 
@@ -1073,14 +1085,16 @@ def do_console_annotation(biblio):
             'year' : biblio['date'][0:4]}, {})
 
     def print_console_msg():
-        print('''\tHELP:\n'''
-            '''\tEnter excerpts OR metadata in the form of abbreviated\n''' 
-            '''\tfields and their values. End with CTRL-D.\n'''
-            '''\tFor example:\n'''
-            '''\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
-            '''\tEntry types (et) values must be a type shortcut:''')
+        print('''\tHELP: Enter annotations, excerpt is default\n''' 
+            '''\t '. ' begins summary \n'''
+            '''\t ', ' begins paraphrase \n'''
+            '''\t '-- ' begins note \n'''
+            '''\t 'key=value' for metadata; e.g., \n'''
+            '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
+            '''\t\tEntry types (et) values must be a type shortcut:''')
         for key, value in fe.CSL_SHORTCUTS.items():
-            print('\t\t%s = %s' % (key, value))
+            print('\t\t\t%s = %s' % (key, value))
+        print('''\n\tEnd with CTRL-D.\n''')
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)

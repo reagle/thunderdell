@@ -46,10 +46,8 @@ dbg = logging.debug
 
 from os import environ
 EDITOR = environ.get('EDITOR')
-try: 
-    HOME = environ['HOME']
-except KeyError, e:
-    HOME = '/home/reagle'
+from os.path import expanduser
+HOME = expanduser("~")
 
 # Expansions for common tags/activities
 
@@ -910,7 +908,7 @@ def blog_at_opencodex(biblio):
     '''
 
     blog_title = blog_body = ''
-    CODEX_ROOT = '/home/reagle/data/2web/reagle.org/joseph/content/'
+    CODEX_ROOT = HOME+'/data/2web/reagle.org/joseph/content/'
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = ' '.join(biblio['title'].split(' ')[0:3])
     entry = biblio['comment']
@@ -959,7 +957,7 @@ def blog_at_goatee(biblio):
     Start at a blog entry at goatee
     '''
     
-    GOATEE_ROOT = '/home/reagle/data/2web/goatee.net/content/'
+    GOATEE_ROOT = HOME+'/data/2web/goatee.net/content/'
     info("biblio['comment'] = '%s'" %(biblio['comment']))
     blog_title, sep, blog_body = biblio['comment'].partition('. ')
 

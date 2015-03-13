@@ -1,18 +1,27 @@
-@misc{A51995tf,
-   author = {A5},
-   custom2 = {author-child.mm},
-   title = {{Title} Five},
-   year = {1995},
-}
-@misc{A61996ts,
-   author = {A6},
-   custom2 = {author-child.mm},
-   title = {{Title} Six},
-   year = {1996},
-}
-@misc{A71997ts,
-   author = {A7},
-   custom2 = {author-child.mm},
-   title = {{Title} Seven},
-   year = {1997},
-}
+---
+references:
+- id: A51995tf
+  type: no-type
+  author:
+  - family: "A5"
+  custom2: "author-child.mm"
+  issued:
+    year: 1995
+  title: "Title five"
+- id: A61996ts
+  type: no-type
+  author:
+  - family: "A6"
+  custom2: "author-child.mm"
+  issued:
+    year: 1996
+  title: "Title six"
+- id: A71997ts
+  type: no-type
+  author:
+  - family: "A7"
+  custom2: "author-child.mm"
+  issued:
+    year: 1997
+  title: "Title seven"
+...

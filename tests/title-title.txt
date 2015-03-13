@@ -1,42 +1,59 @@
-@misc{A11995to,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{Title} One},
-   year = {1995},
-}
-@misc{A11996ts,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{Title} Silly},
-   year = {1996},
-}
-@misc{A11996ts1,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{Title} Sad},
-   year = {1996},
-}
-@misc{A11996tt,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{Title} Two},
-   year = {1996},
-}
-@misc{A11997ta,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{The} Title's Apostrophes},
-   year = {1997},
-}
-@misc{A11997ts,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{Title} Sextet},
-   year = {1997},
-}
-@misc{A11998tgh,
-   author = {A1},
-   custom2 = {title-title.mm},
-   title = {{The} Title with a Great-Hypen},
-   year = {1998},
-}
+---
+references:
+- id: A11995to
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1995
+  title: "Title one"
+- id: A11996ts
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1996
+  title: "Title silly"
+- id: A11996ts1
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1996
+  title: "Title sad"
+- id: A11996tt
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1996
+  title: "Title two"
+- id: A11997ta
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1997
+  title: "The title's apostrophes"
+- id: A11997ts
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1997
+  title: "Title sextet"
+- id: A11998tgh
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "title-title.mm"
+  issued:
+    year: 1998
+  title: "The title with a great-hypen"
+...

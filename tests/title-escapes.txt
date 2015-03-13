@@ -1,12 +1,19 @@
-@online{Wikipedia2009beg,
-   custom2 = {title-escapes.mm},
-   day = {08},
-   keyword = {test},
-   month = {06},
-   organization = {Wikipedia},
-   shorttitle = {{Bracket} (E.g., [], \{\}) (Oldid=295177316)},
-   title = {{Bracket} (E.g., [], \{\})},
-   url = {http://en.wikipedia.org/?oldid=295177316},
-   urldate = {2009-06-10},
-   year = {2009},
-}
+---
+references:
+- id: Wikipedia2009beg
+  type: webpage
+  custom2: "title-escapes.mm"
+  issued:
+    year: 2009
+    month: 06
+    day: 08
+  keyword: "test"
+  container-title: "Wikipedia"
+  title-short: "Bracket (e.g., [], {}) (oldid=295177316)"
+  title: "Bracket (e.g., [], {})"
+  URL: "http://en.wikipedia.org/?oldid=295177316"
+  accessed:
+    year: 2009
+    month: 06
+    day: 10
+...

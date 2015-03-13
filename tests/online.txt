@@ -1,26 +1,39 @@
-@article{A11991to,
-   author = {A1},
-   custom2 = {online.mm},
-   title = {{Title} One},
-   url = {http://example.com/1},
-   year = {1991},
-}
-@online{A21992tt,
-   author = {A2},
-   custom2 = {online.mm},
-   title = {{Title} Two},
-   url = {http://example.com/2},
-   year = {1992},
-}
-@article{Reagle2004occ,
-   author = {Reagle, Joseph},
-   custom2 = {online.mm},
-   journal = {M/C: A Journal of Media and Culture},
-   month = {07},
-   number = {3},
-   title = {{Open} Content Communities},
-   url = {http://journal.media-culture.org.au/0406/06_Reagle.rft.php},
-   urldate = {2004-07-01},
-   volume = {7},
-   year = {2004},
-}
+---
+references:
+- id: A11991to
+  type: article
+  author:
+  - family: "A1"
+  custom2: "online.mm"
+  issued:
+    year: 1991
+  title: "Title one"
+  URL: "http://example.com/1"
+- id: A21992tt
+  type: webpage
+  author:
+  - family: "A2"
+  custom2: "online.mm"
+  issued:
+    year: 1992
+  title: "Title two"
+  URL: "http://example.com/2"
+- id: Reagle2004occ
+  type: article-journal
+  author:
+  - family: "Reagle"
+    given: "Joseph"
+  custom2: "online.mm"
+  issued:
+    year: 2004
+    month: 07
+  container-title: "M/C: A Journal of Media and Culture"
+  issue: "3"
+  title: "Open content communities"
+  URL: "http://journal.media-culture.org.au/0406/06_Reagle.rft.php"
+  accessed:
+    year: 2004
+    month: 07
+    day: 01
+  volume: "7"
+...

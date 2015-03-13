@@ -1,24 +1,35 @@
-@misc{A11991to,
-   author = {A1},
-   custom2 = {author-descendent.mm},
-   title = {{Title} One},
-   year = {1991},
-}
-@misc{A11992tt,
-   author = {A1},
-   custom2 = {author-descendent.mm},
-   title = {{Title} Two},
-   year = {1992},
-}
-@misc{A11994tf,
-   author = {A1},
-   custom2 = {author-descendent.mm},
-   title = {{Title} Four},
-   year = {1994},
-}
-@misc{A21993tt,
-   author = {A2},
-   custom2 = {author-descendent.mm},
-   title = {{Title} Three},
-   year = {1993},
-}
+---
+references:
+- id: A11991to
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "author-descendent.mm"
+  issued:
+    year: 1991
+  title: "Title one"
+- id: A11992tt
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "author-descendent.mm"
+  issued:
+    year: 1992
+  title: "Title two"
+- id: A11994tf
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "author-descendent.mm"
+  issued:
+    year: 1994
+  title: "Title four"
+- id: A21993tt
+  type: no-type
+  author:
+  - family: "A2"
+  custom2: "author-descendent.mm"
+  issued:
+    year: 1993
+  title: "Title three"
+...

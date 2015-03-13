@@ -1,13 +1,20 @@
-@misc{Org1995to,
-   custom2 = {authorless.mm},
-   organization = {Some Org},
-   title = {{Title} One},
-   year = {1995},
-}
-@misc{Turner1996tt,
-   author = {Turner, Bob},
-   custom2 = {authorless.mm},
-   organization = {A6},
-   title = {{Title} Two},
-   year = {1996},
-}
+---
+references:
+- id: Org1995to
+  type: no-type
+  custom2: "authorless.mm"
+  issued:
+    year: 1995
+  container-title: "Some Org"
+  title: "Title one"
+- id: Turner1996tt
+  type: no-type
+  author:
+  - family: "Turner"
+    given: "Bob"
+  custom2: "authorless.mm"
+  issued:
+    year: 1996
+  container-title: "A6"
+  title: "Title two"
+...

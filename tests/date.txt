@@ -1,18 +1,28 @@
-@online{A12004tt1,
-   author = {A1},
-   custom2 = {date.mm},
-   day = {05},
-   month = {07},
-   title = {{T1}},
-   url = {http://example.com/},
-   urldate = {2004-07-10},
-   year = {2004},
-}
-@misc{A12005tt2,
-   author = {A1},
-   custom2 = {date.mm},
-   day = {15},
-   month = {06},
-   title = {{T2}},
-   year = {2005},
-}
+---
+references:
+- id: A12004tt1
+  type: webpage
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2004
+    month: 07
+    day: 05
+  title: "T1"
+  URL: "http://example.com/"
+  accessed:
+    year: 2004
+    month: 07
+    day: 10
+- id: A12005tt2
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2005
+    month: 06
+    day: 15
+  title: "T2"
+...

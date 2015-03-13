@@ -29,7 +29,7 @@ from dateutil.parser import parse
 import fe
 import logging
 from lxml import etree
-from os.path import exists # abspath, basename, splitext
+from os.path import expanduser, exists # abspath, basename, splitext
 import re
 import string
 from subprocess import call, Popen 
@@ -46,7 +46,6 @@ dbg = logging.debug
 
 from os import environ
 EDITOR = environ.get('EDITOR')
-from os.path import expanduser
 HOME = expanduser("~")
 
 # Expansions for common tags/activities

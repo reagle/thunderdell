@@ -13,12 +13,11 @@ import codecs
 #import locale
 import logging
 from os import chdir, environ, mkdir, rename
-from os.path import abspath, exists, splitext
+from os.path import abspath, exists, expanduser, splitext
 import re
 import sys
 
-
-HOME = environ['HOME']
+HOME = os.path.expanduser('~')
 
 log_level = 100 # default
 critical = logging.critical

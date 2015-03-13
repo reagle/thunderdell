@@ -36,9 +36,8 @@ crtl = logging.critical
 info = logging.info
 dbg = logging.debug
 
-from os import environ
-HOME = environ['HOME'] if 'HOME' in environ else '/home/reagle'
-BROWSER = environ['BROWSER'] if 'BROWSER' in environ else None
+HOME = os.path.expanduser('~')
+BROWSER = os.environ['BROWSER'] if 'BROWSER' in os.environ else None
 DEFAULT_MAPS = (HOME+'/joseph/readings.mm',)
 
 TMP_DIR = HOME + '/tmp/.fe/'

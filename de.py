@@ -8,15 +8,9 @@
 
 """extract a MM from a dictated text file using particular conventions"""
 
-import sys
+import os
 
-from os import environ
-
-try: 
-    HOME = environ['HOME']
-except KeyError, e:
-    HOME = '/home/reagle'
-
+HOME = os.path.expanduser('~')
 
 
 def clean(text):

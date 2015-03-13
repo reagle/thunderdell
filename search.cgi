@@ -10,6 +10,9 @@ def cgi_main():
     import codecs, cgi, os, re, sys, urlparse
     from urllib import quote, unquote
 
+    from os.path import expanduser
+    HOME = expanduser("~")
+
     sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     env = os.environ
@@ -30,16 +33,16 @@ def cgi_main():
         query = query[1:]
 
     if site == "BusySponge":
-        sys.path.append('/home/reagle/bin')
+        sys.path.append(HOME+'/bin')
         import bsq
         query_result_file = bsq.queryBSponge(query)
         fileObj = codecs.open(query_result_file, "r", "utf-8", "replace" )
         print fileObj.read()
         fileObj.close()
     else:
-        sys.path.append("/home/reagle/bin/fe")
-        sys.path.append("/home/reagle/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
-        MINDMAP = ('/home/reagle/data/2web/reagle.org/joseph/readings.mm')
+        sys.path.append(HOME+"/bin/fe")
+        sys.path.append(HOME+"/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
+        MINDMAP = (HOME+'/data/2web/reagle.org/joseph/readings.mm')
 
         import fe
         output = fe.emit_results

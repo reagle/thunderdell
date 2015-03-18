@@ -1095,7 +1095,7 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''%s: au=%s ti=%s''' % (tentative_id, 
+    print('''@%s : au=%s ti=%s''' % (tentative_id, 
                                   biblio['author'], biblio['title'])),
     if 'c_web' in biblio:
         print(''' cw=%s''' % (biblio['c_web']))

@@ -933,7 +933,8 @@ def blog_at_opencodex(biblio):
     filename = blog_title.lower() \
         .replace(':', '') \
         .replace(' ', '-') \
-        .replace( "'", '')
+        .replace( "'", '') \
+        .replace("/", "-")
     filename = '%s%s/%s-%s.md' % (CODEX_ROOT, category, this_year, filename)
     info("filename = %s" %filename)
     if exists(filename):

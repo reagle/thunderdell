@@ -1601,9 +1601,11 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if opts.fields:
-        print("                           _BIBTEX_TYPES_ (deprecated)\n")
+        print("                           _BIBTEX_TYPES_ (deprecated)")
+        print("                   http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(BIBLATEX_TYPES)
         print("                            _CSL_TYPES_ (preferred)\n")
+        print("                   http://aurimasv.github.io/z2csl/typeMap.xml\n")
         pretty_tabulate_list(BIB_TYPES)
         print("                               _FIELD_SHORTCUTS_\n")
         pretty_tabulate_dict(BIB_SHORTCUTS)

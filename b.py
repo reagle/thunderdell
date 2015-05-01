@@ -75,6 +75,7 @@ GENERAL_KEY_SHORTCUTS = {
 
 GF_KEY_SHORTCUTS = {
         # Geek Feminism
+        'fem': 'feminism'
         'gen': 'gender',
         'gf' : 'gfem',
         'sex': 'sexism',

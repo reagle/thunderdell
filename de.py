@@ -103,15 +103,6 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             fdo.write(u"""  <node COLOR="#ff33b8" TEXT="%s"/>\n"""
                 % clean(citation))
 
-        elif re.match('([\d\-]+) +excerpt.(.*)', line, re.IGNORECASE):
-            matches = re.match('(.*?) excerpt\.(.*)',line, re.IGNORECASE)
-            fdo.write(u"""          <node COLOR="#166799" TEXT="%s"/>\n"""
-                % clean(' '.join((matches.groups()[0], matches.groups()[1]))))
-
-        elif re.match('(--.*)', line, re.IGNORECASE):
-            fdo.write(u"""          <node COLOR="#000000" TEXT="%s"/>\n"""
-                % clean(line))
-
         elif re.match('summary\.(.*)', line, re.IGNORECASE):
             matches = re.match('summary\.(.*)',line, re.IGNORECASE)
             fdo.write(u"""  <node COLOR="#999999" TEXT="%s"/>\n"""
@@ -163,9 +154,33 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             fdo.write(u"""      <node COLOR="#8b12d6" TEXT="%s">\n""" % clean(line[12:]))
             in_subsection = True
 
+        elif re.match('(--.*)', line, re.IGNORECASE):
+            fdo.write(u"""          <node COLOR="#000000" TEXT="%s"/>\n"""
+                % clean(line))
+
+        elif re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE):
+            matches = re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE)
+            line_no = matches.group(1)
+            if matches.group(2):
+                line_no += matches.group(2)
+            line_text = matches.group(3)
+            if re.match('(.*)(\-\d+)', line_text, re.IGNORECASE):
+                matches = re.match('(.*)(\-\d+)', line_text, re.IGNORECASE)
+                line_text = matches.group(1)
+                line_no += matches.group(2)
+            node_color = '#8b12d6'
+            if line_text.startswith('excerpt.'):
+                node_color = '#166799'
+                line_text = line_text[9:]
+            if line_text.strip().endswith('excerpt.'):
+                node_color = '#166799'
+                line_text = line_text[0:-9]
+            fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
+                % (node_color, clean(' '.join((line_no, line_text)))))
         else:
             fdo.write(u"""          <node COLOR="#8b12d6" TEXT="%s"/>\n"""
                 % clean(line))
+
     return started, in_part, in_chapter, in_section, in_subsection
 
 

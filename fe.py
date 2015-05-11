@@ -1604,11 +1604,17 @@ if __name__ == '__main__':
         print("                           _BIBTEX_TYPES_ (deprecated)")
         print("                   http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(BIBLATEX_TYPES)
+        print("                             _EXAMPLES_\n")
+        print("         d=2013 in=MIT t=mastersthesis")
+        print("         d=2013 in=MIT t=phdthesis\n\n")
         print("                            _CSL_TYPES_ (preferred)\n")
         print("                   http://aurimasv.github.io/z2csl/typeMap.xml\n")
         pretty_tabulate_list(BIB_TYPES)
         print("                               _FIELD_SHORTCUTS_\n")
         pretty_tabulate_dict(BIB_SHORTCUTS)
+        print("         t=bibtex or CSL type")
+        print("         ot=organization's subtype (e.g., W3C REC)\n\n")
+
         sys.exit()
     if opts.query:
         #u'Péña' == unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')

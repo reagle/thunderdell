@@ -12,6 +12,11 @@ import os
 
 HOME = os.path.expanduser('~')
 
+CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
+    'cite': '#ff33b8', 'author': '#338800',
+    'quote': '#166799', 'paraphrase': '#8b12d6',
+    'default': '#000000', None: None}
+CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
 
 def clean(text):
     '''clean and encode text'''
@@ -76,14 +81,14 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if 'author' not in entry: entry['author'] = 'Unknown'
             if 'title' not in entry: entry['title'] = 'Untitled'
 
-            fdo.write(u"""<node COLOR="#338800" TEXT="%s" POSITION="RIGHT">\n"""
-                    % clean(entry['author'].title()))
+            fdo.write(u"""<node COLOR="%s" TEXT="%s" POSITION="RIGHT">\n"""
+                    % (CL_CO['author'], clean(entry['author'].title())))
             if 'url' in entry:
-                fdo.write(u"""  <node COLOR="#090f6b" LINK="%s" TEXT="%s">\n"""
-                    % ( clean(entry['url']), clean(entry['title'])))
+                fdo.write(u"""  <node COLOR="%s" LINK="%s" TEXT="%s">\n"""
+                    % (CL_CO['title'], clean(entry['url']), clean(entry['title'])))
             else:
-                fdo.write(u"""  <node COLOR="#090f6b" TEXT="%s">\n"""
-                    % clean(entry['title']))
+                fdo.write(u"""  <node COLOR="%s" TEXT="%s">\n"""
+                    % (CL_CO['title'], clean(entry['title'])))
 
             #print '***', BIB_FIELDS
             for token, value in sorted(entry.items()):
@@ -100,13 +105,13 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     citation = citation + citation_add
             if citation != "": clean(citation)
             citation += " r=%s" % get_date()
-            fdo.write(u"""  <node COLOR="#ff33b8" TEXT="%s"/>\n"""
-                % clean(citation))
+            fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
+                % (CL_CO['cite'], clean(citation)))
 
         elif re.match('summary\.(.*)', line, re.IGNORECASE):
             matches = re.match('summary\.(.*)',line, re.IGNORECASE)
-            fdo.write(u"""  <node COLOR="#999999" TEXT="%s"/>\n"""
-                % clean(matches.groups()[0]))
+            fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
+                % (CL_CO['annotation'], clean(matches.groups()[0])))
 
         elif re.match('part.*', line, re.IGNORECASE):
             if in_part:
@@ -121,7 +126,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     in_subsection = False
                 fdo.write(u"""  </node>\n""")            # close part
                 in_part = False
-            fdo.write(u"""  <node COLOR="#8b12d6" TEXT="%s">\n""" % clean(line))
+            fdo.write(u"""  <node COLOR="%s" TEXT="%s">\n""" % (
+                    CL_CO['paraphrase'], clean(line)))
             in_part = True
 
         elif re.match('chapter.*', line, re.IGNORECASE):
@@ -134,7 +140,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     in_subsection = False
                 fdo.write(u"""    </node>\n""")            # close chapter
                 in_chapter = False
-            fdo.write(u"""    <node COLOR="#8b12d6" TEXT="%s">\n""" % clean(line))
+            fdo.write(u"""    <node COLOR="%s" TEXT="%s">\n""" % (
+                    CL_CO['paraphrase'], clean(line)))
             in_chapter = True
 
         elif re.match('section.*', line, re.IGNORECASE):
@@ -144,42 +151,46 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if in_section:
                 fdo.write(u"""    </node>\n""")
                 in_section = False
-            fdo.write(u"""      <node COLOR="#8b12d6" TEXT="%s">\n""" % clean(line[9:]))
+            fdo.write(u"""      <node COLOR="%s" TEXT="%s">\n""" % (
+                    CL_CO['paraphrase'], clean(line[9:])))
             in_section = True
 
         elif re.match('subsection.*', line, re.IGNORECASE):
             if in_subsection:
                 fdo.write(u"""    </node>\n""")
                 in_subsection = False
-            fdo.write(u"""      <node COLOR="#8b12d6" TEXT="%s">\n""" % clean(line[12:]))
+            fdo.write(u"""      <node COLOR="%s" TEXT="%s">\n""" % (
+                    CL_CO['paraphrase'], clean(line[12:])))
             in_subsection = True
 
         elif re.match('(--.*)', line, re.IGNORECASE):
-            fdo.write(u"""          <node COLOR="#000000" TEXT="%s"/>\n"""
-                % clean(line))
+            fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
+                % (CL_CO['default'], clean(line)))
 
-        elif re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE):
-            matches = re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE)
-            line_no = matches.group(1)
-            if matches.group(2):
-                line_no += matches.group(2)
-            line_text = matches.group(3)
-            if re.match('(.*)(\-\d+)', line_text, re.IGNORECASE):
-                matches = re.match('(.*)(\-\d+)', line_text, re.IGNORECASE)
-                line_text = matches.group(1)
-                line_no += matches.group(2)
-            node_color = '#8b12d6'
+        else:
+            node_color = CL_CO['paraphrase']
+            line_text = line
+            line_no = ''
+            if re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE):
+                matches = re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE)
+                line_no = matches.group(1)
+                if matches.group(2):
+                    line_no += matches.group(2)
+                line_text = matches.group(3)
+                if re.match('(.*)(\-\d+)', line_text, re.IGNORECASE):
+                    matches = re.match('(.*)(\-\d+)', line_text, re.IGNORECASE)
+                    line_text = matches.group(1)
+                    line_no += matches.group(2)
             if line_text.startswith('excerpt.'):
-                node_color = '#166799'
+                node_color = CL_CO['quote']
                 line_text = line_text[9:]
             if line_text.strip().endswith('excerpt.'):
-                node_color = '#166799'
+                node_color = CL_CO['quote']
                 line_text = line_text[0:-9]
+
             fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
                 % (node_color, clean(' '.join((line_no, line_text)))))
-        else:
-            fdo.write(u"""          <node COLOR="#8b12d6" TEXT="%s"/>\n"""
-                % clean(line))
+
 
     return started, in_part, in_chapter, in_section, in_subsection
 

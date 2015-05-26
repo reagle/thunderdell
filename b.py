@@ -159,12 +159,12 @@ SITE_CONTAINER_MAP = (
     ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
     ('arstechnica.com', 'Ars Technica', 'c_newspaper'),
     ('nytimes.com', 'New York Times', 'c_newspaper'),
-    ('wsj.com', 'Wall Street Journal',  'c_newspaper')
-    ('techcrunch.com', 'TechCrunch',  'c_newspaper')
-    ('verge.com', 'The Verge',  'c_newspaper')
-    ('wired.com', 'Wired',  'c_magazine')
-    ('atlantic.com', 'The Atlantic',  'c_magazine')
-    ('newyorker.com', 'New Yorker',  'c_magazine')
+    ('wsj.com', 'Wall Street Journal',  'c_newspaper'),
+    ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
+    ('verge.com', 'The Verge',  'c_newspaper'),
+    ('wired.com', 'Wired',  'c_magazine'),
+    ('atlantic.com', 'The Atlantic',  'c_magazine'),
+    ('newyorker.com', 'New Yorker',  'c_magazine'),
 )
 
 

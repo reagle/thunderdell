@@ -1058,15 +1058,9 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''@%s : au=%s ti=%s''' % (tentative_id, 
+    print('''@%s : au=%s ti=%s\n''' % (tentative_id, 
                                   biblio['author'], biblio['title'])),
     
-    for container in fe.CONTAINERS:
-        if container in biblio:
-            print(''' %s=%s''' % (container, biblio[container]))
-            break
-    else:
-        print()
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     do_publish = args.publish

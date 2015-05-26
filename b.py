@@ -1051,7 +1051,7 @@ def do_console_annotation(biblio):
             '''\t '-- ' begins note \n'''
             '''\t 'key=value' for metadata; e.g., \n'''
             '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
-            '''\t\tEntry types (et) values must be a type shortcut:''')
+            '''\t\tEntry types (et) values must be typed as shortcut:''')
         for key, value in fe.CSL_SHORTCUTS.items():
             print('\t\t\t%s = %s' % (key, value))
         print('''\n\tEnd with CTRL-D.\n''')
@@ -1076,7 +1076,7 @@ def do_console_annotation(biblio):
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))
                 for short, value in cite_pairs:
-                    if short == 'et': # et=cj -> cj = 'Nature'
+                    if short == 'et': # 'et=cj' -> cj = 'Nature'
                         biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
                         del biblio['c_web']
                     else:

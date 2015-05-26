@@ -44,12 +44,8 @@ TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
-try:
-    from lxml.etree import parse, Element, SubElement, ElementTree
-    useLXML = True
-except:
-    from xml.etree.cElementTree import parse, Element, SubElement, ElementTree
-    useLXML = False
+from lxml.etree import parse, Element, SubElement, ElementTree
+useLXML = True
 
 #################################################################
 # Constants and mappings

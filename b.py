@@ -420,7 +420,7 @@ class scrape_DOI(scrape_default):
             elif key == 'page':
                 biblio['pages'] = json_bib['page']
             elif key == 'container-title':
-                biblio['jounal'] = json_bib['container-title']
+                biblio['journal'] = json_bib['container-title']
             elif key == 'issue':
                 biblio['number'] = json_bib['issue']
             elif key == 'URL':
@@ -660,6 +660,8 @@ def log2mm(biblio):
         http://reagle.org/joseph/2009/01/thunderdell.html
     '''
 
+    from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
+
     print("to log2mm")
     biblio, args.publish = do_console_annotation(biblio)
     
@@ -694,11 +696,6 @@ def log2mm(biblio):
         citation = citation.strip()
     else:
         tags = ''
-    try:
-        from xml.etree.cElementTree import parse # fast C implementation
-    except ImportError:
-        from xml.etree.ElementTree import parse
-    from xml.etree.ElementTree import ElementTree, Element, SubElement
 
     mindmap = parse(ofile).getroot()
     mm_years = mindmap[0]

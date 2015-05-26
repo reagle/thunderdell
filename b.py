@@ -155,6 +155,19 @@ for short_dict in LIST_OF_KEYSHORTCUTS[1:]:
 
 MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 
+SITE_CONTAINER_MAP = (
+    ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
+    ('arstechnica.com', 'Ars Technica', 'c_newspaper'),
+    ('nytimes.com', 'New York Times', 'c_newspaper'),
+    ('wsj.com', 'Wall Street Journal',  'c_newspaper')
+    ('techcrunch.com', 'TechCrunch',  'c_newspaper')
+    ('verge.com', 'The Verge',  'c_newspaper')
+    ('wired.com', 'Wired',  'c_magazine')
+    ('atlantic.com', 'The Atlantic',  'c_magazine')
+    ('newyorker.com', 'New Yorker',  'c_magazine')
+)
+
+
 #######################################
 # Utility functions
 
@@ -207,6 +220,11 @@ class scrape_default(object):
             'url' : self.url,
         }
         biblio['title'], biblio['c_web'] = self.split_title_org()
+        for site, container, container_type in SITE_CONTAINER_MAP:
+            if site in biblio['url']:
+                info("container = %s" %(container))
+                biblio[container_type] = container
+                del biblio['c_web']
         return biblio
 
     def get_author(self):
@@ -357,9 +375,7 @@ class scrape_default(object):
         from urlparse import urlparse
 
         org_chunks = urlparse(self.url)[1].split('.')
-        if 'Wikipedia_Signpost' in self.url:
-            org = 'Wikipedia Signpost'
-        elif org_chunks[0] in ('www'):
+        if org_chunks[0] in ('www'):
             org = org_chunks[1]
         elif org_chunks[-2] in ('wordpress', 'blogspot', 'wikia'):
             org = org_chunks[-3]
@@ -648,8 +664,6 @@ class scrape_twitter(scrape_default):
         excerpt = self.HTML_p.xpath(
             "//p[contains(@class,'tweet-text')]/text()")[0]
         return excerpt
-
-
 
 #######################################
 # Output loggers
@@ -1046,10 +1060,13 @@ def do_console_annotation(biblio):
     tentative_id = get_tentative_ident(biblio)
     print('''@%s : au=%s ti=%s''' % (tentative_id, 
                                   biblio['author'], biblio['title'])),
-    if 'c_web' in biblio:
-        print(''' cw=%s''' % (biblio['c_web']))
+    
+    for container in fe.CONTAINERS:
+        if container in biblio:
+            print(''' %s=%s''' % (container, biblio[container]))
+            break
     else:
-        print
+        print()
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     do_publish = args.publish

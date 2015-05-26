@@ -120,8 +120,16 @@ BIB_SHORTCUTS.update(CSL_SHORTCUTS)
 BIB_FIELDS = dict([(field, short) for short, field in 
                 BIB_SHORTCUTS.iteritems()])
 
-CONTAINERS = [BIB_SHORTCUTS[x] for x in ['or', 'cj','cm', 'cn', 'cd', 
-                                         'cy', 'cf', 'cb', 'cw']]
+CSL_FIELDS = dict([(field, short) for short, field in 
+                CSL_SHORTCUTS.iteritems()])
+
+CONTAINERS = CSL_SHORTCUTS.values()
+CONTAINERS.append('organization')
+
+# CONTAINERS = [BIB_SHORTCUTS[x] for x in ['or', 'cj','cm', 'cn', 'cd', 
+                                         # 'cy', 'cf', 'cb', 'cw']]
+
+
 
 BIBLATEX_TYPES = (
         'article',

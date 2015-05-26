@@ -587,55 +587,6 @@ class scrape_WMMeta(scrape_default):
         permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
         return unescape_XML(permalink)
 
-class scrape_photo_net(scrape_default):
-    """
-    Scrape photo.net postings
-    e.g., http://photo.net/site-help-forum/00ajKF
-    """
-    def __init__(self, url, comment):
-        print("Scraping photo.net;"),
-        self.url = url
-        self.comment = comment
-        scrape_default.__init__(self, url, comment)
-
-    def get_biblio(self):
-        biblio = {
-            'author' : self.get_author(),
-            'title' : self.get_title(),
-            'date' : self.get_date(),
-            'permalink' : self.url,
-            'excerpt' : self.get_excerpt(),
-            'comment' : self.comment,
-            'url' : self.url,
-        }
-        biblio['organization'] = "photo.net Site Help Forum &gt; Photo Critique and Rating"
-        return biblio
-        
-    def get_author(self):
-
-        author = self.HTML_p.xpath(
-            "//div[@class='originalpost']/p/a[@href]/text()")[0]
-        return author.strip()
-
-    def get_title(self):
-
-        title = self.HTML_p.xpath("//title/text()")[0]
-        title = title.split('- Photo.net')[0]
-        return title.strip()
-        
-    def get_date(self):
-
-        date = self.HTML_p.xpath(
-            "//div[@class='originalpost']/p/text()")[1]
-        date = parse(date).strftime("%Y%m%d")
-        return date
-
-    def get_excerpt(self):
-
-        excerpt = self.HTML_p.xpath(
-            "//div[@class='originalpost']/div[@class='message']/p/text()")[0]
-        return excerpt
-    
 class scrape_geekfeminism_wiki(scrape_default):
     def __init__(self, url, comment):
         print("Scraping geekfeminism wiki"),
@@ -1028,7 +979,6 @@ def get_scraper(url, comment):
         ('meta.wikimedia.org/w', scrape_WMMeta),
         ('marc.info/', scrape_MARC),
         ('dx.doi.org/', scrape_DOI),
-        ('photo.net/site-help-forum/', scrape_photo_net),
         ('geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
         ('twitter.com/', scrape_twitter),
         ('', scrape_default)     # default: make sure last

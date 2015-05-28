@@ -846,23 +846,25 @@ def log2console(biblio):
     '''
       
     print('\n')
-    TOKENS = ('author', 'title', 'tags', 'url', 'date', 'comment', 'excerpt')
-    print(biblio)
+    TOKENS = ('author', 'title', 'date', 'journal', 'volume', 'number', 
+        'publisher', 'DOI', 'tags', 'comment', 'excerpt', 'url')
+    # print(biblio)
+    if biblio['tags']:
+        tags = biblio['tags'].strip().split(' ')
+        tags_expanded = ''
+        for tag in tags:
+            tag = KEY_SHORTCUTS.get(tag, tag)
+            tags_expanded += tag + ','
+        biblio['tags'] = tags_expanded[0:-1] # removes last comma
     for token in TOKENS:
-        if token in biblio:
-            if biblio['tags']:
-                tags = biblio['tags'].strip().split(' ')
-                tags_expanded = ''
-                for tag in tags:
-                    tag = KEY_SHORTCUTS.get(tag, tag)
-                    tags_expanded += tag + ','
-                biblio['tags'] = tags_expanded[0:-1] # removes last comma
-            print('%s = %s' % (token, biblio[token]))
-        else:
+        if token not in biblio: # I want these printed even if don't exist
             if token == 'url':
                 biblio['url'] = ''
             if token == 'title':
                 biblio['title'] = ''
+        if token in biblio and biblio[token]:
+            print('%s = %s' % (token, biblio[token]))
+
 
 def blog_at_opencodex(biblio):
     '''

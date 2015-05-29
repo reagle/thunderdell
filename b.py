@@ -165,6 +165,9 @@ SITE_CONTAINER_MAP = (
     ('wired.com', 'Wired',  'c_magazine'),
     ('atlantic.com', 'The Atlantic',  'c_magazine'),
     ('newyorker.com', 'New Yorker',  'c_magazine'),
+    ('forbes.com', 'Forbes',  'c_magazine'),
+    ('engadget.com', 'Engadget',  'c_blog'),
+    # ('', '',  'c_magazine'),
 )
 
 
@@ -701,7 +704,7 @@ def log2mm(biblio):
         if key in fe.BIB_FIELDS:
             info("key = %s value = %s" %(key, value))
             citation += '%s=%s ' % (fe.BIB_FIELDS[key], value)
-    citation += 'r=%s ' % date_read
+    citation += ' r=%s ' % date_read
     if biblio['tags']:
         tags = biblio['tags']
         for tag in tags.strip().split(' '):

@@ -167,6 +167,7 @@ SITE_CONTAINER_MAP = (
     ('newyorker.com', 'New Yorker',  'c_magazine'),
     ('forbes.com', 'Forbes',  'c_magazine'),
     ('engadget.com', 'Engadget',  'c_blog'),
+    ('thegaurdian', 'The Guardian',  'c_newspaper'),
     # ('', '',  'c_magazine'),
 )
 

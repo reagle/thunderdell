@@ -92,7 +92,7 @@ LH_KEY_SHORTCUTS = {
         'too': 'tool'
         }
 
-CC_KEY_SHORTCUTS = {
+RTC_KEY_SHORTCUTS = {
         # Comments
         'ano' : 'anonymous',
         'ass' : 'assessment',
@@ -100,9 +100,10 @@ CC_KEY_SHORTCUTS = {
         'com' : 'competitive',
         'cri' : 'criticism',
         'est' : 'esteem',
+        'fak' : 'fake'
         'fee' : 'feedback',
         'inf' : 'informed',
-        'gam' : 'gaming',
+        'man' : 'manipulation',
         'mar' : 'market',
         'mea' : 'mean',
         'off' : 'offensive',
@@ -147,7 +148,7 @@ WP_KEY_SHORTCUTS = {
         }
 
 LIST_OF_KEYSHORTCUTS = (GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS,
-    CC_KEY_SHORTCUTS,WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS)
+    RTC_KEY_SHORTCUTS,WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS)
 
 KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
 for short_dict in LIST_OF_KEYSHORTCUTS[1:]:

@@ -100,7 +100,7 @@ RTC_KEY_SHORTCUTS = {
         'com' : 'competitive',
         'cri' : 'criticism',
         'est' : 'esteem',
-        'fak' : 'fake'
+        'fak' : 'fake',
         'fee' : 'feedback',
         'inf' : 'informed',
         'man' : 'manipulation',

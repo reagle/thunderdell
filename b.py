@@ -409,6 +409,84 @@ class scrape_default(object):
     def get_permalink(self):
         return self.url
 
+class scrape_ISBN(scrape_default):
+    
+    def __init__(self, url, comment):
+        print("Scraping ISBN;"),
+        self.url = url
+        self.comment = comment
+
+    def get_biblio(self):
+
+        import book_query
+        import json
+        
+        info("url = %s" % self.url)
+        json_string = book_query.query(self.url)
+        json_bib = json.loads(json_string)
+        json_bib = json_bib[self.url.upper()] # 1 item dict
+        biblio = {
+            'permalink' : self.url,
+            'excerpt' : '',
+            'comment' : self.comment,
+        }
+        info("### json_bib.items()")
+        for key, value in json_bib.items():
+            info("key = '%s'" %key)
+            if key.startswith('subject'):
+                continue
+            info("key = '%s' value = '%s' type(value) = '%s'\n" %(
+                key, value, type(value)))
+            if value in (None, [], ''):
+                pass
+            elif key == 'authors':
+                biblio['author'] = self.get_author(json_bib)
+            elif key == 'publish_date':
+                biblio['date'] = json_bib['publish_date']
+            elif key == 'number_of_pages':
+                biblio['pages'] = json_bib['number_of_pages']
+            elif key == 'publishers':
+                biblio['publisher'] = json_bib['publishers'][0]['name']
+            elif key == 'publish_places':
+                biblio['address'] = json_bib['publish_places'][0]['name']
+            elif key == 'URL':
+                biblio['url'] = json_bib['URL']
+            else:
+                biblio[key] = json_bib[key]
+        if 'title' not in json_bib:
+            biblio['title'] = 'UNKNOWN'
+        else:
+            biblio['title'] = sentence_case(' '.join(
+                biblio['title'].split()))
+        return biblio
+    
+    def get_author(self, bib_dict):
+        names = 'UNKNOWN'
+        if 'by_statement' in bib_dict:
+            names = bib_dict['by_statement']
+        # if 'authors' in bib_dict:
+        #     for name_dic in bib_dict['authors']:
+        #         info("name_dic.values() = %s" % name_dic.values())
+        #         names = names + ', ' + ' '.join(name_dic.values())
+        #     names = names[2:] # remove first comma
+        return names
+
+    def get_date(self, bib_dict):
+        # "issued":{"date-parts":[[2007,3]]}
+        date_parts = bib_dict['issued']['date-parts'][0]
+        info("date_parts = %s" % date_parts)
+        if len(date_parts) == 3:
+            year, month, day = date_parts
+            date = '%d%02d%02d' %(int(year), int(month), int(day))
+        elif len(date_parts) == 2:
+            year, month = date_parts
+            date = '%d%02d' % (int(year), int(month))
+        elif len(date_parts) == 1:
+            date = str(date_parts[0])
+        else:
+            date = '0000'
+        info("date = %s" % date)
+        return date
 
 class scrape_DOI(scrape_default):
     
@@ -459,14 +537,12 @@ class scrape_DOI(scrape_default):
         return biblio
     
     def get_author(self, bib_dict):
-        names = ''
+        names = 'UNKNOWN'
         if 'author' in bib_dict:
             for name_dic in bib_dict['author']:
                 info("name_dic.values() = %s" % name_dic.values())
                 names = names + ', ' + ' '.join(name_dic.values())
             names = names[2:] # remove first comma
-        else:
-            names = 'UNKNOWN'
         return names
 
     def get_date(self, bib_dict):
@@ -853,8 +929,9 @@ def log2console(biblio):
     '''
       
     print('\n')
-    TOKENS = ('author', 'title', 'date', 'journal', 'volume', 'number', 
-        'publisher', 'DOI', 'tags', 'comment', 'excerpt', 'url')
+    TOKENS = ('author', 'title', 'date', 'journal', 'volume', 
+        'number', 'publisher', 'address', 'DOI', 'tags', 'comment', 
+        'excerpt', 'url')
     # print(biblio)
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
@@ -991,30 +1068,32 @@ def get_scraper(url, comment):
 
     info("url = '%s'" %(url))
     if url.lower().startswith('doi:'):
-        url = 'http://dx.doi.org/' + url[4:]
-    host_path = url.split('//')[1]
+        return scrape_DOI(url, comment)
+    elif url.lower().startswith('isbn:'):
+        return scrape_ISBN(url, comment)
+    else:
+        host_path = url.split('//')[1]
     
-    dispatch_scraper = (
-        ('en.wikipedia.org/w', scrape_ENWP),
-        ('meta.wikimedia.org/w', scrape_WMMeta),
-        ('marc.info/', scrape_MARC),
-        ('dx.doi.org/', scrape_DOI),
-        ('geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
-        ('twitter.com/', scrape_twitter),
-        ('', scrape_default)     # default: make sure last
-    )
+        dispatch_scraper = (
+            ('en.wikipedia.org/w', scrape_ENWP),
+            ('meta.wikimedia.org/w', scrape_WMMeta),
+            ('marc.info/', scrape_MARC),
+            ('geekfeminism.wikia.com/', scrape_geekfeminism_wiki),
+            ('twitter.com/', scrape_twitter),
+            ('', scrape_default)     # default: make sure last
+        )
 
-    for prefix, scraper in dispatch_scraper:
-        if host_path.startswith(prefix):
-            info("scrape = %s " % scraper)
-            return scraper(url, comment)    # creates instance
+        for prefix, scraper in dispatch_scraper:
+            if host_path.startswith(prefix):
+                info("scrape = %s " % scraper)
+                return scraper(url, comment)    # creates instance
 
 def get_logger(text):
     """
     Given the argument return a function and parameters.
     """
     LOG_REGEX = re.compile(
-        r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?(?P<url>(\.|doi|http)\S*)?(?P<comment> .*)?')
+        r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?(?P<url>(\.|doi|isbn|http)\S*)?(?P<comment> .*)?')
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()

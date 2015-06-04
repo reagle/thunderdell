@@ -85,9 +85,9 @@ GF_KEY_SHORTCUTS = {
 
 LH_KEY_SHORTCUTS = {
         # Lifehack
-        'lh' : 'lhack',
+        'lh' : 'lifehack',
         'his': 'history',
-        'qs' : 'qself',
+        'qs' : 'quantifiedself',
         'sh' : 'shelp',
         'too': 'tool'
         }

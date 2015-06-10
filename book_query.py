@@ -6,8 +6,8 @@
 # (c) Copyright 2012 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-''' Return CrossRef bibliographic data for a given a ISBN.
-    See https://openlibrary.org/dev/docs/api/books 
+''' Return bibliographic data for a given a ISBN.
+    See https://developers.google.com/books/docs/v1/using
 '''
 
 import logging
@@ -25,15 +25,14 @@ def query(isbn):
     if isbn.startswith('isbn:'):
         isbn = isbn[5:]
     info("isbn = '%s'" %isbn)
-    URL = ('http://openlibrary.org/api/books?bibkeys=ISBN:{isbn}'
-            '&format=json&jscmd=data')
+    URL = ('https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
     info("isbn = '%s'" %isbn)
     r = requests.get(URL.format(isbn=isbn))
     returned_content_type = r.headers['content-type']
-    info("returned_conten_ttype = '%s'" %returned_content_type)
-    if returned_content_type == 'application/json':
+    info("returned_content_type = '%s'" %returned_content_type)
+    if returned_content_type.startswith('application/json'):
         content = r.content
-        return(r.content)
+        return(content)
     else:
         return False
 

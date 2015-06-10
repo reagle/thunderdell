@@ -424,7 +424,8 @@ class scrape_ISBN(scrape_default):
         info("url = %s" % self.url)
         json_string = book_query.query(self.url)
         json_bib = json.loads(json_string)
-        json_bib = json_bib[self.url.upper()] # 1 item dict
+        json_bib = json_bib['items'][0]['volumeInfo']
+        critical("json_bib = '%s'" %json_bib)
         biblio = {
             'permalink' : self.url,
             'excerpt' : '',
@@ -441,35 +442,34 @@ class scrape_ISBN(scrape_default):
                 pass
             elif key == 'authors':
                 biblio['author'] = self.get_author(json_bib)
-            elif key == 'publish_date':
-                biblio['date'] = json_bib['publish_date']
-            elif key == 'number_of_pages':
-                biblio['pages'] = json_bib['number_of_pages']
-            elif key == 'publishers':
-                biblio['publisher'] = json_bib['publishers'][0]['name']
-            elif key == 'publish_places':
-                biblio['address'] = json_bib['publish_places'][0]['name']
-            elif key == 'URL':
-                biblio['url'] = json_bib['URL']
+            elif key == 'publishedDate':
+                biblio['date'] = json_bib['publishedDate']
+            elif key == 'pageCount':
+                biblio['pages'] = json_bib['pageCount']
+            elif key == 'publisher':
+                biblio['publisher'] = json_bib['publisher']
+            elif key == 'address': # Google doesn't provide!
+                biblio['address'] = json_bib['address']
+            elif key == 'canonicalVolumeLink':
+                biblio['url'] = json_bib['canonicalVolumeLink']
+            elif key == 'description':
+                biblio['comment'] = json_bib['description']
             else:
                 biblio[key] = json_bib[key]
         if 'title' not in json_bib:
             biblio['title'] = 'UNKNOWN'
         else:
-            biblio['title'] = sentence_case(' '.join(
-                biblio['title'].split()))
+            title = biblio['title']
+            if 'subtitle' in json_bib:
+                title = biblio['title'] + ': ' + biblio['subtitle']
+                del biblio['subtitle']
+            biblio['title'] = sentence_case(title, force_lower=True)
         return biblio
     
     def get_author(self, bib_dict):
         names = 'UNKNOWN'
-        # if 'by_statement' in bib_dict:
-        #     names = bib_dict['by_statement']
         if 'authors' in bib_dict:
-            names = ''
-            for name_dic in bib_dict['authors']:
-                info("name_dic.values() = %s" % name_dic.values()[-1])
-                names = names + ', ' + ''.join(name_dic.values()[-1])
-            names = names[2:] # remove first comma of join above
+            names = ','.join(bib_dict['authors'])
         return names
 
     def get_date(self, bib_dict):
@@ -478,7 +478,7 @@ class scrape_ISBN(scrape_default):
         info("date_parts = %s" % date_parts)
         if len(date_parts) == 3:
             year, month, day = date_parts
-            date = '%d%02d%02d' %(int(year), int(month), int(day))
+            date = '%d%02d%02' %(int(year), int(month), int(day))
         elif len(date_parts) == 2:
             year, month = date_parts
             date = '%d%02d' % (int(year), int(month))

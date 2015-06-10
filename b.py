@@ -540,6 +540,7 @@ class scrape_DOI(scrape_default):
     def get_author(self, bib_dict):
         names = 'UNKNOWN'
         if 'author' in bib_dict:
+            names = ''
             for name_dic in bib_dict['author']:
                 info("name_dic.values() = %s" % name_dic.values())
                 names = names + ', ' + ' '.join(name_dic.values())

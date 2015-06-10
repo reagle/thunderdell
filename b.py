@@ -462,13 +462,14 @@ class scrape_ISBN(scrape_default):
     
     def get_author(self, bib_dict):
         names = 'UNKNOWN'
-        if 'by_statement' in bib_dict:
-            names = bib_dict['by_statement']
-        # if 'authors' in bib_dict:
-        #     for name_dic in bib_dict['authors']:
-        #         info("name_dic.values() = %s" % name_dic.values())
-        #         names = names + ', ' + ' '.join(name_dic.values())
-        #     names = names[2:] # remove first comma
+        # if 'by_statement' in bib_dict:
+        #     names = bib_dict['by_statement']
+        if 'authors' in bib_dict:
+            names = ''
+            for name_dic in bib_dict['authors']:
+                info("name_dic.values() = %s" % name_dic.values()[-1])
+                names = names + ', ' + ''.join(name_dic.values()[-1])
+            names = names[2:] # remove first comma of join above
         return names
 
     def get_date(self, bib_dict):
@@ -929,10 +930,10 @@ def log2console(biblio):
     '''
       
     print('\n')
-    TOKENS = ('author', 'title', 'date', 'journal', 'volume', 
-        'number', 'publisher', 'address', 'DOI', 'tags', 'comment', 
-        'excerpt', 'url')
-    # print(biblio)
+    TOKENS = ('author', 'title', 'subtitle', 'date', 'journal', 
+        'volume', 'number', 'publisher', 'address', 'DOI', 'tags', 
+        'comment', 'excerpt', 'url', )
+    critical("biblio = '%s'" %biblio)
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
         tags_expanded = ''
@@ -941,14 +942,18 @@ def log2console(biblio):
             tags_expanded += tag + ','
         biblio['tags'] = tags_expanded[0:-1] # removes last comma
     for token in TOKENS:
-        if token not in biblio: # I want these printed even if don't exist
-            if token == 'url':
+        critical("token = '%s'" %token)
+        if token not in biblio: 
+            if token == 'url': # I want these printed even if don't exist
                 biblio['url'] = ''
             if token == 'title':
                 biblio['title'] = ''
-        if token in biblio and biblio[token]:
+        if token in biblio:
             print('%s = %s' % (token, biblio[token]))
-
+    if 'identifiers' in biblio:
+        for identifer, value in biblio['identifiers'].items():
+            if identifer.startswith('isbn'):
+                print('%s = %s' % (identifer, value[0]))
 
 def blog_at_opencodex(biblio):
     '''

@@ -424,7 +424,7 @@ class scrape_ISBN(scrape_default):
         info("url = %s" % self.url)
         json_string = book_query.query(self.url)
         json_bib = json.loads(json_string)
-        json_bib = json_bib['items'][0]['volumeInfo']
+        json_bib = json_bib['list'][0]
         critical("json_bib = '%s'" %json_bib)
         biblio = {
             'permalink' : self.url,
@@ -440,36 +440,31 @@ class scrape_ISBN(scrape_default):
                 key, value, type(value)))
             if value in (None, [], ''):
                 pass
-            elif key == 'authors':
+            elif key == 'author':
                 biblio['author'] = self.get_author(json_bib)
-            elif key == 'publishedDate':
-                biblio['date'] = json_bib['publishedDate']
+            elif key == 'year':
+                biblio['date'] = json_bib['year']
             elif key == 'pageCount':
                 biblio['pages'] = json_bib['pageCount']
             elif key == 'publisher':
                 biblio['publisher'] = json_bib['publisher']
-            elif key == 'address': # Google doesn't provide!
-                biblio['address'] = json_bib['address']
-            elif key == 'canonicalVolumeLink':
-                biblio['url'] = json_bib['canonicalVolumeLink']
-            elif key == 'description':
-                biblio['comment'] = json_bib['description']
+            elif key == 'city':
+                biblio['address'] = json_bib['city']
+            elif key == 'url':
+                biblio['url'] = json_bib['url'][0]
             else:
                 biblio[key] = json_bib[key]
         if 'title' not in json_bib:
             biblio['title'] = 'UNKNOWN'
         else:
-            title = biblio['title']
-            if 'subtitle' in json_bib:
-                title = biblio['title'] + ': ' + biblio['subtitle']
-                del biblio['subtitle']
+            title = biblio['title'].replace(' : ', ': ')
             biblio['title'] = sentence_case(title, force_lower=True)
         return biblio
     
     def get_author(self, bib_dict):
         names = 'UNKNOWN'
-        if 'authors' in bib_dict:
-            names = ','.join(bib_dict['authors'])
+        if 'author' in bib_dict:
+            names = bib_dict['author'].split(' ; ')
         return names
 
     def get_date(self, bib_dict):

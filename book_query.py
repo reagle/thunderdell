@@ -7,7 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 ''' Return bibliographic data for a given a ISBN.
-    See https://developers.google.com/books/docs/v1/using
+    See http://xisbn.worldcat.org/xisbnadmin/doc/api.htm#getmetadata
 '''
 
 import logging
@@ -25,12 +25,13 @@ def query(isbn):
     if isbn.startswith('isbn:'):
         isbn = isbn[5:]
     info("isbn = '%s'" %isbn)
-    URL = ('https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
+    URL = ('http://xisbn.worldcat.org/webservices/xid/isbn/{isbn}?method=getMetadata&format=json&fl=*')
     info("isbn = '%s'" %isbn)
     r = requests.get(URL.format(isbn=isbn))
     returned_content_type = r.headers['content-type']
     info("returned_content_type = '%s'" %returned_content_type)
-    if returned_content_type.startswith('application/json'):
+    info("r.content = '%s'" % r.content)
+    if returned_content_type.startswith('text/plain'): #application/json
         content = r.content
         return(content)
     else:

@@ -1,0 +1,21 @@
+---
+references:
+- id: Tosh2012piw
+  type: webpage
+  author:
+  - family: "Tosh"
+    given: "Daniel"
+  custom2: "case.mm"
+  issued:
+    year: 2012
+    month: 07
+    day: 10
+  keyword: "comment"
+  container-title: "Twitter"
+  title: "the point i was making before ..."
+  URL: "https://twitter.com/danieltosh/status/222796636559130624"
+  accessed:
+    year: 2013
+    month: 08
+    day: 28
+...

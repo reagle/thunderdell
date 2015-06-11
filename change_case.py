@@ -24,7 +24,7 @@ info = logging.info
 dbg = logging.debug
 
 PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
-WORD_LIST_FN = '/usr/share/dict/american-english'
+WORD_LIST_FN = 'wordlist-american.txt'
 
 
 def create_wordset(file_name):

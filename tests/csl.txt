@@ -1,0 +1,140 @@
+---
+references:
+- id: A00d1991to
+  type: no-type
+  abstract: "misc"
+  author:
+  - family: "A00d"
+  custom2: "csl.mm"
+  issued:
+    year: 1991
+  title: "Title one"
+- id: A01d1990ct
+  type: chapter
+  publisher-place: "Address"
+  abstract: "inbook: chapter in single author work"
+  author:
+  - family: "A01d"
+  container-title: "Book Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1990
+  publisher: "Publisher"
+  title: "Chapter title"
+  URL: "http://example.com/1"
+- id: A02d1998ct
+  type: book
+  publisher-place: "Address"
+  abstract: "incollection: Chapter in multi-author work"
+  author:
+  - family: "A02d"
+  container-title: "Collection Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1998
+    month: 08
+  editor:
+  - family: "Editor"
+  publisher: "Publisher"
+  title: "Chapter Title"
+  URL: "http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html"
+- id: A03d1990ct
+  type: paper-conference
+  publisher-place: "Address"
+  abstract: "inproceedings"
+  author:
+  - family: "A03d"
+  custom2: "csl.mm"
+  issued:
+    year: 1990
+  container-title: "Proceedings of Event Title"
+  event: "Event Title"
+  publisher: "Publisher"
+  title: "Chapter title"
+  URL: "http://example.com/1"
+- id: A10d1992tle
+  type: article-journal
+  author:
+  - family: "A10d"
+  container-title: "Journal Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1992
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A11d1993tle
+  type: article-magazine
+  author:
+  - family: "A11d"
+  container-title: "Magazine Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1993
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A12d1994tle
+  type: article-newspaper
+  author:
+  - family: "A12d"
+  container-title: "Newspaper Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1994
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A13d1996tle
+  type: entry-dictionary
+  author:
+  - family: "A13d"
+  container-title: "Dictionary Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1996
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A14d1997tle
+  type: entry-encyclopedia
+  author:
+  - family: "A14d"
+  container-title: "Encylcopedia Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1997
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A15d1999tle
+  type: post-weblog
+  author:
+  - family: "A15d"
+  container-title: "Blog Title"
+  custom2: "csl.mm"
+  issued:
+    year: 1999
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A16d2000tle
+  type: webpage
+  author:
+  - family: "A16d"
+  container-title: "Website Title"
+  custom2: "csl.mm"
+  issued:
+    year: 2000
+  title: "Title"
+  URL: "http://example.com/2"
+- id: A30d2012te
+  type: legal_case
+  author:
+  - family: "A30d"
+  custom2: "csl.mm"
+  issued:
+    year: 2012
+  issue: "4:11cv45"
+  container-title: "E.D. Va."
+  title: "Title eleven"
+  URL: "http://www.dmlp.org/sites/citmedialaw.org/files/12-29-2011-Reply%20to%20Response%20Motion%20for%20Summary%20Judgment.pdf"
+  accessed:
+    year: 2013
+    month: 09
+    day: 28
+...

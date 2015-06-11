@@ -1230,10 +1230,10 @@ def parse_names(names):
     suffixes = ("Jr.", "Sr.", "II", "III", "IV")
     names_p = []
     
-    info("names = '%s'" %(names))
+    crtl("names = '%s'" %(names))
     names_split = names.split(',')
     for name in names_split:
-        info("name = '%s'" %(name))
+        crtl("name = '%s'" %(name))
         first = last = von = jr = ''
         chunks = name.strip().split()
 

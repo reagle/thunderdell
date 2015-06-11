@@ -32,7 +32,7 @@ from urllib import quote, unquote
 import unicodedata
 
 log_level = 100 # default
-crtl = logging.critical
+critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
@@ -851,22 +851,22 @@ def emit_biblatex(entries):
 
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
-                crtl("short, field = '%s , %s'" %(short, field))
+                critical("short, field = '%s , %s'" %(short, field))
                 # skip these fields
                 if field in ('identifier', 'entry_type', 'ori_author'): #'isbn'
                     continue
                 if field == 'urldate' and 'url' not in entry:
                     continue # no url, no 'read on'
                 if field in ('url'):  
-                    crtl("url = %s" %entry[field])
+                    critical("url = %s" %entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
-                        crtl("banned")
+                        critical("banned")
                         continue
                     # if online_only and not (online or online journal) then skip
                     if opts.online_urls_only and not (
                         entry_type == 'online' or
                         any(j for j in ONLINE_JOURNALS if j in entry['url'])):
-                        crtl("not online")
+                        critical("not online")
                         continue
 
                 # skip fields not in bibtex

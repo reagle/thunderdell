@@ -461,7 +461,8 @@ class scrape_ISBN(scrape_default):
     def get_author(self, bib_dict):
         names = 'UNKNOWN'
         if 'author' in bib_dict:
-            names = bib_dict['author'].split(' ; ')
+            info("bib_dict['author'] = '%s'" %bib_dict['author'])
+            names = bib_dict['author']
         return names
 
     def get_date(self, bib_dict):

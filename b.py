@@ -253,14 +253,14 @@ class scrape_default(object):
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
         )
         if self.HTML_p is not None:
-            critical('checking xpaths')
+            info('checking xpaths')
             for path in AUTHOR_XPATHS:
-                critical("trying = '%s'" % path)
+                info("trying = '%s'" % path)
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    critical("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
+                    info("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
                     author = string.capwords(''.join(xpath_result).strip())
-                    critical("author = '%s'; xpath = '%s'" %(author, path))
+                    info("author = '%s'; xpath = '%s'" %(author, path))
                     if author != '':
                         return author
                     else:
@@ -274,25 +274,25 @@ class scrape_default(object):
         )
         if self.text:
             #info(self.text)
-            critical('checking regexs')
+            info('checking regexs')
             for regex in AUTHOR_REGEXS:
-                critical("trying = '%s'" % regex)
+                info("trying = '%s'" % regex)
                 dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
                 if dmatch:
-                    critical('matched: "%s"' % regex)
+                    info('matched: "%s"' % regex)
                     author = dmatch.group(1).strip()
                     MAX_MATCH = 30
                     if ' and ' in author: 
                         MAX_MATCH += 35
                         if ', ' in author: 
                             MAX_MATCH += 35
-                    critical("author = '%s'" % dmatch.group())
+                    info("author = '%s'" % dmatch.group())
                     if len(author) > 4 and len(author) < MAX_MATCH: 
                         return string.capwords(author)
                     else:
-                        critical('length %d is <4 or > %d' %(len(author), MAX_MATCH)) 
+                        info('length %d is <4 or > %d' %(len(author), MAX_MATCH)) 
                 else:
-                    critical('failed: "%s"' % regex)
+                    info('failed: "%s"' % regex)
 
         return 'UNKNOWN'
 
@@ -419,13 +419,10 @@ class scrape_ISBN(scrape_default):
     def get_biblio(self):
 
         import book_query
-        import json
         
         info("url = %s" % self.url)
-        json_string = book_query.query(self.url)
-        json_bib = json.loads(json_string)
-        json_bib = json_bib['list'][0]
-        critical("json_bib = '%s'" %json_bib)
+        json_bib = book_query.query(self.url)
+        info("json_bib = '%s'" %json_bib)
         biblio = {
             'permalink' : self.url,
             'excerpt' : '',
@@ -494,12 +491,9 @@ class scrape_DOI(scrape_default):
     def get_biblio(self):
 
         import doi_query
-        import json
         
         info("url = %s" % self.url)
-        json_string = doi_query.query(self.url)
-        info("json_string = %s" % json_string)
-        json_bib = json.loads(json_string)
+        json_bib = doi_query.query(self.url)
         biblio = {
             'permalink' : self.url,
             'excerpt' : '',
@@ -929,7 +923,7 @@ def log2console(biblio):
     TOKENS = ('author', 'title', 'subtitle', 'date', 'journal', 
         'volume', 'number', 'publisher', 'address', 'DOI', 'tags', 
         'comment', 'excerpt', 'url', )
-    critical("biblio = '%s'" %biblio)
+    info("biblio = '%s'" %biblio)
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
         tags_expanded = ''
@@ -938,7 +932,7 @@ def log2console(biblio):
             tags_expanded += tag + ','
         biblio['tags'] = tags_expanded[0:-1] # removes last comma
     for token in TOKENS:
-        critical("token = '%s'" %token)
+        info("token = '%s'" %token)
         if token not in biblio: 
             if token == 'url': # I want these printed even if don't exist
                 biblio['url'] = ''
@@ -1098,7 +1092,7 @@ def get_logger(text):
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()
-        critical("params = '%s'" %(params))
+        info("params = '%s'" %(params))
         function = None
         if params['scheme'] == 'n':   function = log2nifty
         elif params['scheme'] == 'j': function = log2work
@@ -1267,7 +1261,7 @@ if __name__ == "__main__":
         sys.exit()
 
     logger, params = get_logger(' '.join(args.text)) 
-    critical("params = '%s'" %(params))
+    info("params = '%s'" %(params))
     comment = '' if not params['comment'] else params['comment']
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)
@@ -1275,5 +1269,5 @@ if __name__ == "__main__":
     else:
         biblio = {'title' : '', 'url': '', 'comment': comment}
     biblio['tags'] = params['tags']
-    critical("biblio = '%s'" %(biblio))
+    info("biblio = '%s'" %(biblio))
     logger(biblio)

@@ -10,7 +10,9 @@
     See http://xisbn.worldcat.org/xisbnadmin/doc/api.htm#getmetadata
 '''
 
+import json
 import logging
+import pprint
 import requests
 import sys
 
@@ -31,9 +33,10 @@ def query(isbn):
     returned_content_type = r.headers['content-type']
     info("returned_content_type = '%s'" %returned_content_type)
     info("r.content = '%s'" % r.content)
-    if returned_content_type.startswith('text/plain'): #application/json
-        content = r.content
-        return(content)
+    if returned_content_type.startswith('text/plain'): # no 'application/json'
+        json_bib = json.loads(r.content)
+        json_bib = json_bib['list'][0]
+        return(json_bib)
     else:
         return False
 
@@ -66,4 +69,4 @@ if '__main__' == __name__:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
     info(args.ISBN[0])
-    print(query(args.ISBN[0]))
+    pprint.pprint(query(args.ISBN[0]))

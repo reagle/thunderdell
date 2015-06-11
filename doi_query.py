@@ -10,7 +10,9 @@
     See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
 '''
 
+import json
 import logging
+import pprint
 import requests
 import sys
 
@@ -37,7 +39,8 @@ def query(doi, accept='application/citeproc+json'):
     returned_content_type = r.headers['content-type']
     info("returned_content_type = '%s'; requested_content_type = '%s'" %(returned_content_type, requested_content_type))
     if requested_content_type in returned_content_type:
-        return(r.content)
+        json_bib = json.loads(r.content)
+        return(json_bib)
     else:
         return False
 
@@ -77,4 +80,4 @@ if '__main__' == __name__:
             accept = args.style   
     info('accept = %s ' % accept)
     
-    print(query(args.DOI[0], accept))
+    pprint.pprint(query(args.DOI[0], accept))

@@ -1,5 +1,5 @@
 Thunderdell and BusySponge bibliographic/mindmap/microblog tools
-Copyright (C) 2009-2011 Joseph M. Reagle Jr.
+Copyright (C) 2009-2015 Joseph M. Reagle Jr.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -13,3 +13,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+----
+
+`wordlist-american.txt` is taken from SCOWL (Spell Checker Oriented Word Lists), a collection of  English word lists maintained by Kevin Atkinson 
+<kevina@users.sourceforge.net>. It is available under a GPL compatible license:
+http://changelogs.ubuntu.com/changelogs/pool/main/s/scowl/scowl_6-3/wamerican.copyright

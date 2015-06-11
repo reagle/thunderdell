@@ -1,0 +1,29 @@
+---
+references:
+- id: A11995to
+  type: book
+  author:
+  - family: "A1"
+  container-title: "Book One"
+  custom2: "editors.mm"
+  issued:
+    year: 1995
+  editor:
+  - family: "Smith"
+    given: "John"
+  - family: "Sue"
+    given: "Sally"
+  title: "Title one"
+- id: A21995tt
+  type: book
+  author:
+  - family: "A2"
+  container-title: "Book Two"
+  custom2: "editors.mm"
+  issued:
+    year: 1995
+  editor:
+  - family: "Kierra"
+    given: "Jim Jorn and Kathy"
+  title: "Title two"
+...

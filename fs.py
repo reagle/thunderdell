@@ -13,7 +13,7 @@ import codecs, getopt, re, os, sys
 
 
 def walk_freemind(doc,query,links=[]):
-    """Walk the freemind XML tree and serach for query"""
+    """Walk the freemind XML tree and search for query"""
     # <node LINK="a.mm" TEXT="A"/>
 
     import re

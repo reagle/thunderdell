@@ -10,6 +10,8 @@
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
+# TODO: string.capwords doesn't preserve abbreviations (AOL), needs a function
+
 import codecs
 from fe import BORING_WORDS
 import logging
@@ -62,8 +64,8 @@ def safe_capwords(text):
 
 
 def is_proper_noun(word, text_is_ALLCAPS=False):
-    ''' A word is a proper if it has a period or capital letter within, or
-    appears in the proper_nouns set. Recurses on hypenated words.
+    ''' A word is a proper noun if it is in that set or doesn't 
+    appear in the wordset dictionary. Recurse on hyphenated words.
 
     >>> is_proper_noun('W3C')
     True
@@ -75,11 +77,14 @@ def is_proper_noun(word, text_is_ALLCAPS=False):
         parts = word.split('-')
         return any(is_proper_noun(part) for part in parts)
     #if (re.search('\.|[A-Z]', word[1:]) or     # capital or period within
+    info("word = '%s'" %word)
     if (word in proper_nouns or
-            word.lower() not in wordset_nocase):
-        info(word + " True")
+            not word.lower() in wordset_nocase):
+        info(word in proper_nouns)
+        info(not word.lower() in wordset_nocase)
+        info(word + ": True")
         return True
-    info(word + " False")        
+    info(word + ": False")        
     return False
 
     
@@ -142,7 +147,7 @@ def sentence_case(text, force_lower=False):
                 .replace(' . ', '. ') \
                 .replace(' ? ', '? ')
 
-def test():
+def test(case_func, force_lower):
     '''Prints out sentence case for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
@@ -162,11 +167,16 @@ def test():
         'The Altruism Question: Toward a Social-Psychological Answer',
         '  Human Services:  Cambridge War Memorial Recreation Center',
         'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed',
-        'THIS SENTENCE ABOUT AOL IS ALL CAPS'
+        'THIS SENTENCE ABOUT AOL IS ALL CAPS',
+        'Lessons I learned on the road as a Digital Nomad',
         )
             
     for test in TESTS:
-        print(sentence_case(test))
+        info("case_func = '%s'" %case_func)
+        if case_func == sentence_case:
+            print(case_func(test, force_lower))
+        else:
+            print(case_func(test))
 
 if '__main__' == __name__:
 
@@ -184,6 +194,10 @@ if '__main__' == __name__:
     arg_parser.add_argument("-s", "--safe",
                     action="store_true", default=False,
                     help="Capitalize safely, such as preserving abbreviations")
+    arg_parser.add_argument("-f", "--force-lower",
+                    action="store_true", default=False,
+                    help="Even if it appears to be sentence case, "
+                    "force it to be so")
     arg_parser.add_argument("-T", "--test",
                     action="store_true", default=False,
                     help="Test")
@@ -207,15 +221,17 @@ if '__main__' == __name__:
     else:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
-    if args.test:
-        test()
-        sys.exit()
-    text = ' '.join(args.text)
     if args.capwords:
         if args.safe:
-            text = safe_capwords(text)
+            case_func = safe_capwords
         else:
-            text = string.capwords(text)
-    elif args.text:
-        text = sentence_case(text)
-    print(text)
+            case_func = string.capwords
+    else:
+        case_func = sentence_case
+
+    if args.test:
+        test(case_func, args.force_lower)
+    else:
+        text = ' '.join(args.text)
+        text = case_func(text, args.force_lower)
+        print(text)

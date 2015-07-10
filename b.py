@@ -535,8 +535,6 @@ class scrape_DOI(scrape_default):
                 joined_name = ' '.join(
                     [item for item in name_dic.values() if item])
                 info("joined_name = '%s'" %joined_name)
-                # info("name_dic.values() = %s" % name_dic.values())
-                # names = names + ', ' + ' '.join(name_dic.values())
                 names = names + ', ' + joined_name
             names = names[2:] # remove first comma
         return names

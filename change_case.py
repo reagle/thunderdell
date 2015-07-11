@@ -10,8 +10,6 @@
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
-# TODO: string.capwords doesn't preserve abbreviations (AOL), needs a function
-
 import codecs
 from fe import BORING_WORDS
 import logging
@@ -20,16 +18,11 @@ import re
 import string
 import sys
 
-log_level = 100  # default
 critical = logging.critical
-info = logging.info
-dbg = logging.debug
+info = logging.info        
+dbg = logging.debug        
 
-PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
-WORD_LIST_FN = 'wordlist-american.txt'
-
-
-def create_wordset(file_name):
+def create_wordset(file_name): # info() will invoke other logging params
     '''Returns a wordset given a file'''
     wordset = set()
     if isfile(file_name):
@@ -40,6 +33,8 @@ def create_wordset(file_name):
     else:
         return set()
 
+PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
+WORD_LIST_FN = 'wordlist-american.txt'
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
@@ -48,7 +43,6 @@ wordset_upper = set([word for word in wordset if word[0].isupper()])
 wordset_proper_nouns = set([word for word in wordset_upper if
     word.lower() not in wordset_lower])  # remove if in both
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
-
 
 def safe_capwords(text):
     '''Like string.capwords() but won't lowercase rest of an acronym.
@@ -73,22 +67,22 @@ def is_proper_noun(word, text_is_ALLCAPS=False):
     False
     
     '''
-    if '-' in word:  # hyphenated
-        parts = word.split('-')
-        return any(is_proper_noun(part) for part in parts)
-    #if (re.search('\.|[A-Z]', word[1:]) or     # capital or period within
     info("word = '%s'" %word)
-    if (word in proper_nouns or
-            not word.lower() in wordset_nocase):
-        info(word in proper_nouns)
-        info(not word.lower() in wordset_nocase)
-        info(word + ": True")
+    parts = word.split('-') # '([\W]+)'
+    if len(parts) > 1:
+        info("recursing")
+        return any(is_proper_noun(part) for part in parts)
+    word = word.translate(string.maketrans("",""), string.punctuation)
+    if word in proper_nouns:
+        info('word in proper_nouns: True')
         return True
-    info(word + ": False")        
+    if word.lower() not in wordset_lower:
+        info('word.lower() not in wordset_nocase: True')
+        return True
+    info(word + ": False")   
     return False
-
     
-def sentence_case(text, force_lower=False):
+def sentence_case(text, lower=False):
     ''' Convert title to sentence case for APA like citations
     
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
@@ -134,7 +128,7 @@ def sentence_case(text, force_lower=False):
             
         new_text.append(safe_capwords(first_word))
 
-        if text_is_titlecase or force_lower:    # down convert rest of phrase
+        if text_is_titlecase or lower:    # down convert rest of phrase
             for word in rest_of_phrase:
                 if is_proper_noun(word, text_is_ALLCAPS): 
                     pass    
@@ -147,7 +141,7 @@ def sentence_case(text, force_lower=False):
                 .replace(' . ', '. ') \
                 .replace(' ? ', '? ')
 
-def test(case_func, force_lower):
+def test(case_func, lower):
     '''Prints out sentence case for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
@@ -174,9 +168,11 @@ def test(case_func, force_lower):
     for test in TESTS:
         info("case_func = '%s'" %case_func)
         if case_func == sentence_case:
-            print(case_func(test, force_lower))
+            print(case_func(test, lower))
         else:
             print(case_func(test))
+
+
 
 if '__main__' == __name__:
 
@@ -194,7 +190,7 @@ if '__main__' == __name__:
     arg_parser.add_argument("-s", "--safe",
                     action="store_true", default=False,
                     help="Capitalize safely, such as preserving abbreviations")
-    arg_parser.add_argument("-f", "--force-lower",
+    arg_parser.add_argument("-l", "--lower",
                     action="store_true", default=False,
                     help="Even if it appears to be sentence case, "
                     "force it to be so")
@@ -203,7 +199,7 @@ if '__main__' == __name__:
                     help="Test")
     arg_parser.add_argument("-o", "--out-filename",
                     help="output results to filename", metavar="FILE")
-    arg_parser.add_argument('-l', '--log-to-file',
+    arg_parser.add_argument('-L', '--log-to-file',
                     action="store_true", default=False,
                     help="log to file %(prog)s.log")
     arg_parser.add_argument('-V', '--verbose', action='count', default=0,
@@ -211,6 +207,9 @@ if '__main__' == __name__:
     arg_parser.add_argument('--version', action='version', version='TBD')
     args = arg_parser.parse_args()
 
+
+
+    log_level = 100  # default
     if args.verbose == 1: log_level = logging.CRITICAL
     elif args.verbose == 2: log_level = logging.INFO
     elif args.verbose >= 3: log_level = logging.DEBUG
@@ -221,17 +220,21 @@ if '__main__' == __name__:
     else:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
-    if args.capwords:
+
+    if args.capwords or args.safe:
         if args.safe:
             case_func = safe_capwords
         else:
             case_func = string.capwords
     else:
         case_func = sentence_case
+    info("case_func = %s" %case_func)
 
     if args.test:
-        test(case_func, args.force_lower)
+        test(case_func, args.lower)
     else:
         text = ' '.join(args.text)
-        text = case_func(text, args.force_lower)
-        print(text)
+        if case_func == sentence_case:
+            print(case_func(text, args.lower))
+        else:
+            print(case_func(text))

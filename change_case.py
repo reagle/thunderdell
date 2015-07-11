@@ -69,20 +69,22 @@ def is_proper_noun(word, text_is_ALLCAPS=False):
     '''
     info("word = '%s'" %word)
     parts = word.split('-') # '([\W]+)'
+    # info("parts = '%s'" %parts)
     if len(parts) > 1:
         info("recursing")
         return any(is_proper_noun(part) for part in parts)
-    word = word.translate(string.maketrans("",""), string.punctuation)
+    word = ''.join(ch for ch in word if ch not in set(string.punctuation))
+    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
     if word in proper_nouns:
         info('word in proper_nouns: True')
         return True
     if word.lower() not in wordset_lower:
-        info('word.lower() not in wordset_nocase: True')
+        info('word.lower() not in wordset_lower: True')
         return True
-    info(word + ": False")   
+    info("'%s' is_proper_noun: False" %word)   
     return False
     
-def sentence_case(text, lower=False):
+def sentence_case(text):
     ''' Convert title to sentence case for APA like citations
     
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
@@ -106,6 +108,7 @@ def sentence_case(text, lower=False):
     PUNCTUATION = ":.?"
     PUNCTUATION_RE = r'(:|\.|\?) ' # use parens to keep them in the split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
+    info("phrases = '%s'" %phrases)
     new_text = []
     for phrase in phrases:
         if phrase == '':
@@ -128,20 +131,17 @@ def sentence_case(text, lower=False):
             
         new_text.append(safe_capwords(first_word))
 
-        if text_is_titlecase or lower:    # down convert rest of phrase
-            for word in rest_of_phrase:
-                if is_proper_noun(word, text_is_ALLCAPS): 
-                    pass    
-                else:        
-                    word = word.lower()
-                new_text.append(word)
-        else:                        # sentence case, so add rest of phrase
-            new_text.extend(rest_of_phrase)
+        for word in rest_of_phrase:
+            if is_proper_noun(word, text_is_ALLCAPS): 
+                pass    
+            else:        
+                word = word.lower()
+            new_text.append(word)
     return ' '.join(new_text[1:]).replace(' : ', ': ') \
                 .replace(' . ', '. ') \
                 .replace(' ? ', '? ')
 
-def test(case_func, lower):
+def test(case_func):
     '''Prints out sentence case for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
@@ -167,11 +167,7 @@ def test(case_func, lower):
             
     for test in TESTS:
         info("case_func = '%s'" %case_func)
-        if case_func == sentence_case:
-            print(case_func(test, lower))
-        else:
-            print(case_func(test))
-
+        print(case_func(test))
 
 
 if '__main__' == __name__:
@@ -184,16 +180,13 @@ if '__main__' == __name__:
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
     # optional arguments
-    arg_parser.add_argument("-c", "--capwords",
-                    action="store_true", default=False,
-                    help="Capitalize via string.capwords()")
-    arg_parser.add_argument("-s", "--safe",
-                    action="store_true", default=False,
-                    help="Capitalize safely, such as preserving abbreviations")
-    arg_parser.add_argument("-l", "--lower",
+    arg_parser.add_argument("-s", "--sentence-case",
                     action="store_true", default=False,
                     help="Even if it appears to be sentence case, "
                     "force it to be so")
+    arg_parser.add_argument("-t", "--title-case",
+                    action="store_true", default=False,
+                    help="Capitalize safely, e.g., preserve abbreviations")
     arg_parser.add_argument("-T", "--test",
                     action="store_true", default=False,
                     help="Test")
@@ -221,20 +214,13 @@ if '__main__' == __name__:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
 
-    if args.capwords or args.safe:
-        if args.safe:
+    case_func = sentence_case
+    if args.title_case:
             case_func = safe_capwords
-        else:
-            case_func = string.capwords
-    else:
-        case_func = sentence_case
     info("case_func = %s" %case_func)
 
     if args.test:
-        test(case_func, args.lower)
+        test(case_func)
     else:
         text = ' '.join(args.text)
-        if case_func == sentence_case:
-            print(case_func(text, args.lower))
-        else:
-            print(case_func(text))
+        print(case_func(text))

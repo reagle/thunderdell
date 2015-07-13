@@ -58,7 +58,7 @@ def safe_capwords(text):
 
     '''
 
-    info("text = '%s'" %text)
+    info("  safe_capwords: %s text = '%s'" %(type(text), text))
     new_text = []
     words = text.split(' ')
     for word in words:
@@ -70,7 +70,7 @@ def safe_capwords(text):
                 new_text.append(word[0].capitalize() + word[1:])
     return ' '.join(new_text)
 
-def is_proper_noun(word, text_is_ALLCAPS=False):
+def is_proper_noun(word):
     ''' A word is a proper noun if it is in that set or doesn't 
     appear in the wordset dictionary. Recurse on hyphenated words.
 
@@ -80,20 +80,20 @@ def is_proper_noun(word, text_is_ALLCAPS=False):
     False
     
     '''
-    info("word = '%s'" %word)
+    info("    word = '%s'" %word)
     parts = word.split('-') # '([\W]+)'
     # info("parts = '%s'" %parts)
     if len(parts) > 1:
-        info("recursing")
+        info("    recursing")
         return any(is_proper_noun(part) for part in parts)
     word = ''.join(ch for ch in word if ch not in set(string.punctuation))
     if word in proper_nouns: # in list of proper nouns?
-        info('word in proper_nouns: True')
+        info('    word in proper_nouns: True')
         return True
     if word.lower() not in wordset_nocase: # not known to me at all: proper
-        info('word.lower() not in wordset_nocase: True')
+        info('    word.lower() not in wordset_nocase: True')
         return True    
-    info("'%s' is_proper_noun: False" %word)   
+    info("    '%s' is_proper_noun: False" %word)   
     return False
     
 def sentence_case(text):
@@ -104,23 +104,23 @@ def sentence_case(text):
     
     '''
     text = text.strip().replace('  ', ' ')
-    info("** %s text = '%s'" %(type(text), text))
+    info("** sentence_case: %s text = '%s'" %(type(text), text))
 
     # create abbreviation sans BORING words
     info(set(text.split()).difference(BORING_WORDS))
     text_abbreviation = ''.join([word[0] for word in 
         set(text.split()).difference(BORING_WORDS)]) 
-    info("text_abbreviation = %s " % text_abbreviation)
+    info("  text_abbreviation = %s " % text_abbreviation)
     text_is_titlecase = text_abbreviation.isupper()
-    info("text_is_titlecase = '%s'" % text_is_titlecase)
+    info("  text_is_titlecase = '%s'" % text_is_titlecase)
     text_is_ALLCAPS = text.isupper()
-    info("text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
+    info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
     
     text = ': ' + text  # make first phrase consistent for processing below
     PUNCTUATION = ":.?"
     PUNCTUATION_RE = r'(:|\.|\?) ' # use parens to keep them in the split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    info("phrases = '%s'" %phrases)
+    info("  phrases = '%s'" %phrases)
     new_text = []
     for phrase in phrases:
         if phrase == '':
@@ -136,7 +136,7 @@ def sentence_case(text):
         else:
             first_word, rest_of_phrase = words[0], []
             
-        if is_proper_noun(first_word, text_is_ALLCAPS):
+        if is_proper_noun(first_word):
             first_word = first_word
         else:
             first_word = first_word.lower()
@@ -144,7 +144,7 @@ def sentence_case(text):
         new_text.append(safe_capwords(first_word))
 
         for word in rest_of_phrase:
-            if is_proper_noun(word, text_is_ALLCAPS): 
+            if is_proper_noun(word): 
                 pass    
             else:        
                 word = word.lower()

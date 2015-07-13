@@ -455,7 +455,7 @@ class scrape_ISBN(scrape_default):
             biblio['title'] = 'UNKNOWN'
         else:
             title = biblio['title'].replace(' : ', ': ')
-            biblio['title'] = sentence_case(title, force_lower=True)
+            biblio['title'] = sentence_case(title)
         return biblio
     
     def get_author(self, bib_dict):

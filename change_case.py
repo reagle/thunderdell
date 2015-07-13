@@ -10,6 +10,8 @@
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
+# TODO: capitalize BORING_WORDS following punctuation (:) for -t -s
+
 import codecs
 from fe import BORING_WORDS
 import logging
@@ -38,10 +40,12 @@ WORD_LIST_FN = 'wordlist-american.txt'
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
+# f = open('wordset_nocase','w').write(str(wordset_nocase))
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
 wordset_proper_nouns = set([word for word in wordset_upper if
     word.lower() not in wordset_lower])  # remove if in both
+# f = open('wordset_proper_nouns','w').write(str(wordset_proper_nouns))
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
 def safe_capwords(text):
@@ -54,8 +58,17 @@ def safe_capwords(text):
 
     '''
 
-    return text[0].capitalize() + text[1:]
-
+    info("text = '%s'" %text)
+    new_text = []
+    words = text.split(' ')
+    for word in words:
+        info("word = '%s'" %word)
+        if word: # the split and this will remove blank spaces
+            if word.lower() in BORING_WORDS:
+                new_text.append(word.lower())
+            else:
+                new_text.append(word[0].capitalize() + word[1:])
+    return ' '.join(new_text)
 
 def is_proper_noun(word, text_is_ALLCAPS=False):
     ''' A word is a proper noun if it is in that set or doesn't 
@@ -74,13 +87,12 @@ def is_proper_noun(word, text_is_ALLCAPS=False):
         info("recursing")
         return any(is_proper_noun(part) for part in parts)
     word = ''.join(ch for ch in word if ch not in set(string.punctuation))
-    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-    if word in proper_nouns:
+    if word in proper_nouns: # in list of proper nouns?
         info('word in proper_nouns: True')
         return True
-    if word.lower() not in wordset_lower:
-        info('word.lower() not in wordset_lower: True')
-        return True
+    if word.lower() not in wordset_nocase: # not known to me at all: proper
+        info('word.lower() not in wordset_nocase: True')
+        return True    
     info("'%s' is_proper_noun: False" %word)   
     return False
     
@@ -142,7 +154,7 @@ def sentence_case(text):
                 .replace(' ? ', '? ')
 
 def test(case_func):
-    '''Prints out sentence case for a number of test strings'''
+    '''Prints out sentence case (default) for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
         'My defamation 2.0 experience: a story of Wikipedia and a boy',

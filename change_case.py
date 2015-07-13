@@ -15,7 +15,7 @@
 import codecs
 from fe import BORING_WORDS
 import logging
-from os.path import isfile
+import os.path
 import re
 import string
 import sys
@@ -24,15 +24,19 @@ critical = logging.critical
 info = logging.info        
 dbg = logging.debug        
 
-def create_wordset(file_name): # info() will invoke other logging params
+def create_wordset(file_name): # info() doesn't work here, level not yet set
     '''Returns a wordset given a file'''
+    binary_path = os.path.split(sys.argv[0])[0]
+    full_file_name = binary_path + '/' + file_name
+    # critical("full_file_name = '%s'" %full_file_name)
     wordset = set()
-    if isfile(file_name):
-        for line in codecs.open(file_name, 'r', 'utf-8').readlines():
+    if os.path.isfile(full_file_name):
+        for line in codecs.open(full_file_name, 'r', 'utf-8').readlines():
             if line.strip() != '':
                 wordset.add(line.strip())
         return wordset
     else:
+        critical("Could not find wordset %s" %file_name)
         return set()
 
 PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
@@ -40,7 +44,7 @@ WORD_LIST_FN = 'wordlist-american.txt'
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
-# f = open('wordset_nocase','w').write(str(wordset_nocase))
+f = open('wordset_nocase','w').write(str(wordset_nocase))
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
 wordset_proper_nouns = set([word for word in wordset_upper if
@@ -91,6 +95,7 @@ def is_proper_noun(word):
         info('    word in proper_nouns: True')
         return True
     if word.lower() not in wordset_nocase: # not known to me at all: proper
+        info("    word.lower() = '%s'" %word.lower())
         info('    word.lower() not in wordset_nocase: True')
         return True    
     info("    '%s' is_proper_noun: False" %word)   
@@ -213,7 +218,6 @@ if '__main__' == __name__:
     args = arg_parser.parse_args()
 
 
-
     log_level = 100  # default
     if args.verbose == 1: log_level = logging.CRITICAL
     elif args.verbose == 2: log_level = logging.INFO
@@ -235,4 +239,6 @@ if '__main__' == __name__:
         test(case_func)
     else:
         text = ' '.join(args.text)
-        print(case_func(text))
+        result = case_func(text)
+        info(result)
+        print(result)

@@ -10,8 +10,6 @@
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
-# TODO: capitalize BORING_WORDS following punctuation (:) for -t -s
-
 import codecs
 from fe import BORING_WORDS
 import logging
@@ -52,27 +50,62 @@ wordset_proper_nouns = set([word for word in wordset_upper if
 # f = open('wordset_proper_nouns','w').write(str(wordset_proper_nouns))
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
-def safe_capwords(text):
+def safe_capitalize(text):
     '''Like string.capwords() but won't lowercase rest of an acronym.
 
-    >>> safe_capwords('W3C')
+    >>> safe_capitalize('W3C')
     'W3C'
-    >>> safe_capwords('the')
-    'The'
+    >>> safe_capitalize('neat')
+    'Neat'
+    >>> safe_capitalize('the')
+    'the'
 
     '''
 
-    info("  safe_capwords: %s text = '%s'" %(type(text), text))
+    info("  safe_capitalize: %s text = '%s'" %(type(text), text))
     new_text = []
     words = text.split(' ')
     for word in words:
         info("word = '%s'" %word)
-        if word: # the split and this will remove blank spaces
+        if word: # this split will remove multiple white-spaces
             if word.lower() in BORING_WORDS:
                 new_text.append(word.lower())
             else:
                 new_text.append(word[0].capitalize() + word[1:])
     return ' '.join(new_text)
+
+
+def safe_lower(text):
+    '''Lowercases a word except for proper nouns and acronyms.
+
+    >>> safe_lower('IBM')
+    'IBM'
+    >>> safe_lower('Neat')
+    'neat'
+    >>> safe_lower('THE')
+    'the'
+    >>> safe_lower('AMERICA')
+    'America'
+
+    '''
+
+    info("  safe_lower: %s text = '%s'" %(type(text), text))
+    new_text = []
+    words = text.split(' ')
+    for word in words:
+        info("word = '%s'" %word)
+        if word: # this split will remove multiple white-spaces
+            word_capitalized =  word[0].upper() + word[1:].lower()
+            info("word_capitalized = '%s'" %word_capitalized)
+            if word in proper_nouns:
+                new_text.append(word)
+            elif word.isupper():
+                if word_capitalized in proper_nouns:
+                    new_text.append(word_capitalized)
+            else:
+                new_text.append(word.lower())
+    return ' '.join(new_text)
+
 
 def is_proper_noun(word):
     ''' A word is a proper noun if it is in that set or doesn't 
@@ -133,27 +166,20 @@ def sentence_case(text):
         if phrase in PUNCTUATION:
             new_text.append(phrase)
             continue
-        words = phrase.split(' ')
-        if len(words) >= 3:
-            first_word, rest_of_phrase = words[0], words[1:]
-        elif len(words) == 2:
-            first_word, rest_of_phrase = words[0], [words[1]]
-        else:
-            first_word, rest_of_phrase = words[0], []
-            
-        if is_proper_noun(first_word):
-            first_word = first_word
-        else:
-            first_word = first_word.lower()
-            
-        new_text.append(safe_capwords(first_word))
 
-        for word in rest_of_phrase:
+        words = phrase.split(' ')
+        info("words = '%s'" %words)
+        for word in words:
             if is_proper_noun(word): 
-                pass    
+                new_word = word    
             else:        
-                word = word.lower()
-            new_text.append(word)
+                new_word = word.lower()
+
+            if words.index(word) == 0: # capitalize first word in a phrase
+                new_word = new_word[0].capitalize() + new_word[1:]
+
+            new_text.append(new_word)
+
     return ' '.join(new_text[1:]).replace(' : ', ': ') \
                 .replace(' . ', '. ') \
                 .replace(' ? ', '? ')
@@ -178,7 +204,7 @@ def test(case_func):
         'The Altruism Question: Toward a Social-Psychological Answer',
         '  Human Services:  Cambridge War Memorial Recreation Center',
         'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed',
-        'THIS SENTENCE ABOUT AOL IS ALL CAPS',
+        'THIS SENTENCE ABOUT AOL IN AMERICA IS ALL CAPS',
         'Lessons I learned on the road as a Digital Nomad',
         )
             
@@ -233,7 +259,7 @@ if '__main__' == __name__:
 
     case_func = sentence_case
     if args.title_case:
-            case_func = safe_capwords
+            case_func = safe_capitalize
     info("case_func = %s" %case_func)
 
     if args.test:

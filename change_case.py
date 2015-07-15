@@ -224,6 +224,7 @@ if '__main__' == __name__:
     elif args.verbose >= 3: log_level = logging.DEBUG
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
+        info("logging to file")
         logging.basicConfig(filename='change_case.log', filemode='w',
             level=log_level, format=LOG_FORMAT)
     else:

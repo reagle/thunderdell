@@ -350,9 +350,9 @@ def dict_sorted_by_keys(adict):
 #################################################################
 
 ARTICLES = ('a', 'an', 'the')
-CONJUNCTIONS = ('and', 'but', 'for', 'nor', 'or')
-SHORT_PREPOSITIONS = ('on', 'in', 'out', 'to', 'from', 
-    'for', 'of', 'with', 'among')
+CONJUNCTIONS = ('and', 'but', 'nor', 'or')
+SHORT_PREPOSITIONS = ('among', 'as', 'at', 'by', 'for', 'from', 'in',
+    'of', 'on', 'out', 'per', 'to', 'upon', 'with', )
 BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + \
     SHORT_PREPOSITIONS
 
@@ -1564,7 +1564,6 @@ if __name__ == '__main__':
     opts, files = parser.parse_args()
     opts.year = True
     
-    log_level = 100 # default
     if opts.verbose == 1: log_level = logging.CRITICAL
     elif opts.verbose == 2: log_level = logging.INFO
     elif opts.verbose >= 3: log_level = logging.DEBUG

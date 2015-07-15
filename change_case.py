@@ -169,16 +169,21 @@ def sentence_case(text):
 
         words = phrase.split(' ')
         info("words = '%s'" %words)
-        for word in words:
+        for index, word in enumerate(words):
             word_capitalized =  word[0].upper() + word[1:].lower()
+            info("word = '%s'" %word)
             if is_proper_noun(word): 
+                info("  word is_proper_noun")
                 new_word = word    
             elif is_proper_noun(word_capitalized): 
+                info("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
             else:        
+                info("  adding '%s' as is" %word)
                 new_word = word.lower()
 
-            if words.index(word) == 0: # capitalize first word in a phrase
+            if index == 0: # capitalize first word in a phrase
+                info("  capitalizing it as first word in phrase")
                 new_word = new_word[0].capitalize() + new_word[1:]
 
             new_text.append(new_word)

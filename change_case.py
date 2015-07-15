@@ -93,17 +93,21 @@ def safe_lower(text):
     new_text = []
     words = text.split(' ')
     for word in words:
-        info("word = '%s'" %word)
+        info("  word = '%s'" %word)
         if word: # this split will remove multiple white-spaces
             word_capitalized =  word[0].upper() + word[1:].lower()
-            info("word_capitalized = '%s'" %word_capitalized)
+            info("  word_capitalized = '%s'" %word_capitalized)
             if word in proper_nouns:
                 new_text.append(word)
             elif word.isupper():
+                info('    word.isupper(): True')
                 if word_capitalized in proper_nouns:
                     new_text.append(word_capitalized)
+                else:
+                    new_text.append(word.lower())
             else:
                 new_text.append(word.lower())
+    info("  new_text = '%s'" %  new_text)
     return ' '.join(new_text)
 
 
@@ -133,9 +137,15 @@ def is_proper_noun(word):
         return True    
     info("    '%s' is_proper_noun: False" %word)   
     return False
-    
+
 def sentence_case(text):
-    ''' Convert title to sentence case for APA like citations
+    return change_case(text, case_direction='sentence')
+
+def title_case(text):
+    return change_case(text, case_direction='title')
+
+def change_case(text, case_direction='sentence'):
+    ''' Convert text to sentence case for APA like citations
     
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
     'My defamation 2.0 experience: A story of Wikipedia'
@@ -180,9 +190,18 @@ def sentence_case(text):
                 new_word = word_capitalized
             else:        
                 info("  adding '%s' as is" %word)
-                new_word = word.lower()
-
-            if index == 0: # capitalize first word in a phrase
+                if case_direction == 'sentence':
+                    new_word = word.lower()
+                elif case_direction == 'title':
+                    info("  text_is_ALLCAPS = '%s'" %  text_is_ALLCAPS)
+                    if text_is_ALLCAPS:
+                        word = safe_lower(word)
+                        info('  lowering word because text_is_ALLCAPS')
+                    info("  adding '%s' as is" %word)
+                    new_word = safe_capwords(word)
+                else:
+                    raise Exception("Unknown case_direction = '%s'" %case_direction)
+            if word and index == 0: # capitalize first word in a phrase
                 info("  capitalizing it as first word in phrase")
                 new_word = new_word[0].capitalize() + new_word[1:]
 
@@ -215,10 +234,13 @@ def test(case_func):
         'THIS SENTENCE ABOUT AOL IN AMERICA IS ALL CAPS',
         'Lessons I learned on the road as a Digital Nomad',
         )
-            
+
+    import doctest
+    doctest.testmod()
+ 
     for test in TESTS:
-        info("case_func = '%s'" %case_func)
-        print(case_func(test))
+        info("case_direction = '%s'" %case_direction)
+        print(change_case(test, case_direction))
 
 
 if '__main__' == __name__:
@@ -264,16 +286,15 @@ if '__main__' == __name__:
     else:
         logging.basicConfig(level=log_level, format = LOG_FORMAT)
 
-
-    case_func = sentence_case
+    case_direction = 'sentence'
     if args.title_case:
-            case_func = safe_capwords
-    info("case_func = %s" %case_func)
+            case_direction = 'title'
+    info("case_direction = %s" %case_direction)
 
     if args.test:
-        test(case_func)
+        test(case_direction)
     else:
         text = ' '.join(args.text)
-        result = case_func(text)
+        result = change_case(text, case_direction)
         info(result)
         print(result)

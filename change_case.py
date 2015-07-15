@@ -3,7 +3,7 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2012 by Joseph Reagle
+# (c) Copyright 2009-2015 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 ''' Change the case of some text, making use of varied word lists.
@@ -26,7 +26,6 @@ def create_wordset(file_name): # info() doesn't work here, level not yet set
     '''Returns a wordset given a file'''
     binary_path = os.path.split(sys.argv[0])[0]
     full_file_name = binary_path + '/' + file_name
-    # critical("full_file_name = '%s'" %full_file_name)
     wordset = set()
     if os.path.isfile(full_file_name):
         for line in codecs.open(full_file_name, 'r', 'utf-8').readlines():
@@ -42,12 +41,10 @@ WORD_LIST_FN = 'wordlist-american.txt'
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
-# f = open('wordset_nocase','w').write(str(wordset_nocase))
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
 wordset_proper_nouns = set([word for word in wordset_upper if
     word.lower() not in wordset_lower])  # remove if in both
-# f = open('wordset_proper_nouns','w').write(str(wordset_proper_nouns))
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
 def safe_capwords(text):

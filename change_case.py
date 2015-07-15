@@ -50,19 +50,19 @@ wordset_proper_nouns = set([word for word in wordset_upper if
 # f = open('wordset_proper_nouns','w').write(str(wordset_proper_nouns))
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
-def safe_capitalize(text):
-    '''Like string.capwords() but won't lowercase rest of an acronym.
+def safe_capwords(text):
+    '''string.capwords() but don't capitalize() BORING or lower() acronyms.
 
-    >>> safe_capitalize('W3C')
+    >>> safe_capwords('W3C')
     'W3C'
-    >>> safe_capitalize('neat')
+    >>> safe_capwords('neat')
     'Neat'
-    >>> safe_capitalize('the')
+    >>> safe_capwords('the')
     'the'
 
     '''
 
-    info("  safe_capitalize: %s text = '%s'" %(type(text), text))
+    info("  safe_capwords: %s text = '%s'" %(type(text), text))
     new_text = []
     words = text.split(' ')
     for word in words:
@@ -170,8 +170,11 @@ def sentence_case(text):
         words = phrase.split(' ')
         info("words = '%s'" %words)
         for word in words:
+            word_capitalized =  word[0].upper() + word[1:].lower()
             if is_proper_noun(word): 
                 new_word = word    
+            elif is_proper_noun(word_capitalized): 
+                new_word = word_capitalized
             else:        
                 new_word = word.lower()
 
@@ -259,7 +262,7 @@ if '__main__' == __name__:
 
     case_func = sentence_case
     if args.title_case:
-            case_func = safe_capitalize
+            case_func = safe_capwords
     info("case_func = %s" %case_func)
 
     if args.test:

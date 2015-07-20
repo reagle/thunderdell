@@ -92,7 +92,7 @@ def safe_lower(text):
     for word in words:
         info("  word = '%s'" %word)
         if word: # this split will remove multiple white-spaces
-            word_capitalized =  word[0].upper() + word[1:].lower()
+            word_capitalized =  word.capitalize() # [0].upper() + word[1:].lower()
             info("  word_capitalized = '%s'" %word_capitalized)
             if word in proper_nouns:
                 new_text.append(word)
@@ -177,7 +177,7 @@ def change_case(text, case_direction='sentence'):
         words = phrase.split(' ')
         info("words = '%s'" %words)
         for index, word in enumerate(words):
-            word_capitalized =  word[0].upper() + word[1:].lower()
+            word_capitalized =  word.capitalize() # [0].upper() + word[1:].lower()
             info("word = '%s'" %word)
             if is_proper_noun(word): 
                 info("  word is_proper_noun")

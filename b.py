@@ -934,6 +934,7 @@ def log2console(biblio):
             tag = KEY_SHORTCUTS.get(tag, tag)
             tags_expanded += tag + ','
         biblio['tags'] = tags_expanded[0:-1] # removes last comma
+    bib_in_single_line = ''
     for token in TOKENS:
         info("token = '%s'" %token)
         if token not in biblio: 
@@ -941,8 +942,10 @@ def log2console(biblio):
                 biblio['url'] = ''
             if token == 'title':
                 biblio['title'] = ''
-        if token in biblio:
+        if token in biblio and biblio[token]:
             print('%s = %s' % (token, biblio[token]))
+            bib_in_single_line += '%s = %s ' % (token, biblio[token])
+    print('\n%s\n' %bib_in_single_line)
     if 'identifiers' in biblio:
         for identifer, value in biblio['identifiers'].items():
             if identifer.startswith('isbn'):

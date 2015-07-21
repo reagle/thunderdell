@@ -126,11 +126,6 @@ CSL_FIELDS = dict([(field, short) for short, field in
 CONTAINERS = CSL_SHORTCUTS.values()
 CONTAINERS.append('organization')
 
-# CONTAINERS = [BIB_SHORTCUTS[x] for x in ['or', 'cj','cm', 'cn', 'cd', 
-                                         # 'cy', 'cf', 'cb', 'cw']]
-
-
-
 BIBLATEX_TYPES = (
         'article',
         'book',
@@ -242,6 +237,25 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
 
 CSL_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
                                    BIBLATEX_CSL_FIELD_MAP.items())
+
+
+# https://en.wikipedia.org/wiki/Template:Citation
+BIBLATEX_WP_FIELD_MAP = OrderedDict([
+        ('c_journal',       'journal'),  
+        ('c_magazine',      'magazine'),         
+        ('c_newspaper',     'newspaper'),                
+        ('c_dictionary',    'work'),
+        ('c_encyclopedia',  'work'),
+        ('c_forum',         'work'), 
+        ('c_blog',          'work'),
+        ('c_web',           'work'),
+        ('urldate',         'accessdate'),
+        ('address',         'publication-place'), 
+        ('booktitle',       'title'),    
+        ])
+
+WP_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
+                                   BIBLATEX_WP_FIELD_MAP.items())
 
 
 BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter', 
@@ -1072,12 +1086,8 @@ def emit_wp_citation(entries):
                 elif field == 'title': # TODO: convert value to title case?
                     if 'booktitle' in entry:
                         field = 'chapter'
-                elif field == 'booktitle':
-                    field = 'title'
-                elif field == 'urldate':
-                    field = 'accessdate'
-                elif field == 'address':
-                    field = 'place'
+                elif field in BIBLATEX_WP_FIELD_MAP:
+                    field = BIBLATEX_WP_FIELD_MAP[field]
                 opts.outfd.write('| %s = %s\n' % (field, value))
         opts.outfd.write("}}\n")
 

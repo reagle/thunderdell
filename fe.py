@@ -973,8 +973,8 @@ def emit_yaml_csl(entries):
         
         # # if authorless (replicated in container) then delete
         # container_values = [entry[c] for c in CONTAINERS if c in entry]
-        # if entry['ori_author'] in container_values:
-        #     del entry['author']
+        if entry['ori_author'] in container_values:
+            del entry['author']
             
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:

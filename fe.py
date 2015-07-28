@@ -251,7 +251,7 @@ BIBLATEX_WP_FIELD_MAP = OrderedDict([
         ('c_web',           'work'),
         ('urldate',         'accessdate'),
         ('address',         'publication-place'), 
-        ('booktitle',       'title'),    
+        ('booktitle',       'title'), 
         ])
 
 WP_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
@@ -719,6 +719,17 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
 
+    # APA specific strings for CSL
+    # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
+    if et == 'post':
+        genre = 'Online forum comment'
+    elif et == 'post-weblog':
+      genre = 'Web log message'
+      if 'url' in entry:
+        if any([site in entry['url'] for site in (
+                'youtube.com', 'vimeo.com')]):
+            genre = 'Video file'
+
     return et, genre
 
 def bibformat_title(title):
@@ -972,7 +983,7 @@ def emit_yaml_csl(entries):
             opts.outfd.write('  genre: %s\n' % genre)
         
         # # if authorless (replicated in container) then delete
-        # container_values = [entry[c] for c in CONTAINERS if c in entry]
+        container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
             del entry['author']
             

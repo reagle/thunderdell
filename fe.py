@@ -725,7 +725,7 @@ def guess_csl_type(entry):
         genre = 'Online forum comment'
     elif et == 'post-weblog':
       genre = 'Web log message'
-      if 'url' in entry:
+    if 'url' in entry:
         if any([site in entry['url'] for site in (
                 'youtube.com', 'vimeo.com')]):
             genre = 'Video file'

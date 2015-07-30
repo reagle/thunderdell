@@ -31,10 +31,12 @@ def query(isbn):
     info("isbn = '%s'" %isbn)
     r = requests.get(URL.format(isbn=isbn))
     returned_content_type = r.headers['content-type']
-    info("returned_content_type = '%s'" %returned_content_type)
     info("r.content = '%s'" % r.content)
     if returned_content_type.startswith('text/plain'): # no 'application/json'
         json_bib = json.loads(r.content)
+        info("json_bib['stat'] = '%s'" %json_bib['stat'])
+        if 'unknownId' in json_bib['stat']:
+            raise Exception("Unknown ISBN (Book too new?)")
         json_bib = json_bib['list'][0]
         return(json_bib)
     else:

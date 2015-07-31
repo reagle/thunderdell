@@ -157,19 +157,23 @@ for short_dict in LIST_OF_KEYSHORTCUTS[1:]:
 MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 
 SITE_CONTAINER_MAP = (
-    ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
     ('arstechnica.com', 'Ars Technica', 'c_newspaper'),
-    ('nytimes.com', 'New York Times', 'c_newspaper'),
-    ('wsj.com', 'Wall Street Journal',  'c_newspaper'),
-    ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
-    ('verge.com', 'The Verge',  'c_newspaper'),
-    ('wired.com', 'Wired',  'c_magazine'),
     ('atlantic.com', 'The Atlantic',  'c_magazine'),
-    ('newyorker.com', 'New Yorker',  'c_magazine'),
-    ('forbes.com', 'Forbes',  'c_magazine'),
+    ('dailydot', 'The Daily Dot',  'c_newspaper'),
     ('engadget.com', 'Engadget',  'c_blog'),
-    ('thegaurdian', 'The Guardian',  'c_newspaper'),
+    ('forbes.com', 'Forbes',  'c_magazine'),
     ('huffingtonpost', 'Huffington Post',  'c_newspaper'),
+    ('lifehacker.com', 'Lifehacker',  'c_newspaper'),
+    ('newyorker.com', 'New Yorker',  'c_magazine'),
+    ('nytimes.com', 'New York Times', 'c_newspaper'),
+    ('salon.com', 'Salon',  'c_magazine'),
+    ('slate.com', 'Slate',  'c_magazine'),
+    ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
+    ('thegaurdian', 'The Guardian',  'c_newspaper'),
+    ('verge.com', 'The Verge',  'c_newspaper'),
+    ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
+    ('wired.com', 'Wired',  'c_magazine'),
+    ('wsj.com', 'Wall Street Journal',  'c_newspaper'),
     # ('', '',  'c_magazine'),
     # ('', '',  'c_magazine'),
 )
@@ -1149,7 +1153,10 @@ def do_console_annotation(biblio):
     tentative_id = get_tentative_ident(biblio)
     print('''@%s : au=%s ti=%s\n''' % (tentative_id, 
                                   biblio['author'], biblio['title'])),
-    
+    for key in biblio:
+        if key.startswith('c_'):
+            print("    %s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
+
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     do_publish = args.publish

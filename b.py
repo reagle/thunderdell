@@ -164,6 +164,7 @@ SITE_CONTAINER_MAP = (
     ('forbes.com', 'Forbes',  'c_magazine'),
     ('huffingtonpost', 'Huffington Post',  'c_newspaper'),
     ('lifehacker.com', 'Lifehacker',  'c_newspaper'),
+    ('medium.com', 'Medium',  'c_blog'),
     ('newyorker.com', 'New Yorker',  'c_magazine'),
     ('nytimes.com', 'New York Times', 'c_newspaper'),
     ('salon.com', 'Salon',  'c_magazine'),
@@ -174,7 +175,6 @@ SITE_CONTAINER_MAP = (
     ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
     ('wired.com', 'Wired',  'c_magazine'),
     ('wsj.com', 'Wall Street Journal',  'c_newspaper'),
-    # ('', '',  'c_magazine'),
     # ('', '',  'c_magazine'),
 )
 

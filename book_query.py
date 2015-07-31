@@ -37,6 +37,8 @@ def query(isbn):
         info("json_bib['stat'] = '%s'" %json_bib['stat'])
         if 'unknownId' in json_bib['stat']:
             raise Exception("Unknown ISBN (Book too new?)")
+        if 'invalidId' in json_bib['stat']:
+            raise Exception("Invalid ISBN (Tyo?)")
         json_bib = json_bib['list'][0]
         return(json_bib)
     else:

@@ -40,6 +40,12 @@ def query(isbn):
         if 'invalidId' in json_bib['stat']:
             raise Exception("Invalid ISBN (Tyo?)")
         json_bib = json_bib['list'][0]
+        for key, value in json_bib.items():
+     		if type(value) == str or type(value) == unicode:
+	            value = value.strip()
+	            value = value[0:-1] if value.endswith('.') else value
+	            info("  value = '%s'" %value)
+	            json_bib[key] = value
         return(json_bib)
     else:
         return False

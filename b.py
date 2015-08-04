@@ -88,8 +88,9 @@ LH_KEY_SHORTCUTS = {
         'lh' : 'lifehack',
         'his': 'history',
         'qs' : 'quantifiedself',
-        'sh' : 'shelp',
-        'too': 'tool'
+        'sh' : 'selfhelp',
+        'too': 'tool',
+        'min': 'minimalism',
         }
 
 RTC_KEY_SHORTCUTS = {

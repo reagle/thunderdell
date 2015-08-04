@@ -160,6 +160,7 @@ MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 SITE_CONTAINER_MAP = (
     ('arstechnica.com', 'Ars Technica', 'c_newspaper'),
     ('atlantic.com', 'The Atlantic',  'c_magazine'),
+    ('boingboing.net', 'Boing Boing',  'c_blog'),
     ('dailydot', 'The Daily Dot',  'c_newspaper'),
     ('engadget.com', 'Engadget',  'c_blog'),
     ('forbes.com', 'Forbes',  'c_magazine'),

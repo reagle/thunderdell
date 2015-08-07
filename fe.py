@@ -1119,14 +1119,18 @@ def emit_results(entries, query, results_file):
             if matches:
                 text = matches.group(2)
                 locator = matches.group(1)
+                # http://ctan.mirrorcatalogs.com/macros/latex/contrib/biblatex/doc/biblatex.pdf
+                # biblatex: page, column, line, verse, section, paragraph
+                # kindle: location
                 if 'pagination' in entry:
                     if entry['pagination'] == 'section':
                         locator = ', sec. ' + locator
+                    if entry['pagination'] == 'paragraph':
+                        locator = ', para. ' + locator
                     elif entry['pagination'] == 'location':
                         locator = ', loc. ' + locator
                     else:
-                        print("unknown locator %s" % entry['pagination'])
-                        sys.exit
+                        raise Exception("unknown locator %s" % entry['pagination'])
                 else:
                     if '-' in locator:
                         locator = ', pp. ' + locator

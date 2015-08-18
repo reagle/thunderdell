@@ -1100,7 +1100,7 @@ def get_logger(text):
     Given the argument return a function and parameters.
     """
     LOG_REGEX = re.compile(
-        r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?(?P<url>(\.|doi|isbn|http)\S*)?(?P<comment> .*)?')
+        r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?(?P<url>(\.|doi|isbn|http)\S*)?(?P<comment> .*)?', re.IGNORECASE)
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()

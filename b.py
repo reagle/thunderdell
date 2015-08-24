@@ -952,7 +952,7 @@ def log2console(biblio):
             if token == 'isbn':
                 biblio[token] = biblio[token][0]
             print('%s = %s' % (token, biblio[token]))
-            bib_in_single_line += '%s = %s ' % (token, biblio[token])
+            bib_in_single_line += '%s = %s ' % (token, biblio[token].lower())
     print('\n%s\n' %bib_in_single_line)
     if 'identifiers' in biblio:
         for identifer, value in biblio['identifiers'].items():

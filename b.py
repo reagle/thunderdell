@@ -930,8 +930,8 @@ def log2console(biblio):
       
     print('\n')
     TOKENS = ('author', 'title', 'subtitle', 'date', 'journal', 
-        'volume', 'number', 'publisher', 'address', 'DOI', 'tags', 
-        'comment', 'excerpt', 'url', )
+        'volume', 'number', 'publisher', 'address', 'DOI', 'isbn',
+        'tags', 'comment', 'excerpt', 'url', )
     info("biblio = '%s'" %biblio)
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
@@ -949,6 +949,8 @@ def log2console(biblio):
             if token == 'title':
                 biblio['title'] = ''
         if token in biblio and biblio[token]:
+            if token == 'isbn':
+                biblio[token] = biblio[token][0]
             print('%s = %s' % (token, biblio[token]))
             bib_in_single_line += '%s = %s ' % (token, biblio[token])
     print('\n%s\n' %bib_in_single_line)

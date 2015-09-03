@@ -53,7 +53,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
     #print "*** '%s'" % repr(line)
     if line not in (u'', u'\r' ,u'\n'):
         if line.lower().startswith('author ='):
-            # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.IGNORECASE)
+            # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started: # Do I need to close a previous entry
                 if in_subsection:
                     fdo.write(u"""        </node>\n""")
@@ -108,12 +108,12 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
                 % (CL_CO['cite'], clean(citation)))
 
-        elif re.match('summary\.(.*)', line, re.IGNORECASE):
-            matches = re.match('summary\.(.*)',line, re.IGNORECASE)
+        elif re.match('summary\.(.*)', line, re.I):
+            matches = re.match('summary\.(.*)',line, re.I)
             fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
                 % (CL_CO['annotation'], clean(matches.groups()[0])))
 
-        elif re.match('part.*', line, re.IGNORECASE):
+        elif re.match('part.*', line, re.I):
             if in_part:
                 if in_chapter:
                     fdo.write(u"""    </node>\n""")      # close chapter
@@ -130,7 +130,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     CL_CO['paraphrase'], clean(line)))
             in_part = True
 
-        elif re.match('chapter.*', line, re.IGNORECASE):
+        elif re.match('chapter.*', line, re.I):
             if in_chapter:
                 if in_section:
                     fdo.write(u"""      </node>\n""")    # close section
@@ -144,7 +144,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     CL_CO['paraphrase'], clean(line)))
             in_chapter = True
 
-        elif re.match('section.*', line, re.IGNORECASE):
+        elif re.match('section.*', line, re.I):
             if in_subsection:
                 fdo.write(u"""      </node>\n""")    # close section
                 in_subsection = False
@@ -155,7 +155,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     CL_CO['paraphrase'], clean(line[9:])))
             in_section = True
 
-        elif re.match('subsection.*', line, re.IGNORECASE):
+        elif re.match('subsection.*', line, re.I):
             if in_subsection:
                 fdo.write(u"""    </node>\n""")
                 in_subsection = False
@@ -163,7 +163,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     CL_CO['paraphrase'], clean(line[12:])))
             in_subsection = True
 
-        elif re.match('(--.*)', line, re.IGNORECASE):
+        elif re.match('(--.*)', line, re.I):
             fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
                 % (CL_CO['default'], clean(line)))
 
@@ -171,14 +171,21 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             node_color = CL_CO['paraphrase']
             line_text = line
             line_no = ''
-            if re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE):
-                matches = re.match('(\d+)(\-\d+)? (.*)', line, re.IGNORECASE)
+            line_split = line.split(' ')
+            # if line_split[1] == 'excerpt.':
+            digit_chars = '[0123456789cdilmxv]'
+            # matches = re.match('(\d+)(\-\d+)? (.*)', line, re.I)
+            matches = re.match('({0}+)(\-{0}+)? (.*)'.format(digit_chars), 
+                line, re.I)
+            if matches: 
                 line_no = matches.group(1)
                 if matches.group(2):
                     line_no += matches.group(2)
                 line_text = matches.group(3)
-                if re.match('(.*)(\-\d+)', line_text, re.IGNORECASE):
-                    matches = re.match('(.*)(\-\d+)', line_text, re.IGNORECASE)
+                if re.match('(.*)(\-{0}+)'.format(digit_chars), 
+                        line_text, re.I): # appended number
+                    matches = re.match('(.*)(\-{0}+)'.format(digit_chars), 
+                        line_text, re.I)
                     line_text = matches.group(1)
                     line_no += matches.group(2)
             if line_text.startswith('excerpt.'):

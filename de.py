@@ -170,28 +170,26 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
         else:
             node_color = CL_CO['paraphrase']
             line_text = line
+            print(line)
             line_no = ''
             line_split = line.split(' ')
-            # if line_split[1] == 'excerpt.':
-            digit_chars = '[0123456789cdilmxv]'
-            # matches = re.match('(\d+)(\-\d+)? (.*)', line, re.I)
-            matches = re.match('({0}+)(\-{0}+)? (.*)'.format(digit_chars), 
-                line, re.I)
-            if matches: 
+            DIGIT_CHARS = '[\dcdilmxv]'
+            PAGE_NUM_PAT = '([\dcdilmxv]+)(\-[\dcdilmxv]+)?(.*?)(-[\dcdilmxv]+)?$'
+
+            matches = re.match(PAGE_NUM_PAT, line, re.I)
+            if matches:
+                print(matches.groups())
                 line_no = matches.group(1)
                 if matches.group(2):
                     line_no += matches.group(2)
-                line_text = matches.group(3)
-                if re.match('(.*)(\-{0}+)'.format(digit_chars), 
-                        line_text, re.I): # appended number
-                    matches = re.match('(.*)(\-{0}+)'.format(digit_chars), 
-                        line_text, re.I)
-                    line_text = matches.group(1)
-                    line_no += matches.group(2)
+                if matches.group(4):
+                    line_no += matches.group(4)
+                line_text = matches.group(3).strip()
+
             if line_text.startswith('excerpt.'):
                 node_color = CL_CO['quote']
                 line_text = line_text[9:]
-            if line_text.strip().endswith('excerpt.'):
+            if line_text.strip().endswith('excerpt.'): # convenient for annotating
                 node_color = CL_CO['quote']
                 line_text = line_text[0:-9]
 
@@ -216,6 +214,7 @@ def check(text, fdo):
     fdo.write(u"""<map version="0.7.1">\n<node TEXT="Readings">\n""")
 
     for line in text.split('\n'):
+        line = line.strip()
         try:
             started, in_part, in_chapter, in_section, in_subsection = parse(
                 line, started, in_part, in_chapter, in_section, in_subsection)

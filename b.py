@@ -168,7 +168,7 @@ SITE_CONTAINER_MAP = (
     ('lifehacker.com', 'Lifehacker',  'c_newspaper'),
     ('medium.com', 'Medium',  'c_blog'),
     ('newyorker.com', 'New Yorker',  'c_magazine'),
-    ('nytimes.com', 'New York Times', 'c_newspaper'),
+    ('nytimes.com', 'The New York Times', 'c_newspaper'),
     ('salon.com', 'Salon',  'c_magazine'),
     ('slate.com', 'Slate',  'c_magazine'),
     ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
@@ -176,7 +176,8 @@ SITE_CONTAINER_MAP = (
     ('verge.com', 'The Verge',  'c_newspaper'),
     ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
     ('wired.com', 'Wired',  'c_magazine'),
-    ('wsj.com', 'Wall Street Journal',  'c_newspaper'),
+    ('wsj.com', 'The Wall Street Journal',  'c_newspaper'),
+    ('washingtonpost.com', 'The Washington Post',  'c_newspaper'),
     # ('', '',  'c_magazine'),
 )
 
@@ -252,7 +253,8 @@ class scrape_default(object):
             '''//meta[@name='authors']/@content''',
             '''//meta[@http-equiv='author']/@content''',
             '''//a[@rel='author']//text()''',
-            '''//*[@itemprop='author']/text()''', # engadget
+            '''//span[@class='author']/text()''', #WashingtonPost
+            '''//*[@itemprop='author']//text()''', # engadget
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
             '''//*[1][contains(@class, 'byline')]//text()''', # first of many
@@ -672,7 +674,7 @@ class scrape_WMMeta(scrape_default):
         pre, po = self.get_permalink().split('?title=')
         citelink = pre + '?title=Special:Cite&page=' + po
         _, _, cite_HTML_u, resp = get_HTML(citelink)
-        day, month, year = re.search('''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''', cite_html).groups()
+        day, month, year = re.search('''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''', cite_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' %(int(year), int(month), int(day))
 
@@ -1278,6 +1280,8 @@ if __name__ == "__main__":
         sys.exit()
 
     logger, params = get_logger(' '.join(args.text)) 
+    info("-------------------------------------------------------")
+    info("-------------------------------------------------------")
     info("params = '%s'" %(params))
     comment = '' if not params['comment'] else params['comment']
     if params['url']:    # not all log2work entries have urls

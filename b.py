@@ -449,6 +449,8 @@ class scrape_ISBN(scrape_default):
                 biblio['author'] = self.get_author(json_bib)
             elif key == 'year':
                 biblio['date'] = json_bib['year']
+            elif key == 'isbn':
+                biblio['isbn'] = json_bib['isbn'][0]
             elif key == 'pageCount':
                 biblio['pages'] = json_bib['pageCount']
             elif key == 'publisher':
@@ -456,7 +458,8 @@ class scrape_ISBN(scrape_default):
             elif key == 'city':
                 biblio['address'] = json_bib['city']
             elif key == 'url':
-                biblio['url'] = json_bib['url'][0]
+                biblio['url'] = json_bib['url']
+                biblio['permalink'] = json_bib['url']
             else:
                 biblio[key] = json_bib[key]
         if 'title' not in json_bib:
@@ -951,8 +954,6 @@ def log2console(biblio):
             if token == 'title':
                 biblio['title'] = ''
         if token in biblio and biblio[token]:
-            if token == 'isbn':
-                biblio[token] = biblio[token][0]
             print('%s = %s' % (token, biblio[token]))
             bib_in_single_line += '%s = %s ' % (token, biblio[token])
     print('\n%s\n' %bib_in_single_line)

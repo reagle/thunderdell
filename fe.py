@@ -982,10 +982,13 @@ def emit_yaml_csl(entries):
         if genre:
             opts.outfd.write('  genre: %s\n' % genre)
         
-        # # if authorless (replicated in container) then delete
+        # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
-            del entry['author']
+            if not opts.author_create:
+                del entry['author']
+            else:
+                entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
             
         for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
@@ -1535,6 +1538,9 @@ if __name__ == '__main__':
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.""")
+    parser.add_option("-a", "--author-create", default=False,
+                    action="store_true",
+                    help="create author for anon entries using container")
     parser.add_option("-b", "--biblatex", default=False,
                     action="store_true",
                     help="emit biblatex fields")

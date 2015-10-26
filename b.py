@@ -543,6 +543,9 @@ class scrape_DOI(scrape_default):
         if 'author' in bib_dict:
             names = ''
             for name_dic in bib_dict['author']:
+                info("name_dic = '%s'" %name_dic)
+                if 'affiliation' in name_dic:
+                    del name_dic['affiliation']
                 joined_name = ' '.join(
                     [item for item in name_dic.values() if item])
                 info("joined_name = '%s'" %joined_name)

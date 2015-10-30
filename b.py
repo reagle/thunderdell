@@ -1201,6 +1201,11 @@ def do_console_annotation(biblio):
     info("console_annotations = '%s'" %(console_annotations))
     biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
     
+    # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
+    if 'c_web' in biblio and \
+        len(list(biblio[c] for c in fe.CSL_SHORTCUTS.values() if c in biblio)) > 1:
+        del biblio['c_web']
+
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
         print('logged: %s to' % get_tentative_ident(biblio)),

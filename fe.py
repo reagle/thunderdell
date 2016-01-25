@@ -1134,6 +1134,10 @@ def emit_results(entries, query, results_file):
                         locator = ', loc. ' + locator
                     elif entry['pagination'] == 'chapter':
                         locator = ', ch. ' + locator
+                    elif entry['pagination'] == 'verse':
+                        locator = ', vers. ' + locator
+                    elif entry['pagination'] == 'column':
+                        locator = ', col. ' + locator
                     else:
                         raise Exception("unknown locator '%s' for '%s' in '%s'" % (
                             entry['pagination'], entry['title'], 

@@ -172,7 +172,7 @@ SITE_CONTAINER_MAP = (
     ('salon.com', 'Salon',  'c_magazine'),
     ('slate.com', 'Slate',  'c_magazine'),
     ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
-    ('thegaurdian', 'The Guardian',  'c_newspaper'),
+    ('theguardian', 'The Guardian',  'c_newspaper'),
     ('verge.com', 'The Verge',  'c_newspaper'),
     ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
     ('wired.com', 'Wired',  'c_magazine'),

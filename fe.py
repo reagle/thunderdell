@@ -1005,6 +1005,7 @@ def emit_yaml_csl(entries):
                     emit_yaml_people(entry[field])
                     continue
                 if field in ('date', 'origdate', 'urldate'):
+                    if entry[field] == '0000': continue
                     if field == 'date':
                         season = entry['issue'] if 'issue' in entry else None
                         opts.outfd.write('  issued:\n')

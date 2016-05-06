@@ -252,6 +252,7 @@ BIBLATEX_WP_FIELD_MAP = OrderedDict([
         ('urldate',         'accessdate'),
         ('address',         'publication-place'), 
         ('booktitle',       'title'), 
+        ('origdate',        'orig-year'),
         ])
 
 WP_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 

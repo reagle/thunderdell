@@ -965,6 +965,10 @@ def log2console(biblio):
             if identifer.startswith('isbn'):
                 print('%s = %s' % (identifer, value[0]))
 
+    if args.publish: 
+        yasn_publish('', biblio['title'], biblio['url'], biblio['tags'])
+
+
 def blog_at_opencodex(biblio):
     '''
     Start at a blog entry at opencodex

@@ -178,6 +178,8 @@ SITE_CONTAINER_MAP = (
     ('wired.com', 'Wired',  'c_magazine'),
     ('wsj.com', 'The Wall Street Journal',  'c_newspaper'),
     ('washingtonpost.com', 'The Washington Post',  'c_newspaper'),
+    ('fourhourworkweek.com', '4-Hour Workweek',  'c_blog'),
+
     # ('', '',  'c_magazine'),
 )
 

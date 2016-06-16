@@ -1188,7 +1188,7 @@ def emit_results(entries, query, results_file):
         if __name__ == '__main__':
             return file_name
         else:                               # CGI
-            return 'file://' + file_name
+            return 'file://' + '/Users/' + file_name[6:] # change from /home/
 
     def print_entry(identifier, author, date, title, url, MM_mm_file, base_mm_file, close='</li>\n'):
 

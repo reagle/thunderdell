@@ -1218,7 +1218,7 @@ def do_console_annotation(biblio):
     return biblio, do_publish
         
 def yasn_publish(comment, title, url, tags):
-    "Send annotated URL to social networks, at this point: twitter via twidge."
+    "Send annotated URL to social networks, at this point: Twython"
     if tags and tags[0] != '#': # they've not yet been hashified
         tags = ' '.join(['#'+KEY_SHORTCUTS.get(tag, tag) 
             for tag in tags.strip().split(' ')])
@@ -1227,7 +1227,7 @@ def yasn_publish(comment, title, url, tags):
     comment = comment + comment_delim +  '"' + title +  '"'
 
     TWEET_LEN = 140
-    SHORTENER_LEN = 19 # twidge uses is.gd
+    SHORTENER_LEN = 23 # twitter uses t.co
     tweet_room = TWEET_LEN - len(comment) - len(tags) - len(url)
     shortened_room = 'n/a'
     info("length_comment = %s; tweet_room = %s" %(len(comment), tweet_room))
@@ -1239,8 +1239,19 @@ def yasn_publish(comment, title, url, tags):
             comment = comment[0:shortened_room-3] + '...'
     tweet = "%s %s %s" %(comment, url, tags)
     info('tweet length = %s' %len(tweet))
-    print("tweeted '%s' %s %s" %(tweet, tweet_room, shortened_room))
-    call(['twidge', 'update', '%s' %tweet]) # TODO: unicode
+
+    print("tweeting '%s' %s %s" %(tweet, tweet_room, shortened_room))
+    # https://twython.readthedocs.io/en/latest/index.html
+    from twython import Twython
+    # load keys, tokens, and secrets from twitter_token.py; simple string assignment
+    from twitter_tokens import CONSUMER_KEY, CONSUMER_SECRET, \
+            ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+    twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, 
+            ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    try:
+        twitter.update_status(status=tweet)
+    except TwythonError as e:
+        print e
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":

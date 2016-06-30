@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>

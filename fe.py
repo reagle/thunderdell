@@ -30,6 +30,7 @@ import sys
 import time
 from urllib import quote, unquote
 import unicodedata
+import webbrowser
 
 log_level = 100 # default
 critical = logging.critical
@@ -37,7 +38,6 @@ info = logging.info
 dbg = logging.debug
 
 HOME = os.path.expanduser('~')
-BROWSER = os.environ['BROWSER'] if 'BROWSER' in os.environ else None
 DEFAULT_MAPS = (HOME+'/joseph/readings.mm',)
 
 TMP_DIR = HOME + '/tmp/.fe/'
@@ -1478,9 +1478,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not opts.cgi:
-            command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            Popen(command, shell=True, 
-                  stdout=open(os.devnull, 'w'), stderr=STDOUT)
+            webbrowser.open('file://' + results_file_name.encode('utf-8'))
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1496,9 +1494,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not opts.cgi:
-            command = opts.browser.encode('utf-8') % results_file_name.encode('utf-8')
-            Popen(command, shell=True,
-                  stdout=open(os.devnull, 'w'), stderr=STDOUT)
+            webbrowser.open('file://' + results_file_name.encode('utf-8'))
     else:
         output(entries)
     return
@@ -1611,7 +1607,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=log_level, format = "%(levelno)s %(funcName).5s: %(message)s")
     
     opts.cgi = False
-    opts.browser = BROWSER + " '%s'"
     opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     if len(files) == 0:     # Default file

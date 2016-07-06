@@ -269,4 +269,4 @@ if __name__ == "__main__":
             continue
 
         check(text, fdo)
-        subprocess.call([HOME+'/bin/freemind/freemind.sh', fileOut])
+        subprocess.call(['open', '-a', 'Freemind.app', fileOut])

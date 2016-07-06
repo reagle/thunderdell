@@ -44,7 +44,7 @@ TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
-from lxml.etree import parse, Element, SubElement, ElementTree
+from lxml.etree import parse, Element, SubElement, ElementTree, tostring
 useLXML = True
 
 #################################################################
@@ -448,7 +448,7 @@ def get_ident(entry, entries, delim=u""):
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
-    info("ident = %s '%s'" %(type(ident), ident))
+    info("ident = %s '%s' in %s" %(type(ident), ident, entry['_mm_file']))
     ident = ident.replace('@', '') # '@' is citation designator, so just remove
     return unicode(ident)
 

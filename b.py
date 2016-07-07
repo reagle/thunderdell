@@ -1223,7 +1223,7 @@ def yasn_publish(comment, title, url, tags):
     "Send annotated URL to social networks, at this point: Twython"
     if tags and tags[0] != '#': # they've not yet been hashified
         tags = ' '.join(['#'+KEY_SHORTCUTS.get(tag, tag) 
-            for tag in tags.strip().split(' ')])
+                        for tag in tags.strip().split(' ')])
     comment, title, url, tags = [v.strip() for v in [comment, title, url, tags]]
     comment_delim = ": " if comment else ""
     comment = comment + comment_delim +  '"' + title +  '"'

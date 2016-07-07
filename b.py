@@ -1151,7 +1151,9 @@ def do_console_annotation(biblio):
         return fe.get_ident(
             { 'author' : fe.parse_names(biblio['author']), 
             'title' : biblio['title'],
-            'year' : biblio['date'][0:4]}, {})
+            'year' : biblio['date'][0:4], 
+            '_mm_file' : 'CONSOLE' }, {}
+        )
 
     def print_console_msg():
         print('''\tHELP: Enter annotations, excerpt is default\n''' 

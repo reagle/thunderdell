@@ -17,6 +17,14 @@ import os
 import requests # http://docs.python-requests.org/en/latest/
 import sys
 
+# With homebrew python I get a InsecureRequestWarning warning.
+# I done this but it doesn't help.
+#   https://urllib3.readthedocs.io/en/latest/advanced-usage.html#certificate-validation-and-mac-os-x
+# So I disabled
+#   http://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 HOMEDIR = os.path.expanduser('~')
 
 log = logging.getLogger("web_little")

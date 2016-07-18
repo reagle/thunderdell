@@ -17,14 +17,6 @@ import os
 import requests # http://docs.python-requests.org/en/latest/
 import sys
 
-# With homebrew python I get a InsecureRequestWarning warning.
-# I done this but it doesn't help.
-#   https://urllib3.readthedocs.io/en/latest/advanced-usage.html#certificate-validation-and-mac-os-x
-# So I disabled
-#   http://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 HOMEDIR = os.path.expanduser('~')
 
 log = logging.getLogger("web_little")
@@ -75,7 +67,7 @@ def get_HTML_content(url, referer='',
     '''
     
     agent_headers = {"User-Agent" : "Thunderdell/BusySponge"}
-    r = requests.get(url, headers=agent_headers)
+    r = requests.get(url, headers=agent_headers, verify=True)
     info("r.headers['content-type'] = %s" % r.headers['content-type'])
     if 'html' in r.headers['content-type']:
         info("r       encoding = '%s'" %(r.encoding))
@@ -100,7 +92,7 @@ def get_HTML(url, referer='',
     '''Return [HTML content, response] of a given URL.'''
     
     agent_headers = {"User-Agent" : "Thunderdell/BusySponge"}
-    r = requests.get(url, headers=agent_headers, verify=False)
+    r = requests.get(url, headers=agent_headers, verify=True)
     info("r.headers['content-type'] = %s" % r.headers['content-type'])
     if 'html' in r.headers['content-type']:
         HTML_bytes = r.content        

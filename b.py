@@ -948,7 +948,7 @@ def log2console(biblio):
         tags_expanded = ''
         for tag in tags:
             tag = KEY_SHORTCUTS.get(tag, tag)
-            tags_expanded += tag + ','
+            tags_expanded += tag + ' '
         biblio['tags'] = tags_expanded[0:-1] # removes last comma
     bib_in_single_line = ''
     for token in TOKENS:

@@ -1244,7 +1244,7 @@ def yasn_publish(comment, title, url, tags):
 
     print("tweeting '%s' %s %s" %(tweet, tweet_room, shortened_room))
     # https://twython.readthedocs.io/en/latest/index.html
-    from twython import Twython
+    from twython import Twython, TwythonError
     # load keys, tokens, and secrets from twitter_token.py; simple string assignment
     from twitter_tokens import CONSUMER_KEY, CONSUMER_SECRET, \
             ACCESS_TOKEN, ACCESS_TOKEN_SECRET

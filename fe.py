@@ -805,7 +805,7 @@ def bibformat_title(title):
 #################################################################
 
 EXCLUDE_URLS = ('search?q=cache', 'proquest', 'books.google', 
-    'amazon.com/reader', 'amazon.com/gp/reader') 
+    'amazon.com') 
 ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org', 'salon.com', 
     'slate.com')
 

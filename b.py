@@ -270,19 +270,21 @@ class scrape_default(object):
                 if xpath_result:
                     info("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
                     author = string.capwords(''.join(xpath_result).strip())
+                    if author.lower().startswith('by '):
+                        author = author[3:]
                     info("author = '%s'; xpath = '%s'" %(author, path))
                     if author != '':
                         return author
                     else:
                         continue
                     
-        AUTHOR_REGEXS = (
-            "by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
-            "^\W*(?:posted )?by[:]? (.*)",
-            "\d\d\d\d.{,6}? by ([a-z ]*)",
-            "\s{3,}by[:]? (.*)",
-        )
         if self.text:
+            AUTHOR_REGEXS = (
+                "by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
+                "^\W*(?:posted )?by[:]? (.*)",
+                "\d\d\d\d.{,6}? by ([a-z ]*)",
+                "\s{3,}by[:]? (.*)",
+            )
             #info(self.text)
             info('checking regexs')
             for regex in AUTHOR_REGEXS:
@@ -1224,6 +1226,8 @@ def yasn_publish(comment, title, url, tags):
     if tags and tags[0] != '#': # they've not yet been hashified
         tags = ' '.join(['#'+KEY_SHORTCUTS.get(tag, tag) 
                         for tag in tags.strip().split(' ')])
+    else:
+        tags = ''
     comment, title, url, tags = [v.strip() for v in [comment, title, url, tags]]
     comment_delim = ": " if comment else ""
     comment = comment + comment_delim +  '"' + title +  '"'

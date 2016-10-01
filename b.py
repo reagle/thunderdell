@@ -743,7 +743,7 @@ class scrape_twitter(scrape_default):
     def get_title(self):
 
         authororg_title = self.HTML_p.xpath("//title/text()")[0]
-        author_org, title = authororg_title.split(':', 1)
+        author_org, title = authororg_title.split('|', 1)
         #author = author_org.split('/', 1)[1]
         return title.strip()
 

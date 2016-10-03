@@ -259,8 +259,9 @@ class scrape_default(object):
             '''//*[@itemprop='author']//text()''', # engadget
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
+            '''(//span[@class='dynamic-display_name-user-1 '])[1]/text()''', # tynan w/ bogus space
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
-            '''//*[1][contains(@class, 'byline')]//text()''', # first of many
+            '''//*[1][contains(@class, 'byline')][1]//text()''', # first of many
         )
         if self.HTML_p is not None:
             info('checking author xpaths')

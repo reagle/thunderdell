@@ -259,11 +259,11 @@ class scrape_default(object):
             '''//*[@itemprop='author']//text()''', # engadget
             '''//*[contains(@class,'contributor')]/text()''',
             '''//span[@class='name']/text()''',
-            '''//*[1][contains(@class, 'byline')]//text()''', # first of many
             '''//a[contains(@href, 'cm_cr_hreview_mr')]/text()''', # amazon
+            '''//*[1][contains(@class, 'byline')]//text()''', # first of many
         )
         if self.HTML_p is not None:
-            info('checking xpaths')
+            info('checking author xpaths')
             for path in AUTHOR_XPATHS:
                 info("trying = '%s'" % path)
                 xpath_result = self.HTML_p.xpath(path)
@@ -313,6 +313,23 @@ class scrape_default(object):
 
         from dateutil.parser import parse
 
+        DATE_XPATHS = (
+        '''//li/span[@class="byline_label"]/following-sibling::span/@title''',# tynan.com
+        )
+        if self.HTML_p is not None:
+            info('checking date xpaths')
+            for path in DATE_XPATHS:
+                info("trying = '%s'" % path)
+                xpath_result = self.HTML_p.xpath(path)
+                if xpath_result:
+                    info("xpath_result = '%s'; xpath = '%s'" %(xpath_result, path))
+                    date = parse(xpath_result[0]).strftime("%Y%m%d")
+                    info("date = '%s'; xpath = '%s'" %(date, path))
+                    if date != '':
+                        return date
+                    else:
+                        continue
+
         date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
@@ -322,6 +339,9 @@ class scrape_default(object):
             date = time.strftime('%Y%m%d', NOW)
             info("making date NOW = %s" % date)
             return date
+
+        # '''//li/span[@class="byline_label"]/following-sibling::span/@title''',# tynan.com
+
 
     def split_title_org(self):
         '''Separate the title by a delimiter and test if latter half is the

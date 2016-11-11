@@ -278,12 +278,14 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS + [
 ## so I include it here and also include it in the note in emit_biblatex.
 #BIBTEX_FIELDS.append('url')
 
-#HTML class corresponding to Freemind color
-CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
-    'cite': '#ff33b8', 'author': '#338800',
-    'quote': '#166799', 'paraphrase': '#8b12d6',
-    'default': '#000000', None: None}
-CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
+# #HTML class corresponding to Freemind color
+# CL_CO = {
+#     'author': '#338800', 'title': '#090f6b', 'cite': '#ff33b8', 
+#     'annotation': '#999999', 'quote': '#166799', 'paraphrase': '#8b12d6',
+#     'default': '#000000', None: None
+#         }
+# CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
+
 
 #################################################################
 # Utility functions
@@ -1113,8 +1115,8 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry):
         """Move the locator number to the end of the text with the Bibtex key"""
-        color, text = node.get('COLOR','#000000'), node.get('TEXT')
-        prefix = '&gt; ' if color == CL_CO['quote'] else ''
+        style_ref, text = node.get('STYLE_REF','default'), node.get('TEXT')
+        prefix = '&gt; ' if style_ref == 'quote' else ''
         if len(text) < 50: # don't reverse short texts
             cite = ''
         else:
@@ -1158,7 +1160,7 @@ def emit_results(entries, query, results_file):
             hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
 
         results_file.write('    <li class="%s">%s%s%s</li>\n' %
-            (CO_CL[color], prefix, hypertext, cite))
+            (style_ref, prefix, hypertext, cite))
 
     def pretty_print(node, entry=None, spaces='          '):
         """Pretty print a node and descendants into indented HTML"""
@@ -1170,7 +1172,7 @@ def emit_results(entries, query, results_file):
         if len(node) > 0:     
             results_file.write('%s<ul class="container">\n' % spaces)
             for child in node:
-                if CO_CL[child.get('COLOR')] == 'author': # title bug fixed? 110323
+                if child.get('STYLE_REF') == 'author': # title bug fixed? 110323
                     break
                 pretty_print(child, entry, spaces)
             results_file.write('%s</ul>%s\n' % (spaces, spaces))
@@ -1362,7 +1364,8 @@ def walk_freemind(node, mm_file, entries, links):
     def get_author_node(node):
         """ Return the nearest author node ancestor """
         ancestor = get_parent(node)
-        while ancestor.get('COLOR') != CL_CO['author']:
+        dbg(node.get('TEXT'))
+        while ancestor.get('STYLE_REF') != 'author':
             ancestor = get_parent(ancestor)
         return ancestor
 
@@ -1370,11 +1373,11 @@ def walk_freemind(node, mm_file, entries, links):
         if 'LINK' in d.attrib:                  # found a local reference link
             if not d.get('LINK').startswith('http:') and d.get('LINK').endswith('.mm'):
                 links.append(d.get('LINK'))
-        if 'COLOR' in d.attrib: # don't pick up structure nodes and my comments
-            if d.get('COLOR') == CL_CO['author']:
+        if 'STYLE_REF' in d.attrib: # don't pick up structure nodes and my comments
+            if d.get('STYLE_REF') == 'author':
                 # pass author as it will be fetched upon new title
                 pass
-            elif d.get('COLOR') == CL_CO['title']:
+            elif d.get('STYLE_REF') == 'title':
 
                 commit_entry(entry,entries)     # new entry, so store previous
                 entry = {}                      # and create new one
@@ -1397,9 +1400,9 @@ def walk_freemind(node, mm_file, entries, links):
                 if 'LINK' in d.attrib:
                     entry['url'] = d.get('LINK')
             else:
-                if d.get('COLOR') == CL_CO['cite']:
+                if d.get('STYLE_REF') == 'cite':
                     entry['cite'] = d.get('TEXT')
-                elif d.get('COLOR') == CL_CO['annotation']:
+                elif d.get('STYLE_REF') == 'annotation':
                     entry['annotation'] = d.get('TEXT').strip()
                 node_highlighted = query_highlight(d, opts.query_c)
                 if node_highlighted is not None:

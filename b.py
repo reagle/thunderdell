@@ -764,8 +764,10 @@ class scrape_twitter(scrape_default):
     def get_title(self):
 
         authororg_title = self.HTML_p.xpath("//title/text()")[0]
-        author_org, title = authororg_title.split('|', 1)
-        #author = author_org.split('/', 1)[1]
+        info("authororg_title = %s" %(authororg_title))
+        author_org, title = authororg_title.split(':', 1)
+        # author_org, title = authororg_title.split('|', 1)
+        # author = author_org.split('/', 1)[1]
         return title.strip()
 
     def get_date(self):
@@ -941,7 +943,7 @@ def log2work(biblio):
     content = fd.read()
     fd.close()
 
-    insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ol>)')
+    insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ul>)')
 
     newcontent = insertion_regexp.sub(u'\\1 \n    %s\n' %
         log_item, content, re.DOTALL|re.IGNORECASE)

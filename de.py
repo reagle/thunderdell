@@ -12,7 +12,7 @@ import os
 HOME = os.path.expanduser('~')
 
 MINDMAP_PREAMBLE = '''<map version="freeplane 1.5.9">
-    <node TEXT="test" FOLDED="false" ID="ID_327818409" STYLE="oval">
+    <node TEXT="reading" FOLDED="false" ID="ID_327818409" STYLE="oval">
         <font SIZE="18"/>
         <hook NAME="MapStyle">
             <map_styles>

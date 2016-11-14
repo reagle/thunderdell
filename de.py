@@ -9,14 +9,33 @@
 """extract a MM from a dictated text file using particular conventions"""
 
 import os
-
 HOME = os.path.expanduser('~')
 
-CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
-    'cite': '#ff33b8', 'author': '#338800',
-    'quote': '#166799', 'paraphrase': '#8b12d6',
-    'default': '#000000', None: None}
-CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
+MINDMAP_PREAMBLE = '''<map version="freeplane 1.5.9">
+    <node TEXT="test" FOLDED="false" ID="ID_327818409" STYLE="oval">
+        <font SIZE="18"/>
+        <hook NAME="MapStyle">
+            <map_styles>
+                <stylenode LOCALIZED_TEXT="styles.root_node" STYLE="oval" UNIFORM_SHAPE="true" VGAP_QUANTITY="24.0 pt">
+                    <font SIZE="24"/>
+                    <stylenode LOCALIZED_TEXT="styles.user-defined" POSITION="right" STYLE="bubble">
+                        <stylenode TEXT="author" COLOR="#338800"/>
+                        <stylenode TEXT="title" COLOR="#090f6b"/>
+                        <stylenode TEXT="cite" COLOR="#ff33b8"/>
+                        <stylenode TEXT="annotation" COLOR="#999999"/>
+                        <stylenode TEXT="quote" COLOR="#166799"/>
+                        <stylenode TEXT="paraphrase" COLOR="#8b12d6"/>
+                    </stylenode>
+                </stylenode>
+            </map_styles>
+        </hook>
+'''
+
+# CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
+#     'cite': '#ff33b8', 'author': '#338800',
+#     'quote': '#166799', 'paraphrase': '#8b12d6',
+#     'default': '#000000', None: None}
+# CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
 
 def clean(text):
     '''clean and encode text'''
@@ -81,14 +100,14 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if 'author' not in entry: entry['author'] = 'Unknown'
             if 'title' not in entry: entry['title'] = 'Untitled'
 
-            fdo.write(u"""<node COLOR="%s" TEXT="%s" POSITION="RIGHT">\n"""
-                    % (CL_CO['author'], clean(entry['author'].title())))
+            fdo.write(u"""<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
+                    % ('author', clean(entry['author'].title())))
             if 'url' in entry:
-                fdo.write(u"""  <node COLOR="%s" LINK="%s" TEXT="%s">\n"""
-                    % (CL_CO['title'], clean(entry['url']), clean(entry['title'])))
+                fdo.write(u"""  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
+                    % ('title', clean(entry['url']), clean(entry['title'])))
             else:
-                fdo.write(u"""  <node COLOR="%s" TEXT="%s">\n"""
-                    % (CL_CO['title'], clean(entry['title'])))
+                fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s">\n"""
+                    % ('title', clean(entry['title'])))
 
             #print '***', BIB_FIELDS
             for token, value in sorted(entry.items()):
@@ -105,13 +124,13 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     citation = citation + citation_add
             if citation != "": clean(citation)
             citation += " r=%s" % get_date()
-            fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
-                % (CL_CO['cite'], clean(citation)))
+            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ('cite', clean(citation)))
 
         elif re.match('summary\.(.*)', line, re.I):
             matches = re.match('summary\.(.*)',line, re.I)
-            fdo.write(u"""  <node COLOR="%s" TEXT="%s"/>\n"""
-                % (CL_CO['annotation'], clean(matches.groups()[0])))
+            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ('annotation', clean(matches.groups()[0])))
 
         elif re.match('part.*', line, re.I):
             if in_part:
@@ -126,8 +145,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     in_subsection = False
                 fdo.write(u"""  </node>\n""")            # close part
                 in_part = False
-            fdo.write(u"""  <node COLOR="%s" TEXT="%s">\n""" % (
-                    CL_CO['paraphrase'], clean(line)))
+            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s">\n""" % (
+                    'paraphrase', clean(line)))
             in_part = True
 
         elif re.match('chapter.*', line, re.I):
@@ -140,8 +159,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     in_subsection = False
                 fdo.write(u"""    </node>\n""")            # close chapter
                 in_chapter = False
-            fdo.write(u"""    <node COLOR="%s" TEXT="%s">\n""" % (
-                    CL_CO['paraphrase'], clean(line)))
+            fdo.write(u"""    <node STYLE_REF="%s" TEXT="%s">\n""" % (
+                    'paraphrase', clean(line)))
             in_chapter = True
 
         elif re.match('section.*', line, re.I):
@@ -151,24 +170,24 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if in_section:
                 fdo.write(u"""    </node>\n""")
                 in_section = False
-            fdo.write(u"""      <node COLOR="%s" TEXT="%s">\n""" % (
-                    CL_CO['paraphrase'], clean(line[9:])))
+            fdo.write(u"""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
+                    'paraphrase', clean(line[9:])))
             in_section = True
 
         elif re.match('subsection.*', line, re.I):
             if in_subsection:
                 fdo.write(u"""    </node>\n""")
                 in_subsection = False
-            fdo.write(u"""      <node COLOR="%s" TEXT="%s">\n""" % (
-                    CL_CO['paraphrase'], clean(line[12:])))
+            fdo.write(u"""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
+                    'paraphrase', clean(line[12:])))
             in_subsection = True
 
         elif re.match('(--.*)', line, re.I):
-            fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
-                % (CL_CO['default'], clean(line)))
+            fdo.write(u"""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ('default', clean(line)))
 
         else:
-            node_color = CL_CO['paraphrase']
+            node_color = 'paraphrase'
             line_text = line
             # print(line)
             line_no = ''
@@ -187,13 +206,13 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 line_text = matches.group(3).strip()
 
             if line_text.startswith('excerpt.'):
-                node_color = CL_CO['quote']
+                node_color = 'quote'
                 line_text = line_text[9:]
             if line_text.strip().endswith('excerpt.'): # convenient for annotating
-                node_color = CL_CO['quote']
+                node_color = 'quote'
                 line_text = line_text[0:-9]
 
-            fdo.write(u"""          <node COLOR="%s" TEXT="%s"/>\n"""
+            fdo.write(u"""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % (node_color, clean(' '.join((line_no, line_text)))))
 
 
@@ -211,7 +230,7 @@ def check(text, fdo):
     in_subsection = False
     line_number = 0
 
-    fdo.write(u"""<map version="0.7.1">\n<node TEXT="Readings">\n""")
+    fdo.write(u"""%s\n<node TEXT="Readings">\n""" %MINDMAP_PREAMBLE)
 
     for line in text.split('\n'):
         line = line.strip()
@@ -227,8 +246,9 @@ def check(text, fdo):
     if in_section: fdo.write(u"""</node>""") # close the last section
     if in_chapter: fdo.write(u"""</node>""") # close the last chapter
     if in_part: fdo.write(u"""</node>""") # close the last part
-    fdo.write(u"""</node>\n</node>\n""")  # close the last entry
+    fdo.write(u"""</node>\n</node>\n</node>\n""")  # close the last entry
     fdo.write(u"""</node>\n</map>\n""")   # close the document
+
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":
@@ -269,4 +289,4 @@ if __name__ == "__main__":
             continue
 
         check(text, fdo)
-        subprocess.call(['open', '-a', 'Freemind.app', fileOut])
+        subprocess.call(['open', '-a', 'Freeplane.app', fileOut])

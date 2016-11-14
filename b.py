@@ -848,27 +848,27 @@ def log2mm(biblio):
         print("creating %s" % this_week)
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
-    author_node = SubElement(week_node, 'node', {'TEXT': author, 'COLOR': '#338800'})
-    title_node = SubElement(author_node, 'node', {'TEXT': title, 'COLOR': '#090f6b',
+    author_node = SubElement(week_node, 'node', {'TEXT': author, 'STYLE_REF': 'author'})
+    title_node = SubElement(author_node, 'node', {'TEXT': title, 'STYLE_REF': 'title',
         'LINK': permalink})
-    cite_node = SubElement(title_node, 'node', {'TEXT': citation, 'COLOR': '#ff33b8'})
+    cite_node = SubElement(title_node, 'node', {'TEXT': citation, 'STYLE_REF': 'cite'})
     if abstract:
-        abstract_node = SubElement(title_node, 'node', {'TEXT': abstract, 'COLOR': '#999999'})
+        abstract_node = SubElement(title_node, 'node', {'TEXT': abstract, 'STYLE_REF': 'annotation'})
     if excerpt:
         for exc in excerpt.split('\n\n'):
             if exc.startswith(', '):
-                attr_color = '#8b12d6' # paraphrase: purple
+                style_ref = 'paraphrase' 
                 exc = exc[2:]
             elif exc.startswith('. '):
-                attr_color = '#999999' # summary: gray 
+                style_ref = 'annotation'
                 exc = exc[2:]
             elif exc.startswith('-- '):
-                attr_color = '#000000' # note: black
+                style_ref = 'default' 
                 exc = exc[3:]
             else:
-                attr_color = '#166799' # blue excerpt
+                style_ref = 'quote' 
             excerpt_node = SubElement(title_node, 'node', {'TEXT': exc, 
-                'COLOR': attr_color})     
+                'STYLE_REF': style_ref})     
 
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 

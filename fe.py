@@ -1117,7 +1117,8 @@ def emit_results(entries, query, results_file):
         """Move the locator number to the end of the text with the Bibtex key"""
         style_ref, text = node.get('STYLE_REF','default'), node.get('TEXT')
         prefix = '&gt; ' if style_ref == 'quote' else ''
-        if len(text) < 50: # don't reverse short texts
+        # don't reverse short texts and certain style refs
+        if len(text) < 50 or style_ref in ['author', 'title', 'cite'] : 
             cite = ''
         else:
             locator = ''

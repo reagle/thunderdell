@@ -873,7 +873,7 @@ def log2mm(biblio):
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 
     if args.publish: 
-        yasn_publish('', title, permalink, tags)
+        yasn_publish(abstract, title, permalink, tags)
 
 
 def log2nifty(biblio):
@@ -993,7 +993,7 @@ def log2console(biblio):
                 print('%s = %s' % (identifer, value[0]))
 
     if args.publish: 
-        yasn_publish('', biblio['title'], biblio['url'], biblio['tags'])
+        yasn_publish(biblio['comment'], biblio['title'], biblio['url'], biblio['tags'])
 
 
 def blog_at_opencodex(biblio):
@@ -1246,12 +1246,14 @@ def do_console_annotation(biblio):
         
 def yasn_publish(comment, title, url, tags):
     "Send annotated URL to social networks, at this point: Twython"
+    info("comment = %s, title = %s, url = %s, tags = %s" %(comment, title, url, tags))
     if tags and tags[0] != '#': # they've not yet been hashified
         tags = ' '.join(['#'+KEY_SHORTCUTS.get(tag, tag) 
                         for tag in tags.strip().split(' ')])
     else:
         tags = ''
     comment, title, url, tags = [v.strip() for v in [comment, title, url, tags]]
+    info("comment = %s, title = %s, url = %s, tags = %s" %(comment, title, url, tags))
     comment_delim = ": " if comment else ""
     comment = comment + comment_delim +  '"' + title +  '"'
 

@@ -14,6 +14,9 @@
 
 #20090519: bibformat_title and pull_citation each use about ~7%
 #20120514: biblatex/biber doesn't accept BCE/negative, can use year
+#20161231: write yamlformat_title() to protect case of mixed case nouns like iKettle
+#			https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+#           '''[a-z]+[A-Z]\S'''
 
 from cgi import escape, parse_qs
 import codecs
@@ -933,8 +936,8 @@ def emit_yaml_csl(entries):
     #import yaml
     
     def esc_yaml(s):
-        if s: # faster to just quote than testing for YAML_INDICATORS
-            s = s.replace('"', r'\"')
+        if s: # faster to just quote than testing for tokens
+            s = s.replace('"', r"\'")
             s = s.replace("#", r"\\#") # pandoc md escaping
             s = s.replace("@", r"\\@") 
             s = '"' + s + '"'

@@ -1045,6 +1045,8 @@ def emit_yaml_csl(entries):
                     opts.outfd.write('  container-title: "Proceedings of %s"\n'
                         %entry['eventtitle'])
                     # opts.outfd.write('  eventtitle: "%s"\n' %entry['eventtitle'])
+                if field == 'c_blog' and entry[field] == 'Blog':
+                    continue
                       
                 info('field = %s' %(field))
                 #info('CONTAINERS = %s' %(CONTAINERS))

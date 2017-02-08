@@ -75,6 +75,7 @@ BIBLATEX_SHORTCUTS = OrderedDict([
         ('e','editor'),
         ('ed','edition'),
         ('et','eventtitle'),
+        ('g','genre'),
         ('hp','howpublished'),
         ('in','institution'),
         ('i','isbn'),
@@ -1654,13 +1655,18 @@ if __name__ == '__main__':
         print("                           _BIBTEX_TYPES_ (deprecated)")
         print("                   http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(BIBLATEX_TYPES)
+        print("                             _EXAMPLES_\n")
+        print("         d=2013 in=MIT t=mastersthesis")
+        print("         d=2013 in=MIT t=phdthesis")
+
         print("                            _CSL_TYPES_ (preferred)\n")
         print("                   http://aurimasv.github.io/z2csl/typeMap.xml\n")
         pretty_tabulate_list(BIB_TYPES)
         print("                             _EXAMPLES_\n")
-        print("         d=2013 in=MIT t=mastersthesis")
-        print("         d=2013 in=MIT t=phdthesis")
         print("         d=2014 p=ACM et=Conference on FOO ve=Boston")
+        print("         d=2013 in=MIT t=thesis g=Undergraduate thesis")
+        print("         d=2013 in=MIT t=thesis g=Masters thesis")
+        print("         d=2013 in=MIT t=thesis g=PhD dissertation")
         print("\n\n")
         print("                               _FIELD_SHORTCUTS_\n")
         pretty_tabulate_dict(BIB_SHORTCUTS)

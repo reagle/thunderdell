@@ -282,14 +282,6 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS + [
 ## so I include it here and also include it in the note in emit_biblatex.
 #BIBTEX_FIELDS.append('url')
 
-# #HTML class corresponding to Freemind color
-# CL_CO = {
-#     'author': '#338800', 'title': '#090f6b', 'cite': '#ff33b8', 
-#     'annotation': '#999999', 'quote': '#166799', 'paraphrase': '#8b12d6',
-#     'default': '#000000', None: None
-#         }
-# CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
-
 
 #################################################################
 # Utility functions

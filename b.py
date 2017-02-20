@@ -1059,8 +1059,6 @@ def blog_at_goatee(biblio):
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     url = biblio.get('url', None)
     filename = blog_title.lower()
-    info("blog_title = %s" % blog_title)
-    info("filename = %s" % filename)
         
     PHOTO_RE = re.compile('.*/photo/gallery/(\d\d\d\d/\d\d)' \
                 '/\d\d-\d\d\d\d-(.*)\.jpe?g')
@@ -1072,10 +1070,10 @@ def blog_at_goatee(biblio):
             blog_title = re.match(PHOTO_RE, url).group(2)
             filename = blog_title
             blog_title = blog_title.replace('-', ' ')
-    filename = filename.replace(' ', '-').replace("'", '') 
+    filename = filename.strip().replace(' ', '-').replace("'", '') 
+    filename = GOATEE_ROOT + '%s/%s%s-%s.md' % (this_year, this_month, this_day, filename)
     info("blog_title = %s" % blog_title)
     info("filename = %s" % filename)
-    filename = GOATEE_ROOT + '%s/%s%s-%s.md' % (this_year, this_month, this_day, filename)
     if exists(filename):
         print("\nfilename '%s' already exists'" % filename)
         sys.exit()

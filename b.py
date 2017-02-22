@@ -939,24 +939,23 @@ def log2work(biblio):
         (uid, date_token, hashtags, html_comment)
     info(log_item)
 
-    fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
-    content = fd.read()
-    fd.close()
+    plan_fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
+    plan_content = plan_fd.read()
+    plan_fd.close()
 
-    insertion_regexp = re.compile('(<h2>Done Work</h2>\s*<ul>)')
-
-    newcontent = insertion_regexp.sub(u'\\1 \n    %s\n' %
-        log_item, content, re.DOTALL|re.IGNORECASE)
-    if newcontent:
+    plan_tree = etree.fromstring(plan_content)
+    ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
+    if ul_found:
+        ul_found[0].insert(0, etree.XML(log_item))
+        new_content = etree.tostring(plan_tree, pretty_print=True)
         fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
-        fd.write(newcontent)
+        fd.write(new_content)
         fd.close()
     else:
-        print_usage("Sorry, output regexp subsitution failed.")
+        print_usage("Sorry, XML insertion failed.")
 
     if args.publish:
         yasn_publish(comment, title, url, hashtags)
-
 
 def log2console(biblio):
     '''

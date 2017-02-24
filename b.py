@@ -930,7 +930,7 @@ def log2work(biblio):
         hashtags = '#misc'
     info("hashtags = '%s'" %(hashtags))
     html_comment = comment + ' ' + '<a href="%s">%s</a>' % (escape_XML(url), 
-                                                            title)
+                                                            escape_XML(title))
 
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode('utf-8', 'replace')).hexdigest()
@@ -945,6 +945,7 @@ def log2work(biblio):
 
     plan_tree = etree.fromstring(plan_content)
     ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
+    info(ul_found[0])
     if ul_found:
         ul_found[0].insert(0, etree.XML(log_item))
         new_content = etree.tostring(plan_tree, pretty_print=True)

@@ -17,7 +17,7 @@ from os.path import abspath, exists, expanduser, splitext
 import re
 import sys
 
-HOME = os.path.expanduser('~')
+HOME = expanduser('~')
 
 log_level = 100 # default
 critical = logging.critical
@@ -31,7 +31,7 @@ def regexParse(text):
 
     entries = {}
     key_pat = re.compile('@\w+{(.*),')
-    value_pat = re.compile('\s+(\w+) = {(.*)},?')
+    value_pat = re.compile('\s+(\w+) ?= ?{(.*)},?')
     for line in text:
         key_match = key_pat.match(line)
         if key_match:

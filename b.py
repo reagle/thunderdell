@@ -27,6 +27,7 @@ from collections import Counter
 from datetime import datetime
 from dateutil.parser import parse
 import fe
+from io import StringIO, BytesIO
 import logging
 from lxml import etree
 from os.path import expanduser, exists # abspath, basename, splitext
@@ -943,7 +944,7 @@ def log2work(biblio):
     plan_content = plan_fd.read()
     plan_fd.close()
 
-    plan_tree = etree.fromstring(plan_content)
+    plan_tree   = etree.parse(StringIO(plan_content), etree.HTMLParser())
     ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
     info(ul_found[0])
     if ul_found:

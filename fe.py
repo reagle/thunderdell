@@ -932,7 +932,7 @@ def emit_yaml_csl(entries):
         if s: # faster to just quote than testing for tokens
             s = s.replace('"', r"\'")
             s = s.replace("#", r"\\#") # pandoc md escaping
-            s = s.replace("@", r"\\@") 
+            # s = s.replace("@", r"\@") # not needed? causing bugs; delete
             s = '"' + s + '"'
         return s
         

@@ -31,7 +31,8 @@ import string
 from subprocess import call, Popen, STDOUT
 import sys
 import time
-from urllib import quote, unquote
+import urllib
+import urlparse
 import unicodedata
 import webbrowser
 
@@ -931,7 +932,7 @@ def emit_yaml_csl(entries):
     def esc_yaml(s):
         if s: # faster to just quote than testing for tokens
             s = s.replace('"', r"\'")
-            s = s.replace("#", r"\\#") # pandoc md escaping
+            # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
             s = '"' + s + '"'
         return s
@@ -1042,17 +1043,16 @@ def emit_yaml_csl(entries):
                     continue
                       
                 info('field = %s' %(field))
-                #info('CONTAINERS = %s' %(CONTAINERS))
-                info(BIBLATEX_CSL_FIELD_MAP)
+                # info(BIBLATEX_CSL_FIELD_MAP)
                 if field in CONTAINERS:
                     field = 'container-title'
                 # # containers already in titlecase, so protect from csl:lowercase+titlecase
                 # if field == 'container-title':
                 #     value = "<span class='nocase'>%s</span>" % value 
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    info("field FROM =  %s" %(field))
+                    info("bib2csl field FROM =  %s" %(field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    info("field TO   = %s" %(field))
+                    info("bib2csl field TO   = %s" %(field))
                 opts.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
     opts.outfd.write('...\n')
 
@@ -1179,7 +1179,7 @@ def emit_results(entries, query, results_file):
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
         token = token.replace('<strong>','').replace('</strong>','')
-        token = quote(token.encode('utf-8')) # urllib won't accept unicode
+        token = urllib.quote(token.encode('utf-8')) # urllib won't accept unicode
         dbg("token = '%s' type = '%s'" %(token, type(token)))
         url_query = \
         escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
@@ -1667,8 +1667,8 @@ if __name__ == '__main__':
 
         sys.exit()
     if opts.query:
-        #u'Péña' == unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')
-        opts.query = unquote(opts.query).decode('utf-8')
+        #u'Péña' == urllib.unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')
+        opts.query = urllib.unquote(opts.query).decode('utf-8')
         opts.query_c = re.compile(re.escape(opts.query), re.IGNORECASE)
         output = emit_results
 

@@ -1193,8 +1193,8 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''@%s : au=%s ti=%s\n''' % (tentative_id, 
-                    biblio['author'], biblio['title'])),
+    print('''@%s : au=%s ti=%s d=%s\n''' % (tentative_id, biblio['author'], 
+    	biblio['title'], biblio['date'])),
     for key in biblio:
         if key.startswith('c_'):
             print("    %s=%s" %(fe.CSL_FIELDS[key], biblio[key]))

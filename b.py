@@ -859,6 +859,7 @@ def log2mm(biblio):
         abstract_node = SubElement(title_node, 'node', {'TEXT': abstract, 'STYLE_REF': 'annotation'})
     if excerpt:
         for exc in excerpt.split('\n\n'):
+            info("exc = %s" %(exc))
             if exc.startswith(', '):
                 style_ref = 'paraphrase' 
                 exc = exc[2:]
@@ -1231,7 +1232,7 @@ def do_console_annotation(biblio):
                     biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
         else:
             if line:
-                console_annotations += '\n\n' + line
+                console_annotations += '\n\n' + line.strip()
 
     info("biblio.get('excerpt', '') = '%s'" %(biblio.get('excerpt', '')))
     info("console_annotations = '%s'" %(console_annotations))

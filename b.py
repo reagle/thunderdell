@@ -1205,7 +1205,7 @@ def do_console_annotation(biblio):
     while True:
         try:
             line = raw_input('').decode(sys.stdin.encoding)
-            if line == '-p':
+            if line.strip() == '-p':
                 do_publish = True
             elif line == '?':
                 print_console_msg()

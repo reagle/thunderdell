@@ -30,11 +30,13 @@ import fe
 from io import StringIO, BytesIO
 import logging
 from lxml import etree
+import os
 from os.path import expanduser, exists # abspath, basename, splitext
 import re
 import string
 from subprocess import call, Popen 
 import sys
+import tempfile
 import time
 # personal Web utility module
 from web_little import get_HTML, get_text, unescape_XML, escape_XML 
@@ -1193,8 +1195,8 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''@%s : au=%s ti=%s\n''' % (tentative_id, 
-                    biblio['author'], biblio['title'])),
+    print('''@%s : au=%s ti=%s d=%s\n''' % (tentative_id, biblio['author'], 
+    	biblio['title'], biblio['date'])),
     for key in biblio:
         if key.startswith('c_'):
             print("    %s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
@@ -1202,7 +1204,29 @@ def do_console_annotation(biblio):
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     do_publish = args.publish
-    while True:
+
+    EDITOR = os.environ.get('EDITOR','nano')
+
+	initial_message = '''%s = %s''' @%s : au=%s ti=%s d=%s\n''' % (tentative_id, biblio['author'], 
+    	biblio['title'], biblio['date'])),
+    for key in biblio:
+        if key.startswith('c_'):
+            print("    %s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
+
+
+with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+  tf.write(initial_message)
+  tf.flush()
+  call([EDITOR, tf.name])
+
+  # do the parsing with `tf` using regular File operations.
+  # for instance:
+  tf.seek(0)
+  edited_message = tf.read()
+
+
+
+    while True: # else raw_input
         try:
             line = raw_input('').decode(sys.stdin.encoding)
             if line.strip() == '-p':

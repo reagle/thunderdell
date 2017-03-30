@@ -30,11 +30,13 @@ import fe
 from io import StringIO, BytesIO
 import logging
 from lxml import etree
+from os import environ
 from os.path import expanduser, exists # abspath, basename, splitext
 import re
 import string
 from subprocess import call, Popen 
 import sys
+import tempfile
 import time
 # personal Web utility module
 from web_little import get_HTML, get_text, unescape_XML, escape_XML 
@@ -45,8 +47,8 @@ critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
-from os import environ
-EDITOR = environ.get('EDITOR')
+EDITOR = environ.get('EDITOR','nano') 
+VISUAL = environ.get('VISUAL','nano')
 HOME = expanduser("~")
 
 # Expansions for common tags/activities
@@ -1046,7 +1048,7 @@ def blog_at_opencodex(biblio):
         fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
         fd.write('> %s\n' % biblio['excerpt'])
     fd.close()
-    Popen([EDITOR, filename])
+    Popen([VISUAL, filename])
     
 def blog_at_goatee(biblio):
     '''
@@ -1101,7 +1103,7 @@ def blog_at_goatee(biblio):
                 '''<p><a href="%s"><img alt="%s" class="view" src="%s"/></a></p>''' 
                 % (url, alt_text, url))
     fd.close()
-    Popen([EDITOR, filename])
+    Popen([VISUAL, filename])
     
 #######################################
 # Dispatchers
@@ -1193,42 +1195,44 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    print('''@%s : au=%s ti=%s d=%s\n''' % (tentative_id, biblio['author'], 
-    	biblio['title'], biblio['date'])),
+    initial_text = [('d=%s au=%s ti=%s' %(biblio['date'], 
+        biblio['author'], biblio['title']))]
     for key in biblio:
         if key.startswith('c_'):
-            print("    %s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
+            initial_text.append("%s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
+    initial_text = '\n'.join(initial_text)
 
-    EQUAL_PAT = re.compile(r'(\w{1,3})=')
     console_annotations = ''
     do_publish = args.publish
-    while True:
-        try:
-            line = raw_input('').decode(sys.stdin.encoding)
-            if line.strip() == '-p':
-                do_publish = True
-            elif line == '?':
-                print_console_msg()
-            elif '=' in line:
-                cites = EQUAL_PAT.split(line)[1:]
-                # 2 refs to an iterable are '*' unpacked and rezipped
-                cite_pairs = list(zip(*[iter(cites)] * 2))
-                for short, value in cite_pairs:
-                    if short == 'et': # 'et=cj' -> cj = 'Nature'
-                        biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
-                        del biblio['c_web']
-                    else:
-                        biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
-            else:
-                if line:
-                    console_annotations += '\n\n' + line
-        except EOFError:    # catch ctrl-D
-            break
-        except KeyError as e:
-            print("Bad type shorcut: %s", e)
+    
+    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+        tf.write(initial_text+'\n')
+        tf.flush()
+        call([EDITOR, tf.name])
+        tf.seek(0)
+        edited_text = tf.readlines()
+    print('@%s\n%s' %(tentative_id, edited_text))
+
+    EQUAL_PAT = re.compile(r'(\w{1,3})=')
+    for line in edited_text:
+        if line.strip() == '-p':
+            do_publish = True
+        elif line == '?':
             print_console_msg()
-        except Exception as e:             # trap all other errors
-            print("Bad input: %s: '%s'" %(e, line))
+        elif '=' in line:
+            cites = EQUAL_PAT.split(line)[1:]
+            # 2 refs to an iterable are '*' unpacked and rezipped
+            cite_pairs = list(zip(*[iter(cites)] * 2))
+            for short, value in cite_pairs:
+                if short == 'et': # 'et=cj' -> cj = 'Nature'
+                    biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
+                    del biblio['c_web']
+                else:
+                    biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
+        else:
+            if line:
+                console_annotations += '\n\n' + line
+
     info("biblio.get('excerpt', '') = '%s'" %(biblio.get('excerpt', '')))
     info("console_annotations = '%s'" %(console_annotations))
     biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations

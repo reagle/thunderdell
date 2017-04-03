@@ -36,7 +36,6 @@ import re
 import string
 from subprocess import call, Popen 
 import sys
-import tempfile
 import time
 # personal Web utility module
 from web_little import get_HTML, get_text, unescape_XML, escape_XML 
@@ -53,6 +52,11 @@ HOME = expanduser("~")
 
 # Expansions for common tags/activities
 
+    os.makedirs(TMP_DIR)
+if not os.path.isdir(TMP_DIR):
+TMP_DIR = HOME + '/tmp/.fe/'
+HOME = os.path.expanduser("~")
+VISUAL = os.environ.get('VISUAL','nano')
 GENERAL_KEY_SHORTCUTS = {
         'con': 'conflict',
         'exi': 'exit',
@@ -1205,15 +1209,23 @@ def do_console_annotation(biblio):
 
     console_annotations = ''
     do_publish = args.publish
-    
-    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
-        tf.write(initial_text.encode('utf-8'))
-        tf.flush()
-        call([EDITOR, tf.name])
-        tf.seek(0)
-        edited_text = tf.readlines()
-    print('@%s\n%s' %(tentative_id, edited_text))
 
+    annotation_file_name = TMP_DIR + 'b-annotation.txt'
+    if os.path.exists(annotation_file_name): os.remove(annotation_file_name)
+    try:
+        annotation_file = codecs.open(annotation_file_name, "w", "utf-8")
+    except IOError:
+        print(("There was an error writing to", annotation_file_name))
+        sys.exit()
+    annotation_file.write(initial_text)
+    annotation_file.close()
+    # annotation_file.flush()
+    call([EDITOR, annotation_file_name])
+    # annotation_file.seek(0)
+    annotation_file = codecs.open(annotation_file_name, "r", "utf-8")
+    edited_text = annotation_file.readlines()
+
+    print('@%s\n%s' %(tentative_id, edited_text))
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     for line in edited_text:
         if line.strip() == '-p':

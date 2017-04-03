@@ -1201,13 +1201,13 @@ def do_console_annotation(biblio):
     for key in biblio:
         if key.startswith('c_'):
             initial_text.append("%s=%s" %(fe.CSL_FIELDS[key], biblio[key]))
-    initial_text = '\n'.join(initial_text)
+    initial_text = '\n'.join(initial_text)+'\n'
 
     console_annotations = ''
     do_publish = args.publish
     
     with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
-        tf.write(initial_text+'\n')
+        tf.write(initial_text.encode('utf-8'))
         tf.flush()
         call([EDITOR, tf.name])
         tf.seek(0)

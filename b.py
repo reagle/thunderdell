@@ -30,8 +30,7 @@ import fe
 from io import StringIO, BytesIO
 import logging
 from lxml import etree
-from os import environ
-from os.path import expanduser, exists # abspath, basename, splitext
+import os
 import re
 import string
 from subprocess import call, Popen 
@@ -46,17 +45,15 @@ critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
-EDITOR = environ.get('EDITOR','nano') 
-VISUAL = environ.get('VISUAL','nano')
-HOME = expanduser("~")
+EDITOR = os.environ.get('EDITOR','nano') 
+VISUAL = os.environ.get('VISUAL','nano')
+HOME = os.path.expanduser("~")
+TMP_DIR = HOME + '/tmp/.fe/'
+if not os.path.isdir(TMP_DIR):
+    os.makedirs(TMP_DIR)
 
 # Expansions for common tags/activities
 
-    os.makedirs(TMP_DIR)
-if not os.path.isdir(TMP_DIR):
-TMP_DIR = HOME + '/tmp/.fe/'
-HOME = os.path.expanduser("~")
-VISUAL = os.environ.get('VISUAL','nano')
 GENERAL_KEY_SHORTCUTS = {
         'con': 'conflict',
         'exi': 'exit',

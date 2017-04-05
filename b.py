@@ -1227,10 +1227,15 @@ def do_console_annotation(biblio):
     print('@%s\n%s' %(tentative_id, edited_text))
     EQUAL_PAT = re.compile(r'(\w{1,3})=')
     for line in edited_text:
-        if line.strip() == '-p':
+        line = line.strip()
+        if line == '':
+            continue
+        elif line == '-p':
             do_publish = True
         elif line == '?':
             print_console_msg()
+        elif line.startswith('. '):
+            biblio['comment'] = line[2:].strip()
         elif '=' in line:
             cites = EQUAL_PAT.split(line)[1:]
             # 2 refs to an iterable are '*' unpacked and rezipped
@@ -1294,10 +1299,10 @@ def yasn_publish(comment, title, url, tags):
             ACCESS_TOKEN, ACCESS_TOKEN_SECRET
     twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, 
             ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    try:
-        twitter.update_status(status=tweet)
-    except TwythonError as e:
-        print e
+    # try:
+    #     twitter.update_status(status=tweet)
+    # except TwythonError as e:
+    #     print e
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":

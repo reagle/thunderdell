@@ -491,11 +491,13 @@ class scrape_ISBN(scrape_default):
                 biblio['permalink'] = json_bib['url']
             else:
                 biblio[key] = json_bib[key]
-        if 'title' not in json_bib:
-            biblio['title'] = 'UNKNOWN'
-        else:
+        if 'title' in json_bib:
             title = biblio['title'].replace(' : ', ': ')
             biblio['title'] = sentence_case(title)
+            if 'subtitle' in json_bib:
+                biblio['subtitle'] = sentence_case(subtitle)
+        else:
+            biblio['title'] = 'UNKNOWN'
         return biblio
     
     def get_author(self, bib_dict):

@@ -22,6 +22,47 @@ info = logging.info
 dbg = logging.debug
 
 def query(isbn):
+    """Query available ISBN services"""
+    try:
+        bib = oclc_query(isbn)
+    except:
+        bib = google_query(isbn)
+    return(bib)
+
+def google_query(isbn):
+    """Query the ISBN Web service; returns string"""
+    # https://books.google.com/books?isbn=0472069322
+
+    if isbn.startswith('isbn:'):
+        isbn = isbn[5:]
+    info("isbn = '%s'" %isbn)
+    URL = ('https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
+    info("isbn = '%s'" %isbn)
+    r = requests.get(URL.format(isbn=isbn))
+    returned_content_type = r.headers['content-type']
+    # info("r.content = '%s'" % r.content)
+    json_bib = {}
+    if returned_content_type.startswith('application/json'): 
+        json_result = json.loads(r.content)
+        info("json_result['totalItems'] = '%s'" %json_result['totalItems'])
+        if json_result['totalItems'] == 0:
+            raise Exception("Google unknown ISBN for %s" %isbn)
+        json_vol = json_result['items'][0]['volumeInfo']
+        for key, value in json_vol.items():
+            if key == 'authors':
+                json_bib['author'] = ', '.join(value)
+            if key == 'publishedDate':
+                json_bib['date'] = value.replace('-', '')
+            elif type(value) == str or type(value) == unicode:
+                json_bib[key] = value.strip()
+                info("  value = '%s'" %json_bib[key])
+        json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
+        return(json_bib)
+    else:
+        raise Exception("Google ISBN API did not return application/json")
+
+
+def oclc_query(isbn):
     """Query the ISBN Web service; returns string"""
     # https://books.google.com/books?isbn=0472069322
 
@@ -34,23 +75,24 @@ def query(isbn):
     returned_content_type = r.headers['content-type']
     info("r.content = '%s'" % r.content)
     if returned_content_type.startswith('text/plain'): # no 'application/json'
-        json_bib = json.loads(r.content)
-        info("json_bib['stat'] = '%s'" %json_bib['stat'])
-        if 'unknownId' in json_bib['stat']:
-            raise Exception("Unknown ISBN (Book too new?)")
-        if 'invalidId' in json_bib['stat']:
-            raise Exception("Invalid ISBN (Tyo?)")
-        json_bib = json_bib['list'][0]
-        for key, value in json_bib.items():
-     		if type(value) == str or type(value) == unicode:
-	            value = value.strip()
-	            value = value[0:-1] if value.endswith('.') else value
-	            info("  value = '%s'" %value)
-	            json_bib[key] = value
+        json_result = json.loads(r.content)
+        info("json_result['stat'] = '%s'" %json_result['stat'])
+        if 'unknownId' in json_result['stat']:
+            raise Exception("OCLC unknown ISBN (Book too new?)")
+        if 'invalidId' in json_result['stat']:
+            raise Exception("OCLC invalid ISBN (Typo?)")
+        json_vol = json_result['list'][0]
+        json_bib = {}
+        for key, value in json_vol.items():
+            if type(value) == str or type(value) == unicode:
+                value = value.strip()
+                value = value[0:-1] if value.endswith('.') else value
+                info("  value = '%s'" %value)
+                json_bib[key] = value
         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
         return(json_bib)
     else:
-        return False
+        raise Exception("OCLC ISBN API did not return text/plain")
 
 if '__main__' == __name__:
 

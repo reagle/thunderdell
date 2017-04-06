@@ -23,10 +23,11 @@ dbg = logging.debug
 
 def query(isbn):
     """Query available ISBN services"""
-    try:
-        bib = oclc_query(isbn)
-    except:
+    bib = oclc_query(isbn)
+    if not bib:
         bib = google_query(isbn)
+        if not bib:
+            raise Exception('ISBN queries failed')
     return(bib)
 
 def google_query(isbn):
@@ -46,7 +47,8 @@ def google_query(isbn):
         json_result = json.loads(r.content)
         info("json_result['totalItems'] = '%s'" %json_result['totalItems'])
         if json_result['totalItems'] == 0:
-            raise Exception("Google unknown ISBN for %s" %isbn)
+            print("Google unknown ISBN for %s" %isbn)
+            return False
         json_vol = json_result['items'][0]['volumeInfo']
         for key, value in json_vol.items():
             if key == 'authors':
@@ -59,7 +61,8 @@ def google_query(isbn):
         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
         return(json_bib)
     else:
-        raise Exception("Google ISBN API did not return application/json")
+        print("Google ISBN API did not return application/json")
+        return False
 
 
 def oclc_query(isbn):
@@ -78,9 +81,11 @@ def oclc_query(isbn):
         json_result = json.loads(r.content)
         info("json_result['stat'] = '%s'" %json_result['stat'])
         if 'unknownId' in json_result['stat']:
-            raise Exception("OCLC unknown ISBN (Book too new?)")
+            print("OCLC unknown ISBN %s" %isbn)
+            return False
         if 'invalidId' in json_result['stat']:
-            raise Exception("OCLC invalid ISBN (Typo?)")
+            print("OCLC invalid ISBN %s" %isbn)
+            return False
         json_vol = json_result['list'][0]
         json_bib = {}
         for key, value in json_vol.items():
@@ -92,7 +97,8 @@ def oclc_query(isbn):
         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
         return(json_bib)
     else:
-        raise Exception("OCLC ISBN API did not return text/plain")
+        print("OCLC ISBN API did not return text/plain")
+        return False
 
 if '__main__' == __name__:
 

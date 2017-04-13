@@ -1190,12 +1190,71 @@ def do_console_annotation(biblio):
             '''\t '. ' begins summary \n'''
             '''\t ', ' begins paraphrase \n'''
             '''\t '-- ' begins note \n'''
+            '''\t '# ' ignorable comment \n'''
             '''\t 'key=value' for metadata; e.g., \n'''
             '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
             '''\t\tEntry types (et) values must be typed as shortcut:''')
         for key, value in fe.CSL_SHORTCUTS.items():
             print('\t\t\t%s = %s' % (key, value))
         print('''\n\tEnd with CTRL-D.\n''')
+
+    def edit_annotation(initial_text, resume_edit = False):
+        '''Write initial bib info to a tmp file, edit and return'''
+
+        annotation_file_name = TMP_DIR + 'b-annotation.txt'
+        if not resume_edit:
+            if os.path.exists(annotation_file_name): 
+                os.remove(annotation_file_name)
+            annotation_file = codecs.open(annotation_file_name, "w", "utf-8")
+            annotation_file.write(initial_text)
+            annotation_file.close()
+        call([EDITOR, annotation_file_name])
+        annotation_file = codecs.open(annotation_file_name, "r", "utf-8")
+        return(annotation_file.readlines())
+
+    def parse_bib(biblio, edited_text):
+        '''Parse the bib assignments'''
+
+        console_annotations = ''
+        do_publish = args.publish
+        print('@%s\n' %(tentative_id))
+        EQUAL_PAT = re.compile(r'(\w{1,3})=')
+        for line in edited_text:
+            line = line.strip()
+            if line == '':
+                continue
+            if line.startswith('#'): # ignore comment line
+                continue
+            elif line == '-p':
+                do_publish = True
+            elif line == '?':
+                print_console_msg()
+            elif line.startswith('. '):
+                biblio['comment'] = line[2:].strip()
+            elif '=' in line:
+                cites = EQUAL_PAT.split(line)[1:]
+                # 2 refs to an iterable are '*' unpacked and rezipped
+                cite_pairs = list(zip(*[iter(cites)] * 2))
+                info("cite_pairs = %s" %cite_pairs)
+                for short, value in cite_pairs:
+                    if short == 'et': # 'et=cj' -> cj = 'Nature'
+                        biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
+                        del biblio['c_web']
+                    else:
+                        biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
+            else:
+                if line:
+                    console_annotations += '\n\n' + line.strip()
+
+        info("biblio.get('excerpt', '') = '%s'" %(biblio.get('excerpt', '')))
+        info("console_annotations = '%s'" %(console_annotations))
+        biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
+        
+        # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
+        if 'c_web' in biblio and \
+            len(list(biblio[c] for c in fe.CSL_SHORTCUTS.values() if c in biblio)) > 1:
+            del biblio['c_web']
+        return biblio, do_publish
 
     info("biblio['author'] = '%s'" %(biblio['author']))
     tentative_id = get_tentative_ident(biblio)
@@ -1208,58 +1267,14 @@ def do_console_annotation(biblio):
         initial_text.append('. ' + biblio['comment'])
     initial_text = '\n'.join(initial_text)+'\n'
 
-    console_annotations = ''
-    do_publish = args.publish
-
-    annotation_file_name = TMP_DIR + 'b-annotation.txt'
-    if os.path.exists(annotation_file_name): os.remove(annotation_file_name)
+    edited_text = edit_annotation(initial_text)
     try:
-        annotation_file = codecs.open(annotation_file_name, "w", "utf-8")
-    except IOError:
-        print(("There was an error writing to", annotation_file_name))
-        sys.exit()
-    annotation_file.write(initial_text)
-    annotation_file.close()
-    # annotation_file.flush()
-    call([EDITOR, annotation_file_name])
-    # annotation_file.seek(0)
-    annotation_file = codecs.open(annotation_file_name, "r", "utf-8")
-    edited_text = annotation_file.readlines()
-
-    print('@%s\n%s' %(tentative_id, edited_text))
-    EQUAL_PAT = re.compile(r'(\w{1,3})=')
-    for line in edited_text:
-        line = line.strip()
-        if line == '':
-            continue
-        elif line == '-p':
-            do_publish = True
-        elif line == '?':
-            print_console_msg()
-        elif line.startswith('. '):
-            biblio['comment'] = line[2:].strip()
-        elif '=' in line:
-            cites = EQUAL_PAT.split(line)[1:]
-            # 2 refs to an iterable are '*' unpacked and rezipped
-            cite_pairs = list(zip(*[iter(cites)] * 2))
-            for short, value in cite_pairs:
-                if short == 'et': # 'et=cj' -> cj = 'Nature'
-                    biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
-                    del biblio['c_web']
-                else:
-                    biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
-        else:
-            if line:
-                console_annotations += '\n\n' + line.strip()
-
-    info("biblio.get('excerpt', '') = '%s'" %(biblio.get('excerpt', '')))
-    info("console_annotations = '%s'" %(console_annotations))
-    biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
-    
-    # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
-    if 'c_web' in biblio and \
-        len(list(biblio[c] for c in fe.CSL_SHORTCUTS.values() if c in biblio)) > 1:
-        del biblio['c_web']
+        biblio, do_publish = parse_bib(biblio, edited_text)
+    except (TypeError, KeyError) as e:
+        print('Error parsing biblio assignments: %s\nTry again.' %e)
+        time.sleep(2)
+        edited_text = edit_annotation('', resume_edit = True)
+        biblio, do_publish = parse_bib(biblio, edited_text)
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:

@@ -666,7 +666,7 @@ class scrape_ENWP(scrape_default):
     def get_title(self):
         title = scrape_default.get_title(self)    # use super()?
         info("title = '%s'" %(title))
-        return title.replace(' - Wikipedia, the free encyclopedia','')
+        return title.replace(' - Wikipedia','')
 
     def get_permalink(self):
         if "oldid" not in self.url:

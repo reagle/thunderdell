@@ -14,9 +14,6 @@
 
 #20090519: bibformat_title and pull_citation each use about ~7%
 #20120514: biblatex/biber doesn't accept BCE/negative, can use year
-#20161231: write yamlformat_title() to protect case of mixed case nouns like iKettle
-#			https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
-#           '''[a-z]+[A-Z]\S'''
 
 from cgi import escape, parse_qs
 import codecs
@@ -970,7 +967,18 @@ def emit_yaml_csl(entries):
             opts.outfd.write('    day: %s\n' %day)
         if season:
             opts.outfd.write('    season: %s\n' %season)
-        
+
+#20161231: write yamlformat_title() to protect case of mixed case nouns like iKettle
+
+    def yaml_protect_case(title):
+        """Preserve/bracket proper names/nouns
+        https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+        >>> yaml_protect_case("The iKettle – a world off its rocker")
+        "The <span class='nocase'>iKettle</span> – a world off its rocker"
+        """
+        protect_pat = re.compile(r'\b([a-z]+[A-Z]\S+)\b')
+        return protect_pat.sub(r"<span class='nocase'>\1</span>", title)
+
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     opts.outfd.write('---\n')
@@ -1000,6 +1008,10 @@ def emit_yaml_csl(entries):
                     continue
 
                 # special format fields
+                if field == 'title':
+                    opts.outfd.write('  title: %s\n' 
+                        % yaml_protect_case(esc_yaml((value))))
+                    continue
                 if field in ('author', 'editor', 'translator'):
                     opts.outfd.write('  %s:\n' %field)
                     emit_yaml_people(entry[field])

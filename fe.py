@@ -968,8 +968,6 @@ def emit_yaml_csl(entries):
         if season:
             opts.outfd.write('    season: %s\n' %season)
 
-#20161231: write yamlformat_title() to protect case of mixed case nouns like iKettle
-
     def yaml_protect_case(title):
         """Preserve/bracket proper names/nouns
         https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md

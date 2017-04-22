@@ -7,7 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
-"""Extract a bibliography from a Freemind mindmap"""
+"""Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
 # *  use argparse; 
@@ -434,7 +434,7 @@ def get_ident(entry, entries, delim=u""):
     info("ident = %s '%s'" %(type(ident), ident))
     # remove chars not permitted in xml name/id attributes
     ident = ident.replace(':','').replace("'","")
-    # remove some punctuation and strong added by walk_freemind.query_highlight
+    # remove some punctuation and strong added by walk_freeplane.query_highlight
     ident = ident.replace('.','').replace('<strong>','').replace('</strong>','')
     info("ident = %s '%s'" %(type(ident), ident))
     ident = strip_accents(ident) # bibtex doesn't handle unicode in keys well
@@ -1331,8 +1331,8 @@ def purge_entries(entries):
             dbg("   deleting %s" % entry)
             del entries[entry]
 
-def walk_freemind(node, mm_file, entries, links):
-    """Walk the freemind XML tree and build:
+def walk_freeplane(node, mm_file, entries, links):
+    """Walk the freeplane XML tree and build:
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
         other nodes that match a query.
@@ -1468,7 +1468,7 @@ def build_bib(file_name, output):
                 dbg("    failed to parse %s" % mm_file)
                 continue
             dbg("    successfully parsed %s" % mm_file)
-            entries, links = walk_freemind(doc, mm_file, entries, links=[])
+            entries, links = walk_freeplane(doc, mm_file, entries, links=[])
             if opts.chase:
                 for link in links:
                     link = os.path.abspath(os.path.dirname(mm_file) + '/' +link)
@@ -1688,7 +1688,7 @@ if __name__ == '__main__':
 else:
     class opts:
         cgi = True              # called from cgi
-        chase = True            # Follow freemind links to other local maps
+        chase = True            # Follow freeplane links to other local maps
         long_url = False        # Use short 'oldid' URLs for mediawikis
         online_urls_only = False # Emit urls for @online only
         pretty = False          # Print as HTML with citation at end

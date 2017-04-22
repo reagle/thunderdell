@@ -1319,7 +1319,7 @@ def yasn_publish(comment, title, url, tags):
     try:
         twitter.update_status(status=tweet)
     except TwythonError as e:
-        print e
+        print(e)
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":

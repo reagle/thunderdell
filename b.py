@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -197,13 +197,13 @@ def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
     info("old %s s = '%s'" %(type(s), s))
     punctuation = { 
-        0x2018:u"'",    #apostrophe
-        0x2019:u"'", 
-        0x201C:u'"',    # quotation
-        0x201D:u'"' }
+        0x2018:"'",    #apostrophe
+        0x2019:"'", 
+        0x201C:'"',    # quotation
+        0x201D:'"' }
     if s:
         s = s.translate(punctuation)
-        s = s.replace(u"—", "--")
+        s = s.replace("—", "--")
         info("new %s s = '%s'" %(type(s), s))
     return s
 
@@ -216,7 +216,7 @@ class scrape_default(object):
     Default and base class scraper.
     """
     def __init__(self, url, comment):
-        print("Scraping default Web page;"),
+        print(("Scraping default Web page;"), end=' ')
         self.url = url
         self.comment = comment
         try:
@@ -358,8 +358,8 @@ class scrape_default(object):
         info("title_ori = '%s'" %(title_ori))
         org = org_ori = self.get_org()
         info("org_ori = '%s'" %(org_ori))
-        STRONG_DELIMTERS = re.compile(u'\s[\|—«»]\s')
-        WEAK_DELIMITERS = re.compile(u'[:;-]\s')
+        STRONG_DELIMTERS = re.compile('\s[\|—«»]\s')
+        WEAK_DELIMITERS = re.compile('[:;-]\s')
         if STRONG_DELIMTERS.search(title_ori):
             info("STRONG_DELIMTERS")
             parts = STRONG_DELIMTERS.split(title_ori)
@@ -396,9 +396,9 @@ class scrape_default(object):
     def get_title(self):
 
         title_regexps = (
-            ('http://lists.w3.org/.*', u'<!-- subject="(.*?)" -->'),
-            ('http://lists.kde.org/.*', ur"<title>MARC: msg '(.*?)'</title>"),
-            ('', ur'<title>(.*?)</title>')    # default: make sure last
+            ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
+            ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
+            ('', r'<title>(.*?)</title>')    # default: make sure last
         )
 
         for prefix, regexp in title_regexps:
@@ -416,7 +416,7 @@ class scrape_default(object):
         return title
 
     def get_org(self):
-        from urlparse import urlparse
+        from urllib.parse import urlparse
 
         org_chunks = urlparse(self.url)[1].split('.')
         if org_chunks[0] in ('www'):
@@ -449,7 +449,7 @@ class scrape_default(object):
 class scrape_ISBN(scrape_default):
     
     def __init__(self, url, comment):
-        print("Scraping ISBN;"),
+        print(("Scraping ISBN;"), end=' ')
         self.url = url
         self.comment = comment
 
@@ -466,7 +466,7 @@ class scrape_ISBN(scrape_default):
             'comment' : self.comment,
         }
         info("### json_bib.items()")
-        for key, value in json_bib.items():
+        for key, value in list(json_bib.items()):
             info("key = '%s'" %key)
             if key.startswith('subject'):
                 continue
@@ -527,7 +527,7 @@ class scrape_ISBN(scrape_default):
 class scrape_DOI(scrape_default):
     
     def __init__(self, url, comment):
-        print("Scraping DOI;"),
+        print(("Scraping DOI;"), end=' ')
         self.url = url
         self.comment = comment
 
@@ -542,7 +542,7 @@ class scrape_DOI(scrape_default):
             'excerpt' : '',
             'comment' : self.comment,
         }
-        for key, value in json_bib.items():
+        for key, value in list(json_bib.items()):
             info("key = '%s' value = '%s' type(value) = '%s'" %(
                 key, value, type(value)))
             if value in (None, [], ''):
@@ -578,7 +578,7 @@ class scrape_DOI(scrape_default):
                 if 'affiliation' in name_dic:
                     del name_dic['affiliation']
                 joined_name = ' '.join(
-                    [item for item in name_dic.values() if item])
+                    [item for item in list(name_dic.values()) if item])
                 info("joined_name = '%s'" %joined_name)
                 names = names + ', ' + joined_name
             names = names[2:] # remove first comma
@@ -604,7 +604,7 @@ class scrape_DOI(scrape_default):
         
 class scrape_MARC(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping MARC;"),
+        print(("Scraping MARC;"), end=' ')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -654,7 +654,7 @@ class scrape_MARC(scrape_default):
 
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping en.Wikipedia;"),
+        print(("Scraping en.Wikipedia;"), end=' ')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -697,7 +697,7 @@ class scrape_ENWP(scrape_default):
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
-        print("Scraping Wikimedia Meta;"),
+        print(("Scraping Wikimedia Meta;"), end=' ')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -727,7 +727,7 @@ class scrape_WMMeta(scrape_default):
 
 class scrape_geekfeminism_wiki(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping geekfeminism wiki"),
+        print(("Scraping geekfeminism wiki"), end=' ')
         scrape_default.__init__(self, url, comment)
 
     def get_biblio(self):
@@ -745,7 +745,7 @@ class scrape_geekfeminism_wiki(scrape_default):
     
 class scrape_twitter(scrape_default):
     def __init__(self, url, comment):
-        print("Scraping twitter"),
+        print(("Scraping twitter"), end=' ')
         scrape_default.__init__(self, url, comment)
 
     def get_biblio(self):
@@ -821,7 +821,7 @@ def log2mm(biblio):
         if token in biblio: # not needed in citation
             del biblio[token] 
     citation = ''
-    for key, value in biblio.items():
+    for key, value in list(biblio.items()):
         if key in fe.BIB_FIELDS:
             info("key = %s value = %s" %(key, value))
             citation += '%s=%s ' % (fe.BIB_FIELDS[key], value)
@@ -842,16 +842,16 @@ def log2mm(biblio):
             year_node = mm_year
             break
     else:
-        print("creating %s" % year)
+        print(("creating %s" % year))
         year_node = SubElement(mm_years, 'node', {'TEXT': this_year, 'POSITION': 'right'})
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
     for week_node in year_node:
         if week_node.get('TEXT') == this_week:
-            print("week %s" % this_week)
+            print(("week %s" % this_week))
             break
     else:
-        print("creating %s" % this_week)
+        print(("creating %s" % this_week))
         week_node = SubElement(year_node, 'node', {'TEXT': this_week, 'POSITION': 'right'})
 
     author_node = SubElement(week_node, 'node', {'TEXT': author, 'STYLE_REF': 'author'})
@@ -991,13 +991,13 @@ def log2console(biblio):
             if token == 'title':
                 biblio['title'] = ''
         if token in biblio and biblio[token]:
-            print('%s = %s' % (token, biblio[token]))
+            print(('%s = %s' % (token, biblio[token])))
             bib_in_single_line += '%s = %s ' % (token, biblio[token])
-    print('\n%s\n' %bib_in_single_line)
+    print(('\n%s\n' %bib_in_single_line))
     if 'identifiers' in biblio:
-        for identifer, value in biblio['identifiers'].items():
+        for identifer, value in list(biblio['identifiers'].items()):
             if identifer.startswith('isbn'):
-                print('%s = %s' % (identifer, value[0]))
+                print(('%s = %s' % (identifer, value[0])))
 
     if args.publish: 
         yasn_publish(biblio['comment'], biblio['title'], biblio['url'], biblio['tags'])
@@ -1040,7 +1040,7 @@ def blog_at_opencodex(biblio):
     filename = '%s%s/%s-%s.md' % (CODEX_ROOT, category, this_year, filename)
     info("filename = %s" %filename)
     if exists(filename):
-        print("\nfilename '%s' already exists'" % filename)
+        print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
     fd = codecs.open(filename, 'w', 'utf-8', 'replace')
     fd.write('Title: %s\n' % blog_title)
@@ -1082,7 +1082,7 @@ def blog_at_goatee(biblio):
     info("blog_title = %s" % blog_title)
     info("filename = %s" % filename)
     if exists(filename):
-        print("\nfilename '%s' already exists'" % filename)
+        print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
     fd = codecs.open(filename, 'w', 'utf-8', 'replace')
     fd.write('Title: %s\n' % blog_title.title())
@@ -1194,8 +1194,8 @@ def do_console_annotation(biblio):
             '''\t 'key=value' for metadata; e.g., \n'''
             '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
             '''\t\tEntry types (et) values must be typed as shortcut:''')
-        for key, value in fe.CSL_SHORTCUTS.items():
-            print('\t\t\t%s = %s' % (key, value))
+        for key, value in list(fe.CSL_SHORTCUTS.items()):
+            print(('\t\t\t%s = %s' % (key, value)))
         print('''\n\tEnd with CTRL-D.\n''')
 
     def edit_annotation(initial_text, resume_edit = False):
@@ -1217,7 +1217,7 @@ def do_console_annotation(biblio):
 
         console_annotations = ''
         do_publish = args.publish
-        print('@%s\n' %(tentative_id))
+        print(('@%s\n' %(tentative_id)))
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         for line in edited_text:
             line = line.strip()
@@ -1252,7 +1252,7 @@ def do_console_annotation(biblio):
         
         # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
         if 'c_web' in biblio and \
-            len(list(biblio[c] for c in fe.CSL_SHORTCUTS.values() if c in biblio)) > 1:
+            len(list(biblio[c] for c in list(fe.CSL_SHORTCUTS.values()) if c in biblio)) > 1:
             del biblio['c_web']
         return biblio, do_publish
 
@@ -1271,14 +1271,14 @@ def do_console_annotation(biblio):
     try:
         biblio, do_publish = parse_bib(biblio, edited_text)
     except (TypeError, KeyError) as e:
-        print('Error parsing biblio assignments: %s\nTry again.' %e)
+        print(('Error parsing biblio assignments: %s\nTry again.' %e))
         time.sleep(2)
         edited_text = edit_annotation('', resume_edit = True)
         biblio, do_publish = parse_bib(biblio, edited_text)
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
-        print('logged: %s to' % get_tentative_ident(biblio)),
+        print(('logged: %s to' % get_tentative_ident(biblio)), end=' ')
     return biblio, do_publish
         
 def yasn_publish(comment, title, url, tags):
@@ -1308,7 +1308,7 @@ def yasn_publish(comment, title, url, tags):
     tweet = "%s %s %s" %(comment, url, tags)
     info('tweet length = %s' %len(tweet))
 
-    print("tweeting '%s' %s %s" %(tweet, tweet_room, shortened_room))
+    print(("tweeting '%s' %s %s" %(tweet, tweet_room, shortened_room)))
     # https://twython.readthedocs.io/en/latest/index.html
     from twython import Twython, TwythonError
     # load keys, tokens, and secrets from twitter_token.py; simple string assignment
@@ -1316,10 +1316,10 @@ def yasn_publish(comment, title, url, tags):
             ACCESS_TOKEN, ACCESS_TOKEN_SECRET
     twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, 
             ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    # try:
-    #     twitter.update_status(status=tweet)
-    # except TwythonError as e:
-    #     print e
+    try:
+        twitter.update_status(status=tweet)
+    except TwythonError as e:
+        print e
 
 #Check to see if the script is executing as main.
 if __name__ == "__main__":

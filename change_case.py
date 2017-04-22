@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -217,7 +217,7 @@ def test(case_func):
         'Broadband Makes Women and Aaron Happy',
         'Tax Example Explains the Value of Hosted Software to Business',
         'PS3 shipments pass 35 million units worldwide',
-        u'New Theorem Proved by Poincaré',
+        'New Theorem Proved by Poincaré',
         'Wikipedia goes 3D',
         'Wikipedia trumps Britannica',
         "Glycogen: A Trojan Horse for Neurons",
@@ -237,7 +237,7 @@ def test(case_func):
  
     for test in TESTS:
         info("case_direction = '%s'" %case_direction)
-        print(change_case(test, case_direction))
+        print((change_case(test, case_direction)))
 
 
 if '__main__' == __name__:

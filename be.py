@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -55,7 +55,7 @@ def process(entries):
 
     fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
 
-    for entry in entries.values():
+    for entry in list(entries.values()):
         info("entry = '%s'" %(entry))
         cite = []
         reordered_names = []
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             fileOut = splitext(file_name)[0] + '.mm'
             fdo = codecs.open(fileOut, "wb", "utf-8", "replace")
         except IOError:
-            print "    file does not exist"
+            print("    file does not exist")
             continue
         entries = regexParse(src.split('\n'))
         process(entries)

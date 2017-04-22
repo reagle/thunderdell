@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -29,7 +29,7 @@ def parse_token(name,year):
 try:
     (options,files) = getopt.getopt (sys.argv[1:],"m:")
 except getopt.error:
-    print 'Error: Unknown option or missing argument.'
+    print('Error: Unknown option or missing argument.')
 file = files[0]
 if file[-4:] == '.doc':
     os.system('/usr/bin/antiword -w0 %s > /tmp/tmp-%s' % (file,file)) # -m 8859-1.txt
@@ -101,4 +101,4 @@ for line in fd:
         #print "**** insert_txt = '%s'" % insert_txt
         line = line.replace(catch,insert_txt)
                 
-    print line,
+    print(line, end=' ')

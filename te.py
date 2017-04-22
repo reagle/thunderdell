@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -7,7 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
-"""parse inconsistently formatted bibliographies into a Freemind minmap"""
+"""parse inconsistently formatted bibliographies into a Freeplane mindmap"""
 
 def clean_xml(text):
     """Remove entities and remove spurious whitespace"""
@@ -188,12 +188,12 @@ if __name__ == "__main__":
     try:
         (options,files) = getopt.getopt (sys.argv[1:],"")
     except getopt.error:
-        print 'Error: Unknown option or missing argument.'
+        print('Error: Unknown option or missing argument.')
     files = [os.path.abspath(file) for file in files]
     for file in files:
         try:
             fd = codecs.open(file, "rb", "utf-8", "replace")
         except IOError:
-            print "    file does not exist"
+            print("    file does not exist")
             continue
         check(fd)

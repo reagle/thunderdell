@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -28,8 +28,8 @@ import string
 from subprocess import call, Popen, STDOUT
 import sys
 import time
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import unicodedata
 import webbrowser
 
@@ -56,7 +56,7 @@ MONTH2DIGIT = {'jan' : '1', 'feb' : '2', 'mar' : '3',
         'apr' : '4', 'may' : '5', 'jun' : '6',
         'jul' : '7', 'aug' : '8', 'sep' : '9',
         'oct' : '10', 'nov' : '11', 'dec' : '12'}
-DIGIT2MONTH = dict((v,k) for k, v in MONTH2DIGIT.iteritems())
+DIGIT2MONTH = dict((v,k) for k, v in MONTH2DIGIT.items())
 
 
 # happy to keep using bibtex:address alias of bibtex:location
@@ -120,12 +120,12 @@ BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
 BIB_SHORTCUTS.update(CSL_SHORTCUTS)
 
 BIB_FIELDS = dict([(field, short) for short, field in 
-                BIB_SHORTCUTS.iteritems()])
+                BIB_SHORTCUTS.items()])
 
 CSL_FIELDS = dict([(field, short) for short, field in 
-                CSL_SHORTCUTS.iteritems()])
+                CSL_SHORTCUTS.items()])
 
-CONTAINERS = CSL_SHORTCUTS.values()
+CONTAINERS = list(CSL_SHORTCUTS.values())
 CONTAINERS.append('organization')
 
 BIBLATEX_TYPES = (
@@ -211,7 +211,7 @@ CSL_BIBLATEX_TYPE_MAP = OrderedDict([
         ])
 
 BIBLATEX_CSL_TYPE_MAP = OrderedDict((v,k) for k, v in 
-                                   CSL_BIBLATEX_TYPE_MAP.items())
+                                   list(CSL_BIBLATEX_TYPE_MAP.items()))
 
 BIBLATEX_CSL_FIELD_MAP = OrderedDict([
         ('address',        'publisher-place'),         
@@ -238,7 +238,7 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
         ])
 
 CSL_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
-                                   BIBLATEX_CSL_FIELD_MAP.items())
+                                   list(BIBLATEX_CSL_FIELD_MAP.items()))
 
 
 # https://en.wikipedia.org/wiki/Template:Citation
@@ -258,7 +258,7 @@ BIBLATEX_WP_FIELD_MAP = OrderedDict([
         ])
 
 WP_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in 
-                                   BIBLATEX_WP_FIELD_MAP.items())
+                                   list(BIBLATEX_WP_FIELD_MAP.items()))
 
 
 BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter', 
@@ -289,18 +289,18 @@ def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
         ['%20s' %j for j in mylist[i:i+cols]]
             ) for i in range(0,len(mylist),cols)]
-    print("\n".join(pairs))
+    print(("\n".join(pairs)))
     print("\n")
 
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(sorted(['%s:%s' %(key, value) 
-        for key, value in mydict.items()]), cols)
+        for key, value in list(mydict.items())]), cols)
      
 from xml.sax.saxutils import escape, unescape
 def unescape_XML(o):
     '''Unescape XML character entities; & < > are defaulted'''
     extras = {"&apos;": "'", "&quot;": '"'}
-    if isinstance(o, basestring):
+    if isinstance(o, str):
         #info("%s is a string" % o)
         return(unescape(o, extras))
     elif isinstance(o, list): # it's a list of authors with name parts
@@ -416,7 +416,7 @@ def identity_increment(ident, entries):
         dbg("\t yielded    %s" % ident)
     return ident
 
-def get_ident(entry, entries, delim=u""):
+def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
     last_names = []
@@ -446,7 +446,7 @@ def get_ident(entry, entries, delim=u""):
         ident = identity_increment(ident, entries)
     info("ident = %s '%s' in %s" %(type(ident), ident, entry['_mm_file']))
     ident = ident.replace('@', '') # '@' is citation designator, so just remove
-    return unicode(ident)
+    return str(ident)
 
 def pull_citation(entry):
     """Modifies entry with parsed citation
@@ -524,8 +524,8 @@ def pull_citation(entry):
         elif '-' in date:
             date_parts = date.split('-') # '2009-05-21'
         else:                            # '20090521'
-            date_parts = filter(None, [date[0:4], date[4:6], 
-                date[6:8]])  # filter drops empty strings
+            date_parts = [_f for _f in [date[0:4], date[4:6], 
+                date[6:8]] if _f]  # filter drops empty strings
         if len(date_parts) == 3: 
             entry['year'], entry['month'], entry['day'] = date_parts
             date = '%s-%s-%s' %(date_parts[0], date_parts[1], date_parts[2])
@@ -616,7 +616,7 @@ def guess_bibtex_type(entry):
         elif et in CSL_TYPES:
             et = CSL_BIBLATEX_TYPE_MAP[et]
         else:
-            print("Unknown entry_type = %s" %et)
+            print(("Unknown entry_type = %s" %et))
             sys.exit()
         return et 
 
@@ -675,10 +675,10 @@ def guess_csl_type(entry):
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre
         else:
-            print("Unknown entry_type = %s" %et)
+            print(("Unknown entry_type = %s" %et))
             sys.exit()
     et = 'no-type'
-    if any(c in entry for c in CSL_SHORTCUTS.values()):
+    if any(c in entry for c in list(CSL_SHORTCUTS.values())):
         info("looking at containers for %s" %entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'
@@ -822,7 +822,7 @@ def emit_biblatex(entries):
             entry['booktitle'] = 'Proceedings of ' + entry['eventtitle'] 
         if opts.bibtex:
             if 'url' in entry: # most bibtex styles doesn't support url
-                note = ' Available at: \url{%s}' % entry['url']
+                note = ' Available at: \\url{%s}' % entry['url']
                 if 'urldate' in entry:
                     urldate = dateutil.parser.parse(entry['urldate']).strftime(
                         "%d %B %Y")
@@ -871,7 +871,7 @@ def emit_biblatex(entries):
 
         opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
+        for short, field in sorted(list(BIB_SHORTCUTS.items()), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 critical("short, field = '%s , %s'" %(short, field))
                 # skip these fields
@@ -996,7 +996,7 @@ def emit_yaml_csl(entries):
             else:
                 entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
             
-        for short, field in sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1]):
+        for short, field in sorted(list(BIB_SHORTCUTS.items()), key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 value = unescape_XML(entry[field])
                 info("short, field = '%s , %s'" %(short, field))
@@ -1093,7 +1093,7 @@ def emit_wp_citation(entries):
     for entry in dict_sorted_by_keys(entries):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
-            wp_ident = get_ident(entry, entries, delim=u" & ")
+            wp_ident = get_ident(entry, entries, delim=" & ")
             opts.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
             
         for short, field in list(BIB_SHORTCUTS.items()):
@@ -1189,7 +1189,7 @@ def emit_results(entries, query, results_file):
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
         token = token.replace('<strong>','').replace('</strong>','')
-        token = urllib.quote(token.encode('utf-8')) # urllib won't accept unicode
+        token = urllib.parse.quote(token.encode('utf-8')) # urllib won't accept unicode
         dbg("token = '%s' type = '%s'" %(token, type(token)))
         url_query = \
         escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
@@ -1318,7 +1318,7 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)    # break the citation up
         except:
-            print("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
+            print(("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file'])))
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
@@ -1598,6 +1598,7 @@ if __name__ == '__main__':
                     action="store_true", default=False,
                     help="run tests")
     parser.add_option('-V', '--verbose', dest='verbose', action='count',
+                    default = 1,
                     help="Increase verbosity (specify multiple times for more)")
     parser.add_option("-w", "--WP-citation", default=False,
                     action="store_true",
@@ -1621,8 +1622,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=log_level, format = "%(levelno)s %(funcName).5s: %(message)s")
     
     opts.cgi = False
-    opts.outfd = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
-
+    opts.outfd = sys.stdout
+    
     if len(files) == 0:     # Default file
         files = DEFAULT_MAPS
     elif len(files) > 1:
@@ -1678,7 +1679,7 @@ if __name__ == '__main__':
         sys.exit()
     if opts.query:
         #u'Péña' == urllib.unquote(quote(u'Péña'.encode('utf-8'))).decode('utf-8')
-        opts.query = urllib.unquote(opts.query).decode('utf-8')
+        opts.query = urllib.parse.unquote(opts.query).decode('utf-8')
         opts.query_c = re.compile(re.escape(opts.query), re.IGNORECASE)
         output = emit_results
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -47,15 +47,15 @@ def google_query(isbn):
         json_result = json.loads(r.content)
         info("json_result['totalItems'] = '%s'" %json_result['totalItems'])
         if json_result['totalItems'] == 0:
-            print("Google unknown ISBN for %s" %isbn)
+            print(("Google unknown ISBN for %s" %isbn))
             return False
         json_vol = json_result['items'][0]['volumeInfo']
-        for key, value in json_vol.items():
+        for key, value in list(json_vol.items()):
             if key == 'authors':
                 json_bib['author'] = ', '.join(value)
             if key == 'publishedDate':
                 json_bib['date'] = value.replace('-', '')
-            elif type(value) == str or type(value) == unicode:
+            elif type(value) == str or type(value) == str:
                 json_bib[key] = value.strip()
                 info("  value = '%s'" %json_bib[key])
         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
@@ -81,15 +81,15 @@ def oclc_query(isbn):
         json_result = json.loads(r.content)
         info("json_result['stat'] = '%s'" %json_result['stat'])
         if 'unknownId' in json_result['stat']:
-            print("OCLC unknown ISBN %s" %isbn)
+            print(("OCLC unknown ISBN %s" %isbn))
             return False
         if 'invalidId' in json_result['stat']:
-            print("OCLC invalid ISBN %s" %isbn)
+            print(("OCLC invalid ISBN %s" %isbn))
             return False
         json_vol = json_result['list'][0]
         json_bib = {}
-        for key, value in json_vol.items():
-            if type(value) == str or type(value) == unicode:
+        for key, value in list(json_vol.items()):
+            if type(value) == str or type(value) == str:
                 value = value.strip()
                 value = value[0:-1] if value.endswith('.') else value
                 info("  value = '%s'" %value)

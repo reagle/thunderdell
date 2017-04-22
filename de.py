@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
@@ -44,10 +44,10 @@ def clean(text):
     
     text = text.strip(', \f\r\n')
     REPLACEMENTS = [
-        (u'&', '&amp;'),     (u"'", '&apos;'),
-        (u'"', '&quot;'),    (u'“', '&quot;'),   (u'”', '&quot;'),
-        (u"‘", u"'"),         (u"’", u"'"),
-        (u" – ", u" -- "), (u"–", u" -- ")]
+        ('&', '&amp;'),     ("'", '&apos;'),
+        ('"', '&quot;'),    ('“', '&quot;'),   ('”', '&quot;'),
+        ("‘", "'"),         ("’", "'"),
+        (" – ", " -- "), ("–", " -- ")]
         
     for v1, v2 in REPLACEMENTS:
         text = text.replace(v1, v2)
@@ -70,29 +70,29 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
     entry = {}
 
     #print "*** '%s'" % repr(line)
-    if line not in (u'', u'\r' ,u'\n'):
+    if line not in ('', '\r' ,'\n'):
         if line.lower().startswith('author ='):
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started: # Do I need to close a previous entry
                 if in_subsection:
-                    fdo.write(u"""        </node>\n""")
+                    fdo.write("""        </node>\n""")
                     in_subsection = False
                 if in_section:
-                    fdo.write(u"""      </node>\n""")
+                    fdo.write("""      </node>\n""")
                     in_section = False
                 if in_chapter:
-                    fdo.write(u"""    </node>\n""")
+                    fdo.write("""    </node>\n""")
                     in_chapter = False
                 if in_part:
-                    fdo.write(u"""    </node>\n""")
+                    fdo.write("""    </node>\n""")
                     in_part = False
 
-                fdo.write(u"""</node>\n</node>\n""")
+                fdo.write("""</node>\n</node>\n""")
                 started = False
             started = True
             cites = re.split('(\w+) =',line)[1:] # should space be optional '(\w+) ?='
             # 2 references to an iterable object that are unpacked with '*' and rezipped
-            cite_pairs = zip(*[iter(cites)] * 2)
+            cite_pairs = list(zip(*[iter(cites)] * 2))
             for token, value in cite_pairs:
                 entry[token.lower()] = value.strip()
 
@@ -100,13 +100,13 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             if 'author' not in entry: entry['author'] = 'Unknown'
             if 'title' not in entry: entry['title'] = 'Untitled'
 
-            fdo.write(u"""<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
+            fdo.write("""<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
                     % ('author', clean(entry['author'].title())))
             if 'url' in entry:
-                fdo.write(u"""  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
+                fdo.write("""  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
                     % ('title', clean(entry['url']), clean(entry['title'])))
             else:
-                fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s">\n"""
+                fdo.write("""  <node STYLE_REF="%s" TEXT="%s">\n"""
                     % ('title', clean(entry['title'])))
 
             #print '***', BIB_FIELDS
@@ -118,72 +118,72 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                         if token.lower() in BIB_FIELDS:
                             t, v = BIB_FIELDS[token.lower()], value
                         else:
-                            print "* Unknown token '%s' in %s" %(token, entry['author'])
+                            print("* Unknown token '%s' in %s" %(token, entry['author']))
                             sys.exit
                     citation_add = "%s=%s " %(t,v)
                     citation = citation + citation_add
             if citation != "": clean(citation)
             citation += " r=%s" % get_date()
-            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            fdo.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % ('cite', clean(citation)))
 
         elif re.match('summary\.(.*)', line, re.I):
             matches = re.match('summary\.(.*)',line, re.I)
-            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            fdo.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % ('annotation', clean(matches.groups()[0])))
 
         elif re.match('part.*', line, re.I):
             if in_part:
                 if in_chapter:
-                    fdo.write(u"""    </node>\n""")      # close chapter
+                    fdo.write("""    </node>\n""")      # close chapter
                     in_chapter = False
                 if in_section:
-                    fdo.write(u"""      </node>\n""")    # close section
+                    fdo.write("""      </node>\n""")    # close section
                     in_section = False
                 if in_subsection:
-                    fdo.write(u"""      </node>\n""")    # close section
+                    fdo.write("""      </node>\n""")    # close section
                     in_subsection = False
-                fdo.write(u"""  </node>\n""")            # close part
+                fdo.write("""  </node>\n""")            # close part
                 in_part = False
-            fdo.write(u"""  <node STYLE_REF="%s" TEXT="%s">\n""" % (
+            fdo.write("""  <node STYLE_REF="%s" TEXT="%s">\n""" % (
                     'paraphrase', clean(line)))
             in_part = True
 
         elif re.match('chapter.*', line, re.I):
             if in_chapter:
                 if in_section:
-                    fdo.write(u"""      </node>\n""")    # close section
+                    fdo.write("""      </node>\n""")    # close section
                     in_section = False
                 if in_subsection:
-                    fdo.write(u"""      </node>\n""")    # close section
+                    fdo.write("""      </node>\n""")    # close section
                     in_subsection = False
-                fdo.write(u"""    </node>\n""")            # close chapter
+                fdo.write("""    </node>\n""")            # close chapter
                 in_chapter = False
-            fdo.write(u"""    <node STYLE_REF="%s" TEXT="%s">\n""" % (
+            fdo.write("""    <node STYLE_REF="%s" TEXT="%s">\n""" % (
                     'paraphrase', clean(line)))
             in_chapter = True
 
         elif re.match('section.*', line, re.I):
             if in_subsection:
-                fdo.write(u"""      </node>\n""")    # close section
+                fdo.write("""      </node>\n""")    # close section
                 in_subsection = False
             if in_section:
-                fdo.write(u"""    </node>\n""")
+                fdo.write("""    </node>\n""")
                 in_section = False
-            fdo.write(u"""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
+            fdo.write("""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
                     'paraphrase', clean(line[9:])))
             in_section = True
 
         elif re.match('subsection.*', line, re.I):
             if in_subsection:
-                fdo.write(u"""    </node>\n""")
+                fdo.write("""    </node>\n""")
                 in_subsection = False
-            fdo.write(u"""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
+            fdo.write("""      <node STYLE_REF="%s" TEXT="%s">\n""" % (
                     'paraphrase', clean(line[12:])))
             in_subsection = True
 
         elif re.match('(--.*)', line, re.I):
-            fdo.write(u"""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            fdo.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % ('default', clean(line)))
 
         else:
@@ -212,7 +212,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 node_color = 'quote'
                 line_text = line_text[0:-9]
 
-            fdo.write(u"""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            fdo.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % (node_color, clean(' '.join((line_no, line_text)))))
 
 
@@ -230,7 +230,7 @@ def check(text, fdo):
     in_subsection = False
     line_number = 0
 
-    fdo.write(u"""%s\n<node TEXT="Readings">\n""" %MINDMAP_PREAMBLE)
+    fdo.write("""%s\n<node TEXT="Readings">\n""" %MINDMAP_PREAMBLE)
 
     for line in text.split('\n'):
         line = line.strip()
@@ -238,16 +238,16 @@ def check(text, fdo):
             started, in_part, in_chapter, in_section, in_subsection = parse(
                 line, started, in_part, in_chapter, in_section, in_subsection)
         except KeyError:
-            print traceback.print_tb(sys.exc_traceback), '\n', line_number, line
+            print(traceback.print_tb(sys.exc_info()[2]), '\n', line_number, line)
             sys.exit()
         line_number += 1
 
-    if in_subsection: fdo.write(u"""</node>""") # close the last section
-    if in_section: fdo.write(u"""</node>""") # close the last section
-    if in_chapter: fdo.write(u"""</node>""") # close the last chapter
-    if in_part: fdo.write(u"""</node>""") # close the last part
-    fdo.write(u"""</node>\n</node>\n</node>\n""")  # close the last entry
-    fdo.write(u"""</node>\n</map>\n""")   # close the document
+    if in_subsection: fdo.write("""</node>""") # close the last section
+    if in_section: fdo.write("""</node>""") # close the last section
+    if in_chapter: fdo.write("""</node>""") # close the last chapter
+    if in_part: fdo.write("""</node>""") # close the last part
+    fdo.write("""</node>\n</node>\n</node>\n""")  # close the last entry
+    fdo.write("""</node>\n</map>\n""")   # close the document
 
 
 #Check to see if the script is executing as main.
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     try:
         (options,files) = getopt.getopt (sys.argv[1:],"")
     except getopt.error:
-        print 'Error: Unknown option or missing argument.'
+        print('Error: Unknown option or missing argument.')
     files = [os.path.abspath(file) for file in files]
     for file in files:
         if file.endswith('.rtf'):
@@ -275,9 +275,9 @@ if __name__ == "__main__":
             fdi = codecs.open(file, "rb", encoding)
             text = fdi.read()
             if encoding == 'UTF-8':
-                if text[0] == unicode( codecs.BOM_UTF8, "utf8" ):
+                if text[0] == str( codecs.BOM_UTF8, "utf8" ):
                     text = text[1:]
-                    print "removed BOM"
+                    print("removed BOM")
             # it's not decoding MS Word txt correctly, word is not starting with
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
@@ -285,7 +285,7 @@ if __name__ == "__main__":
             fdo = codecs.open(fileOut, "wb", "utf-8")
             sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
         except IOError:
-            print "    file does not exist"
+            print("    file does not exist")
             continue
 
         check(text, fdo)

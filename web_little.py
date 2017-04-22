@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
@@ -27,10 +27,10 @@ dbg = logging.debug
 from xml.sax.saxutils import escape, unescape
 def escape_XML(s): # http://wiki.python.org/moin/EscapingXml
     '''Escape XML character entities; & < > are defaulted'''
-    extras = {u'\t' : u'  '}
+    extras = {'\t' : '  '}
     return escape(s, extras)
 
-import re, htmlentitydefs
+import re, html.entities
 def unescape_XML(text):
     '''
     Removes HTML or XML character references and entities from text.
@@ -39,23 +39,23 @@ def unescape_XML(text):
     '''
     def fixup(m):
         text = m.group(0)
-        if text[:2] == u"&#":
+        if text[:2] == "&#":
             # character reference
             try:
-                if text[:3] == u"&#x":
-                    return unichr(int(text[3:-1], 16))
+                if text[:3] == "&#x":
+                    return chr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = chr(html.entities.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text # leave as is
-    return re.sub(u"&#?\w+;", fixup, text)
+    return re.sub("&#?\w+;", fixup, text)
     
     
 def get_HTML_content(url, referer='', 
@@ -113,5 +113,5 @@ def get_text(url):
 
     import os
 
-    return unicode(os.popen('w3m -O utf8 -cols 10000 '
-        '-dump "%s"' %url).read().decode('utf-8', 'replace'))
+    return str(os.popen('w3m -O utf8 -cols 10000 '
+        '-dump "%s"' %url).read())

@@ -1318,7 +1318,7 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)    # break the citation up
         except:
-            print ("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
+            print("pull_citation error on %s: %s" %(entry['author'], entry['_mm_file']))
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry

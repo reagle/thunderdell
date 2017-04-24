@@ -28,9 +28,9 @@ import urllib.error, urllib.parse, urllib.request
 import unicodedata
 import webbrowser
 
+from xml.sax.saxutils import escape, unescape
 from lxml.etree import parse
 useLXML = True
-from xml.sax.saxutils import escape, unescape
 
 import dateutil.parser    # http://labix.org/python-dateutil
 
@@ -131,9 +131,9 @@ BIBLATEX_TYPES = (
     'article',
     'book',
     'booklet',
-    'collection',   # the larger mutli-author book with editor
-    'inbook',       # chapter in a book by a single author
-    'incollection', # chapter in multi-authored book with editor
+    'collection',    # the larger mutli-author book with editor
+    'inbook',        # chapter in a book by a single author
+    'incollection',  # chapter in multi-authored book with editor
     'inproceedings',
     'manual',
     'mastersthesis',
@@ -147,7 +147,7 @@ BIBLATEX_TYPES = (
     'online',
     )
 
-CSL_TYPES =  (
+CSL_TYPES = (
     'article',
     'article-magazine',
     'article-newspaper',
@@ -210,7 +210,7 @@ CSL_BIBLATEX_TYPE_MAP = OrderedDict([
     ])
 
 BIBLATEX_CSL_TYPE_MAP = OrderedDict((v, k) for k, v in
-                                   list(CSL_BIBLATEX_TYPE_MAP.items()))
+                                    list(CSL_BIBLATEX_TYPE_MAP.items()))
 
 BIBLATEX_CSL_FIELD_MAP = OrderedDict([
     ('address',        'publisher-place'),
@@ -236,7 +236,7 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
     ('catalog',        'call-number'),
     ])
 
-CSL_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in
+CSL_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
                                      list(BIBLATEX_CSL_FIELD_MAP.items()))
 
 
@@ -256,11 +256,12 @@ BIBLATEX_WP_FIELD_MAP = OrderedDict([
     ('origdate',        'orig-year'),
 ])
 
-WP_BIBLATEX_FIELD_MAP = OrderedDict((v,k) for k, v in
+WP_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
                                     list(BIBLATEX_WP_FIELD_MAP.items()))
 
 
-BIBTEX_FIELDS = ['address', 'annote', 'author', 'booktitle', 'chapter',
+BIBTEX_FIELDS = [
+    'address', 'annote', 'author', 'booktitle', 'chapter',
     'crossref', 'edition', 'editor', 'howpublished', 'institution', 'journal',
     'key', 'month', 'note', 'number', 'organization', 'pages', 'publisher',
     'school', 'series', 'title', 'type', 'volume', 'year']
@@ -285,15 +286,16 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS + [
 
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
-        ['%20s' %j for j in mylist[i:i+cols]]
-            ) for i in range(0,len(mylist),cols)]
+        ['%20s' % j for j in mylist[i:i+cols]]
+            ) for i in range(0, len(mylist), cols)]
     print(("\n".join(pairs)))
     print("\n")
 
 
 def pretty_tabulate_dict(mydict, cols=3):
-    pretty_tabulate_list(sorted(['%s:%s' % (key, value)
-        for key, value in list(mydict.items())]), cols)
+    pretty_tabulate_list(
+        sorted(['%s:%s' % (key, value)
+               for key, value in list(mydict.items())]), cols)
 
 
 def unescape_XML(o):
@@ -301,7 +303,7 @@ def unescape_XML(o):
     extras = {"&apos;": "'", "&quot;": '"'}
     if isinstance(o, str):
         return(unescape(o, extras))
-    elif isinstance(o, list): # it's a list of authors with name parts
+    elif isinstance(o, list):  # it's a list of authors with name parts
         new_authors = []
         for author in o:
             new_author = []
@@ -327,14 +329,14 @@ def escape_latex(text):
 
 
 def strip_accents(text):
-    #"""strip accents and those chars that can't be stripped"""
-    ##>>> strip_accents(u'nôn-åscîî') # fails because of doctest bug
-    ##u'non-ascii'
+    """strip accents and those chars that can't be stripped"""
+    # >>> strip_accents(u'nôn-åscîî')
+    # ^ fails because of doctest bug u'non-ascii'
     try:    # test if ascii
         text.encode('ascii')
     except UnicodeEncodeError:
         return ''.join(x for x in unicodedata.normalize('NFKD', text)
-            if unicodedata.category(x) != 'Mn')
+                       if unicodedata.category(x) != 'Mn')
     else:
         return text
 
@@ -392,14 +394,14 @@ def identity_add_title(ident, title):
                        ).replace('Textbook-l', ''
                        ).replace('.0', ''
                        ).replace("'", "")
- 
+
     not_alphanum_pat = re.compile("[^a-zA-Z0-9']")
     title_words = not_alphanum_pat.split(clean_title.lower())
 
     if len(title_words) == 1:
         suffix = title_words[0][0] + title_words[0][-2] + title_words[0][-1]
     else:
-        suffix = ''.join([word[0] for word in title_words 
+        suffix = ''.join([word[0] for word in title_words
                           if word not in BORING_WORDS])
         suffix = suffix[:3]
     ident = ident + suffix
@@ -418,7 +420,7 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:    # if it still collides
-        dbg("\t trying     %s collides with %s" 
+        dbg("\t trying     %s collides with %s"
             % (ident, entries[ident]['title']))
         if ident[-1].isdigit():
             suffix = int(ident[-1])
@@ -435,33 +437,34 @@ def get_ident(entry, entries, delim=""):
 
     last_names = []
     for first, von, last, jr in entry['author']:
-        last_names.append(von.replace(' ', '') + last.replace(' ',''))
+        last_names.append(von.replace(' ', '') + last.replace(' ', ''))
     if len(last_names) == 1: name_part = last_names[0]
     elif len(last_names) == 2: name_part = delim.join(last_names[0:2])
     elif len(last_names) == 3: name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
         name_part = last_names[0] + 'Etal'
 
-    if not 'year' in entry: entry['year'] = '0000'
+    if 'year' not in entry:
+        entry['year'] = '0000'
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['year']))
     info("ident = %s '%s'" % (type(ident), ident))
     # remove chars not permitted in xml name/id attributes
-    ident = ident.replace(':','').replace("'","")
+    ident = ident.replace(':', '').replace("'", "")
     # remove some punct and strong added by walk_freeplane.query_highlight
     ident = ident.replace('.', ''
                          ).replace('<strong>', ''
                          ).replace('</strong>', '')
     info("ident = %s '%s'" % (type(ident), ident))
-    ident = strip_accents(ident) # bibtex doesn't handle unicode in keys well
-    if ident[0].isdigit(): # pandoc forbids keys starting with digits
+    ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
+    if ident[0].isdigit():        # pandoc forbids keys starting with digits
         ident = 'a' + ident
 
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
     info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
-    ident = ident.replace('@', '') # '@' is citation designator, so just remove
+    ident = ident.replace('@', '')  # remove '@' citation designator
     return str(ident)
 
 
@@ -477,7 +480,7 @@ def pull_citation(entry):
     if 'cite' in entry:
         citation = entry['cite']
         dbg("citation = '%s'" % (citation))
-        # split around tokens of length 1-3; 
+        # split around tokens of length 1-3;
         #     get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         cites = EQUAL_PAT.split(citation)[1:]
@@ -488,7 +491,7 @@ def pull_citation(entry):
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
-                print(("Key error on ", error, 
+                print(("Key error on ", error,
                        entry['title'], entry['_mm_file']))
     else:
         entry['date'] = '0000'
@@ -527,7 +530,7 @@ def pull_citation(entry):
         if 'month' in entry:
             date += '-%02d' % int(entry['month'])
             if 'day' in entry:
-                if not '-' in entry['day']:
+                if '-' not in entry['day']:
                     date += '-%02d' % int(entry['day'])
                 else:  # a range
                     start_date, end_date = entry['day'].split('-')
@@ -542,10 +545,10 @@ def pull_citation(entry):
             # biblatex permits ranges delimited by '/', but I do not
             raise Exception("'/' should not be in date.")
         elif '-' in date:
-            date_parts = date.split('-') # '2009-05-21'
-        else:                            # '20090521'
-            date_parts = [_f for _f in [date[0:4], date[4:6],
-                date[6:8]] if _f]  # filter drops empty strings
+            date_parts = date.split('-')  # '2009-05-21'
+        else:                             # '20090521'
+            # filter drops empty strings
+            date_parts = [_f for _f in [date[0:4], date[4:6], date[6:8]] if _f]
         if len(date_parts) == 3:
             entry['year'], entry['month'], entry['day'] = date_parts
             date = '%s-%s-%s' % (date_parts[0], date_parts[1], date_parts[2])
@@ -638,7 +641,7 @@ def guess_bibtex_type(entry):
         elif et in CSL_TYPES:
             et = CSL_BIBLATEX_TYPE_MAP[et]
         else:
-            print(("Unknown entry_type = %s" %et))
+            print(("Unknown entry_type = %s" % et))
             sys.exit()
         return et
 
@@ -650,7 +653,7 @@ def guess_bibtex_type(entry):
             if 'author' in entry:           et = 'inproceedings'
             else:                           et = 'proceedings'
         elif 'booktitle' in entry:
-            if not 'editor' in entry:       et = 'inbook'
+            if 'editor' not in entry:       et = 'inbook'
             else:
                 if 'author' in entry or \
                     'chapter' in entry:      et = 'incollection'
@@ -697,11 +700,11 @@ def guess_csl_type(entry):
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre
         else:
-            print(("Unknown entry_type = %s" %et))
+            print(("Unknown entry_type = %s" % et))
             sys.exit()
     et = 'no-type'
     if any(c in entry for c in list(CSL_SHORTCUTS.values())):
-        info("looking at containers for %s" %entry)
+        info("looking at containers for %s" % entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'
         if 'c_newspaper' in entry:          et = 'article-newspaper'
@@ -724,7 +727,7 @@ def guess_csl_type(entry):
 
         elif 'author' in entry and 'title' in entry and 'publisher' in entry:
                                             et = 'book'
-        elif not 'author' in entry:
+        elif 'author' not in entry:
             if 'venue' in entry:            et = 'book'         # ? proceedings
             if 'editor' in entry:           et = 'book'         # ? collection
         elif 'institution' in entry:
@@ -743,7 +746,7 @@ def guess_csl_type(entry):
     if et == 'post':
         genre = 'Online forum comment'
     elif et == 'post-weblog':
-      genre = 'Web log message'
+        genre = 'Web log message'
     if 'url' in entry:
         if any([site in entry['url'] for site in (
                 'youtube.com', 'vimeo.com')]):
@@ -779,7 +782,7 @@ def bibformat_title(title):
     words2ignore = articles + conjunctions + contractions + others + prepositions
     words2protect = ('vs.', 'oldid')
 
-    whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE) # \W+
+    whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
     words = whitespace_pat.split(title)
 
     chunk_pat = re.compile(r"""([-:])""", re.UNICODE)
@@ -816,16 +819,16 @@ def bibformat_title(title):
     quoted_title = ''.join(cased_title)
 
     # convert quotes to LaTeX then convert doubles to singles within the title
-    if quoted_title[0] == '"': # First char is a quote
+    if quoted_title[0] == '"':  # First char is a quote
         quoted_title = '``' + quoted_title[1:]
     # open quote
-    quoted_title = quoted_title.replace(' "',' ``').replace(" '"," `")  
+    quoted_title = quoted_title.replace(' "', ' ``').replace(" '", " `")
     # close quote
-    quoted_title = quoted_title.replace('" ',"'' ")
+    quoted_title = quoted_title.replace('" ', "'' ")
     # left-over close quote
-    quoted_title = quoted_title.replace('"',"''")    
+    quoted_title = quoted_title.replace('"', "''")
     # single quotes
-    quoted_title = quoted_title.replace('``','`').replace("''","'")  
+    quoted_title = quoted_title.replace('``', '`').replace("''", "'")
 
     return quoted_title
 
@@ -869,7 +872,7 @@ def emit_biblatex(entries):
         if opts.bibtex or opts.year:
             if 'date' in entry:
                 del entry['date']
-        else: # remove bibtex fields from biblatex
+        else:  # remove bibtex fields from biblatex
             for token in ('year', 'month', 'day'):
                 if token in entry:
                     del entry[token]
@@ -882,7 +885,7 @@ def emit_biblatex(entries):
                     del entry['booktitle']
 
         # CSL type and field conversions
-        info("entry = %s" %entry)
+        info("entry = %s" % entry)
         for field in ('c_blog', 'c_web', 'c_forum'):
             if field in entry:
                 entry_type_copy = 'online'
@@ -905,24 +908,25 @@ def emit_biblatex(entries):
 
         opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in sorted(list(BIB_SHORTCUTS.items()), 
+        for short, field in sorted(list(BIB_SHORTCUTS.items()),
                                    key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 critical("short, field = '%s , %s'" % (short, field))
                 # skip these fields
-                if field in ('identifier', 'entry_type', 'ori_author'): #'isbn'
+                if field in ('identifier', 'entry_type', 'ori_author'):
                     continue
                 if field == 'urldate' and 'url' not in entry:
-                    continue # no url, no 'read on'
+                    continue  # no url, no 'read on'
                 if field in ('url'):
-                    critical("url = %s" %entry[field])
+                    critical("url = %s" % entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
                         critical("banned")
                         continue
-                    # if online_only and not (online or online journal) then skip
+                    # if online_only and not (online or online journal)
                     if opts.online_urls_only and not (
-                        entry_type == 'online' or
-                        any(j for j in ONLINE_JOURNALS if j in entry['url'])):
+                            entry_type == 'online' or
+                            any(j for j in ONLINE_JOURNALS
+                                if j in entry['url'])):
                         critical("not online")
                         continue
 
@@ -931,7 +935,7 @@ def emit_biblatex(entries):
                         continue
 
                 # if entry[field] not a proper string, make it so
-                value = unescape_XML(entry[field]) # remove xml entities
+                value = unescape_XML(entry[field])  # remove xml entities
                 info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
@@ -963,7 +967,7 @@ def emit_yaml_csl(entries):
     # import yaml
 
     def esc_yaml(s):
-        if s: # faster to just quote than testing for tokens
+        if s:  # faster to just quote than testing for tokens
             s = s.replace('"', r"\'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
@@ -1032,7 +1036,7 @@ def emit_yaml_csl(entries):
             else:
                 entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
 
-        for short, field in sorted(list(BIB_SHORTCUTS.items()), 
+        for short, field in sorted(list(BIB_SHORTCUTS.items()),
                                    key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 value = unescape_XML(entry[field])
@@ -1045,14 +1049,14 @@ def emit_yaml_csl(entries):
                 # special format fields
                 if field == 'title':
                     opts.outfd.write('  title: %s\n'
-                        % yaml_protect_case(esc_yaml((value))))
+                                     % yaml_protect_case(esc_yaml((value))))
                     continue
                 if field in ('author', 'editor', 'translator'):
-                    opts.outfd.write('  %s:\n' %field)
+                    opts.outfd.write('  %s:\n' % field)
                     emit_yaml_people(entry[field])
                     continue
                 if field in ('date', 'origdate', 'urldate'):
-                    if entry[field] == '0000': 
+                    if entry[field] == '0000':
                         continue
                     if field == 'date':
                         season = entry['issue'] if 'issue' in entry else None
@@ -1067,13 +1071,13 @@ def emit_yaml_csl(entries):
                     continue
 
                 if field == 'urldate' and 'url' not in entry:
-                    continue # no url, no 'read on'
+                    continue  # no url, no 'read on'
                 if field == 'url':
-                    info("url = %s" %entry[field])
+                    info("url = %s" % entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
                         info("banned")
                         continue
-                    # skip URL articles with no pagination + other offline types
+                    # skip articles+URL w/ no pagination & other offline types
                     if opts.online_urls_only:
                         info("online_urls_only")
                         # don't skip online types
@@ -1081,12 +1085,11 @@ def emit_yaml_csl(entries):
                             pass
                         # skip items that are paginated
                         elif 'pages' in entry:
-                                info("  skipping url, paginated item")
-                                continue
+                            info("  skipping url, paginated item")
+                            continue
                 if field == 'eventtitle' and 'container-title' not in entry:
                     opts.outfd.write('  container-title: "Proceedings of %s"\n'
-                        % entry['eventtitle'])
-                    # opts.outfd.write('  eventtitle: "%s"\n' %entry['eventtitle'])
+                                     % entry['eventtitle'])
                 if field == 'c_blog' and entry[field] == 'Blog':
                     continue
 
@@ -1094,7 +1097,7 @@ def emit_yaml_csl(entries):
                 # info(BIBLATEX_CSL_FIELD_MAP)
                 if field in CONTAINERS:
                     field = 'container-title'
-                # containers already in titlecase, 
+                # containers already in titlecase,
                 #     so protect from csl:lowercase+titlecase
                 # if field == 'container-title':
                 #     value = "<span class='nocase'>%s</span>" % value
@@ -1148,7 +1151,7 @@ def emit_wp_citation(entries):
                 elif field == 'editor':
                     output_wp_names(field, entry[field])
                     continue
-                elif field == 'title': # TODO: convert value to title case?
+                elif field == 'title':  # TODO: convert value to title case?
                     if 'booktitle' in entry:
                         field = 'chapter'
                 elif field in BIBLATEX_WP_FIELD_MAP:
@@ -1161,8 +1164,8 @@ def emit_results(entries, query, results_file):
     """Emit the results of the query"""
 
     def reverse_print(node, entry):
-        """Move the locator number to the end of the text with the Bibtex key"""
-        style_ref, text = node.get('STYLE_REF','default'), node.get('TEXT')
+        """Move locator number to the end of the text with the Bibtex key"""
+        style_ref, text = node.get('STYLE_REF', 'default'), node.get('TEXT')
         prefix = '&gt; ' if style_ref == 'quote' else ''
         # don't reverse short texts and certain style refs
         if len(text) < 50 or style_ref in ['author', 'title', 'cite']:
@@ -1194,7 +1197,8 @@ def emit_results(entries, query, results_file):
                     elif entry['pagination'] == 'line':
                         locator = ', line ' + locator
                     else:
-                        raise Exception("unknown locator '%s' for '%s' in '%s'" 
+                        raise Exception(
+                            "unknown locator '%s' for '%s' in '%s'"
                             % (entry['pagination'], entry['title'],
                                entry['custom2']))
                 else:
@@ -1202,14 +1206,15 @@ def emit_results(entries, query, results_file):
                         locator = ', pp. ' + locator
                     else:
                         locator = ', p. ' + locator
-            cite = ' [@%s%s]' % (entry['identifier'].replace(' ',''), locator)
+            cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
 
         hypertext = text
         if 'LINK' in node.attrib:
-            hypertext = '<a href="%s"> %s</a>' % (escape(node.get('LINK')), text)
+            hypertext = '<a href="%s"> %s</a>' % (escape(
+                                                  node.get('LINK')), text)
 
-        results_file.write('    <li class="%s">%s%s%s</li>\n' %
-            (style_ref, prefix, hypertext, cite))
+        results_file.write('    <li class="%s">%s%s%s</li>\n'
+                           % (style_ref, prefix, hypertext, cite))
 
     def pretty_print(node, entry=None, spaces='          '):
         """Pretty print a node and descendants into indented HTML"""
@@ -1221,7 +1226,7 @@ def emit_results(entries, query, results_file):
         if len(node) > 0:
             results_file.write('%s<ul class="container">\n' % spaces)
             for child in node:
-                if child.get('STYLE_REF') == 'author': # title bug fixed? 110323
+                if child.get('STYLE_REF') == 'author':
                     break
                 pretty_print(child, entry, spaces)
             results_file.write('%s</ul>%s\n' % (spaces, spaces))
@@ -1242,9 +1247,9 @@ def emit_results(entries, query, results_file):
         if __name__ == '__main__':
             return file_name
         else:                               # CGI
-            return 'file://' + '/Users/' + file_name[6:] # change from /home/
+            return 'file://' + '/Users/' + file_name[6:]  # change from /home/
 
-    def print_entry(identifier, author, date, title, url, 
+    def print_entry(identifier, author, date, title, url,
                     MM_mm_file, base_mm_file, close='</li>\n'):
 
         identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (
@@ -1256,14 +1261,15 @@ def emit_results(entries, query, results_file):
             link_html = ''
         from_html = 'from <a href="%s">%s</a>' % (MM_mm_file, base_mm_file)
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
-            % (identifier_html, title_html, link_html, from_html, close))
+                           % (identifier_html, title_html, link_html,
+                              from_html, close))
 
     for entry in dict_sorted_by_keys(entries):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
         title = entry['title']
         date = entry['date']
-        url = entry.get('url','')
+        url = entry.get('url', '')
         base_mm_file = os.path.basename(entry['_mm_file'])
         MM_mm_file = get_url_MM(entry['_mm_file'])
 
@@ -1272,36 +1278,37 @@ def emit_results(entries, query, results_file):
             results_file.write('          <li class="li_entry_identifier">\n'
                                '          <ul class="tit_child">\n'),
             results_file.write(
-                '<li style="text-align: right">[<a href="%s">%s</a>]</li>' 
-                % (MM_mm_file,base_mm_file),)
-            fl_names = ', '.join(name[0] + ' ' 
+                '<li style="text-align: right">[<a href="%s">%s</a>]</li>'
+                % (MM_mm_file, base_mm_file),)
+            fl_names = ', '.join(name[0] + ' '
                                  + name[2] for name in entry['author'])
             title_mdn = "%s" % (title)
             if url:
                 title_mdn = "[%s](%s)" % (title, url)
-            results_file.write('<li class="mdn">[%s]: %s, %s, "%s".</li>'
+            results_file.write(
+                '<li class="mdn">[%s]: %s, %s, "%s".</li>'
                 % (identifier, fl_names, date[0:4], title_mdn))
             results_file.write('<li class="author">%s</li>' % fl_names)
             pretty_print(entry['_title_node'], entry)
             results_file.write('\n          </ul>\n</li>\n'),
 
-        # if I have some nodes that were matched, PP with citation info reversed
+        # if some nodes were matched, PP with citation info reversed
         if '_node_results' in entry:
-            print_entry(identifier, author, date, title, url, 
+            print_entry(identifier, author, date, title, url,
                         MM_mm_file, base_mm_file,
                         '<ul class="li_node_results">\n')
             for node in entry['_node_results']:
                 reverse_print(node, entry)
-            results_file.write( '  </ul></li>\n')
+            results_file.write('  </ul></li>\n')
 
         # if my author or title matched, print biblio w/ link to complete entry
         elif '_author_result' in entry:
             author = entry['_author_result'].get('TEXT') + entry['year']
-            print_entry(identifier, author, date, title, 
+            print_entry(identifier, author, date, title,
                         url, MM_mm_file, base_mm_file)
         elif '_title_result' in entry:
             title = entry['_title_result'].get('TEXT')
-            print_entry(identifier, author, date, title, 
+            print_entry(identifier, author, date, title,
                         url, MM_mm_file, base_mm_file)
 
 #################################################################
@@ -1417,7 +1424,7 @@ def walk_freeplane(node, mm_file, entries, links):
         if query_c and node.get('TEXT'):
             if query_c.search(node.get('TEXT')):
                 result = query_c.sub(
-                    lambda m: "<strong>" + m.group() + "</strong>", 
+                    lambda m: "<strong>" + m.group() + "</strong>",
                     node.get('TEXT'))
                 node.set('TEXT', result)
                 return node
@@ -1436,17 +1443,17 @@ def walk_freeplane(node, mm_file, entries, links):
 
     for d in node.getiterator():
         if 'LINK' in d.attrib:                  # found a local reference link
-            if not (d.get('LINK').startswith('http:') 
+            if not (d.get('LINK').startswith('http:')
                     and d.get('LINK').endswith('.mm')):
                 links.append(d.get('LINK'))
-        if 'STYLE_REF' in d.attrib:  # don't pick up structure nodes and comments
+        if 'STYLE_REF' in d.attrib:  # don't pick up structure nodes & comments
             if d.get('STYLE_REF') == 'author':
                 # pass author as it will be fetched upon new title
                 pass
             elif d.get('STYLE_REF') == 'title':
 
-                commit_entry(entry,entries)     # new entry, so store previous
-                entry = {}                      # and create new one
+                commit_entry(entry, entries)     # new entry, so store previous
+                entry = {}                       # and create new one
 
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
@@ -1472,9 +1479,10 @@ def walk_freeplane(node, mm_file, entries, links):
                     entry['annotation'] = d.get('TEXT').strip()
                 node_highlighted = query_highlight(d, opts.query_c)
                 if node_highlighted is not None:
-                    entry.setdefault('_node_results', []).append(node_highlighted)
+                    entry.setdefault(
+                        '_node_results', []).append(node_highlighted)
 
-    commit_entry(entry,entries)  # commit the last entry as no new titles left
+    commit_entry(entry, entries)  # commit the last entry as no new titles left
     purge_entries(entries)
 
     return entries, links
@@ -1511,7 +1519,7 @@ def build_bib(file_name, output):
     links = []          # list of other files encountered in the mind map
     done = []           # list of files processed, kept to prevent loops
     entry = {}          # dict of bibliographic data
-    entries = OrderedDict() # dict of {id : {entry}}, by insertion order
+    entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
     mm_files = []
     mm_files.append(file_name)  # list of file encountered (e.g., chase option)
     dbg("   mm_files = %s" % mm_files)
@@ -1529,17 +1537,19 @@ def build_bib(file_name, output):
             entries, links = walk_freeplane(doc, mm_file, entries, links=[])
             if opts.chase:
                 for link in links:
-                    link = os.path.abspath(os.path.dirname(mm_file) + '/' +link)
+                    link = os.path.abspath(
+                        os.path.dirname(mm_file) + '/' + link)
                     if link not in done:
-                        if not any([word in link for word in ('syllabus', 
+                        if not any([word in link for word in ('syllabus',
                                                               'readings')]):
-                            dbg("    placing %s in mm_files" %link)
+                            dbg("    placing %s in mm_files" % link)
                             mm_files.append(link)
             done.append(os.path.abspath(mm_file))
 
     if opts.query:
         results_file_name = TMP_DIR + 'query-thunderdell.html'
-        if os.path.exists(results_file_name): os.remove(results_file_name)
+        if os.path.exists(results_file_name):
+            os.remove(results_file_name)
         try:
             results_file = codecs.open(results_file_name, "w", "utf-8")
         except IOError:
@@ -1576,7 +1586,7 @@ def build_bib(file_name, output):
 
 def _test_results():
     """
-    Tests the overall parsing of Mindmap XML and the relationships between 
+    Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
 
     >>> call('fe ~/bin/fe/tests/authorless.mm > \
@@ -1657,7 +1667,7 @@ if __name__ == '__main__':
                       help="query the mindmaps", metavar="QUERY")
     parser.set_defaults(query_c=None)
     parser.add_option("-s", "--style", default="apalike",
-                      help="use bibtex stylesheet (default: %default)", 
+                      help="use bibtex stylesheet (default: %default)",
                       metavar="BST")
     parser.add_option("-T", "--tests",
                       action="store_true", default=False,
@@ -1681,7 +1691,7 @@ if __name__ == '__main__':
     if opts.verbose == 1: log_level = logging.CRITICAL
     elif opts.verbose == 2: log_level = logging.INFO
     elif opts.verbose >= 3: log_level = logging.DEBUG
-    logging.basicConfig(level=log_level, 
+    logging.basicConfig(level=log_level,
                         format="%(levelno)s %(funcName).5s: %(message)s")
 
     opts.cgi = False

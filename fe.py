@@ -1750,7 +1750,7 @@ if __name__ == '__main__':
 
         sys.exit()
     if opts.query:
-        opts.query = urllib.parse.unquote(opts.query).decode('utf-8')
+        opts.query = urllib.parse.unquote(opts.query)
         opts.query_c = re.compile(re.escape(opts.query), re.IGNORECASE)
         output = emit_results
 

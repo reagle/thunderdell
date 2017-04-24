@@ -1443,9 +1443,9 @@ def walk_freeplane(node, mm_file, entries, links):
 
     for d in node.getiterator():
         if 'LINK' in d.attrib:                  # found a local reference link
-            if not (d.get('LINK').startswith('http:')
-                    and d.get('LINK').endswith('.mm')):
-                links.append(d.get('LINK'))
+            if (not d.get('LINK').startswith('http:')
+                and d.get('LINK').endswith('.mm')):
+                    links.append(d.get('LINK'))
         if 'STYLE_REF' in d.attrib:  # don't pick up structure nodes & comments
             if d.get('STYLE_REF') == 'author':
                 # pass author as it will be fetched upon new title
@@ -1561,7 +1561,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not opts.cgi:
-            webbrowser.open('file://' + results_file_name.encode('utf-8'))
+            webbrowser.open('file://' + results_file_name)
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:

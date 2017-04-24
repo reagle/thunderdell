@@ -994,7 +994,7 @@ def log2work(biblio):
     if ul_found:
         ul_found[0].insert(0, etree.XML(log_item))
         new_content = etree.tostring(
-            plan_tree, pretty_print=True, method="HTML")
+            plan_tree, pretty_print=True, encoding="unicode", method="HTML")
         fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
         fd.write(new_content)
         fd.close()

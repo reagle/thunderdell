@@ -3,7 +3,7 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2015 by Joseph Reagle
+# (c) Copyright 2009-2017 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
@@ -27,11 +27,12 @@ import time
 import urllib.error, urllib.parse, urllib.request
 import unicodedata
 import webbrowser
+
+from lxml.etree import parse
+useLXML = True
 from xml.sax.saxutils import escape, unescape
 
 import dateutil.parser    # http://labix.org/python-dateutil
-from lxml.etree import parse
-useLXML = True
 
 log_level = 100  # default
 critical = logging.critical
@@ -50,7 +51,7 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 
 MONTH2DIGIT = {'jan': '1', 'feb': '2', 'mar': '3',
-               'apr': '4', 'may': '5', 'jun': '6',
+			   'apr': '4', 'may': '5', 'jun': '6',
                'jul': '7', 'aug': '8', 'sep': '9',
                'oct': '10', 'nov': '11', 'dec': '12'}
 DIGIT2MONTH = dict((v, k) for k, v in MONTH2DIGIT.items())

@@ -15,10 +15,11 @@ import html.entities
 import logging
 from lxml import etree
 import os
-import requests  # http://docs.python-requests.org/en/latest/
 import re
 import sys
 from xml.sax.saxutils import escape, unescape
+
+import requests  # http://docs.python-requests.org/en/latest/
 
 HOMEDIR = os.path.expanduser('~')
 
@@ -40,6 +41,7 @@ def unescape_XML(text):
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
 
     '''
+    # is this redundant with function in fe.py?
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":

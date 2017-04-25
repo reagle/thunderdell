@@ -367,7 +367,7 @@ def normalize_whitespace(text):
 def dict_sorted_by_keys(adict):
     """Return a list of values sorted by dict's keys"""
     for key in sorted(adict):
-        dbg("key = '%s'" % (key))
+        # dbg("key = '%s'" % (key))
         yield adict[key]
 
 #################################################################
@@ -432,15 +432,14 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:    # if it still collides
-        dbg("\t trying     %s collides with %s"
-            % (ident, entries[ident]['title']))
+        # dbg("\t trying     %s crash w/ %s"% (ident, entries[ident]['title']))
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
             ident = ident[0:-1] + str(suffix)
         else:
             ident += '1'
-        dbg("\t yielded    %s" % ident)
+        # dbg("\t yielded    %s" % ident)
     return ident
 
 
@@ -460,14 +459,14 @@ def get_ident(entry, entries, delim=""):
         entry['year'] = '0000'
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['year']))
-    info("ident = %s '%s'" % (type(ident), ident))
+    # info("ident = %s '%s'" % (type(ident), ident))
     # remove chars not permitted in xml name/id attributes
     ident = ident.replace(':', '').replace("'", "")
     # remove some punct and strong added by walk_freeplane.query_highlight
     ident = ident.replace('.', ''
                          ).replace('<strong>', ''
                          ).replace('</strong>', '')
-    info("ident = %s '%s'" % (type(ident), ident))
+    # info("ident = %s '%s'" % (type(ident), ident))
     ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
     if ident[0].isdigit():        # pandoc forbids keys starting with digits
         ident = 'a' + ident
@@ -475,7 +474,7 @@ def get_ident(entry, entries, delim=""):
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
-    info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
+    # info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
     ident = ident.replace('@', '')  # remove '@' citation designator
     return str(ident)
 
@@ -491,7 +490,7 @@ def pull_citation(entry):
 
     if 'cite' in entry:
         citation = entry['cite']
-        dbg("citation = '%s'" % (citation))
+        # dbg("citation = '%s'" % (citation))
         # split around tokens of length 1-3;
         #     get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
@@ -716,7 +715,7 @@ def guess_csl_type(entry):
             sys.exit()
     et = 'no-type'
     if any(c in entry for c in list(CSL_SHORTCUTS.values())):
-        info("looking at containers for %s" % entry)
+        # info("looking at containers for %s" % entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'
         if 'c_newspaper' in entry:          et = 'article-newspaper'
@@ -812,21 +811,21 @@ def bibformat_title(title):
 
     for word in words:
         if len(word) > 0:
-            info("word = '%s'" % (word))
+            # info("word = '%s'" % (word))
             if not (word[0].isalpha()):
-                info("not (word[0].isalpha())")
+                # info("not (word[0].isalpha())")
                 cased_title.append(word)
             elif word in words2ignore:
-                info("word in words2ignore")
+                # info("word in words2ignore")
                 cased_title.append(word)
             elif (word in words2protect):
-                info("protecting lower '%s'" % (word))
+                # info("protecting lower '%s'" % (word))
                 cased_title.append('{' + word + '}')
             elif (word[0].isupper()):
-                info("protecting title '%s'" % (word))
+                # info("protecting title '%s'" % (word))
                 cased_title.append('{' + my_title(word) + '}')
             else:
-                info("else nothing")
+                # info("else nothing")
                 cased_title.append(my_title(word))
     quoted_title = ''.join(cased_title)
 
@@ -856,7 +855,7 @@ ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org', 'salon.com',
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
-    dbg("entries = '%s'" % (entries))
+    # dbg("entries = '%s'" % (entries))
 
     for entry in dict_sorted_by_keys(entries):
         entry_type = guess_bibtex_type(entry)
@@ -897,7 +896,7 @@ def emit_biblatex(entries):
                     del entry['booktitle']
 
         # CSL type and field conversions
-        info("entry = %s" % entry)
+        # info("entry = %s" % entry)
         for field in ('c_blog', 'c_web', 'c_forum'):
             if field in entry:
                 entry_type_copy = 'online'
@@ -923,23 +922,23 @@ def emit_biblatex(entries):
         for short, field in sorted(list(BIB_SHORTCUTS.items()),
                                    key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
-                critical("short, field = '%s , %s'" % (short, field))
+                # critical("short, field = '%s , %s'" % (short, field))
                 # skip these fields
                 if field in ('identifier', 'entry_type', 'ori_author'):
                     continue
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field in ('url'):
-                    critical("url = %s" % entry[field])
+                    # info("url = %s" % entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
-                        critical("banned")
+                        # info("banned")
                         continue
                     # if online_only and not (online or online journal)
                     if opts.online_urls_only and not (
                             entry_type == 'online' or
                             any(j for j in ONLINE_JOURNALS
                                 if j in entry['url'])):
-                        critical("not online")
+                        # info("not online")
                         continue
 
                 # skip fields not in bibtex
@@ -948,7 +947,7 @@ def emit_biblatex(entries):
 
                 # if entry[field] not a proper string, make it so
                 value = entry[field]  # remove xml entities
-                info("value = %s; type = %s" % (value, type(value)))
+                # info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
                 if opts.bibtex and field == 'month':
@@ -990,7 +989,7 @@ def emit_yaml_csl(entries):
         """yaml writer for authors and editors"""
 
         for person in people:
-            info("person = '%s'" % (' '.join(person)))
+            # info("person = '%s'" % (' '.join(person)))
             # bibtex ('First Middle', 'von', 'Last', 'Jr.')
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
@@ -1009,7 +1008,7 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
-        info("date '%s'" % date)
+        # info("date '%s'" % date)
         year, month, day = (date.split('-') + 3 * [None])[0:3]
         if year:
             opts.outfd.write('    year: %s\n' % year)
@@ -1052,7 +1051,7 @@ def emit_yaml_csl(entries):
                                    key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                info("short, field = '%s , %s'" % (short, field))
+                # info("short, field = '%s , %s'" % (short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
                              'day', 'month', 'year', 'issue'):
@@ -1085,19 +1084,19 @@ def emit_yaml_csl(entries):
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field == 'url':
-                    info("url = %s" % entry[field])
+                    # info("url = %s" % entry[field])
                     if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
-                        info("banned")
+                        # info("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if opts.online_urls_only:
-                        info("online_urls_only")
+                        # info("online_urls_only")
                         # don't skip online types
                         if entry_type in ('post', 'post-weblog', 'webpage'):
                             pass
                         # skip items that are paginated
                         elif 'pages' in entry:
-                            info("  skipping url, paginated item")
+                            # info("  skipping url, paginated item")
                             continue
                 if field == 'eventtitle' and 'container-title' not in entry:
                     opts.outfd.write('  container-title: "Proceedings of %s"\n'
@@ -1105,8 +1104,8 @@ def emit_yaml_csl(entries):
                 if field == 'c_blog' and entry[field] == 'Blog':
                     continue
 
-                info('field = %s' % (field))
-                # info(BIBLATEX_CSL_FIELD_MAP)
+                # info('field = %s' % (field))
+                # # info(BIBLATEX_CSL_FIELD_MAP)
                 if field in CONTAINERS:
                     field = 'container-title'
                 # containers already in titlecase,
@@ -1114,9 +1113,9 @@ def emit_yaml_csl(entries):
                 # if field == 'container-title':
                 #     value = "<span class='nocase'>%s</span>" % value
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    info("bib2csl field FROM =  %s" % (field))
+                    # info("bib2csl field FROM =  %s" % (field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    info("bib2csl field TO   = %s" % (field))
+                    # info("bib2csl field TO   = %s" % (field))
                 opts.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
     opts.outfd.write('...\n')
 
@@ -1248,10 +1247,10 @@ def emit_results(entries, query, results_file):
         token = token.replace('<strong>', '').replace('</strong>', '')
         # urllib won't accept unicode
         token = urllib.parse.quote(token.encode('utf-8'))
-        dbg("token = '%s' type = '%s'" % (token, type(token)))
+        # dbg("token = '%s' type = '%s'" % (token, type(token)))
         url_query = \
             escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
-        dbg("url_query = '%s' type = '%s'" % (url_query, type(url_query)))
+        # dbg("url_query = '%s' type = '%s'" % (url_query, type(url_query)))
         return url_query
 
     def get_url_MM(file_name):
@@ -1351,10 +1350,10 @@ def parse_names(names):
     suffixes = ("Jr.", "Sr.", "II", "III", "IV")
     names_p = []
 
-    info("names = '%s'" % (names))
+    # info("names = '%s'" % (names))
     names_split = names.split(',')
     for name in names_split:
-        info("name = '%s'" % (name))
+        # info("name = '%s'" % (name))
         first = last = von = jr = ''
         chunks = name.strip().split()
 
@@ -1394,15 +1393,6 @@ def commit_entry(entry, entries):
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
-
-
-def purge_entries(entries):
-    """Delete Null entries"""
-    for entry in list(entries.keys()):
-        dbg("%s %s" % (type(entry), entry))
-        if entries[entry]['identifier'] == 'Null':
-            dbg("   deleting %s" % entry)
-            del entries[entry]
 
 
 def walk_freeplane(node, mm_file, entries, links):
@@ -1448,7 +1438,7 @@ def walk_freeplane(node, mm_file, entries, links):
     def get_author_node(node):
         """ Return the nearest author node ancestor """
         ancestor = get_parent(node)
-        dbg(node.get('TEXT'))
+        # dbg(node.get('TEXT'))
         while ancestor.get('STYLE_REF') != 'author':
             ancestor = get_parent(ancestor)
         return ancestor
@@ -1495,7 +1485,6 @@ def walk_freeplane(node, mm_file, entries, links):
                         '_node_results', []).append(node_highlighted)
 
     commit_entry(entry, entries)  # commit the last entry as no new titles left
-    purge_entries(entries)
 
     return entries, links
 
@@ -1534,18 +1523,18 @@ def build_bib(file_name, output):
     entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
     mm_files = []
     mm_files.append(file_name)  # list of file encountered (e.g., chase option)
-    dbg("   mm_files = %s" % mm_files)
+    # dbg("   mm_files = %s" % mm_files)
     for mm_file in mm_files:
         if mm_file in done:
             continue
         else:
-            dbg("   processing %s" % mm_file)
+            # dbg("   processing %s" % mm_file)
             try:
                 doc = parse(mm_file).getroot()
             except IOError as err:
-                dbg("    failed to parse %s" % mm_file)
+                # dbg("    failed to parse %s" % mm_file)
                 continue
-            dbg("    successfully parsed %s" % mm_file)
+            # dbg("    successfully parsed %s" % mm_file)
             entries, links = walk_freeplane(doc, mm_file, entries, links=[])
             if opts.chase:
                 for link in links:
@@ -1554,7 +1543,7 @@ def build_bib(file_name, output):
                     if link not in done:
                         if not any([word in link for word in ('syllabus',
                                                               'readings')]):
-                            dbg("    placing %s in mm_files" % link)
+                            # dbg("    placing %s in mm_files" % link)
                             mm_files.append(link)
             done.append(os.path.abspath(mm_file))
 
@@ -1700,9 +1689,12 @@ if __name__ == '__main__':
     opts, files = parser.parse_args()
     opts.year = True
 
-    if opts.verbose == 1: log_level = logging.CRITICAL
-    elif opts.verbose == 2: log_level = logging.INFO
-    elif opts.verbose >= 3: log_level = logging.DEBUG
+    if opts.verbose == 1:
+        log_level = logging.CRITICAL
+    elif opts.verbose == 2:
+        log_level = logging.INFO
+    elif opts.verbose >= 3:
+        log_level = logging.DEBUG
     logging.basicConfig(level=log_level,
                         format="%(levelno)s %(funcName).5s: %(message)s")
 

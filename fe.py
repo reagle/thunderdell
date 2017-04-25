@@ -24,7 +24,9 @@ import re
 from subprocess import call
 import sys
 import time
-import urllib.error, urllib.parse, urllib.request
+# import urllib.error
+import urllib.parse
+# import urllib.request
 import unicodedata
 import webbrowser
 
@@ -299,20 +301,30 @@ def pretty_tabulate_dict(mydict, cols=3):
 
 
 def unescape_XML(o):
-    '''Unescape XML character entities; & < > are defaulted'''
+    '''Unescape XML character entities in a string;
+    &<> are by default; I add apostrophe and quote'''
+
     extras = {"&apos;": "'", "&quot;": '"'}
-    if isinstance(o, str):
-        return(unescape(o, extras))
-    elif isinstance(o, list):  # it's a list of authors with name parts
-        new_authors = []
-        for author in o:
-            new_author = []
-            for name_part in author:
-                new_author.append(unescape(name_part, extras))
-            new_authors.append(new_author)
-        return(new_authors)
-    else:
-        raise TypeError('o = %s; type = %s' % (o, type(o)))
+    return(unescape(o, extras))
+
+
+# def unescape_XML(o):
+#     '''Unescape XML character entities in a string or list;
+#        & < > are by default; I add apostrophe and quote'''
+
+#     extras = {"&apos;": "'", "&quot;": '"'}
+#     if isinstance(o, str):
+#         return(unescape(o, extras))
+#     elif isinstance(o, list):  # it's a list of authors recurse on name parts
+#         new_authors = []
+#         for author in o:
+#             new_author = []
+#             for name_part in author:
+#                 new_author.append(unescape(name_part, extras))
+#             new_authors.append(new_author)
+#         return(new_authors)
+#     else:
+#         raise TypeError('o = %s; type = %s' % (o, type(o)))
 
 
 def escape_latex(text):
@@ -935,7 +947,7 @@ def emit_biblatex(entries):
                         continue
 
                 # if entry[field] not a proper string, make it so
-                value = unescape_XML(entry[field])  # remove xml entities
+                value = entry[field]  # remove xml entities
                 info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
@@ -980,9 +992,9 @@ def emit_yaml_csl(entries):
         for person in people:
             info("person = '%s'" % (' '.join(person)))
             # bibtex ('First Middle', 'von', 'Last', 'Jr.')
-            # CSL ('family', 'given', 'suffix' 'non-dropping-particle', 'dropping-particle'
-            given, particle, family, suffix = [unescape_XML(chunk)
-                                               for chunk in person]
+            # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
+            #      'dropping-particle')
+            given, particle, family, suffix = person
             opts.outfd.write('  - family: %s\n' % esc_yaml(family))
             if given:
                 opts.outfd.write('    given: %s\n' % esc_yaml(given))
@@ -1039,7 +1051,7 @@ def emit_yaml_csl(entries):
         for short, field in sorted(list(BIB_SHORTCUTS.items()),
                                    key=lambda t: t[1]):
             if field in entry and entry[field] is not None:
-                value = unescape_XML(entry[field])
+                value = entry[field]
                 info("short, field = '%s , %s'" % (short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
@@ -1445,7 +1457,7 @@ def walk_freeplane(node, mm_file, entries, links):
         if 'LINK' in d.attrib:                  # found a local reference link
             if (not d.get('LINK').startswith('http:')
                 and d.get('LINK').endswith('.mm')):
-                    links.append(d.get('LINK'))
+                    links.append(unescape_XML(d.get('LINK')))
         if 'STYLE_REF' in d.attrib:  # don't pick up structure nodes & comments
             if d.get('STYLE_REF') == 'author':
                 # pass author as it will be fetched upon new title
@@ -1458,13 +1470,13 @@ def walk_freeplane(node, mm_file, entries, links):
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
-                entry['ori_author'] = author_node.get('TEXT')
+                entry['ori_author'] = unescape_XML(author_node.get('TEXT'))
                 entry['author'] = parse_names(entry['ori_author'])
                 author_highlighted = query_highlight(author_node, opts.query_c)
                 if author_highlighted is not None:
                     entry['_author_result'] = author_highlighted
 
-                entry['title'] = d.get('TEXT')
+                entry['title'] = unescape_XML(d.get('TEXT'))
                 entry['_mm_file'] = mm_file
                 entry['_title_node'] = d
                 title_highlighted = query_highlight(d, opts.query_c)
@@ -1474,9 +1486,9 @@ def walk_freeplane(node, mm_file, entries, links):
                     entry['url'] = d.get('LINK')
             else:
                 if d.get('STYLE_REF') == 'cite':
-                    entry['cite'] = d.get('TEXT')
+                    entry['cite'] = unescape_XML(d.get('TEXT'))
                 elif d.get('STYLE_REF') == 'annotation':
-                    entry['annotation'] = d.get('TEXT').strip()
+                    entry['annotation'] = unescape_XML(d.get('TEXT').strip())
                 node_highlighted = query_highlight(d, opts.query_c)
                 if node_highlighted is not None:
                     entry.setdefault(

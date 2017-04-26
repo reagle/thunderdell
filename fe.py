@@ -308,25 +308,6 @@ def unescape_XML(o):
     return(unescape(o, extras))
 
 
-# def unescape_XML(o):
-#     '''Unescape XML character entities in a string or list;
-#        & < > are by default; I add apostrophe and quote'''
-
-#     extras = {"&apos;": "'", "&quot;": '"'}
-#     if isinstance(o, str):
-#         return(unescape(o, extras))
-#     elif isinstance(o, list):  # it's a list of authors recurse on name parts
-#         new_authors = []
-#         for author in o:
-#             new_author = []
-#             for name_part in author:
-#                 new_author.append(unescape(name_part, extras))
-#             new_authors.append(new_author)
-#         return(new_authors)
-#     else:
-#         raise TypeError('o = %s; type = %s' % (o, type(o)))
-
-
 def escape_latex(text):
     text = text.replace('$', '\$') \
         .replace('&', r'\&') \
@@ -507,19 +488,15 @@ def pull_citation(entry):
     else:
         entry['date'] = '0000'
 
-    # If it's an URL and has a read date, insert text
     # if 'url' in entry and entry['url'] is not None:
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
     if 'custom1' in entry and 'url' in entry:
-        try:
-            urldate = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'],
-                                    "%Y%m%d"))
-        except ValueError:
-            urldate = time.strftime("%Y-%m-%d", time.strptime(entry['custom1'],
-                                    "%Y%m%d %H:%M UTC"))
-        entry['urldate'] = urldate
+        entry['urldate'] = "%s-%s-%s" % (
+            entry['custom1'][0:4],  # year
+            entry['custom1'][4:6],  # month
+            entry['custom1'][6:8])  # day
         del entry['custom1']
 
     if 'month' in entry:
@@ -1418,15 +1395,12 @@ def walk_freeplane(node, mm_file, entries, links):
 
     def query_highlight(node, query_c):
         """ Return a modified node with matches highlighted"""
-        if query_c and node.get('TEXT'):
-            if query_c.search(node.get('TEXT')):
-                result = query_c.sub(
-                    lambda m: "<strong>" + m.group() + "</strong>",
-                    node.get('TEXT'))
-                node.set('TEXT', result)
-                return node
-            else:
-                return None
+        if query_c.search(node.get('TEXT')):
+            result = query_c.sub(
+                lambda m: "<strong>" + m.group() + "</strong>",
+                node.get('TEXT'))
+            node.set('TEXT', result)
+            return node
         else:
             return None
 
@@ -1443,41 +1417,41 @@ def walk_freeplane(node, mm_file, entries, links):
             if (not d.get('LINK').startswith('http:')
                 and d.get('LINK').endswith('.mm')):
                     links.append(unescape_XML(d.get('LINK')))
-        if 'STYLE_REF' in d.attrib:  # don't pick up structure nodes & comments
+        # skip nodes that are structure, comment, and empty of text
+        if 'STYLE_REF' in d.attrib and d.get('TEXT'):
             if d.get('STYLE_REF') == 'author':
                 # pass author as it will be fetched upon new title
                 pass
             elif d.get('STYLE_REF') == 'title':
-
                 commit_entry(entry, entries)     # new entry, so store previous
                 entry = {}                       # and create new one
-
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
                 entry['ori_author'] = unescape_XML(author_node.get('TEXT'))
                 entry['author'] = parse_names(entry['ori_author'])
-                author_highlighted = query_highlight(author_node, opts.query_c)
-                if author_highlighted is not None:
-                    entry['_author_result'] = author_highlighted
-
                 entry['title'] = unescape_XML(d.get('TEXT'))
                 entry['_mm_file'] = mm_file
                 entry['_title_node'] = d
-                title_highlighted = query_highlight(d, opts.query_c)
-                if title_highlighted is not None:
-                    entry['_title_result'] = title_highlighted
                 if 'LINK' in d.attrib:
                     entry['url'] = d.get('LINK')
+                if opts.query_c:
+                    author_highlighted = query_highlight(author_node, opts.query_c)
+                    if author_highlighted is not None:
+                        entry['_author_result'] = author_highlighted
+                    title_highlighted = query_highlight(d, opts.query_c)
+                    if title_highlighted is not None:
+                        entry['_title_result'] = title_highlighted
             else:
                 if d.get('STYLE_REF') == 'cite':
                     entry['cite'] = unescape_XML(d.get('TEXT'))
                 elif d.get('STYLE_REF') == 'annotation':
                     entry['annotation'] = unescape_XML(d.get('TEXT').strip())
-                node_highlighted = query_highlight(d, opts.query_c)
-                if node_highlighted is not None:
-                    entry.setdefault(
-                        '_node_results', []).append(node_highlighted)
+                if opts.query_c:
+                    node_highlighted = query_highlight(d, opts.query_c)
+                    if node_highlighted is not None:
+                        entry.setdefault(
+                            '_node_results', []).append(node_highlighted)
 
     commit_entry(entry, entries)  # commit the last entry as no new titles left
 

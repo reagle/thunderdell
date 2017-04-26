@@ -18,29 +18,26 @@ import codecs
 from cgi import escape, parse_qs
 from collections import OrderedDict
 import logging
+from lxml.etree import parse
 from optparse import OptionParser
 import os
 import re
 from subprocess import call
 import sys
 import time
-# import urllib.error
 import urllib.parse
-# import urllib.request
 import unicodedata
 import webbrowser
 
-from xml.sax.saxutils import escape, unescape
-from lxml.etree import parse
-useLXML = True
-
 import dateutil.parser    # http://labix.org/python-dateutil
+from web_little import escape_XML, unescape_XML
 
 log_level = 100  # default
 critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
+useLXML = True
 HOME = os.path.expanduser('~')
 DEFAULT_MAPS = (HOME + '/joseph/readings.mm',)
 
@@ -298,15 +295,6 @@ def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
         sorted(['%s:%s' % (key, value)
                for key, value in list(mydict.items())]), cols)
-
-
-def unescape_XML(o):
-    '''Unescape XML character entities in a string;
-    &<> are by default; I add apostrophe and quote'''
-
-    extras = {"&apos;": "'", "&quot;": '"'}
-    return(unescape(o, extras))
-
 
 def escape_latex(text):
     text = text.replace('$', '\$') \

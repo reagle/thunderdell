@@ -1,19 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 
 # On Webfaction [1] this script and its parent directory must be chmod 711
 # [1]: http://docs.webfaction.com/software/static.html#error-500-internal-server-error
+# On Webfaction env python3 = python3.2; so I must set 3.5 on the shebang above
 
-# Main function
 def cgi_main():
     global opts
-    import codecs, cgi, os, re, sys, urllib.parse
+    import codecs, cgi, os, re, sys
     from urllib.parse import quote, unquote
 
     from os.path import expanduser
     HOME = expanduser("~")
 
-    # sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
+    # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
     env = os.environ
 
@@ -27,8 +28,8 @@ def cgi_main():
     #query = form.getfirst('query', 'aux2bib')
     #site = form.getvalue('sitesearch', 'BusySponge') 
 
-    query = unquote(query)  #.decode(charset)
-    
+    query = unquote(query) 
+
     if query.startswith('@'):
         query = query[1:]
 
@@ -41,7 +42,6 @@ def cgi_main():
         fileObj.close()
     else:
         sys.path.append(HOME+"/bin/fe")
-        # sys.path.append(HOME+"/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
         MINDMAP = (HOME+'/data/2web/reagle.org/joseph/readings.mm')
 
         import fe
@@ -58,7 +58,8 @@ def cgi_main():
 
         fe.build_bib(MINDMAP, output)
 
-        fileObj = codecs.open(fe.TMP_DIR + 'query-thunderdell.html', "r", "utf-8")
+        fileObj = codecs.open(fe.TMP_DIR + 'query-thunderdell.html', 
+                              "r", "utf-8")
         print((fileObj.read()))
         fileObj.close()
 

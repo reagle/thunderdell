@@ -11,8 +11,6 @@
 
 # TODO
 # *  use argparse;
-# 20090519: bibformat_title and pull_citation each use about ~7%
-# 20120514: biblatex/biber doesn't accept BCE/negative, can use year
 
 import codecs
 from cgi import escape, parse_qs
@@ -126,7 +124,7 @@ CSL_FIELDS = dict([(field, short) for short, field in
 CONTAINERS = list(CSL_SHORTCUTS.values())
 CONTAINERS.append('organization')
 
-BIBLATEX_TYPES = (
+BIBLATEX_TYPES = {
     'article',
     'book',
     'booklet',
@@ -144,9 +142,9 @@ BIBLATEX_TYPES = (
     'periodical',
     'proceedings',
     'online',
-    )
+    }
 
-CSL_TYPES = (
+CSL_TYPES = {
     'article',
     'article-magazine',
     'article-newspaper',
@@ -182,9 +180,9 @@ CSL_TYPES = (
     'thesis',
     'treaty',
     'webpage',
-    )
+    }
 
-BIB_TYPES = BIBLATEX_TYPES + CSL_TYPES
+BIB_TYPES = BIBLATEX_TYPES | CSL_TYPES
 
 # http://reagle.org/joseph/2013/08/bib-mapping.html
 CSL_BIBLATEX_TYPE_MAP = OrderedDict([
@@ -259,20 +257,20 @@ WP_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
                                     list(BIBLATEX_WP_FIELD_MAP.items()))
 
 
-BIBTEX_FIELDS = [
+BIBTEX_FIELDS = {
     'address', 'annote', 'author', 'booktitle', 'chapter',
     'crossref', 'edition', 'editor', 'howpublished', 'institution', 'journal',
     'key', 'month', 'note', 'number', 'organization', 'pages', 'publisher',
-    'school', 'series', 'title', 'type', 'volume', 'year']
+    'school', 'series', 'title', 'type', 'volume', 'year'}
 
-BIBLATEX_FIELDS = BIBTEX_FIELDS + [
+BIBLATEX_FIELDS = BIBTEX_FIELDS | {
     'addendum', 'annotation',
     'catalog', 'custom1', 'custom2', 'custom4', 'custom5',
     'date', 'day', 'doi', 'entry_type', 'eventtitle',
     'identifier', 'isbn', 'issue', 'keyword',
     'origdate', 'origlanguage', 'origpublisher''origyear',
     'pagination', 'pubstate', 'retype', 'shorttitle',
-    'translator', 'url', 'urldate', 'venue']
+    'translator', 'url', 'urldate', 'venue'}
 
 
 # url not original bibtex standard, but is common,
@@ -295,6 +293,7 @@ def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
         sorted(['%s:%s' % (key, value)
                for key, value in list(mydict.items())]), cols)
+
 
 def escape_latex(text):
     text = text.replace('$', '\$') \
@@ -333,8 +332,8 @@ def normalize_whitespace(text):
     return text
 
 
-def dict_sorted_by_keys(adict):
-    """Return a list of values sorted by dict's keys"""
+def sorted_dict_generator(adict):
+    """Returns an dict generator sorted by keys"""
     for key in sorted(adict):
         # dbg("key = '%s'" % (key))
         yield adict[key]
@@ -343,12 +342,11 @@ def dict_sorted_by_keys(adict):
 # Entry construction
 #################################################################
 
-ARTICLES = ('a', 'an', 'the')
-CONJUNCTIONS = ('and', 'but', 'nor', 'or')
-SHORT_PREPOSITIONS = ('among', 'as', 'at', 'by', 'for', 'from', 'in',
-                      'of', 'on', 'out', 'per', 'to', 'upon', 'with', )
-BORING_WORDS = ('', 're') + ARTICLES + CONJUNCTIONS + \
-    SHORT_PREPOSITIONS
+ARTICLES = {'a', 'an', 'the'}
+CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
+SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
+                      'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
+BORING_WORDS = {'', 're'} | ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS
 
 
 def identity_add_title(ident, title):
@@ -480,7 +478,7 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'custom1' in entry and 'url' in entry:
+    if 'custom1' in entry and 'url' in entry:  # URL read/accessed date
         entry['urldate'] = "%s-%s-%s" % (
             entry['custom1'][0:4],  # year
             entry['custom1'][4:6],  # month
@@ -548,8 +546,8 @@ def pull_citation(entry):
         oldid = queries['oldid'][0]
         entry['shorttitle'] = '%s (oldid=%s)' % (entry['title'], oldid)
         if not opts.long_url:  # short URLs
-            base = 'http://' + url.split('/')[2]
-            oldid = '/?oldid=' + oldid
+            base = 'http://%s' % url.split('/')[2]
+            oldid = '/?oldid=%s' % oldid
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
 
@@ -679,7 +677,7 @@ def guess_csl_type(entry):
             print(("Unknown entry_type = %s" % et))
             sys.exit()
     et = 'no-type'
-    if any(c in entry for c in list(CSL_SHORTCUTS.values())):
+    if any(c in entry for c in CSL_SHORTCUTS.values()):
         # info("looking at containers for %s" % entry)
         if 'c_journal' in entry:            et = 'article-journal'
         if 'c_magazine' in entry:           et = 'article-magazine'
@@ -724,8 +722,8 @@ def guess_csl_type(entry):
     elif et == 'post-weblog':
         genre = 'Web log message'
     if 'url' in entry:
-        if any([site in entry['url'] for site in (
-                'youtube.com', 'vimeo.com')]):
+        if any([site in entry['url'] for site in {
+                'youtube.com', 'vimeo.com'}]):
             genre = 'Video file'
 
     return et, genre
@@ -744,19 +742,25 @@ def bibformat_title(title):
     """
     protected_title = cased_title = quoted_title = []
 
-    articles = ['a', 'an', 'the']
-    conjunctions = ['and', 'but', 'for', 'or', 'nor']
-    contractions = ['s', 't', 've', 're']   # following apostrophe
-    others = []
-    prepositions = (
-        'aboard about above across after against along among around as at '
-        'before behind below beneath beside  between beyond but by '
-        'concerning despite down during except for from in  into like near '
-        'of off on onto out outside over past per regarding since '
-        'through throughout till to toward '
-        'under underneath until up  upon versus with within without').split()
-    words2ignore = articles + conjunctions + contractions + others + prepositions
-    words2protect = ('vs.', 'oldid')
+    articles = {'a', 'an', 'the'}
+    conjunctions = {'and', 'but', 'for', 'or', 'nor'}
+    contractions = {'s', 't', 've', 're'}   # following apostrophe
+    others = set()
+    prepositions = {
+        'aboard', 'about', 'above', 'across', 'after', 'against', 'along',
+        'among', 'around', 'as', 'at', 'before', 'behind', 'below',
+        'beneath', 'beside', '', 'between', 'beyond', 'but', 'by',
+        'concerning', 'despite', 'down', 'during', 'except', 'for',
+        'from', 'in', '', 'into', 'like', 'near',
+        'of', 'off', 'on', 'onto', 'out', 'outside', 'over',
+        'past', 'per', 'regarding', 'since',
+        'through', 'throughout', 'till', 'to', 'toward',
+        'under', 'underneath', 'until', 'up', '', 'upon', 'versus',
+        'with', 'within', 'without'
+    }
+    words2ignore = articles | conjunctions | contractions | others \
+       | prepositions
+    words2protect = {'vs.', 'oldid'}
 
     whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
     words = whitespace_pat.split(title)
@@ -764,7 +768,7 @@ def bibformat_title(title):
     chunk_pat = re.compile(r"""([-:])""", re.UNICODE)
 
     def my_title(text):
-        '''title case after some chars -- but not ['.] like .title()'''
+        '''title case after some chars, but not ['.] like .title()'''
 
         text_list = list(text)
         text_list[0] = text_list[0].upper()
@@ -785,10 +789,10 @@ def bibformat_title(title):
                 cased_title.append(word)
             elif (word in words2protect):
                 # info("protecting lower '%s'" % (word))
-                cased_title.append('{' + word + '}')
+                cased_title.append('{%s}' % word)
             elif (word[0].isupper()):
                 # info("protecting title '%s'" % (word))
-                cased_title.append('{' + my_title(word) + '}')
+                cased_title.append('{%s}' % my_title(word))
             else:
                 # info("else nothing")
                 cased_title.append(my_title(word))
@@ -796,7 +800,7 @@ def bibformat_title(title):
 
     # convert quotes to LaTeX then convert doubles to singles within the title
     if quoted_title[0] == '"':  # First char is a quote
-        quoted_title = '``' + quoted_title[1:]
+        quoted_title = '``%s' % quoted_title[1:]
     # open quote
     quoted_title = quoted_title.replace(' "', ' ``').replace(" '", " `")
     # close quote
@@ -812,17 +816,17 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
-EXCLUDE_URLS = ('search?q=cache', 'proquest', 'books.google',
-                'amazon.com')
-ONLINE_JOURNALS = ('firstmonday.org', 'media-culture.org', 'salon.com',
-                   'slate.com')
+EXCLUDE_URLS = {'search?q=cache', 'proquest', 'books.google',
+                'amazon.com'}
+ONLINE_JOURNALS = {'firstmonday.org', 'media-culture.org', 'salon.com',
+                   'slate.com'}
 
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
     # dbg("entries = '%s'" % (entries))
 
-    for entry in dict_sorted_by_keys(entries):
+    for entry in sorted_dict_generator(entries):
         entry_type = guess_bibtex_type(entry)
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
@@ -832,7 +836,7 @@ def emit_biblatex(entries):
 
         # bibtex syntax accommodations
         if 'eventtitle' in entry and 'booktitle' not in entry:
-            entry['booktitle'] = 'Proceedings of ' + entry['eventtitle']
+            entry['booktitle'] = 'Proceedings of %s' % entry['eventtitle']
         if opts.bibtex:
             if 'url' in entry:  # most bibtex styles doesn't support url
                 note = ' Available at: \\url{%s}' % entry['url']
@@ -911,7 +915,7 @@ def emit_biblatex(entries):
                         continue
 
                 # if entry[field] not a proper string, make it so
-                value = entry[field]  # remove xml entities
+                value = entry[field]
                 # info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
@@ -947,7 +951,7 @@ def emit_yaml_csl(entries):
             s = s.replace('"', r"\'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
-            s = '"' + s + '"'
+            s = '"%s"' %s
         return s
 
     def emit_yaml_people(people):
@@ -997,7 +1001,7 @@ def emit_yaml_csl(entries):
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
-    for entry in dict_sorted_by_keys(entries):
+    for entry in sorted_dict_generator(entries):
         entry_type, genre = guess_csl_type(entry)
         opts.outfd.write('- id: %s\n' % entry['identifier'])
         opts.outfd.write('  type: %s\n' % entry_type)
@@ -1096,14 +1100,14 @@ def emit_wp_citation(entries):
                 prefix = ''
                 suffix = name_num
             elif field == 'editor':
-                prefix = 'editor' + str(name_num) + '-'
+                prefix = 'editor%s-' % str(name_num)
                 suffix = ''
             opts.outfd.write(
                 '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
             opts.outfd.write(
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
 
-    for entry in dict_sorted_by_keys(entries):
+    for entry in sorted_dict_generator(entries):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
             wp_ident = get_ident(entry, entries, delim=" & ")
@@ -1154,19 +1158,19 @@ def emit_results(entries, query, results_file):
                 # kindle: location
                 if 'pagination' in entry:
                     if entry['pagination'] == 'section':
-                        locator = ', sec. ' + locator
+                        locator = ', sec. %s' % locator
                     elif entry['pagination'] == 'paragraph':
-                        locator = ', para. ' + locator
+                        locator = ', para. %s' % locator
                     elif entry['pagination'] == 'location':
-                        locator = ', loc. ' + locator
+                        locator = ', loc. %s' % locator
                     elif entry['pagination'] == 'chapter':
-                        locator = ', ch. ' + locator
+                        locator = ', ch. %s' % locator
                     elif entry['pagination'] == 'verse':
-                        locator = ', vers. ' + locator
+                        locator = ', vers. %s' % locator
                     elif entry['pagination'] == 'column':
-                        locator = ', col. ' + locator
+                        locator = ', col. %s' % locator
                     elif entry['pagination'] == 'line':
-                        locator = ', line ' + locator
+                        locator = ', line %s' % locator
                     else:
                         raise Exception(
                             "unknown locator '%s' for '%s' in '%s'"
@@ -1174,9 +1178,9 @@ def emit_results(entries, query, results_file):
                                entry['custom2']))
                 else:
                     if '-' in locator:
-                        locator = ', pp. ' + locator
+                        locator = ', pp. %s' % locator
                     else:
-                        locator = ', p. ' + locator
+                        locator = ', p. %s' % locator
             cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
 
         hypertext = text
@@ -1218,7 +1222,7 @@ def emit_results(entries, query, results_file):
         if __name__ == '__main__':
             return file_name
         else:                               # CGI
-            return 'file://' + '/Users/' + file_name[6:]  # change from /home/
+            return 'file:///Users/%s' % file_name[6:]  # change from /home/
 
     def print_entry(identifier, author, date, title, url,
                     MM_mm_file, base_mm_file, close='</li>\n'):
@@ -1235,7 +1239,7 @@ def emit_results(entries, query, results_file):
                            % (identifier_html, title_html, link_html,
                               from_html, close))
 
-    for entry in dict_sorted_by_keys(entries):
+    for entry in sorted_dict_generator(entries):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
         title = entry['title']
@@ -1385,7 +1389,7 @@ def walk_freeplane(node, mm_file, entries, links):
         """ Return a modified node with matches highlighted"""
         if query_c.search(node.get('TEXT')):
             result = query_c.sub(
-                lambda m: "<strong>" + m.group() + "</strong>",
+                lambda m: "<strong>%s</strong>" % m.group(),
                 node.get('TEXT'))
             node.set('TEXT', result)
             return node
@@ -1519,7 +1523,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not opts.cgi:
-            webbrowser.open('file://' + results_file_name)
+            webbrowser.open('file://%s' % results_file_name)
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1536,7 +1540,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not opts.cgi:
-            webbrowser.open('file://' + results_file_name.encode('utf-8'))
+            webbrowser.open('file://%s' % results_file_name.encode('utf-8'))
     else:
         output(entries)
     return

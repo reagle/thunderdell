@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # On Webfaction [1] this script and its parent directory must be chmod 711
@@ -7,13 +7,13 @@
 # Main function
 def cgi_main():
     global opts
-    import codecs, cgi, os, re, sys, urlparse
-    from urllib import quote, unquote
+    import codecs, cgi, os, re, sys, urllib.parse
+    from urllib.parse import quote, unquote
 
     from os.path import expanduser
     HOME = expanduser("~")
 
-    sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
+    # sys.stdout = codecs.getwriter('UTF-8')(sys.__stdout__, errors='replace')
 
     env = os.environ
 
@@ -27,7 +27,7 @@ def cgi_main():
     #query = form.getfirst('query', 'aux2bib')
     #site = form.getvalue('sitesearch', 'BusySponge') 
 
-    query = unquote(query).decode(charset)
+    query = unquote(query)  #.decode(charset)
     
     if query.startswith('@'):
         query = query[1:]
@@ -37,11 +37,11 @@ def cgi_main():
         import bsq
         query_result_file = bsq.queryBSponge(query)
         fileObj = codecs.open(query_result_file, "r", "utf-8", "replace" )
-        print fileObj.read()
+        print((fileObj.read()))
         fileObj.close()
     else:
         sys.path.append(HOME+"/bin/fe")
-        sys.path.append(HOME+"/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
+        # sys.path.append(HOME+"/bin/lib/python2.7/site-packages/python_dateutil-1.5-py2.7.egg/")
         MINDMAP = (HOME+'/data/2web/reagle.org/joseph/readings.mm')
 
         import fe
@@ -59,19 +59,20 @@ def cgi_main():
         fe.build_bib(MINDMAP, output)
 
         fileObj = codecs.open(fe.TMP_DIR + 'query-thunderdell.html', "r", "utf-8")
-        print fileObj.read()
+        print((fileObj.read()))
         fileObj.close()
 
 def print_error(msg):
     import sys
 
-    print """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-    <html>
-    <head><title>Error</title></head>
-    <body>
-    <p>%s</p>
-    </body>
-    </html>""" % msg
+    print((
+        """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+        <html>
+        <head><title>Error</title></head>
+        <body>
+        <p>%s</p>
+        </body>
+        </html>""" % msg))
     sys.exit()
 
 

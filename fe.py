@@ -1717,7 +1717,7 @@ if __name__ == '__main__':
 
     opts.outfd.close()
 else:
-    class pts:
+    class opts:
         cgi = True                # called from cgi
         chase = True              # Follow freeplane links to other local maps
         long_url = False          # Use short 'oldid' URLs for mediawikis

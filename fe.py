@@ -819,7 +819,7 @@ def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
     # dbg("entries = '%s'" % (entries))
 
-    for entry in (v for k, v in sorted(entries.items())):
+    for key, entry in sorted(entries.items()):
         entry_type = guess_bibtex_type(entry)
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
@@ -996,7 +996,7 @@ def emit_yaml_csl(entries):
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
 
-    for entry in (v for k, v in sorted(entries.items())):
+    for key, entry in sorted(entries.items()):
         entry_type, genre = guess_csl_type(entry)
         opts.outfd.write('- id: %s\n' % entry['identifier'])
         opts.outfd.write('  type: %s\n' % entry_type)
@@ -1102,7 +1102,7 @@ def emit_wp_citation(entries):
             opts.outfd.write(
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
 
-    for entry in (v for k, v in sorted(entries.items())):
+    for key, entry in sorted(entries.items()):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
             wp_ident = get_ident(entry, entries, delim=" & ")
@@ -1233,7 +1233,7 @@ def emit_results(entries, query, results_file):
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
                            % (identifier_html, title_html, link_html,
                               from_html, close))
-    for entry in (v for k, v in sorted(entries.items())):
+    for key, entry in sorted(entries.items()):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
         title = entry['title']

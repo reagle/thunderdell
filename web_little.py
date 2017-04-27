@@ -15,10 +15,11 @@ import html.entities
 import logging
 from lxml import etree
 import os
-import requests  # http://docs.python-requests.org/en/latest/
 import re
 import sys
 from xml.sax.saxutils import escape, unescape
+
+import requests  # http://docs.python-requests.org/en/latest/
 
 HOMEDIR = os.path.expanduser('~')
 
@@ -34,12 +35,22 @@ def escape_XML(s):  # http://wiki.python.org/moin/EscapingXml
     return escape(s, extras)
 
 
-def unescape_XML(text):
+# def unescape_XML(o): #.117s 5.45%
+#     '''Unescape XML character entities in a string;
+#     &<> are by default; I add apostrophe and quote'''
+
+#     extras = {"&apos;": "'", "&quot;": '"'}
+#     return(unescape(o, extras))
+
+
+def unescape_XML(text):  #.0937s 4.11%
     '''
     Removes HTML or XML character references and entities from text.
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
+    Marginally faster than `from xml.sax.saxutils import escape, unescape`
 
     '''
+    import html.entities
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":

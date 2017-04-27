@@ -333,7 +333,7 @@ def normalize_whitespace(text):
 
 
 def sorted_dict_generator(adict):
-    """Returns an dict generator sorted by keys"""
+    """Returns a dict generator sorted by keys"""
     for key in sorted(adict):
         # dbg("key = '%s'" % (key))
         yield adict[key]

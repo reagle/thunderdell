@@ -27,7 +27,6 @@ import urllib.parse
 import unicodedata
 import webbrowser
 
-import dateutil.parser    # http://labix.org/python-dateutil
 from web_little import escape_XML, unescape_XML
 
 log_level = 100  # default
@@ -835,8 +834,10 @@ def emit_biblatex(entries):
             if 'url' in entry:  # most bibtex styles doesn't support url
                 note = ' Available at: \\url{%s}' % entry['url']
                 if 'urldate' in entry:
-                    urldate = dateutil.parser.parse(entry['urldate']).strftime(
-                        "%d %B %Y")
+                    urldate = "%s-%s-%s" % (
+                        entry['urldate'][0:4],  # year
+                        entry['urldate'][4:6],  # month
+                        entry['urldate'][6:8])  # day
                     note += ' [Accessed %s]' % urldate
                 entry['note'] = entry.setdefault('note', '') + note
             if entry_type == 'online':

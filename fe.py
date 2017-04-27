@@ -332,12 +332,6 @@ def normalize_whitespace(text):
     return text
 
 
-def sorted_dict_generator(adict):
-    """Returns a dict generator sorted by keys"""
-    for key in sorted(adict):
-        # dbg("key = '%s'" % (key))
-        yield adict[key]
-
 #################################################################
 # Entry construction
 #################################################################
@@ -826,7 +820,7 @@ def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
     # dbg("entries = '%s'" % (entries))
 
-    for entry in sorted_dict_generator(entries):
+    for entry in (v for k, v in sorted(entries.items())):
         entry_type = guess_bibtex_type(entry)
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
@@ -935,7 +929,6 @@ def emit_biblatex(entries):
                 opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
 
-
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
 
@@ -1001,7 +994,8 @@ def emit_yaml_csl(entries):
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     opts.outfd.write('---\n')
     opts.outfd.write('references:\n')
-    for entry in sorted_dict_generator(entries):
+
+    for entry in (v for k, v in sorted(entries.items())):
         entry_type, genre = guess_csl_type(entry)
         opts.outfd.write('- id: %s\n' % entry['identifier'])
         opts.outfd.write('  type: %s\n' % entry_type)
@@ -1107,7 +1101,7 @@ def emit_wp_citation(entries):
             opts.outfd.write(
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
 
-    for entry in sorted_dict_generator(entries):
+    for entry in (v for k, v in sorted(entries.items())):
         opts.outfd.write('{{ citation\n')
         if 'identifier' in entry:
             wp_ident = get_ident(entry, entries, delim=" & ")
@@ -1238,8 +1232,7 @@ def emit_results(entries, query, results_file):
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
                            % (identifier_html, title_html, link_html,
                               from_html, close))
-
-    for entry in sorted_dict_generator(entries):
+    for entry in (v for k, v in sorted(entries.items())):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
         title = entry['title']

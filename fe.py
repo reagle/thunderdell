@@ -1315,9 +1315,10 @@ def parse_names(names):
         first = last = von = jr = ''
         chunks = name.strip().split()
 
-        if 'van' in chunks and chunks[chunks.index('van') + 1] in ('den', 'der'):
-            chunks[chunks.index('van'):chunks.index('van') + 2] = \
-                ['van ' + chunks[chunks.index('van') + 1]]
+        if 'van' in chunks and chunks[chunks.index('van') + 1] in (
+                'den', 'der'):
+                    chunks[chunks.index('van'):chunks.index('van') + 2] = \
+                        ['van ' + chunks[chunks.index('van') + 1]]
 
         if len(chunks) > 1:
             if chunks[-1] in suffixes:
@@ -1335,7 +1336,8 @@ def parse_names(names):
 
 
 def commit_entry(entry, entries):
-    """Place an entry in the entries dictionary with default values if need be"""
+    """Place an entry in the entries dictionary
+    with default values if need be"""
     if entry != {}:
         entry.setdefault('author', [('', 'John', 'Doe', '')])
         entry.setdefault('title', 'Unknown')
@@ -1401,8 +1403,8 @@ def walk_freeplane(node, mm_file, entries, links):
     for d in node.getiterator():
         if 'LINK' in d.attrib:                  # found a local reference link
             if (not d.get('LINK').startswith('http:')
-                and d.get('LINK').endswith('.mm')):
-                    links.append(unescape_XML(d.get('LINK')))
+                    and d.get('LINK').endswith('.mm')):
+                links.append(unescape_XML(d.get('LINK')))
         # skip nodes that are structure, comment, and empty of text
         if 'STYLE_REF' in d.attrib and d.get('TEXT'):
             if d.get('STYLE_REF') == 'author':

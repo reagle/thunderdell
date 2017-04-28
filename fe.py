@@ -1496,8 +1496,9 @@ def build_bib(file_name, output):
                     link = os.path.abspath(
                         os.path.dirname(mm_file) + '/' + link)
                     if link not in done:
-                        if not any([word in link for word in ('syllabus',
-                                                              'readings')]):
+                        if not any([word in link for word in (
+                                'syllabus',
+                                'readings')]):
                             # dbg("    placing %s in mm_files" % link)
                             mm_files.append(link)
             done.append(os.path.abspath(mm_file))

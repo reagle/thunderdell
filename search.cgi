@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.5
+#!/usr/bin/env python3.3
 # -*- coding: utf-8 -*-
 
 # On Webfaction [1] this script and its parent directory must be chmod 711

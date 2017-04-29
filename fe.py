@@ -1475,10 +1475,10 @@ def build_bib(file_name, output):
     """Collect the files to walk and invoke functions to build a bib"""
 
     links = []          # list of other files encountered in the mind map
-    done = []           # list of files processed, kept to prevent loops
+    done = set()           # list of files processed, kept to prevent loops
     entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
-    mm_files = []
-    mm_files.append(file_name)  # list of file encountered (e.g., chase option)
+    mm_files = set()
+    mm_files.add(file_name)  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)
     for mm_file in mm_files:
         if mm_file in done:
@@ -1501,8 +1501,8 @@ def build_bib(file_name, output):
                                 'syllabus',
                                 'readings')]):
                             # dbg("    placing %s in mm_files" % link)
-                            mm_files.append(link)
-            done.append(os.path.abspath(mm_file))
+                            mm_files.add(link)
+            done.add(os.path.abspath(mm_file))
 
     if opts.query:
         results_file_name = TMP_DIR + 'query-thunderdell.html'

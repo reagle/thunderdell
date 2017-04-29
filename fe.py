@@ -471,7 +471,7 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'custom1' in entry and 'url' in entry:  # URL read/accessed date
+    if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
         entry['urldate'] = "%s-%s-%s" % (
             entry['custom1'][0:4],  # year
             entry['custom1'][4:6],  # month
@@ -1475,12 +1475,13 @@ def build_bib(file_name, output):
     """Collect the files to walk and invoke functions to build a bib"""
 
     links = []          # list of other files encountered in the mind map
-    done = set()           # list of files processed, kept to prevent loops
+    done = []           # list of files processed, kept to prevent loops
     entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
-    mm_files = set()
-    mm_files.add(file_name)  # list of file encountered (e.g., chase option)
+    mm_files = []
+    mm_files.append(file_name)  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)
-    for mm_file in mm_files:
+    while mm_files:
+        mm_file = mm_files.pop()
         if mm_file in done:
             continue
         else:
@@ -1501,8 +1502,8 @@ def build_bib(file_name, output):
                                 'syllabus',
                                 'readings')]):
                             # dbg("    placing %s in mm_files" % link)
-                            mm_files.add(link)
-            done.add(os.path.abspath(mm_file))
+                            mm_files.append(link)
+            done.append(os.path.abspath(mm_file))
 
     if opts.query:
         results_file_name = TMP_DIR + 'query-thunderdell.html'

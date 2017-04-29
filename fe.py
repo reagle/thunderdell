@@ -471,7 +471,7 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'custom1' in entry:          # read/accessed date
+    if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
         entry['urldate'] = "%s-%s-%s" % (
             entry['custom1'][0:4],  # year
             entry['custom1'][4:6],  # month
@@ -1480,7 +1480,8 @@ def build_bib(file_name, output):
     mm_files = []
     mm_files.append(file_name)  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)
-    for mm_file in mm_files:
+    while mm_files:
+        mm_file = mm_files.pop()
         if mm_file in done:
             continue
         else:

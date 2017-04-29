@@ -471,7 +471,7 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'custom1' in entry and 'url' in entry:  # URL read/accessed date
+    if 'custom1' in entry:          # read/accessed date
         entry['urldate'] = "%s-%s-%s" % (
             entry['custom1'][0:4],  # year
             entry['custom1'][4:6],  # month

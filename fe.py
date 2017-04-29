@@ -1476,7 +1476,6 @@ def build_bib(file_name, output):
 
     links = []          # list of other files encountered in the mind map
     done = []           # list of files processed, kept to prevent loops
-    entry = {}          # dict of bibliographic data
     entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
     mm_files = []
     mm_files.append(file_name)  # list of file encountered (e.g., chase option)

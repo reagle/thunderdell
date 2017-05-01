@@ -10,7 +10,8 @@
 """Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
-# *  use argparse;
+# * migrate: use argparse;
+# * optimization?: instead of following links, use `locate` to process all *.mm
 
 import codecs
 from cgi import escape, parse_qs

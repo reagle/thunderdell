@@ -422,12 +422,13 @@ def get_ident(entry, entries, delim=""):
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['year']))
     # info("ident = %s '%s'" % (type(ident), ident))
-    # remove chars not permitted in xml name/id attributes
-    ident = ident.replace(':', '').replace("'", "")
-    # remove some punct and strong added by walk_freeplane.query_highlight
-    ident = ident.replace('.', ''
-                         ).replace('<strong>', ''
-                         ).replace('</strong>', '')
+    ident = ident.replace(
+        ':', '').replace(  # not permitted in xml name/id attributes
+        "'", "").replace(  # punctuation
+        '.', '').replace(
+        '@', '').replace(  # '@' citation designator
+        '<strong>', '').replace(  # added by walk_freeplane.query_highlight
+        '</strong>', '')
     # info("ident = %s '%s'" % (type(ident), ident))
     ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
     if ident[0].isdigit():        # pandoc forbids keys starting with digits
@@ -437,8 +438,7 @@ def get_ident(entry, entries, delim=""):
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
     # info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
-    ident = ident.replace('@', '')  # remove '@' citation designator
-    return str(ident)
+    return ident
 
 
 

@@ -1486,26 +1486,25 @@ def build_bib(file_name, output):
         mm_file = mm_files.pop()
         if mm_file in done:
             continue
-        else:
-            # dbg("   processing %s" % mm_file)
-            try:
-                doc = parse(mm_file).getroot()
-            except IOError as err:
-                # dbg("    failed to parse %s" % mm_file)
-                continue
-            # dbg("    successfully parsed %s" % mm_file)
-            entries, links = walk_freeplane(doc, mm_file, entries, links=[])
-            if opts.chase:
-                for link in links:
-                    link = os.path.abspath(
-                        os.path.dirname(mm_file) + '/' + link)
-                    if link not in done:
-                        if not any([word in link for word in (
-                                'syllabus',
-                                'readings')]):
-                            # dbg("    placing %s in mm_files" % link)
-                            mm_files.append(link)
-            done.append(os.path.abspath(mm_file))
+        # dbg("   processing %s" % mm_file)
+        try:
+            doc = parse(mm_file).getroot()
+        except IOError as err:
+            # dbg("    failed to parse %s" % mm_file)
+            continue
+        # dbg("    successfully parsed %s" % mm_file)
+        entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+        if opts.chase:
+            for link in links:
+                link = os.path.abspath(
+                    os.path.dirname(mm_file) + '/' + link)
+                if link not in done:
+                    if not any([word in link for word in (
+                            'syllabus',
+                            'readings')]):
+                        # dbg("    placing %s in mm_files" % link)
+                        mm_files.append(link)
+        done.append(os.path.abspath(mm_file))
 
     if opts.query:
         results_file_name = TMP_DIR + 'query-thunderdell.html'

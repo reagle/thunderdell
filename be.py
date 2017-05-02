@@ -9,7 +9,6 @@
 
 """Convert a bibtex file into a mindmap."""
 
-import codecs
 import logging
 from os import chdir, environ, mkdir, rename
 from os.path import abspath, exists, expanduser, splitext
@@ -157,9 +156,9 @@ if __name__ == "__main__":
     files = [abspath(file_name) for file_name in args.files]
     for file_name in files:
         try:
-            src = codecs.open(file_name, "r", "utf-8", "replace").read()
+            src = open(file_name, "r", encoding="utf-8", errors="replace").read()
             fileOut = splitext(file_name)[0] + '.mm'
-            fdo = codecs.open(fileOut, "wb", "utf-8", "replace")
+            fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
         except IOError:
             print("    file does not exist")
             continue

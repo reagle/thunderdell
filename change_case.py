@@ -19,8 +19,9 @@ import string
 import sys
 
 critical = logging.critical
-info = logging.info        
-dbg = logging.debug        
+info = logging.info
+dbg = logging.debug
+
 
 def create_wordset(file_name): # info() doesn't work here, level not yet set
     '''Returns a wordset given a file'''
@@ -33,7 +34,7 @@ def create_wordset(file_name): # info() doesn't work here, level not yet set
                 wordset.add(line.strip())
         return wordset
     else:
-        critical("Could not find wordset %s" %file_name)
+        critical("Could not find wordset %s" % file_name)
         return set()
 
 PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
@@ -43,9 +44,11 @@ wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
+# remove if in both
 wordset_proper_nouns = set([word for word in wordset_upper if
-    word.lower() not in wordset_lower])  # remove if in both
+                           word.lower() not in wordset_lower])
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
+
 
 def safe_capwords(text):
     '''string.capwords() but don't capitalize() BORING or lower() acronyms.
@@ -59,12 +62,12 @@ def safe_capwords(text):
 
     '''
 
-    info("  safe_capwords: %s text = '%s'" %(type(text), text))
+    info("  safe_capwords: %s text = '%s'" % (type(text), text))
     new_text = []
     words = text.split(' ')
     for word in words:
-        info("word = '%s'" %word)
-        if word: # this split will remove multiple white-spaces
+        info("word = '%s'" % word)
+        if word:  # this split will remove multiple white-spaces
             if word.lower() in BORING_WORDS:
                 new_text.append(word.lower())
             else:
@@ -86,14 +89,14 @@ def safe_lower(text):
 
     '''
 
-    info("  safe_lower: %s text = '%s'" %(type(text), text))
+    info("  safe_lower: %s text = '%s'" % (type(text), text))
     new_text = []
     words = text.split(' ')
     for word in words:
-        info("  word = '%s'" %word)
-        if word: # this split will remove multiple white-spaces
-            word_capitalized =  word.capitalize() # [0].upper() + word[1:].lower()
-            info("  word_capitalized = '%s'" %word_capitalized)
+        info("  word = '%s'" % word)
+        if word:  # this split will remove multiple white-spaces
+            word_capitalized = word.capitalize()  # [0].upper() + word[1:].lower()
+            info("  word_capitalized = '%s'" % word_capitalized)
             if word in proper_nouns:
                 new_text.append(word)
             elif word.isupper():
@@ -104,68 +107,71 @@ def safe_lower(text):
                     new_text.append(word.lower())
             else:
                 new_text.append(word.lower())
-    info("  new_text = '%s'" %  new_text)
+    info("  new_text = '%s'" % new_text)
     return ' '.join(new_text)
 
 
 def is_proper_noun(word):
-    ''' A word is a proper noun if it is in that set or doesn't 
+    ''' A word is a proper noun if it is in that set or doesn't
     appear in the wordset dictionary. Recurse on hyphenated words.
 
     >>> is_proper_noun('W3C')
     True
     >>> is_proper_noun('The')
     False
-    
+
     '''
-    info("    word = '%s'" %word)
-    parts = word.split('-') # '([\W]+)'
+    info("    word = '%s'" % word)
+    parts = word.split('-')  # '([\W]+)'
     # info("parts = '%s'" %parts)
     if len(parts) > 1:
         info("    recursing")
         return any(is_proper_noun(part) for part in parts)
     word = ''.join(ch for ch in word if ch not in set(string.punctuation))
-    if word in proper_nouns: # in list of proper nouns?
+    if word in proper_nouns:  # in list of proper nouns?
         info('    word in proper_nouns: True')
         return True
-    if word.lower() not in wordset_nocase: # not known to me at all: proper
-        info("    word.lower() = '%s'" %word.lower())
+    if word.lower() not in wordset_nocase:  # not known to me at all: proper
+        info("    word.lower() = '%s'" % word.lower())
         info('    word.lower() not in wordset_nocase: True')
-        return True    
-    info("    '%s' is_proper_noun: False" %word)   
+        return True
+    info("    '%s' is_proper_noun: False" % word)
     return False
+
 
 def sentence_case(text):
     return change_case(text, case_direction='sentence')
 
+
 def title_case(text):
     return change_case(text, case_direction='title')
 
+
 def change_case(text, case_direction='sentence'):
     ''' Convert text to sentence case for APA like citations
-    
+
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
     'My defamation 2.0 experience: A story of Wikipedia'
-    
+
     '''
     text = text.strip().replace('  ', ' ')
-    info("** sentence_case: %s text = '%s'" %(type(text), text))
+    info("** sentence_case: %s text = '%s'" % (type(text), text))
 
     # create abbreviation sans BORING words
     info(set(text.split()).difference(BORING_WORDS))
-    text_abbreviation = ''.join([word[0] for word in 
-        set(text.split()).difference(BORING_WORDS)]) 
+    text_abbreviation = ''.join(
+        [word[0] for word in set(text.split()).difference(BORING_WORDS)])
     info("  text_abbreviation = %s " % text_abbreviation)
     text_is_titlecase = text_abbreviation.isupper()
     info("  text_is_titlecase = '%s'" % text_is_titlecase)
     text_is_ALLCAPS = text.isupper()
     info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
-    
+
     text = ': ' + text  # make first phrase consistent for processing below
     PUNCTUATION = ":.?"
-    PUNCTUATION_RE = r'(:|\.|\?) ' # use parens to keep them in the split
+    PUNCTUATION_RE = r'(:|\.|\?) '  # use parens to keep them in the split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    info("  phrases = '%s'" %phrases)
+    info("  phrases = '%s'" % phrases)
     new_text = []
     for phrase in phrases:
         if phrase == '':
@@ -175,38 +181,42 @@ def change_case(text, case_direction='sentence'):
             continue
 
         words = phrase.split(' ')
-        info("words = '%s'" %words)
+        info("words = '%s'" % words)
         for index, word in enumerate(words):
-            word_capitalized =  word.capitalize() # [0].upper() + word[1:].lower()
-            info("word = '%s'" %word)
-            if is_proper_noun(word): 
+            # [0].upper() + word[1:].lower()
+            word_capitalized = word.capitalize()
+            info("word = '%s'" % word)
+            if is_proper_noun(word):
                 info("  word is_proper_noun")
-                new_word = word    
-            elif is_proper_noun(word_capitalized): 
+                new_word = word
+            elif is_proper_noun(word_capitalized):
                 info("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
-            else:        
-                info("  adding '%s' as is" %word)
+            else:
+                info("  adding '%s' as is" % word)
                 if case_direction == 'sentence':
                     new_word = word.lower()
                 elif case_direction == 'title':
-                    info("  text_is_ALLCAPS = '%s'" %  text_is_ALLCAPS)
+                    info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
                     if text_is_ALLCAPS:
                         word = safe_lower(word)
                         info('  lowering word because text_is_ALLCAPS')
-                    info("  adding '%s' as is" %word)
+                    info("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
-                    raise Exception("Unknown case_direction = '%s'" %case_direction)
-            if word and index == 0: # capitalize first word in a phrase
+                    raise Exception(
+                        "Unknown case_direction = '%s'" % case_direction)
+            if word and index == 0:  # capitalize first word in a phrase
                 info("  capitalizing it as first word in phrase")
                 new_word = new_word[0].capitalize() + new_word[1:]
 
             new_text.append(new_word)
 
-    return ' '.join(new_text[1:]).replace(' : ', ': ') \
-                .replace(' . ', '. ') \
-                .replace(' ? ', '? ')
+    return ' '.join(new_text[1:]
+                    ).replace(' : ', ': '
+                    ).replace(' . ', '. '
+                    ).replace(' ? ', '? ')
+
 
 def test(case_func):
     '''Prints out sentence case (default) for a number of test strings'''
@@ -229,47 +239,50 @@ def test(case_func):
         '  Human Services:  Cambridge War Memorial Recreation Center',
         'Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed',
         'THIS SENTENCE ABOUT AOL IN AMERICA IS ALL CAPS',
-        'Lessons I learned on the road as a Digital Nomad',
-        )
+        'Lessons I learned on the road as a Digital Nomad', )
 
     import doctest
     doctest.testmod()
- 
+
     for test in TESTS:
-        info("case_direction = '%s'" %case_direction)
+        info("case_direction = '%s'" % case_direction)
         print((change_case(test, case_direction)))
 
 
 if '__main__' == __name__:
 
-    import argparse # http://docs.python.org/dev/library/argparse.html
+    import argparse  # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description='Change the case of some text, '
-            ' defaulting to sentence case.')
-    
+        'defaulting to sentence case.')
+
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
     # optional arguments
-    arg_parser.add_argument("-s", "--sentence-case",
-                    action="store_true", default=False,
-                    help="Even if it appears to be sentence case, "
-                    "force it to be so")
-    arg_parser.add_argument("-t", "--title-case",
-                    action="store_true", default=False,
-                    help="Capitalize safely, e.g., preserve abbreviations")
-    arg_parser.add_argument("-T", "--test",
-                    action="store_true", default=False,
-                    help="Test")
-    arg_parser.add_argument("-o", "--out-filename",
-                    help="output results to filename", metavar="FILE")
-    arg_parser.add_argument('-L', '--log-to-file',
-                    action="store_true", default=False,
-                    help="log to file %(prog)s.log")
-    arg_parser.add_argument('-V', '--verbose', action='count', default=0,
-                    help="Increase verbosity (specify multiple times for more)")
+    arg_parser.add_argument(
+        "-s", "--sentence-case",
+        action="store_true", default=False,
+        help="Even if it appears to be sentence case, force it to be so")
+    arg_parser.add_argument(
+        "-t", "--title-case",
+        action="store_true", default=False,
+        help="Capitalize safely, e.g., preserve abbreviations")
+    arg_parser.add_argument(
+        "-T", "--test",
+        action="store_true", default=False,
+        help="Test")
+    arg_parser.add_argument(
+        "-o", "--out-filename",
+        help="output results to filename", metavar="FILE")
+    arg_parser.add_argument(
+        '-L', '--log-to-file',
+        action="store_true", default=False,
+        help="log to file %(prog)s.log")
+    arg_parser.add_argument(
+        '-V', '--verbose', action='count', default=0,
+        help="Increase verbosity (specify multiple times for more)")
     arg_parser.add_argument('--version', action='version', version='TBD')
     args = arg_parser.parse_args()
-
 
     log_level = 100  # default
     if args.verbose == 1: log_level = logging.CRITICAL
@@ -279,14 +292,14 @@ if '__main__' == __name__:
     if args.log_to_file:
         info("logging to file")
         logging.basicConfig(filename='change_case.log', filemode='w',
-            level=log_level, format=LOG_FORMAT)
+                            level=log_level, format=LOG_FORMAT)
     else:
-        logging.basicConfig(level=log_level, format = LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     case_direction = 'sentence'
     if args.title_case:
             case_direction = 'title'
-    info("case_direction = %s" %case_direction)
+    info("case_direction = %s" % case_direction)
 
     if args.test:
         test(case_direction)

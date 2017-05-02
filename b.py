@@ -22,7 +22,6 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 import argparse
 from argparse import RawTextHelpFormatter
-import codecs
 from collections import Counter
 from datetime import datetime
 from dateutil.parser import parse
@@ -924,8 +923,6 @@ def log2nifty(biblio):
     Log to personal blog.
     '''
 
-    import codecs
-
     print("to log2nifty\n")
     ofile = HOME+'/data/2web/goatee.net/nifty-stuff.html'
 
@@ -946,7 +943,7 @@ def log2nifty(biblio):
     newcontent = insertion_regexp.sub('\\1 \n  %s'
         % log_item, content, re.DOTALL | re.IGNORECASE)
     if newcontent:
-        fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
+        fd = open(ofile, 'w', encoding='utf-8', errors='replace')
         fd.write(newcontent)
         fd.close()
     else:
@@ -984,7 +981,7 @@ def log2work(biblio):
         (uid, date_token, hashtags, html_comment)
     info(log_item)
 
-    plan_fd = codecs.open(ofile, 'r', 'utf-8', 'replace')
+    plan_fd = open(ofile, 'r', encoding='utf-8', errors='replace')
     plan_content = plan_fd.read()
     plan_fd.close()
 
@@ -995,7 +992,7 @@ def log2work(biblio):
         ul_found[0].insert(0, etree.XML(log_item))
         new_content = etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="HTML")
-        fd = codecs.open(ofile, 'w', 'utf-8', 'replace')
+        fd = open(ofile, 'r', encoding='utf-8', errors='replace')
         fd.write(new_content)
         fd.close()
     else:
@@ -1082,7 +1079,7 @@ def blog_at_opencodex(biblio):
     if exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
-    fd = codecs.open(filename, 'w', 'utf-8', 'replace')
+    fd = open(filename, 'w', encoding='utf-8', errors='replace')
     fd.write('Title: %s\n' % blog_title)
     fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", NOW))
     fd.write('Tags: %s\n' % tags)
@@ -1126,7 +1123,7 @@ def blog_at_goatee(biblio):
     if exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
-    fd = codecs.open(filename, 'w', 'utf-8', 'replace')
+    fd = open(filename, 'w', encoding='utf-8', errors='replace')
     fd.write('Title: %s\n' % blog_title.title())
     fd.write('Date: %s\n' % time.strftime("%Y-%m-%d", NOW))
     fd.write('Tags: \n')
@@ -1253,11 +1250,11 @@ def do_console_annotation(biblio):
         if not resume_edit:
             if os.path.exists(annotation_file_name):
                 os.remove(annotation_file_name)
-            annotation_file = codecs.open(annotation_file_name, "w", "utf-8")
+            annotation_file = open(annotation_file_name, "w", encoding="utf-8")
             annotation_file.write(initial_text)
             annotation_file.close()
         call([EDITOR, annotation_file_name])
-        annotation_file = codecs.open(annotation_file_name, "r", "utf-8")
+        annotation_file = open(annotation_file_name, "r", encoding="utf-8")
         return(annotation_file.readlines())
 
     def parse_bib(biblio, edited_text):

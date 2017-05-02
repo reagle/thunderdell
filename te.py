@@ -197,7 +197,7 @@ if __name__ == "__main__":
     files = [os.path.abspath(file) for file in files]
     for file in files:
         try:
-            fd = codecs.open(file, "rb", "utf-8", "replace")
+            fd = open(file, "rb", encoding="utf-8", codecs="replace")
         except IOError:
             print("    file does not exist")
             continue

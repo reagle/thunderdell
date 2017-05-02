@@ -266,8 +266,8 @@ if __name__ == "__main__":
     from fe import BIB_SHORTCUTS   # a dict of shotcuts yeilding a field
     from fe import BIB_FIELDS      # a dict of a field yielding its shortcut
 
-    import chardet
     import codecs
+    import chardet
     import getopt
     import os
     import subprocess
@@ -280,13 +280,15 @@ if __name__ == "__main__":
     files = [os.path.abspath(file) for file in files]
     for file in files:
         if file.endswith('.rtf'):
-            subprocess.call(['/usr/bin/X11/catdoc', '-aw', file],
-                            stdout=open('%s.txt' % file[0:-4], 'w'))
+            subprocess.call(
+                ['/usr/bin/X11/catdoc', '-aw', file],
+                stdout=open('%s.txt' % file[0:-4], 'w',
+                encoding='utf-8', errors='replace'))
             file = file[0:-4] + '.txt'
         try:
             encoding = 'UTF-8'
             # encoding = chardet.detect(open(file).read())['encoding']
-            fdi = codecs.open(file, "rb", encoding)
+            fdi = open(file, "r", encoding=encoding, errors='replace')
             text = fdi.read()
             if encoding == 'UTF-8':
                 if text[0] == str(codecs.BOM_UTF8, "utf8"):
@@ -296,9 +298,9 @@ if __name__ == "__main__":
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
             fileOut = os.path.splitext(file)[0] + '.mm'
-            fdo = codecs.open(fileOut, "wb", "utf-8")
-            sys.stdout = codecs.getwriter('UTF-8')(
-                sys.__stdout__, errors='replace')
+            fdo = open(fileOut, "w", encoding="utf-8", errors='replace')
+            # sys.stdout = codecs.getwriter('UTF-8')(
+            #     sys.__stdout__, errors='replace')
         except IOError:
             print("    file does not exist")
             continue

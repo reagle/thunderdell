@@ -13,7 +13,6 @@
 # * migrate: use argparse;
 # * optimization?: instead of following links, use `locate` to process all *.mm
 
-import codecs
 from cgi import escape, parse_qs
 from collections import OrderedDict
 import logging
@@ -115,6 +114,7 @@ CSL_SHORTCUTS = OrderedDict([
 
 BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
 BIB_SHORTCUTS.update(CSL_SHORTCUTS)
+BIB_SHORTCUTS_ITEMS = sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1])
 
 BIB_FIELDS = dict([(field, short) for short, field in
                   BIB_SHORTCUTS.items()])
@@ -439,6 +439,7 @@ def get_ident(entry, entries, delim=""):
     # info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
     ident = ident.replace('@', '')  # remove '@' citation designator
     return str(ident)
+
 
 
 def pull_citation(entry):
@@ -885,8 +886,7 @@ def emit_biblatex(entries):
 
         opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
-        for short, field in sorted(list(BIB_SHORTCUTS.items()),
-                                   key=lambda t: t[1]):
+        for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 # critical("short, field = '%s , %s'" % (short, field))
                 # skip these fields
@@ -932,6 +932,7 @@ def emit_biblatex(entries):
                 opts.outfd.write('   %s = {%s},\n' % (field, value))
         opts.outfd.write("}\n")
 
+
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
 
@@ -947,7 +948,7 @@ def emit_yaml_csl(entries):
             s = s.replace('"', r"\'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
-            s = '"%s"' %s
+            s = '"%s"' % s
         return s
 
     def emit_yaml_people(people):
@@ -973,8 +974,9 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
-        # info("date '%s'" % date)
+        info("date '%s'" % date)
         year, month, day = (date.split('-') + 3 * [None])[0:3]
+        info("year, month, day = %s, %s, %s" % (year, month, day))
         if year:
             opts.outfd.write('    year: %s\n' % year)
         if month:
@@ -1008,13 +1010,12 @@ def emit_yaml_csl(entries):
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
-            if not opts.author_create:
+            if not opts.author_create:  # TODO create config for this
                 del entry['author']
             else:
                 entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
 
-        for short, field in sorted(list(BIB_SHORTCUTS.items()),
-                                   key=lambda t: t[1]):
+        for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 # info("short, field = '%s , %s'" % (short, field))
@@ -1110,7 +1111,7 @@ def emit_wp_citation(entries):
             wp_ident = get_ident(entry, entries, delim=" & ")
             opts.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
 
-        for short, field in list(BIB_SHORTCUTS.items()):
+        for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in ('annotation', 'custom1', 'custom2',
@@ -1426,7 +1427,8 @@ def walk_freeplane(node, mm_file, entries, links):
                 if 'LINK' in d.attrib:
                     entry['url'] = d.get('LINK')
                 if opts.query_c:
-                    author_highlighted = query_highlight(author_node, opts.query_c)
+                    author_highlighted = query_highlight(
+                        author_node, opts.query_c)
                     if author_highlighted is not None:
                         entry['_author_result'] = author_highlighted
                     title_highlighted = query_highlight(d, opts.query_c)
@@ -1501,7 +1503,7 @@ def build_bib(file_name, output):
                 if link not in done:
                     if not any([word in link for word in (
                             'syllabus',
-                            'readings')]):
+                            'readings')]): # 'old'
                         # dbg("    placing %s in mm_files" % link)
                         mm_files.append(link)
         done.append(os.path.abspath(mm_file))
@@ -1511,7 +1513,7 @@ def build_bib(file_name, output):
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
         try:
-            results_file = codecs.open(results_file_name, "w", "utf-8")
+            results_file = open(results_file_name, "w", encoding="utf-8")
         except IOError:
             print(("There was an error writing to", results_file_name))
             sys.exit()
@@ -1525,7 +1527,7 @@ def build_bib(file_name, output):
     elif opts.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
-            results_file = codecs.open(results_file_name, "w", "utf-8")
+            results_file = open(results_file_name, "w", encoding="utf-8")
         except IOError:
             print(("There was an error writing to", results_file_name))
             sys.exit()
@@ -1684,7 +1686,7 @@ if __name__ == '__main__':
         elif opts.WP_citation:
             extension = '.wiki'
         output_fn = os.path.splitext(file_name)[0] + extension
-        opts.outfd = codecs.open(output_fn, "w", "utf-8")
+        opts.outfd = open(output_fn, "w", encoding="utf-8")
     if opts.tests:
         print("Running doctests")
         import doctest

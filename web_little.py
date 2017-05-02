@@ -13,7 +13,7 @@ Web functionality I frequently make use of.
 import chardet
 import html.entities
 import logging
-from lxml import etree
+from xml import etree
 import os
 import re
 import sys

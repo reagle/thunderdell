@@ -1386,10 +1386,11 @@ def walk_freeplane(node, mm_file, entries, links):
 
     def query_highlight(node, query_c):
         """ Return a modified node with matches highlighted"""
-        if query_c.search(node.get('TEXT')):
-            result = query_c.sub(
-                lambda m: "<strong>%s</strong>" % m.group(),
-                node.get('TEXT'))
+        text = node.get('TEXT')
+        result = query_c.sub(
+            lambda m: "<strong>%s</strong>" % m.group(),
+            text)
+        if text != result:
             node.set('TEXT', result)
             return node
         else:

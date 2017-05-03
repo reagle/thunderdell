@@ -457,10 +457,10 @@ def pull_citation(entry):
         #     get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         cites = EQUAL_PAT.split(citation)[1:]
-        dbg(f"cites = {cites}")
+        dbg("cites = %s" % cites)
         # 2 refs to an iterable are '*' unpacked and rezipped
-        cite_pairs = list(zip(*[iter(cites)] * 2))
-        dbg(f"cite_pairs = {cite_pairs}")
+        cite_pairs = zip(*[iter(cites)] * 2)
+        dbg("cite_pairs = %s" % (cite_pairs))
         for short, value in cite_pairs:
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()

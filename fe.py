@@ -441,7 +441,6 @@ def get_ident(entry, entries, delim=""):
     return ident
 
 
-
 def pull_citation(entry):
     """Modifies entry with parsed citation
 
@@ -458,9 +457,10 @@ def pull_citation(entry):
         #     get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         cites = EQUAL_PAT.split(citation)[1:]
-
+        dbg(f"cites = {cites}")
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = list(zip(*[iter(cites)] * 2))
+        dbg(f"cite_pairs = {cite_pairs}")
         for short, value in cite_pairs:
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
@@ -974,9 +974,7 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
-        info("date '%s'" % date)
         year, month, day = (date.split('-') + 3 * [None])[0:3]
-        info("year, month, day = %s, %s, %s" % (year, month, day))
         if year:
             opts.outfd.write('    year: %s\n' % year)
         if month:
@@ -1356,6 +1354,7 @@ def commit_entry(entry, entries):
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
+    return entries
 
 
 def walk_freeplane(node, mm_file, entries, links):
@@ -1399,7 +1398,6 @@ def walk_freeplane(node, mm_file, entries, links):
     def get_author_node(node):
         """ Return the nearest author node ancestor """
         ancestor = get_parent(node)
-        # dbg(node.get('TEXT'))
         while ancestor.get('STYLE_REF') != 'author':
             ancestor = get_parent(ancestor)
         return ancestor
@@ -1421,7 +1419,9 @@ def walk_freeplane(node, mm_file, entries, links):
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
                 entry['ori_author'] = unescape_XML(author_node.get('TEXT'))
+                info("entry['ori_author'] = %s" % (entry['ori_author']))
                 entry['author'] = parse_names(entry['ori_author'])
+                info("entry['author'] = %s" % (entry['author']))
                 entry['title'] = unescape_XML(d.get('TEXT'))
                 entry['_mm_file'] = mm_file
                 entry['_title_node'] = d
@@ -1446,8 +1446,7 @@ def walk_freeplane(node, mm_file, entries, links):
                         entry.setdefault(
                             '_node_results', []).append(node_highlighted)
 
-    commit_entry(entry, entries)  # commit the last entry as no new titles left
-
+    entries = commit_entry(entry, entries)  # commit the last entry as no new titles left
     return entries, links
 
 
@@ -1552,10 +1551,6 @@ def _test_results():
     Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
 
-    >>> call('fe ~/bin/fe/tests/authorless.mm > \
-    /tmp/authorless.txt; \
-    diff ~/bin/fe/tests/authorless.txt /tmp/authorless.txt', shell=True)
-    0
     >>> call('fe ~/bin/fe/tests/author-child.mm > \
     /tmp/author-child.txt; \
     diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt', shell=True)
@@ -1564,8 +1559,27 @@ def _test_results():
     /tmp/author-descendent.txt; \
     diff ~/bin/fe/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
     0
+    >>> call('fe ~/bin/fe/tests/authorless.mm > \
+    /tmp/authorless.txt; \
+    diff ~/bin/fe/tests/authorless.txt /tmp/authorless.txt', shell=True)
+    0
+    >>> call('fe ~/bin/fe/tests/authors.mm > \
+    /tmp/authors.txt; \
+    diff ~/bin/fe/tests/authors.txt /tmp/authors.txt', shell=True)
+    0
+    >>> call('fe ~/bin/fe/tests/case.mm > \
+    /tmp/case.txt; \
+    diff ~/bin/fe/tests/case.txt /tmp/case.txt', shell=True)
+    0
+    >>> call('fe ~/bin/fe/tests/csl.mm > \
+    /tmp/csl.txt; \
+    diff ~/bin/fe/tests/csl.txt /tmp/csl.txt', shell=True)
+    0
     >>> call('fe ~/bin/fe/tests/date.mm > /tmp/date.txt; \
     diff ~/bin/fe/tests/date.txt /tmp/date.txt', shell=True)
+    0
+    >>> call('fe ~/bin/fe/tests/editors.mm > /tmp/editors.txt; \
+    diff ~/bin/fe/tests/editors.txt /tmp/editors.txt', shell=True)
     0
     >>> call('fe ~/bin/fe/tests/online.mm > /tmp/online.txt; \
     diff ~/bin/fe/tests/online.txt /tmp/online.txt', shell=True)

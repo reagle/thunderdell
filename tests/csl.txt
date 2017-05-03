@@ -104,6 +104,7 @@ references:
   URL: "http://example.com/2"
 - id: A15d1999tle
   type: post-weblog
+  genre: Web log message
   author:
   - family: "A15d"
   container-title: "Blog Title"

@@ -457,10 +457,10 @@ def pull_citation(entry):
         #     get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         cites = EQUAL_PAT.split(citation)[1:]
-        dbg("cites = %s" % cites)
+        # dbg("cites = %s" % cites)
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = zip(*[iter(cites)] * 2)
-        dbg("cite_pairs = %s" % (cite_pairs))
+        # dbg("cite_pairs = %s" % (cite_pairs))
         for short, value in cite_pairs:
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
@@ -1419,9 +1419,7 @@ def walk_freeplane(node, mm_file, entries, links):
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
                 entry['ori_author'] = unescape_XML(author_node.get('TEXT'))
-                info("entry['ori_author'] = %s" % (entry['ori_author']))
                 entry['author'] = parse_names(entry['ori_author'])
-                info("entry['author'] = %s" % (entry['author']))
                 entry['title'] = unescape_XML(d.get('TEXT'))
                 entry['_mm_file'] = mm_file
                 entry['_title_node'] = d

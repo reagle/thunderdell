@@ -10,8 +10,6 @@
 """Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
-# * migrate: use argparse;
-# * optimization?: instead of following links, use `locate` to process all *.mm
 
 from cgi import escape, parse_qs
 from collections import OrderedDict
@@ -37,7 +35,7 @@ dbg = logging.debug
 
 useLXML = False
 HOME = os.path.expanduser('~')
-DEFAULT_MAPS = (HOME + '/joseph/readings.mm',)
+DEFAULT_MAP = HOME + '/joseph/readings.mm'
 
 TMP_DIR = HOME + '/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
@@ -452,15 +450,12 @@ def pull_citation(entry):
 
     if 'cite' in entry:
         citation = entry['cite']
-        # dbg("citation = '%s'" % (citation))
-        # split around tokens of length 1-3;
-        #     get rid of first empty string of results
+        # split around tokens of length 1-3 and
+        # get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         cites = EQUAL_PAT.split(citation)[1:]
-        # dbg("cites = %s" % cites)
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = zip(*[iter(cites)] * 2)
-        # dbg("cite_pairs = %s" % (cite_pairs))
         for short, value in cite_pairs:
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
@@ -541,7 +536,7 @@ def pull_citation(entry):
         queries = parse_qs(query)
         oldid = queries['oldid'][0]
         entry['shorttitle'] = '%s (oldid=%s)' % (entry['title'], oldid)
-        if not opts.long_url:  # short URLs
+        if not args.long_url:  # short URLs
             base = 'http://%s' % url.split('/')[2]
             oldid = '/?oldid=%s' % oldid
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
@@ -833,7 +828,7 @@ def emit_biblatex(entries):
         # bibtex syntax accommodations
         if 'eventtitle' in entry and 'booktitle' not in entry:
             entry['booktitle'] = 'Proceedings of %s' % entry['eventtitle']
-        if opts.bibtex:
+        if args.bibtex:
             if 'url' in entry:  # most bibtex styles doesn't support url
                 note = ' Available at: \\url{%s}' % entry['url']
                 if 'urldate' in entry:
@@ -847,7 +842,7 @@ def emit_biblatex(entries):
                 entry_type_copy = 'misc'
             if entry_type == 'report':
                 entry_type_copy = 'techreport'
-        if opts.bibtex or opts.year:
+        if args.bibtex or args.year:
             if 'date' in entry:
                 del entry['date']
         else:  # remove bibtex fields from biblatex
@@ -884,7 +879,7 @@ def emit_biblatex(entries):
                 del entry[field]
                 continue
 
-        opts.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
+        args.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
@@ -900,7 +895,7 @@ def emit_biblatex(entries):
                         # info("banned")
                         continue
                     # if online_only and not (online or online journal)
-                    if opts.online_urls_only and not (
+                    if args.online_urls_only and not (
                             entry_type == 'online' or
                             any(j for j in ONLINE_JOURNALS
                                 if j in entry['url'])):
@@ -908,7 +903,7 @@ def emit_biblatex(entries):
                         continue
 
                 # skip fields not in bibtex
-                if opts.bibtex and field not in BIBTEX_FIELDS:
+                if args.bibtex and field not in BIBTEX_FIELDS:
                         continue
 
                 # if entry[field] not a proper string, make it so
@@ -916,7 +911,7 @@ def emit_biblatex(entries):
                 # info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
-                if opts.bibtex and field == 'month':
+                if args.bibtex and field == 'month':
                     value = DIGIT2MONTH[str(int(value))]
 
                 # escape latex brackets.
@@ -929,8 +924,8 @@ def emit_biblatex(entries):
                 if field in ('title', 'shorttitle'):
                     value = bibformat_title(value)
 
-                opts.outfd.write('   %s = {%s},\n' % (field, value))
-        opts.outfd.write("}\n")
+                args.outfd.write('   %s = {%s},\n' % (field, value))
+        args.outfd.write("}\n")
 
 
 def emit_yaml_csl(entries):
@@ -960,29 +955,29 @@ def emit_yaml_csl(entries):
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
             given, particle, family, suffix = person
-            opts.outfd.write('  - family: %s\n' % esc_yaml(family))
+            args.outfd.write('  - family: %s\n' % esc_yaml(family))
             if given:
-                opts.outfd.write('    given: %s\n' % esc_yaml(given))
-                # opts.outfd.write('    given:\n')
+                args.outfd.write('    given: %s\n' % esc_yaml(given))
+                # args.outfd.write('    given:\n')
                 # for given_part in given.split(' '):
-                #     opts.outfd.write('    - %s\n' % esc_yaml(given_part))
+                #     args.outfd.write('    - %s\n' % esc_yaml(given_part))
             if suffix:
-                opts.outfd.write('    suffix: %s\n' % esc_yaml(suffix))
+                args.outfd.write('    suffix: %s\n' % esc_yaml(suffix))
             if particle:
-                opts.outfd.write('    non-dropping-particle: %s\n' %
+                args.outfd.write('    non-dropping-particle: %s\n' %
                                  esc_yaml(particle))
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
         year, month, day = (date.split('-') + 3 * [None])[0:3]
         if year:
-            opts.outfd.write('    year: %s\n' % year)
+            args.outfd.write('    year: %s\n' % year)
         if month:
-            opts.outfd.write('    month: %s\n' % month)
+            args.outfd.write('    month: %s\n' % month)
         if day:
-            opts.outfd.write('    day: %s\n' % day)
+            args.outfd.write('    day: %s\n' % day)
         if season:
-            opts.outfd.write('    season: %s\n' % season)
+            args.outfd.write('    season: %s\n' % season)
 
     def yaml_protect_case(title):
         """Preserve/bracket proper names/nouns
@@ -995,20 +990,20 @@ def emit_yaml_csl(entries):
 
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
-    opts.outfd.write('---\n')
-    opts.outfd.write('references:\n')
+    args.outfd.write('---\n')
+    args.outfd.write('references:\n')
 
     for key, entry in sorted(entries.items()):
         entry_type, genre = guess_csl_type(entry)
-        opts.outfd.write('- id: %s\n' % entry['identifier'])
-        opts.outfd.write('  type: %s\n' % entry_type)
+        args.outfd.write('- id: %s\n' % entry['identifier'])
+        args.outfd.write('  type: %s\n' % entry_type)
         if genre:
-            opts.outfd.write('  genre: %s\n' % genre)
+            args.outfd.write('  genre: %s\n' % genre)
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
-            if not opts.author_create:  # TODO create config for this
+            if not args.author_create:  # TODO create config for this
                 del entry['author']
             else:
                 entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
@@ -1024,11 +1019,11 @@ def emit_yaml_csl(entries):
 
                 # special format fields
                 if field == 'title':
-                    opts.outfd.write('  title: %s\n'
+                    args.outfd.write('  title: %s\n'
                                      % yaml_protect_case(esc_yaml((value))))
                     continue
                 if field in ('author', 'editor', 'translator'):
-                    opts.outfd.write('  %s:\n' % field)
+                    args.outfd.write('  %s:\n' % field)
                     emit_yaml_people(entry[field])
                     continue
                 if field in ('date', 'origdate', 'urldate'):
@@ -1036,13 +1031,13 @@ def emit_yaml_csl(entries):
                         continue
                     if field == 'date':
                         season = entry['issue'] if 'issue' in entry else None
-                        opts.outfd.write('  issued:\n')
+                        args.outfd.write('  issued:\n')
                         emit_yaml_date(entry[field], season)
                     if field == 'origdate':
-                        opts.outfd.write('  original-date:\n')
+                        args.outfd.write('  original-date:\n')
                         emit_yaml_date(entry[field])
                     if field == 'urldate':
-                        opts.outfd.write('  accessed:\n')
+                        args.outfd.write('  accessed:\n')
                         emit_yaml_date(entry[field])
                     continue
 
@@ -1054,7 +1049,7 @@ def emit_yaml_csl(entries):
                         # info("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
-                    if opts.online_urls_only:
+                    if args.online_urls_only:
                         # info("online_urls_only")
                         # don't skip online types
                         if entry_type in ('post', 'post-weblog', 'webpage'):
@@ -1064,7 +1059,7 @@ def emit_yaml_csl(entries):
                             # info("  skipping url, paginated item")
                             continue
                 if field == 'eventtitle' and 'container-title' not in entry:
-                    opts.outfd.write('  container-title: "Proceedings of %s"\n'
+                    args.outfd.write('  container-title: "Proceedings of %s"\n'
                                      % entry['eventtitle'])
                 if field == 'c_blog' and entry[field] == 'Blog':
                     continue
@@ -1076,8 +1071,8 @@ def emit_yaml_csl(entries):
                     # info("bib2csl field FROM =  %s" % (field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # info("bib2csl field TO   = %s" % (field))
-                opts.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
-    opts.outfd.write('...\n')
+                args.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
+    args.outfd.write('...\n')
 
 
 def emit_wp_citation(entries):
@@ -1098,16 +1093,16 @@ def emit_wp_citation(entries):
             elif field == 'editor':
                 prefix = 'editor%s-' % str(name_num)
                 suffix = ''
-            opts.outfd.write(
+            args.outfd.write(
                 '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
-            opts.outfd.write(
+            args.outfd.write(
                 '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
 
     for key, entry in sorted(entries.items()):
-        opts.outfd.write('{{ citation\n')
+        args.outfd.write('{{ citation\n')
         if 'identifier' in entry:
             wp_ident = get_ident(entry, entries, delim=" & ")
-            opts.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
+            args.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
@@ -1127,8 +1122,8 @@ def emit_wp_citation(entries):
                         field = 'chapter'
                 elif field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
-                opts.outfd.write('| %s = %s\n' % (field, value))
-        opts.outfd.write("}}\n")
+                args.outfd.write('| %s = %s\n' % (field, value))
+        args.outfd.write("}}\n")
 
 
 def emit_results(entries, query, results_file):
@@ -1244,7 +1239,7 @@ def emit_results(entries, query, results_file):
         MM_mm_file = get_url_MM(entry['_mm_file'])
 
         # if I am what was queried, print all of me
-        if entry['identifier'] == opts.query:
+        if entry['identifier'] == args.query:
             results_file.write('          <li class="li_entry_identifier">\n'
                                '          <ul class="tit_child">\n'),
             results_file.write(
@@ -1425,12 +1420,12 @@ def walk_freeplane(node, mm_file, entries, links):
                 entry['_title_node'] = d
                 if 'LINK' in d.attrib:
                     entry['url'] = d.get('LINK')
-                if opts.query_c:
+                if args.query_c:
                     author_highlighted = query_highlight(
-                        author_node, opts.query_c)
+                        author_node, args.query_c)
                     if author_highlighted is not None:
                         entry['_author_result'] = author_highlighted
-                    title_highlighted = query_highlight(d, opts.query_c)
+                    title_highlighted = query_highlight(d, args.query_c)
                     if title_highlighted is not None:
                         entry['_title_result'] = title_highlighted
             else:
@@ -1438,8 +1433,8 @@ def walk_freeplane(node, mm_file, entries, links):
                     entry['cite'] = unescape_XML(d.get('TEXT'))
                 elif d.get('STYLE_REF') == 'annotation':
                     entry['annotation'] = unescape_XML(d.get('TEXT').strip())
-                if opts.query_c:
-                    node_highlighted = query_highlight(d, opts.query_c)
+                if args.query_c:
+                    node_highlighted = query_highlight(d, args.query_c)
                     if node_highlighted is not None:
                         entry.setdefault(
                             '_node_results', []).append(node_highlighted)
@@ -1494,7 +1489,7 @@ def build_bib(file_name, output):
             continue
         # dbg("    successfully parsed %s" % mm_file)
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
-        if opts.chase:
+        if args.chase:
             for link in links:
                 link = os.path.abspath(
                     os.path.dirname(mm_file) + '/' + link)
@@ -1506,7 +1501,7 @@ def build_bib(file_name, output):
                         mm_files.append(link)
         done.append(os.path.abspath(mm_file))
 
-    if opts.query:
+    if args.query:
         results_file_name = TMP_DIR + 'query-thunderdell.html'
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
@@ -1516,13 +1511,13 @@ def build_bib(file_name, output):
             print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
-        results_file.write(RESULT_FILE_QUERY_BOX % (opts.query, opts.query))
-        emit_results(entries, opts.query, results_file)
+        results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+        emit_results(entries, args.query, results_file)
         results_file.write('</ul></body></html>\n')
         results_file.close()
-        if not opts.cgi:
+        if not args.cgi:
             webbrowser.open('file://%s' % results_file_name)
-    elif opts.pretty:
+    elif args.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
@@ -1533,11 +1528,11 @@ def build_bib(file_name, output):
         results_file.write('    <title>Pretty Mind Map</title></head>'
                            '<body>\n<ul class="top">\n')
         for entry in list(entries.values()):
-            opts.query = entry['identifier']
-            emit_results(entries, opts.query, results_file)
+            args.query = entry['identifier']
+            emit_results(entries, args.query, results_file)
         results_file.write('</ul></body></html>\n')
         results_file.close()
-        if not opts.cgi:
+        if not args.cgi:
             webbrowser.open('file://%s' % results_file_name.encode('utf-8'))
     else:
         output(entries)
@@ -1597,114 +1592,128 @@ def _test_results():
     """
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="""usage: %prog [options] [FILE.mm]\n
+    import argparse  # http://docs.python.org/dev/library/argparse.html
+    arg_parser = argparse.ArgumentParser(
+        description="""usage: %prog [options] [FILE.mm]\n
     Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.""")
-    parser.add_option("-a", "--author-create", default=False,
-                      action="store_true",
-                      help="create author for anon entries using container")
-    parser.add_option("-b", "--biblatex", default=False,
-                      action="store_true",
-                      help="emit biblatex fields")
-    parser.add_option("--bibtex", default=False,
-                      action="store_true",
-                      help="emit bibtex fields rather than biblatex")
-    parser.add_option("-c", "--chase",
-                      action="store_true", default=False,
-                      help="chase links between MMs")
-    parser.add_option("-D", "--defaults",
-                      action="store_true", default=False,
-                      help="chase, output YAML/CSL, use default map "
-                           " and output file")
-    parser.add_option("-k", "--keys", default='-no-keys',
-                      action="store_const", const='-use-keys',
-                      help="show bibtex keys in displayed HTML")
-    parser.add_option("-f", "--file-out",
-                      action="store_true", default=False,
-                      help="output goes to FILE.bib")
-    parser.add_option("-F", "--fields",
-                      action="store_true", default=False,
-                      help="show biblatex shortcuts, fields, "
-                           "and types used by fe")
-    parser.add_option("-l", "--long-url",
-                      action="store_true", default=False,
-                      help="use long URLs")
-    parser.add_option("-o", "--online-urls-only",
-                      action="store_true", default=False,
-                      help="emit URLs for online resources only")
-    parser.add_option("-p", "--pretty",
-                      action="store_true", default=False,
-                      help="pretty print")
-    parser.add_option("-q", "--query",
-                      help="query the mindmaps", metavar="QUERY")
-    parser.set_defaults(query_c=None)
-    parser.add_option("-s", "--style", default="apalike",
-                      help="use bibtex stylesheet (default: %default)",
-                      metavar="BST")
-    parser.add_option("-T", "--tests",
-                      action="store_true", default=False,
-                      help="run tests")
-    parser.add_option('-V', '--verbose', dest='verbose', action='count',
-                      default=1,
-                      help="Increase verbosity "
-                           "(specify multiple times for more)")
-    parser.add_option("-w", "--WP-citation", default=False,
-                      action="store_true",
-                      help="emit Wikipedia {{citation}} format which can be "
-                      "cited via {{sfn|Author2004|loc=p. 45}}. "
-                      "See: http://en.wikipedia.org/wiki/Template:Cite")
-    parser.add_option("-y", "--YAML-CSL", default=False,
-                      action="store_true",
-                      help="emit YAML/CSL for use with pandoc [default]")
+    arg_parser.add_argument(
+        'file', nargs='?', default=DEFAULT_MAP, metavar='FILE')
+    arg_parser.add_argument(
+        "-a", "--author-create", default=False,
+        action="store_true",
+        help="create author for anon entries using container")
+    arg_parser.add_argument(
+        "-b", "--biblatex", default=False,
+        action="store_true",
+        help="emit biblatex fields")
+    arg_parser.add_argument(
+        "--bibtex", default=False,
+        action="store_true",
+        help="emit bibtex fields rather than biblatex")
+    arg_parser.add_argument(
+        "-c", "--chase",
+        action="store_true", default=False,
+        help="chase links between MMs")
+    arg_parser.add_argument(
+        "-D", "--defaults",
+        action="store_true", default=False,
+        help="chase, output YAML/CSL, use default map and output file")
+    arg_parser.add_argument(
+        "-k", "--keys", default='-no-keys',
+        action="store_const", const='-use-keys',
+        help="show bibtex keys in displayed HTML")
+    arg_parser.add_argument(
+        "-f", "--file-out",
+        action="store_true", default=False,
+        help="output goes to FILE.bib")
+    arg_parser.add_argument(
+        "-F", "--fields",
+        action="store_true", default=False,
+        help="show biblatex shortcuts, fields, and types used by fe")
+    arg_parser.add_argument(
+        "-l", "--long-url",
+        action="store_true", default=False,
+        help="use long URLs")
+    arg_parser.add_argument(
+        "-o", "--online-urls-only",
+        action="store_true", default=False,
+        help="emit URLs for online resources only")
+    arg_parser.add_argument(
+        "-p", "--pretty",
+        action="store_true", default=False,
+        help="pretty print")
+    arg_parser.add_argument(
+        "-q", "--query",
+        help="query the mindmaps", metavar="QUERY")
+    arg_parser.set_defaults(query_c=None)
+    arg_parser.add_argument(
+        "-s", "--style", default="apalike",
+        help="use bibtex stylesheet (default: apalike)",
+        metavar="BST")
+    arg_parser.add_argument(
+        "-T", "--tests",
+        action="store_true", default=False,
+        help="run tests")
+    arg_parser.add_argument(
+        '-V', '--verbose', dest='verbose', action='count',
+        default=1,
+        help="Increase verbosity (specify multiple times for more)")
+    arg_parser.add_argument(
+        "-w", "--WP-citation", default=False,
+        action="store_true",
+        help="emit Wikipedia {{citation}} format which can be "
+        "cited via {{sfn|Author2004|loc=p. 45}}. "
+        "See: http://en.wikipedia.org/wiki/Template:Cite")
+    arg_parser.add_argument(
+        "-y", "--YAML-CSL", default=False,
+        action="store_true",
+        help="emit YAML/CSL for use with pandoc [default]")
 
-    opts, files = parser.parse_args()
-    opts.year = True
+    args = arg_parser.parse_args()
+    file_name = os.path.abspath(args.file)
 
-    if opts.verbose == 1:
+    args.year = True
+
+    if args.verbose == 1:
         log_level = logging.CRITICAL
-    elif opts.verbose == 2:
+    elif args.verbose == 2:
         log_level = logging.INFO
-    elif opts.verbose >= 3:
+    elif args.verbose >= 3:
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level,
                         format="%(levelno)s %(funcName).5s: %(message)s")
 
-    opts.cgi = False
-    opts.outfd = sys.stdout
+    args.cgi = False
+    args.outfd = sys.stdout
 
-    if len(files) == 0:     # Default file
-        files = DEFAULT_MAPS
-    elif len(files) > 1:
-        print("Warning: ignoring all files but the first")
-    file_name = os.path.abspath(files[0])
-
-    if opts.WP_citation:
+    if args.WP_citation:
         output = emit_wp_citation
-    elif opts.bibtex or opts.biblatex:
+    elif args.bibtex or args.biblatex:
         output = emit_biblatex
     else:
-        opts.YAML_CSL = True
+        args.YAML_CSL = True
         output = emit_yaml_csl
-    if opts.defaults:
-        opts.chase = True
-        opts.file_out = True
-    if opts.file_out:
-        if opts.YAML_CSL:
+    if args.defaults:
+        args.chase = True
+        args.file_out = True
+    if args.file_out:
+        if args.YAML_CSL:
             extension = '.yaml'
-        elif opts.bibtex or opts.biblatex:
+        elif args.bibtex or args.biblatex:
             extension = '.bib'
-        elif opts.WP_citation:
+        elif args.WP_citation:
             extension = '.wiki'
         output_fn = os.path.splitext(file_name)[0] + extension
-        opts.outfd = open(output_fn, "w", encoding="utf-8")
-    if opts.tests:
+        args.outfd = open(output_fn, "w", encoding="utf-8")
+    if args.tests:
         print("Running doctests")
         import doctest
         doctest.testmod()
-    if opts.fields:
+    if args.fields:
         print("\n                           _BIBTEX_TYPES_ (deprecated)")
         print("                  http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(list(BIBLATEX_TYPES))
@@ -1727,16 +1736,14 @@ if __name__ == '__main__':
         print("         ot=organization's subtype (e.g., W3C REC)\n\n")
 
         sys.exit()
-    if opts.query:
-        opts.query = urllib.parse.unquote(opts.query)
-        opts.query_c = re.compile(re.escape(opts.query), re.IGNORECASE)
+    if args.query:
+        args.query = urllib.parse.unquote(args.query)
+        args.query_c = re.compile(re.escape(args.query), re.IGNORECASE)
         output = emit_results
-
     build_bib(file_name, output)
-
-    opts.outfd.close()
+    args.outfd.close()
 else:
-    class opts:
+    class args:
         cgi = True                # called from cgi
         chase = True              # Follow freeplane links to other local maps
         long_url = False          # Use short 'oldid' URLs for mediawikis

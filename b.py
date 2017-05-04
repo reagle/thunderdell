@@ -960,7 +960,7 @@ def log2work(biblio):
     print("to log2work\n")
     info("biblio = '%s'" % (biblio))
     ofile = HOME + '/data/2web/reagle.org/joseph/plan/plans/index.html'
-
+    info("ofile = %s" % (ofile))
     title = biblio['title'].strip()
     url = biblio['url'].strip()
     comment = biblio['comment'].strip() if biblio['comment'] else ''
@@ -993,7 +993,7 @@ def log2work(biblio):
         ul_found[0].insert(0, etree.XML(log_item))
         new_content = etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="HTML")
-        fd = open(ofile, 'r', encoding='utf-8', errors='replace')
+        fd = open(ofile, 'w', encoding='utf-8', errors='replace')
         fd.write(new_content)
         fd.close()
     else:

@@ -16,17 +16,15 @@ from collections import OrderedDict
 import logging
 # from lxml.etree import parse
 from xml.etree.ElementTree import parse
-from optparse import OptionParser
 import os
 import re
 from subprocess import call
 import sys
-import time
 import urllib.parse
 import unicodedata
 import webbrowser
 
-from web_little import escape_XML, unescape_XML
+from web_little import unescape_XML
 
 log_level = 100  # default
 critical = logging.critical
@@ -282,7 +280,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
-        ['%20s' % j for j in mylist[i:i+cols]]
+         ['%20s' % j for j in mylist[i:i + cols]]
             ) for i in range(0, len(mylist), cols)]
     print(("\n".join(pairs)))
     print("\n")
@@ -731,7 +729,7 @@ def bibformat_title(title):
     "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
     """
-    protected_title = cased_title = quoted_title = []
+    cased_title = quoted_title = []
 
     articles = {'a', 'an', 'the'}
     conjunctions = {'and', 'but', 'for', 'or', 'nor'}
@@ -765,8 +763,8 @@ def bibformat_title(title):
         text_list[0] = text_list[0].upper()
         for chunk in chunk_pat.finditer(text):
             index = chunk.start()
-            if index+1 < len(text_list):
-                text_list[index+1] = text_list[index+1].upper()
+            if index + 1 < len(text_list):
+                text_list[index + 1] = text_list[index + 1].upper()
         return ''.join(text_list)
 
     for word in words:
@@ -1367,7 +1365,7 @@ def walk_freeplane(node, mm_file, entries, links):
     is encountered or it is the last entry.
 
     """
-    author = author_node = title = cite = annotation = results = None
+    author_node = None
     entry = {}
 
     if useLXML is False:
@@ -1495,8 +1493,7 @@ def build_bib(file_name, output):
                     os.path.dirname(mm_file) + '/' + link)
                 if link not in done:
                     if not any([word in link for word in (
-                            'syllabus',
-                            'readings')]): # 'old'
+                               'syllabus', 'readings')]): # 'old'
                         # dbg("    placing %s in mm_files" % link)
                         mm_files.append(link)
         done.append(os.path.abspath(mm_file))

@@ -10,12 +10,10 @@
 Web functionality I frequently make use of.
 """
 
-import chardet
 import html.entities
 import logging
 import os
 import re
-import sys
 from xml.sax.saxutils import escape, unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
@@ -42,14 +40,14 @@ def escape_XML(s):  # http://wiki.python.org/moin/EscapingXml
 #     return(unescape(o, extras))
 
 
-def unescape_XML(text):  #.0937s 4.11%
+def unescape_XML(text):  # .0937s 4.11%
     '''
     Removes HTML or XML character references and entities from text.
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
     Marginally faster than `from xml.sax.saxutils import escape, unescape`
 
     '''
-    import html.entities
+
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":
@@ -69,39 +67,6 @@ def unescape_XML(text):  #.0937s 4.11%
                 pass
         return text  # leave as is
     return re.sub("&#?\w+;", fixup, text)
-
-
-# # Is this redundant, can I delete? 20170501
-# def get_HTML_content(
-#         url, referer='', data=None, cookie=None,
-#         retry_counter=0, cache_control=None):
-#     '''Return [HTML content, headers] of a given URL.
-#     Note: I try to guess the encoding and return unicode. However, etree
-#     will not parse unicode with an encoding declaration within it.
-#     However, get_HTML will return a parse tree if that's what you need.
-#     '''
-
-#     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
-#     r = requests.get(url, headers=agent_headers, verify=True)
-#     info("r.headers['content-type'] = %s" % r.headers['content-type'])
-#     if 'html' in r.headers['content-type']:
-#         info("r       encoding = '%s'" % (r.encoding))
-#         chardet_encoding = chardet.detect(r.content)
-#         info("chardet_encoding = %s" % chardet_encoding)
-#         if chardet_encoding['confidence'] > 0.85:
-#             try:
-#                 info("chardet encoding = '%s'" % (
-#                     chardet_encoding['encoding']))
-#                 content_uni = r.content.decode(chardet_encoding['encoding'])
-#             except UnicodeDecodeError:
-#                 info("r       encoding = '%s'" % (r.encoding))
-#                 content_uni = r.content.decode(r.encoding)
-#         else:
-#             info("r       encoding = '%s'" % (r.encoding))
-#             content_uni = r.content.decode(r.encoding)
-#         return content_uni, r.headers
-#     else:
-#         raise IOError("URL content is not HTML.")
 
 
 def get_HTML(

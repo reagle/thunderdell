@@ -55,105 +55,106 @@ if not os.path.isdir(TMP_DIR):
 # Expansions for common tags/activities
 
 GENERAL_KEY_SHORTCUTS = {
-        'con': 'conflict',
-        'exi': 'exit',
-        'for': 'fork',
-        'hum': 'humor',
-        'ide': 'identity',
-        'lea': 'leadership',
-        'leg': 'legal',
-        'ope': 'open',
-        'nor': 'norms',
-        'pat': 'patience',
-        'pol': 'policing',
-        'pow': 'power',
-        'pra': 'praxis',
-        'pri': 'privacy',
-        'spe': 'speech',
-        'str': 'structure',
-        'tea': 'teaching',
-        'tec': 'technology',
-        'tro': 'troll',
-        'zei': 'zeitgeist',
-        }
+    'con': 'conflict',
+    'exi': 'exit',
+    'for': 'fork',
+    'hum': 'humor',
+    'ide': 'identity',
+    'lea': 'leadership',
+    'leg': 'legal',
+    'ope': 'open',
+    'nor': 'norms',
+    'pat': 'patience',
+    'pol': 'policing',
+    'pow': 'power',
+    'pra': 'praxis',
+    'pri': 'privacy',
+    'spe': 'speech',
+    'str': 'structure',
+    'tea': 'teaching',
+    'tec': 'technology',
+    'tro': 'troll',
+    'zei': 'zeitgeist',
+    }
 
 GF_KEY_SHORTCUTS = {
-        # Geek Feminism
-        'fem': 'feminism',
-        'gen': 'gender',
-        'gf': 'gfem',
-        'sex': 'sexism',
-        'mer': 'meritocracy',
-        'prv': 'privilege',
-        }
+    # Geek Feminism
+    'fem': 'feminism',
+    'gen': 'gender',
+    'gf': 'gfem',
+    'sex': 'sexism',
+    'mer': 'meritocracy',
+    'prv': 'privilege',
+    }
 
 LH_KEY_SHORTCUTS = {
-        # Lifehack
-        'lh': 'lifehack',
-        'his': 'history',
-        'qs': 'quantifiedself',
-        'sh': 'selfhelp',
-        'too': 'tool',
-        'min': 'minimalism',
-        }
+    # Lifehack
+    'lh': 'lifehack',
+    'his': 'history',
+    'qs': 'quantifiedself',
+    'sh': 'selfhelp',
+    'too': 'tool',
+    'min': 'minimalism',
+    }
 
 RTC_KEY_SHORTCUTS = {
-        # Comments
-        'ano': 'anonymous',
-        'ass': 'assessment',
-        'aut': 'automated',
-        'com': 'competitive',
-        'cri': 'criticism',
-        'est': 'esteem',
-        'fak': 'fake',
-        'fee': 'feedback',
-        'inf': 'informed',
-        'man': 'manipulation',
-        'mar': 'market',
-        'mea': 'mean',
-        'off': 'offensive',
-        'qua': 'quant',
-        'ran': 'ranking',
-        'rat': 'rating',
-        'rev': 'review',
-        'sel': 'self',
-        'soc': 'social',
-        'pup': 'puppet',
+    # Comments
+    'ano': 'anonymous',
+    'ass': 'assessment',
+    'aut': 'automated',
+    'com': 'competitive',
+    'cri': 'criticism',
+    'est': 'esteem',
+    'fak': 'fake',
+    'fee': 'feedback',
+    'inf': 'informed',
+    'man': 'manipulation',
+    'mar': 'market',
+    'mea': 'mean',
+    'off': 'offensive',
+    'qua': 'quant',
+    'ran': 'ranking',
+    'rat': 'rating',
+    'rev': 'review',
+    'sel': 'self',
+    'soc': 'social',
+    'pup': 'puppet',
         }
 
 WP_KEY_SHORTCUTS = {
-        # Wikipedia
-        'alt': 'alternative',
-        'aut': 'authority',
-        'ana': 'analysis',
-        'apo': 'apologize',
-        'att': 'attack',
-        'bia': 'bias',
-        'blo': 'block',
-        'cab': 'cabal',
-        'col': 'collaboration',
-        'con': 'consensus',
-        'cit': 'citation',
-        'coi': 'COI',
-        'dep': 'deployment',
-        'ecc': 'eccentric',
-        'exp': 'expertise',
-        'fai': 'faith',
-        'fru': 'frustration',
-        'gov': 'governance',
-        'mot': 'motivation',
-        'neu': 'neutrality',
-        'not': 'notability',
-        'par': 'participation',
-        'phi': 'philosophy',
-        'pol': 'policy',
-        'qua': 'quality',
-        'uni': 'universal',
-        'ver': 'verifiability',
-        }
+    # Wikipedia
+    'alt': 'alternative',
+    'aut': 'authority',
+    'ana': 'analysis',
+    'apo': 'apologize',
+    'att': 'attack',
+    'bia': 'bias',
+    'blo': 'block',
+    'cab': 'cabal',
+    'col': 'collaboration',
+    'con': 'consensus',
+    'cit': 'citation',
+    'coi': 'COI',
+    'dep': 'deployment',
+    'ecc': 'eccentric',
+    'exp': 'expertise',
+    'fai': 'faith',
+    'fru': 'frustration',
+    'gov': 'governance',
+    'mot': 'motivation',
+    'neu': 'neutrality',
+    'not': 'notability',
+    'par': 'participation',
+    'phi': 'philosophy',
+    'pol': 'policy',
+    'qua': 'quality',
+    'uni': 'universal',
+    'ver': 'verifiability',
+    }
 
-LIST_OF_KEYSHORTCUTS = (GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS,
-    RTC_KEY_SHORTCUTS,WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS)
+LIST_OF_KEYSHORTCUTS = (
+    GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS,
+    RTC_KEY_SHORTCUTS, WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS)
 
 KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
 for short_dict in LIST_OF_KEYSHORTCUTS[1:]:
@@ -163,26 +164,26 @@ MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec'
 
 SITE_CONTAINER_MAP = (
     ('arstechnica.com', 'Ars Technica', 'c_newspaper'),
-    ('atlantic.com', 'The Atlantic',  'c_magazine'),
-    ('boingboing.net', 'Boing Boing',  'c_blog'),
-    ('dailydot', 'The Daily Dot',  'c_newspaper'),
-    ('engadget.com', 'Engadget',  'c_blog'),
-    ('forbes.com', 'Forbes',  'c_magazine'),
-    ('huffingtonpost', 'Huffington Post',  'c_newspaper'),
-    ('lifehacker.com', 'Lifehacker',  'c_newspaper'),
-    ('medium.com', 'Medium',  'c_blog'),
-    ('newyorker.com', 'New Yorker',  'c_magazine'),
+    ('atlantic.com', 'The Atlantic', 'c_magazine'),
+    ('boingboing.net', 'Boing Boing', 'c_blog'),
+    ('dailydot', 'The Daily Dot', 'c_newspaper'),
+    ('engadget.com', 'Engadget', 'c_blog'),
+    ('forbes.com', 'Forbes', 'c_magazine'),
+    ('huffingtonpost', 'Huffington Post', 'c_newspaper'),
+    ('lifehacker.com', 'Lifehacker', 'c_newspaper'),
+    ('medium.com', 'Medium', 'c_blog'),
+    ('newyorker.com', 'New Yorker', 'c_magazine'),
     ('nytimes.com', 'The New York Times', 'c_newspaper'),
-    ('salon.com', 'Salon',  'c_magazine'),
-    ('slate.com', 'Slate',  'c_magazine'),
-    ('techcrunch.com', 'TechCrunch',  'c_newspaper'),
-    ('theguardian', 'The Guardian',  'c_newspaper'),
-    ('verge.com', 'The Verge',  'c_newspaper'),
+    ('salon.com', 'Salon', 'c_magazine'),
+    ('slate.com', 'Slate', 'c_magazine'),
+    ('techcrunch.com', 'TechCrunch', 'c_newspaper'),
+    ('theguardian', 'The Guardian', 'c_newspaper'),
+    ('verge.com', 'The Verge', 'c_newspaper'),
     ('Wikipedia_Signpost', 'Wikipedia Signpost', 'c_web'),
-    ('wired.com', 'Wired',  'c_magazine'),
-    ('wsj.com', 'The Wall Street Journal',  'c_newspaper'),
-    ('washingtonpost.com', 'The Washington Post',  'c_newspaper'),
-    ('fourhourworkweek.com', '4-Hour Workweek',  'c_blog'),
+    ('wired.com', 'Wired', 'c_magazine'),
+    ('wsj.com', 'The Wall Street Journal', 'c_newspaper'),
+    ('washingtonpost.com', 'The Washington Post', 'c_newspaper'),
+    ('fourhourworkweek.com', '4-Hour Workweek', 'c_blog'),
     # ('', '',  'c_magazine'),
 )
 
@@ -333,7 +334,8 @@ class scrape_default(object):
                 info("trying = '%s'" % path)
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    info("xpath_result = '%s'; xpath = '%s'" % (xpath_result, path))
+                    info("xpath_result = '%s'; xpath = '%s'"
+                         % (xpath_result, path))
                     date = parse(xpath_result[0]).strftime("%Y%m%d")
                     info("date = '%s'; xpath = '%s'" % (date, path))
                     if date != '':
@@ -350,8 +352,6 @@ class scrape_default(object):
             date = time.strftime('%Y%m%d', NOW)
             info("making date NOW = %s" % date)
             return date
-
-        # '''//li/span[@class="byline_label"]/following-sibling::span/@title''',# tynan.com
 
     def split_title_org(self):
         '''Separate the title by a delimiter and test if latter half is the
@@ -673,7 +673,7 @@ class scrape_ENWP(scrape_default):
         return 'Wikipedia'
 
     def split_title_org(self):
-        return self.get_title(),  self.get_org()
+        return self.get_title(), self.get_org()
 
     def get_title(self):
         title = scrape_default.get_title(self)    # use super()?
@@ -732,7 +732,7 @@ class scrape_WMMeta(scrape_default):
             '''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''',
             cite_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
-        return '%d%02d%02d' %(int(year), int(month), int(day))
+        return '%d%02d%02d' % (int(year), int(month), int(day))
 
     def get_org(self):
         return 'Wikimedia'
@@ -741,7 +741,8 @@ class scrape_WMMeta(scrape_default):
         return ''            # no good way to identify first paragraph at Meta
 
     def get_permalink(self):
-        permalink = self.url.split('/wiki/')[0] + re.search('''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
+        permalink = self.url.split('/wiki/')[0] + re.search(
+            '''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
         return unescape_XML(permalink)
 
 
@@ -830,7 +831,7 @@ def log2mm(biblio):
     this_year = time.strftime('%Y', NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
-    ofile = HOME+'/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
+    ofile = HOME + '/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
     info("biblio = %s" % biblio)
     author = biblio['author']
     title = biblio['title']
@@ -924,7 +925,7 @@ def log2nifty(biblio):
     '''
 
     print("to log2nifty\n")
-    ofile = HOME+'/data/2web/goatee.net/nifty-stuff.html'
+    ofile = HOME + '/data/2web/goatee.net/nifty-stuff.html'
 
     title = biblio['title']
     comment = biblio['comment']
@@ -958,7 +959,7 @@ def log2work(biblio):
 
     print("to log2work\n")
     info("biblio = '%s'" % (biblio))
-    ofile = HOME+'/data/2web/reagle.org/joseph/plan/plans/index.html'
+    ofile = HOME + '/data/2web/reagle.org/joseph/plan/plans/index.html'
 
     title = biblio['title'].strip()
     url = biblio['url'].strip()
@@ -1038,7 +1039,8 @@ def log2console(biblio):
                 print(('%s = %s' % (identifer, value[0])))
 
     if args.publish:
-        yasn_publish(biblio['comment'], biblio['title'], biblio['url'], biblio['tags'])
+        yasn_publish(biblio['comment'], biblio['title'],
+                     biblio['url'], biblio['tags'])
 
 
 def blog_at_opencodex(biblio):
@@ -1047,7 +1049,7 @@ def blog_at_opencodex(biblio):
     '''
 
     blog_title = blog_body = ''
-    CODEX_ROOT = HOME+'/data/2web/reagle.org/joseph/content/'
+    CODEX_ROOT = HOME + '/data/2web/reagle.org/joseph/content/'
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = ' '.join(biblio['title'].split(' ')[0:3])
     entry = biblio['comment']
@@ -1086,7 +1088,7 @@ def blog_at_opencodex(biblio):
     fd.write('Category: %s\n\n' % category)
     fd.write(blog_body.strip())
     if 'url' in biblio and 'excerpt' in biblio:
-        fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
+        fd.write('\n\n[%s](%s)\n\n' % (biblio['title'], biblio['url']))
         fd.write('> %s\n' % biblio['excerpt'])
     fd.close()
     Popen([VISUAL, filename])
@@ -1097,7 +1099,7 @@ def blog_at_goatee(biblio):
     Start at a blog entry at goatee
     '''
 
-    GOATEE_ROOT = HOME+'/data/2web/goatee.net/content/'
+    GOATEE_ROOT = HOME + '/data/2web/goatee.net/content/'
     info("biblio['comment'] = '%s'" % (biblio['comment']))
     blog_title, sep, blog_body = biblio['comment'].partition('. ')
 
@@ -1132,12 +1134,11 @@ def blog_at_goatee(biblio):
 
     if 'url':
         if biblio.get('excerpt', False):
-            fd.write('\n\n[%s](%s)\n\n' %(biblio['title'], biblio['url']))
+            fd.write('\n\n[%s](%s)\n\n' % (biblio['title'], biblio['url']))
             fd.write('> %s\n' % biblio['excerpt'])
         if photo_match:
             path, jpg = url.rsplit('/', 1)
             thumb_url = path + '/thumbs/' + jpg
-            #thumb_url = url.replace('/web/', '/thumbs/')
             alt_text = blog_title.replace('-', ' ')
             fd.write(
                 '''<p><a href="%s"><img alt="%s" class="thumb right" src="%s"/></a></p>\n\n'''
@@ -1186,7 +1187,7 @@ def get_logger(text):
     """
     LOG_REGEX = re.compile(
         r'(?P<scheme>\w) (?P<tags>(?:\w+ )+)?'
-         '(?P<url>(\.|doi|isbn|http)\S*)?(?P<comment> .*)?', re.IGNORECASE)
+        '(?P<url>(\.|doi|isbn|http)\S*)?(?P<comment> .*)?', re.IGNORECASE)
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()
@@ -1304,14 +1305,14 @@ def do_console_annotation(biblio):
 
     info("biblio['author'] = '%s'" % (biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    initial_text = [('d=%s au=%s ti=%s' %(biblio['date'],
+    initial_text = [('d=%s au=%s ti=%s' % (biblio['date'],
                     biblio['author'], biblio['title']))]
     for key in biblio:
         if key.startswith('c_'):
             initial_text.append("%s=%s" % (fe.CSL_FIELDS[key], biblio[key]))
     if 'comment' in biblio and biblio['comment'].strip():
         initial_text.append('. ' + biblio['comment'])
-    initial_text = '\n'.join(initial_text)+'\n'
+    initial_text = '\n'.join(initial_text) + '\n'
 
     edited_text = edit_annotation(initial_text)
     try:
@@ -1333,7 +1334,7 @@ def yasn_publish(comment, title, url, tags):
     info("comment = %s, title = %s, url = %s, tags = %s"
          % (comment, title, url, tags))
     if tags and tags[0] != '#':  # they've not yet been hashified
-        tags = ' '.join(['#'+KEY_SHORTCUTS.get(tag, tag)
+        tags = ' '.join(['#' + KEY_SHORTCUTS.get(tag, tag)
                         for tag in tags.strip().split(' ')])
     else:
         tags = ''
@@ -1354,7 +1355,7 @@ def yasn_publish(comment, title, url, tags):
         info("length_comment = %s; shortened_room = %s" % (
             len(comment), shortened_room))
         if shortened_room < 0:
-            comment = comment[0:shortened_room-3] + '...'
+            comment = comment[0:shortened_room - 3] + '...'
     tweet = "%s %s %s" % (comment, url, tags)
     info('tweet length = %s' % len(tweet))
 
@@ -1370,6 +1371,7 @@ def yasn_publish(comment, title, url, tags):
         twitter.update_status(status=tweet)
     except TwythonError as e:
         print(e)
+
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":

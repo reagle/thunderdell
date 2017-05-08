@@ -666,16 +666,15 @@ def guess_csl_type(entry):
             print(("Unknown entry_type = %s" % et))
             sys.exit()
     et = 'no-type'
-    if any(c in entry for c in CSL_SHORTCUTS.values()):
-        # info("looking at containers for %s" % entry)
-        if 'c_journal' in entry:            et = 'article-journal'
-        if 'c_magazine' in entry:           et = 'article-magazine'
-        if 'c_newspaper' in entry:          et = 'article-newspaper'
-        if 'c_dictionary' in entry:         et = 'entry-dictionary'
-        if 'c_encyclopedia' in entry:       et = 'entry-encyclopedia'
-        if 'c_forum' in entry:              et = 'post'
-        if 'c_blog' in entry:               et = 'post-weblog'
-        if 'c_web' in entry:                et = 'webpage'
+    # info("looking at containers for %s" % entry)
+    if 'c_web' in entry:                et = 'webpage'
+    elif 'c_blog' in entry:             et = 'post-weblog'
+    elif 'c_newspaper' in entry:        et = 'article-newspaper'
+    elif 'c_magazine' in entry:         et = 'article-magazine'
+    elif 'c_journal' in entry:          et = 'article-journal'
+    elif 'c_dictionary' in entry:       et = 'entry-dictionary'
+    elif 'c_encyclopedia' in entry:     et = 'entry-encyclopedia'
+    elif 'c_forum' in entry:            et = 'post'
     else:
         if 'eventtitle' in entry:
             if 'publisher' in entry:        et = 'paper-conference'
@@ -711,8 +710,8 @@ def guess_csl_type(entry):
     elif et == 'post-weblog':
         genre = 'Web log message'
     if 'url' in entry:
-        if any([site in entry['url'] for site in {
-                'youtube.com', 'vimeo.com'}]):
+        if any((site in entry['url'] for site in [
+                'youtube.com', 'vimeo.com'])):
             genre = 'Video file'
 
     return et, genre
@@ -805,10 +804,10 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
-EXCLUDE_URLS = {'search?q=cache', 'proquest', 'books.google',
-                'amazon.com'}
-ONLINE_JOURNALS = {'firstmonday.org', 'media-culture.org', 'salon.com',
-                   'slate.com'}
+EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
+                'amazon.com']
+ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
+                   'slate.com']
 
 
 def emit_biblatex(entries):
@@ -883,13 +882,14 @@ def emit_biblatex(entries):
             if field in entry and entry[field] is not None:
                 # critical("short, field = '%s , %s'" % (short, field))
                 # skip these fields
+                value = entry[field]
                 if field in ('identifier', 'entry_type', 'ori_author'):
                     continue
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field in ('url'):
-                    # info("url = %s" % entry[field])
-                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                    # info("url = %s" % value)
+                    if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
                         continue
                     # if online_only and not (online or online journal)
@@ -904,8 +904,7 @@ def emit_biblatex(entries):
                 if args.bibtex and field not in BIBTEX_FIELDS:
                         continue
 
-                # if entry[field] not a proper string, make it so
-                value = entry[field]
+                # if value not a proper string, make it so
                 # info("value = %s; type = %s" % (value, type(value)))
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
@@ -1022,35 +1021,35 @@ def emit_yaml_csl(entries):
                     continue
                 if field in ('author', 'editor', 'translator'):
                     args.outfd.write('  %s:\n' % field)
-                    emit_yaml_people(entry[field])
+                    emit_yaml_people(value)
                     continue
                 if field in ('date', 'origdate', 'urldate'):
-                    if entry[field] == '0000':
+                    if value == '0000':
                         continue
                     if field == 'date':
                         season = entry['issue'] if 'issue' in entry else None
                         args.outfd.write('  issued:\n')
-                        emit_yaml_date(entry[field], season)
+                        emit_yaml_date(value, season)
                     if field == 'origdate':
                         args.outfd.write('  original-date:\n')
-                        emit_yaml_date(entry[field])
+                        emit_yaml_date(value)
                     if field == 'urldate':
                         args.outfd.write('  accessed:\n')
-                        emit_yaml_date(entry[field])
+                        emit_yaml_date(value)
                     continue
 
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field == 'url':
-                    # info("url = %s" % entry[field])
-                    if any(ban for ban in EXCLUDE_URLS if ban in entry[field]):
+                    # info("url = %s" % value)
+                    if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if args.online_urls_only:
                         # info("online_urls_only")
                         # don't skip online types
-                        if entry_type in ('post', 'post-weblog', 'webpage'):
+                        if entry_type in {'post', 'post-weblog', 'webpage'}:
                             pass
                         # skip items that are paginated
                         elif 'pages' in entry:
@@ -1058,7 +1057,7 @@ def emit_yaml_csl(entries):
                             continue
                 if field == 'eventtitle' and 'container-title' not in entry:
                     args.outfd.write('  container-title: "Proceedings of %s"\n'
-                                     % entry['eventtitle'])
+                                     % value)
                 if field == 'c_blog' and entry[field] == 'Blog':
                     continue
 
@@ -1110,10 +1109,10 @@ def emit_wp_citation(entries):
                              'keyword', 'month', 'shorttitle', 'year'):
                     continue
                 elif field == 'author':
-                    output_wp_names(field, entry[field])
+                    output_wp_names(field, value)
                     continue
                 elif field == 'editor':
-                    output_wp_names(field, entry[field])
+                    output_wp_names(field, value)
                     continue
                 elif field == 'title':  # TODO: convert value to title case?
                     if 'booktitle' in entry:

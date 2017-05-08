@@ -986,13 +986,20 @@ def log2work(biblio):
     plan_content = plan_fd.read()
     plan_fd.close()
 
-    plan_tree = etree.parse(StringIO(plan_content), etree.HTMLParser())
-    ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
-    info(ul_found[0])
+    # parsing as XML needs namespaces in XPATH
+    plan_tree = etree.parse(StringIO(plan_content), etree.XMLParser())
+    # plan_tree = etree.parse(StringIO(plan_content), etree.HTMLParser())
+    ul_found = plan_tree.xpath(
+        '''//x:div[@id='Done']/x:ul''',
+        namespaces={'x': 'http://www.w3.org/1999/xhtml'})
+    # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
+    info("ul_found = %s" % (ul_found))
     if ul_found:
-        ul_found[0].insert(0, etree.XML(log_item))
+        log_item_xml = etree.XML(log_item)
+        log_item_xml.tail ='\n\n      '
+        ul_found[0].insert(0, log_item_xml)
         new_content = etree.tostring(
-            plan_tree, pretty_print=True, encoding="unicode", method="HTML")
+            plan_tree, pretty_print=True, encoding="unicode", method="xml")
         new_plan_fd = open(ofile, 'w', encoding='utf-8', errors='replace')
         new_plan_fd.write(new_content)
         new_plan_fd.close()

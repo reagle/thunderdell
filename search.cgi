@@ -6,7 +6,7 @@
 # On Webfaction env python3 = python3.2; so I must set 3.5 on the shebang above
 
 def cgi_main():
-    global opts
+    global args
     import codecs, cgi, os, re, sys
     from urllib.parse import quote, unquote
 
@@ -46,10 +46,10 @@ def cgi_main():
 
         import fe
         output = fe.emit_results
-        fe.opts.query = query
-        fe.opts.query_c = re.compile(re.escape(query), re.IGNORECASE)
-        fe.opts.chase = True
-        fe.opts.cgi = True
+        fe.args.query = query
+        fe.args.query_c = re.compile(re.escape(query), re.IGNORECASE)
+        fe.args.chase = True
+        fe.args.cgi = True
         
         def _ignore(_): pass # this overrides fe's logging
         fe.critical = _ignore

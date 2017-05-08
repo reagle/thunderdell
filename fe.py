@@ -1295,10 +1295,10 @@ def parse_names(names):
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
     """
-    particles = ("al", "bin", "da", "de", "de la", "Du", "la",
+    PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
                  "van", "van den", "van der", "von",
-                 "Van", "Von")
-    suffixes = ("Jr.", "Sr.", "II", "III", "IV")
+                 "Van", "Von"}
+    SUFFIXES = {"Jr.", "Sr.", "II", "III", "IV"}
     names_p = []
 
     # info("names = '%s'" % (names))
@@ -1314,11 +1314,11 @@ def parse_names(names):
                         ['van ' + chunks[chunks.index('van') + 1]]
 
         if len(chunks) > 1:
-            if chunks[-1] in suffixes:
+            if chunks[-1] in SUFFIXES:
                 jr = chunks.pop(-1)
             last = chunks.pop(-1)
             if len(chunks) > 0:
-                if chunks[-1] in particles:
+                if chunks[-1] in PARTICLES:
                     von = chunks.pop(-1)
             first = ' '.join(chunks)
         else:

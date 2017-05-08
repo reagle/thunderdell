@@ -993,9 +993,9 @@ def log2work(biblio):
         ul_found[0].insert(0, etree.XML(log_item))
         new_content = etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="HTML")
-        fd = open(ofile, 'w', encoding='utf-8', errors='replace')
-        fd.write(new_content)
-        fd.close()
+        new_plan_fd = open(ofile, 'w', encoding='utf-8', errors='replace')
+        new_plan_fd.write(new_content)
+        new_plan_fd.close()
     else:
         print_usage("Sorry, XML insertion failed.")
 

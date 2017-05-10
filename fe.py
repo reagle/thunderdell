@@ -337,7 +337,8 @@ ARTICLES = {'a', 'an', 'the'}
 CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
 SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
                       'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
-BORING_WORDS = {'', 're'} | ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS
+JUNK_WORDS = {'', 're', }
+BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 
 
 def identity_add_title(ident, title):

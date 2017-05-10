@@ -33,9 +33,9 @@ dbg = logging.debug
 
 useLXML = False
 HOME = os.path.expanduser('~')
-DEFAULT_MAP = HOME + '/joseph/readings.mm'
+DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
 
-TMP_DIR = HOME + '/tmp/.fe/'
+TMP_DIR = f'{HOME}/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
@@ -288,8 +288,8 @@ def pretty_tabulate_list(mylist, cols=3):
 
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
-        sorted(['%s:%s' % (key, value)
-               for key, value in list(mydict.items())]), cols)
+        sorted([f'{key}:{value}'
+                for key, value in list(mydict.items())]), cols)
 
 
 def escape_latex(text):
@@ -492,14 +492,14 @@ def pull_citation(entry):
     if 'year' in entry and 'date' not in entry:
         date = entry['year']
         if 'month' in entry:
-            date += '-%02d' % int(entry['month'])
+            date += f'-{int(entry["month"]):02d}'
             if 'day' in entry:
                 if '-' not in entry['day']:
-                    date += '-%02d' % int(entry['day'])
+                    date += f'-{int(entry["day"]):02d}'
                 else:  # a range
                     start_date, end_date = entry['day'].split('-')
-                    date = date + '-%02d' % int(start_date) + \
-                        '/' + date + '-%02d' % int(end_date)
+                    date = date + f"-{int(start_date):02d}" \
+                        f"/{date}-{int(end_date):02d}"
         entry['date'] = date
 
     # biblatex 0.9+:date -> bibtex:year
@@ -515,13 +515,13 @@ def pull_citation(entry):
             date_parts = [_f for _f in [date[0:4], date[4:6], date[6:8]] if _f]
         if len(date_parts) == 3:
             entry['year'], entry['month'], entry['day'] = date_parts
-            date = '%s-%s-%s' % (date_parts[0], date_parts[1], date_parts[2])
+            date = f'{date_parts[0]}-{date_parts[1]}-{date_parts[2]}'
         elif len(date_parts) == 2:
             entry['year'], entry['month'] = date_parts
-            date = '%s-%s' % (date_parts[0], date_parts[1])
+            date = f'{date_parts[0]}-{date_parts[1]}'
         else:
             entry['year'] = date_parts[0]
-            date = '%s' % (date_parts[0])
+            date = f'{date_parts[0]}'
         entry['date'] = date
 
     if ': ' in entry['title']:
@@ -534,10 +534,10 @@ def pull_citation(entry):
         query = url.split('?', 1)[1]
         queries = parse_qs(query)
         oldid = queries['oldid'][0]
-        entry['shorttitle'] = '%s (oldid=%s)' % (entry['title'], oldid)
+        entry['shorttitle'] = f'{entry["title"]} (oldid={oldid})'
         if not args.long_url:  # short URLs
-            base = 'http://%s' % url.split('/')[2]
-            oldid = '/?oldid=%s' % oldid
+            base = f'http://{url.split("/")[2]}'
+            oldid = f'/?oldid={oldid}'
             diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
             entry['url'] = base + oldid + diff
 
@@ -568,8 +568,8 @@ def create_bibtex_author(names):
         first, von, last, jr = name[0:4]
 
         if all(s.islower() for s in (first, last)):  # {{hooks}, {bell}}
-            first = '{%s}' % first
-            last = '{%s}' % last
+            first = f'{{first}}'
+            last = f'{{last}}'
 
         if von != '':
             full_name += von + ' '
@@ -605,7 +605,7 @@ def guess_bibtex_type(entry):
         elif et in CSL_TYPES:
             et = CSL_BIBLATEX_TYPE_MAP[et]
         else:
-            print(("Unknown entry_type = %s" % et))
+            print(f"Unknown entry_type = {et}")
             sys.exit()
         return et
 
@@ -664,7 +664,7 @@ def guess_csl_type(entry):
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre
         else:
-            print(("Unknown entry_type = %s" % et))
+            print((f"Unknown entry_type = {et}"))
             sys.exit()
     et = 'no-type'
     # info("looking at containers for %s" % entry)
@@ -778,10 +778,10 @@ def bibformat_title(title):
                 cased_title.append(word)
             elif (word in words2protect):
                 # info("protecting lower '%s'" % (word))
-                cased_title.append('{%s}' % word)
+                cased_title.append(f'{{word}}')
             elif (word[0].isupper()):
                 # info("protecting title '%s'" % (word))
-                cased_title.append('{%s}' % my_title(word))
+                cased_title.append(f'{{{my_title(word)}}}')
             else:
                 # info("else nothing")
                 cased_title.append(my_title(word))
@@ -789,7 +789,7 @@ def bibformat_title(title):
 
     # convert quotes to LaTeX then convert doubles to singles within the title
     if quoted_title[0] == '"':  # First char is a quote
-        quoted_title = '``%s' % quoted_title[1:]
+        quoted_title = f'``{quoted_title[1:]}'
     # open quote
     quoted_title = quoted_title.replace(' "', ' ``').replace(" '", " `")
     # close quote
@@ -825,16 +825,16 @@ def emit_biblatex(entries):
 
         # bibtex syntax accommodations
         if 'eventtitle' in entry and 'booktitle' not in entry:
-            entry['booktitle'] = 'Proceedings of %s' % entry['eventtitle']
+            entry['booktitle'] = f'Proceedings of {entry["eventtitle"]}'
         if args.bibtex:
             if 'url' in entry:  # most bibtex styles doesn't support url
-                note = ' Available at: \\url{%s}' % entry['url']
+                note = f' Available at: \\url{{entry["url"]}}'
                 if 'urldate' in entry:
                     urldate = "%s-%s-%s" % (
                         entry['urldate'][0:4],  # year
                         entry['urldate'][4:6],  # month
                         entry['urldate'][6:8])  # day
-                    note += ' [Accessed %s]' % urldate
+                    note += f' [Accessed {urldate}]'
                 entry['note'] = entry.setdefault('note', '') + note
             if entry_type == 'online':
                 entry_type_copy = 'misc'
@@ -877,7 +877,7 @@ def emit_biblatex(entries):
                 del entry[field]
                 continue
 
-        args.outfd.write('@%s{%s,\n' % (entry_type_copy, entry['identifier']))
+        args.outfd.write(f'@{entry_type_copy}{{{entry["identifier"]},\n')
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
@@ -922,7 +922,7 @@ def emit_biblatex(entries):
                 if field in ('title', 'shorttitle'):
                     value = bibformat_title(value)
 
-                args.outfd.write('   %s = {%s},\n' % (field, value))
+                args.outfd.write(f'   {field} = {{{value}}},\n')
         args.outfd.write("}\n")
 
 
@@ -941,7 +941,7 @@ def emit_yaml_csl(entries):
             s = s.replace('"', r"\'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
-            s = '"%s"' % s
+            s = f'"{s}"'
         return s
 
     def emit_yaml_people(people):
@@ -953,29 +953,29 @@ def emit_yaml_csl(entries):
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
             given, particle, family, suffix = person
-            args.outfd.write('  - family: %s\n' % esc_yaml(family))
+            args.outfd.write(f'  - family: {esc_yaml(family)}\n')
             if given:
-                args.outfd.write('    given: %s\n' % esc_yaml(given))
+                args.outfd.write(f'    given: {esc_yaml(given)}\n')
                 # args.outfd.write('    given:\n')
                 # for given_part in given.split(' '):
                 #     args.outfd.write('    - %s\n' % esc_yaml(given_part))
             if suffix:
-                args.outfd.write('    suffix: %s\n' % esc_yaml(suffix))
+                args.outfd.write(f'    suffix: {esc_yaml(suffix)}\n')
             if particle:
-                args.outfd.write('    non-dropping-particle: %s\n' %
-                                 esc_yaml(particle))
+                args.outfd.write(f'    non-dropping-particle: '
+                    f'{esc_yaml(particle)}\n')
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
         year, month, day = (date.split('-') + 3 * [None])[0:3]
         if year:
-            args.outfd.write('    year: %s\n' % year)
+            args.outfd.write(f'    year: {year}\n')
         if month:
-            args.outfd.write('    month: %s\n' % month)
+            args.outfd.write(f'    month: {month}\n')
         if day:
-            args.outfd.write('    day: %s\n' % day)
+            args.outfd.write(f'    day: {day}\n')
         if season:
-            args.outfd.write('    season: %s\n' % season)
+            args.outfd.write(f'    season: {season}\n')
 
     def yaml_protect_case(title):
         """Preserve/bracket proper names/nouns
@@ -993,10 +993,10 @@ def emit_yaml_csl(entries):
 
     for key, entry in sorted(entries.items()):
         entry_type, genre = guess_csl_type(entry)
-        args.outfd.write('- id: %s\n' % entry['identifier'])
-        args.outfd.write('  type: %s\n' % entry_type)
+        args.outfd.write(f'- id: {entry["identifier"]}\n')
+        args.outfd.write(f'  type: {entry_type}\n')
         if genre:
-            args.outfd.write('  genre: %s\n' % genre)
+            args.outfd.write(f'  genre: {genre}\n')
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
@@ -1017,11 +1017,11 @@ def emit_yaml_csl(entries):
 
                 # special format fields
                 if field == 'title':
-                    args.outfd.write('  title: %s\n'
-                                     % yaml_protect_case(esc_yaml((value))))
+                    title = yaml_protect_case(esc_yaml((value)))
+                    args.outfd.write(f'  title: {title}\n')
                     continue
                 if field in ('author', 'editor', 'translator'):
-                    args.outfd.write('  %s:\n' % field)
+                    args.outfd.write(f'  {field}:\n')
                     emit_yaml_people(value)
                     continue
                 if field in ('date', 'origdate', 'urldate'):
@@ -1057,8 +1057,8 @@ def emit_yaml_csl(entries):
                             # info("  skipping url, paginated item")
                             continue
                 if field == 'eventtitle' and 'container-title' not in entry:
-                    args.outfd.write('  container-title: "Proceedings of %s"\n'
-                                     % value)
+                    args.outfd.write(
+                        f'  container-title: "Proceedings of {value}"\n')
                 if field == 'c_blog' and entry[field] == 'Blog':
                     continue
 
@@ -1069,7 +1069,7 @@ def emit_yaml_csl(entries):
                     # info("bib2csl field FROM =  %s" % (field))
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # info("bib2csl field TO   = %s" % (field))
-                args.outfd.write("  %s: %s\n" % (field, esc_yaml(value)))
+                args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write('...\n')
 
 
@@ -1089,12 +1089,12 @@ def emit_wp_citation(entries):
                 prefix = ''
                 suffix = name_num
             elif field == 'editor':
-                prefix = 'editor%s-' % str(name_num)
+                prefix = f'editor{str(name_num)}-'
                 suffix = ''
             args.outfd.write(
-                '| %sfirst%s = %s\n' % (prefix, suffix, name[0]))
+                f'| {prefix}first{suffix} = {name[0]}\n')
             args.outfd.write(
-                '| %slast%s = %s\n' % (prefix, suffix, ' '.join(name[1:])))
+                f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
 
     for key, entry in sorted(entries.items()):
         args.outfd.write('{{ citation\n')
@@ -1120,7 +1120,7 @@ def emit_wp_citation(entries):
                         field = 'chapter'
                 elif field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
-                args.outfd.write('| %s = %s\n' % (field, value))
+                args.outfd.write(f'| {field} = {value}\n')
         args.outfd.write("}}\n")
 
 
@@ -1147,19 +1147,19 @@ def emit_results(entries, query, results_file):
                 # kindle: location
                 if 'pagination' in entry:
                     if entry['pagination'] == 'section':
-                        locator = ', sec. %s' % locator
+                        locator = f', sec. {locator}'
                     elif entry['pagination'] == 'paragraph':
-                        locator = ', para. %s' % locator
+                        locator = f', para. {locator}'
                     elif entry['pagination'] == 'location':
-                        locator = ', loc. %s' % locator
+                        locator = f', loc. {locator}'
                     elif entry['pagination'] == 'chapter':
-                        locator = ', ch. %s' % locator
+                        locator = f', ch. {locator}'
                     elif entry['pagination'] == 'verse':
-                        locator = ', vers. %s' % locator
+                        locator = f', vers. {locator}'
                     elif entry['pagination'] == 'column':
-                        locator = ', col. %s' % locator
+                        locator = f', col. {locator}'
                     elif entry['pagination'] == 'line':
-                        locator = ', line %s' % locator
+                        locator = f', line {locator}'
                     else:
                         raise Exception(
                             "unknown locator '%s' for '%s' in '%s'"
@@ -1167,18 +1167,18 @@ def emit_results(entries, query, results_file):
                                entry['custom2']))
                 else:
                     if '-' in locator:
-                        locator = ', pp. %s' % locator
+                        locator = f', pp. {locator}'
                     else:
-                        locator = ', p. %s' % locator
+                        locator = f', p. {locator}'
             cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
 
         hypertext = text
         if 'LINK' in node.attrib:
-            hypertext = '<a href="%s"> %s</a>' % (escape(
-                                                  node.get('LINK')), text)
+            link = escape(node.get('LINK'))
+            hypertext = f'<a href="{link}">{text}'
 
-        results_file.write('    <li class="%s">%s%s%s</li>\n'
-                           % (style_ref, prefix, hypertext, cite))
+        results_file.write(
+            f'    <li class="{style_ref}">{prefix}{hypertext}{cite}</li>\n')
 
     def pretty_print(node, entry=None, spaces='          '):
         """Pretty print a node and descendants into indented HTML"""
@@ -1188,12 +1188,12 @@ def emit_results(entries, query, results_file):
             reverse_print(node, entry)
         # I should clean all of this up to use simpleHTMLwriter
         if len(node) > 0:
-            results_file.write('%s<ul class="container">\n' % spaces)
+            results_file.write(f'{spaces}<ul class="container">\n')
             for child in node:
                 if child.get('STYLE_REF') == 'author':
                     break
                 pretty_print(child, entry, spaces)
-            results_file.write('%s</ul>%s\n' % (spaces, spaces))
+            results_file.write(f'{spaces}</ul>{spaces}\n')
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
@@ -1211,19 +1211,19 @@ def emit_results(entries, query, results_file):
         if __name__ == '__main__':
             return file_name
         else:                               # CGI
-            return 'file:///Users/%s' % file_name[6:]  # change from /home/
+            return f'file:///Users/{file_name[6:]}'  # change from /home/
 
     def print_entry(identifier, author, date, title, url,
                     MM_mm_file, base_mm_file, close='</li>\n'):
 
         identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (
             get_url_query(identifier), identifier)
-        title_html = '<a href="%s">%s</a>' % (get_url_query(title), title)
+        title_html = f'<a href="{get_url_query(title)}">{title}</a>'
         if url:
-            link_html = '[<a href="%s">url</a>]' % url
+            link_html = f'[<a href="{url}">url</a>]'
         else:
             link_html = ''
-        from_html = 'from <a href="%s">%s</a>' % (MM_mm_file, base_mm_file)
+        from_html = f'from <a href="{MM_mm_file}">{base_mm_file}</a>'
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
                            % (identifier_html, title_html, link_html,
                               from_html, close))
@@ -1245,13 +1245,13 @@ def emit_results(entries, query, results_file):
                 % (MM_mm_file, base_mm_file),)
             fl_names = ', '.join(name[0] + ' '
                                  + name[2] for name in entry['author'])
-            title_mdn = "%s" % (title)
+            title_mdn = f"{title}"
             if url:
-                title_mdn = "[%s](%s)" % (title, url)
+                title_mdn = f"[{title}]({url})"
             results_file.write(
                 '<li class="mdn">[%s]: %s, %s, "%s".</li>'
                 % (identifier, fl_names, date[0:4], title_mdn))
-            results_file.write('<li class="author">%s</li>' % fl_names)
+            results_file.write(f'<li class="author">{fl_names}</li>')
             pretty_print(entry['_title_node'], entry)
             results_file.write('\n          </ul>\n</li>\n'),
 
@@ -1342,8 +1342,8 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)    # break the citation up
         except:
-            print(("pull_citation error on %s: %s"
-                   % (entry['author'], entry['_mm_file'])))
+            print((f"pull_citation error on {entry['author']}: "
+                f"{entry['_mm_file']}"))
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
@@ -1380,7 +1380,7 @@ def walk_freeplane(node, mm_file, entries, links):
         """ Return a modified node with matches highlighted"""
         text = node.get('TEXT')
         result = query_c.sub(
-            lambda m: "<strong>%s</strong>" % m.group(),
+            lambda m: f"<strong>{m.group()}</strong>",
             text)
         if text != result:
             node.set('TEXT', result)
@@ -1437,7 +1437,8 @@ def walk_freeplane(node, mm_file, entries, links):
                         entry.setdefault(
                             '_node_results', []).append(node_highlighted)
 
-    entries = commit_entry(entry, entries)  # commit the last entry as no new titles left
+    # commit the last entry as no new titles left
+    entries = commit_entry(entry, entries)
     return entries, links
 
 
@@ -1499,7 +1500,7 @@ def build_bib(file_name, output):
         done.append(os.path.abspath(mm_file))
 
     if args.query:
-        results_file_name = TMP_DIR + 'query-thunderdell.html'
+        results_file_name = f'{TMP_DIR}query-thunderdell.html'
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
         try:
@@ -1513,7 +1514,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            webbrowser.open('file://%s' % results_file_name)
+            webbrowser.open(f'file://{results_file_name}')
     elif args.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1530,7 +1531,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            webbrowser.open('file://%s' % results_file_name.encode('utf-8'))
+            webbrowser.open(f'file://{results_file_name.encode("utf-8")}')
     else:
         output(entries)
     return
@@ -1704,7 +1705,7 @@ if __name__ == '__main__':
             extension = '.bib'
         elif args.WP_citation:
             extension = '.wiki'
-        output_fn = os.path.splitext(file_name)[0] + extension
+        output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
         print("Running doctests")

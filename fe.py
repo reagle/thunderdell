@@ -281,8 +281,8 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
-         ['%20s' % j for j in mylist[i:i + cols]]
-            ) for i in range(0, len(mylist), cols)]
+        ['%20s' % j for j in mylist[i:i + cols]])
+        for i in range(0, len(mylist), cols)]
     print(("\n".join(pairs)))
     print("\n")
 
@@ -749,7 +749,7 @@ def bibformat_title(title):
         'with', 'within', 'without'
     }
     words2ignore = articles | conjunctions | contractions | others \
-       | prepositions
+        | prepositions
     words2protect = {'vs.', 'oldid'}
 
     whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
@@ -964,7 +964,7 @@ def emit_yaml_csl(entries):
                 args.outfd.write(f'    suffix: {esc_yaml(suffix)}\n')
             if particle:
                 args.outfd.write(f'    non-dropping-particle: '
-                    f'{esc_yaml(particle)}\n')
+                                 f'{esc_yaml(particle)}\n')
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
@@ -1128,7 +1128,7 @@ def emit_wp_citation(entries):
 def emit_results(entries, query, results_file):
     """Emit the results of the query"""
 
-    def reverse_print(node, entry):
+    def reverse_print(node, entry, spaces):
         """Move locator number to the end of the text with the Bibtex key"""
         style_ref, text = node.get('STYLE_REF', 'default'), node.get('TEXT')
         prefix = '&gt; ' if style_ref == 'quote' else ''
@@ -1178,24 +1178,27 @@ def emit_results(entries, query, results_file):
             link = escape(node.get('LINK'))
             hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
 
-        results_file.write(
-            f'    <li class="{style_ref}">{prefix}{hypertext}{cite}</li>\n')
+        results_file.write(f'{spaces}<li class="{style_ref}">'
+                           f'{prefix}{hypertext}{cite}</li>\n')
 
-    def pretty_print(node, entry=None, spaces='          '):
+    def pretty_print(node, entry, spaces):
         """Pretty print a node and descendants into indented HTML"""
         # bug: nested titles are printed twice. 101217
-        spaces = spaces + '  '  # indent the next list
         if node.get('TEXT') is not None:
-            reverse_print(node, entry)
+            reverse_print(node, entry, spaces)
         # I should clean all of this up to use simpleHTMLwriter,
         # markup.py, or yattag
         if len(node) > 0:
-            results_file.write(f'{spaces}<li><ul class="container">\n')
+            results_file.write(
+                f'{spaces}<li><ul class="pprint_recurse">\n')
+            spaces = spaces + ' '
             for child in node:
                 if child.get('STYLE_REF') == 'author':
                     break
                 pretty_print(child, entry, spaces)
-            results_file.write(f'{spaces}</ul></li>{spaces}\n')
+            spaces = spaces[0:-1]
+            results_file.write(
+                f'{spaces}</ul></li><!--pprint_recurse-->\n')
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
@@ -1216,7 +1219,7 @@ def emit_results(entries, query, results_file):
             return f'file:///Users/{file_name[6:]}'  # change from /home/
 
     def print_entry(identifier, author, date, title, url,
-                    MM_mm_file, base_mm_file, close='</li>\n'):
+                    MM_mm_file, base_mm_file, spaces):
 
         identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (
             get_url_query(identifier), identifier)
@@ -1228,11 +1231,13 @@ def emit_results(entries, query, results_file):
             link_html = ''
         from_html = f'from <a class="from_html" ' \
             f'href="{MM_mm_file}">{base_mm_file}</a>'
-        results_file.write('  %s, <em>%s</em> %s [%s]%s'
-                           % (identifier_html, title_html, link_html,
-                              from_html, close))
+        results_file.write('%s%s, <em>%s</em> %s [%s]'
+                           % (spaces, identifier_html, title_html, link_html,
+                              from_html))
+        results_file.write(
+            f'{spaces}</li><!--identifier_html-->\n')
 
-    spaces = '          '
+    spaces = ' '
     for key, entry in sorted(entries.items()):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
@@ -1245,8 +1250,11 @@ def emit_results(entries, query, results_file):
         # if I am what was queried, print all of me
         if entry['identifier'] == args.query:
             results_file.write('%s<li class="li_entry_identifier">\n'
-                               '%s<ul class="tit_child">\n'
-                               % (spaces, spaces),),
+                               % (spaces))
+            spaces = spaces + ' '
+            results_file.write('%s<ul class="tit_tree">\n'
+                               % (spaces))
+            spaces = spaces + ' '
             results_file.write(
                 '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
                 % (spaces, MM_mm_file, base_mm_file),)
@@ -1259,29 +1267,37 @@ def emit_results(entries, query, results_file):
                 '%s<li class="mdn">[%s]: %s, %s, "%s".</li>\n'
                 % (spaces, identifier, fl_names, date[0:4], title_mdn))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
-            results_file.write(f'{spaces}<li class="pretty_print">\n')
-            pretty_print(entry['_title_node'], entry)
-            results_file.write(f'{spaces}</li><!--pretty_print-->')
-            results_file.write(f'{spaces}</ul><!--tit_child-->\n</li>\n'),
+            # results_file.write(f'{spaces}<li class="pretty_print">\n')
+            pretty_print(entry['_title_node'], entry, spaces)
+            # results_file.write(f'{spaces}</li><!--pretty_print-->')
+            results_file.write(f'{spaces}</ul><!--tit_tree-->\n'),
+            results_file.write(f'{spaces}</li>\n'),
 
         # if some nodes were matched, PP with citation info reversed
         if '_node_results' in entry:
             print_entry(identifier, author, date, title, url,
-                        MM_mm_file, base_mm_file,
-                        '<ul class="li_node_results">\n')
-            for node in entry['_node_results']:
-                reverse_print(node, entry)
-            results_file.write('  </ul></li>\n')
-
+                        MM_mm_file, base_mm_file, spaces)
+            if len(entry['_node_results']) > 0:
+                results_file.write(f'{spaces}<li>\n')
+                spaces = spaces + ' '
+                results_file.write(f'{spaces}<ul class="li_node_results">\n')
+                spaces = spaces + ' '
+                for node in entry['_node_results']:
+                    reverse_print(node, entry, spaces)
+                spaces = spaces[0:-1]
+            results_file.write(
+                f'{spaces}</ul><!--li_node_results-->\n')
+            spaces = spaces[0:-1]
+            results_file.write(f'{spaces}</li>\n')
         # if my author or title matched, print biblio w/ link to complete entry
         elif '_author_result' in entry:
             author = entry['_author_result'].get('TEXT') + entry['year']
             print_entry(identifier, author, date, title,
-                        url, MM_mm_file, base_mm_file)
+                        url, MM_mm_file, base_mm_file, spaces)
         elif '_title_result' in entry:
             title = entry['_title_result'].get('TEXT')
             print_entry(identifier, author, date, title,
-                        url, MM_mm_file, base_mm_file)
+                        url, MM_mm_file, base_mm_file, spaces)
 
 #################################################################
 # Mindmap parsing and bib building
@@ -1451,28 +1467,27 @@ def walk_freeplane(node, mm_file, entries, links):
     return entries, links
 
 
-RESULT_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-      "http://www.w3.org/TR/html4/loose.dtd">
-    <html>
-    <head>
-    <meta http-equiv="Content-Type"
-    content="text/html; charset=UTF-8" />
-    <link href="http://reagle.org/joseph/2005/01/mm-print.css"
-    rel="stylesheet" type="text/css" />
+RESULT_FILE_HEADER = """<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=UTF-8" />
+<link href="http://reagle.org/joseph/2005/01/mm-print.css"
+rel="stylesheet" type="text/css" />
 """
 
 RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
-    </head>
-    <body>
-        <div>
-            <form method="get" action="http://reagle.org/joseph/plan/search.cgi">
-            <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
-            name="query" maxlength="80" /> <input type="radio" name="sitesearch"
-            value="BusySponge" /> BS <input type="radio" name="sitesearch"
-            checked="checked" value="MindMap" /> MM</form>
-        </div>
-        <h2>Results for '%s'</h2>
-        <ul class="RESULT_FILE_QUERY_BOX">
+</head>
+<body>
+<div>
+    <form method="get" action="http://reagle.org/joseph/plan/search.cgi">
+    <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
+    name="query" maxlength="80" /> <input type="radio" name="sitesearch"
+    value="BusySponge" /> BS <input type="radio" name="sitesearch"
+    checked="checked" value="MindMap" /> MM</form>
+</div>
+<h2>Results for '%s'</h2>
+<ul class="RESULT_FILE_QUERY_BOX">
 """
 
 

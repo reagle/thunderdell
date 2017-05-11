@@ -1187,14 +1187,15 @@ def emit_results(entries, query, results_file):
         spaces = spaces + '  '  # indent the next list
         if node.get('TEXT') is not None:
             reverse_print(node, entry)
-        # I should clean all of this up to use simpleHTMLwriter
+        # I should clean all of this up to use simpleHTMLwriter,
+        # markup.py, or yattag
         if len(node) > 0:
-            results_file.write(f'{spaces}<ul class="container">\n')
+            results_file.write(f'{spaces}<li><ul class="container">\n')
             for child in node:
                 if child.get('STYLE_REF') == 'author':
                     break
                 pretty_print(child, entry, spaces)
-            results_file.write(f'{spaces}</ul>{spaces}\n')
+            results_file.write(f'{spaces}</ul></li>{spaces}\n')
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
@@ -1230,6 +1231,8 @@ def emit_results(entries, query, results_file):
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
                            % (identifier_html, title_html, link_html,
                               from_html, close))
+
+    spaces = '          '
     for key, entry in sorted(entries.items()):
         identifier = entry['identifier']
         author = create_bibtex_author(entry['author'])
@@ -1241,22 +1244,25 @@ def emit_results(entries, query, results_file):
 
         # if I am what was queried, print all of me
         if entry['identifier'] == args.query:
-            results_file.write('          <li class="li_entry_identifier">\n'
-                               '          <ul class="tit_child">\n'),
+            results_file.write('%s<li class="li_entry_identifier">\n'
+                               '%s<ul class="tit_child">\n'
+                               % (spaces, spaces),),
             results_file.write(
-                '<li style="text-align: right">[<a href="%s">%s</a>]</li>'
-                % (MM_mm_file, base_mm_file),)
+                '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
+                % (spaces, MM_mm_file, base_mm_file),)
             fl_names = ', '.join(name[0] + ' '
                                  + name[2] for name in entry['author'])
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
             results_file.write(
-                '<li class="mdn">[%s]: %s, %s, "%s".</li>'
-                % (identifier, fl_names, date[0:4], title_mdn))
-            results_file.write(f'<li class="author">{fl_names}</li>')
+                '%s<li class="mdn">[%s]: %s, %s, "%s".</li>\n'
+                % (spaces, identifier, fl_names, date[0:4], title_mdn))
+            results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
+            results_file.write(f'{spaces}<li class="pretty_print">\n')
             pretty_print(entry['_title_node'], entry)
-            results_file.write('\n          </ul>\n</li>\n'),
+            results_file.write(f'{spaces}</li><!--pretty_print-->')
+            results_file.write(f'{spaces}</ul><!--tit_child-->\n</li>\n'),
 
         # if some nodes were matched, PP with citation info reversed
         if '_node_results' in entry:
@@ -1466,7 +1472,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
             checked="checked" value="MindMap" /> MM</form>
         </div>
         <h2>Results for '%s'</h2>
-        <ul>
+        <ul class="RESULT_FILE_QUERY_BOX">
 """
 
 

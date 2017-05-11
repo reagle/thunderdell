@@ -1175,7 +1175,7 @@ def emit_results(entries, query, results_file):
         hypertext = text
         if 'LINK' in node.attrib:
             link = escape(node.get('LINK'))
-            hypertext = f'<a href="{link}">{text}'
+            hypertext = f'<a href="{link}">{text}</a>'
 
         results_file.write(
             f'    <li class="{style_ref}">{prefix}{hypertext}{cite}</li>\n')

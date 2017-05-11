@@ -10,6 +10,7 @@
 """Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
+# 20170511: produces invalid HTML with multiple html and unclosed ul
 
 from cgi import escape, parse_qs
 from collections import OrderedDict

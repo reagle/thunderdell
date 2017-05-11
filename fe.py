@@ -1176,7 +1176,7 @@ def emit_results(entries, query, results_file):
         hypertext = text
         if 'LINK' in node.attrib:
             link = escape(node.get('LINK'))
-            hypertext = f'<a href="{link}">{text}</a>'
+            hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
 
         results_file.write(
             f'    <li class="{style_ref}">{prefix}{hypertext}{cite}</li>\n')
@@ -1219,12 +1219,14 @@ def emit_results(entries, query, results_file):
 
         identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (
             get_url_query(identifier), identifier)
-        title_html = f'<a href="{get_url_query(title)}">{title}</a>'
+        title_html = f'<a class="title_html"' \
+            f' href="{get_url_query(title)}">{title}</a>'
         if url:
-            link_html = f'[<a href="{url}">url</a>]'
+            link_html = f'[<a class="link_html" href="{url}">url</a>]'
         else:
             link_html = ''
-        from_html = f'from <a href="{MM_mm_file}">{base_mm_file}</a>'
+        from_html = f'from <a class="from_html" ' \
+            f'href="{MM_mm_file}">{base_mm_file}</a>'
         results_file.write('  %s, <em>%s</em> %s [%s]%s'
                            % (identifier_html, title_html, link_html,
                               from_html, close))

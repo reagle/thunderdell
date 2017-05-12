@@ -995,7 +995,7 @@ def log2work(biblio):
     # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
     info("ul_found = %s" % (ul_found))
     if ul_found:
-        ul_found[0].text += '\n      '
+        ul_found[0].text = '\n      '
         log_item_xml = etree.XML(log_item)
         log_item_xml.tail = '\n\n      '
         ul_found[0].insert(0, log_item_xml)

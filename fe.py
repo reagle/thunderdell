@@ -94,7 +94,7 @@ BIBLATEX_SHORTCUTS = OrderedDict([
     ('urld', 'urldate'),
     ('ve', 'venue'),
     ('c3', 'catalog'), ('c4', 'custom4'), ('c5', 'custom5'),
-    ])
+])
 
 CSL_SHORTCUTS = OrderedDict([
     # title (csl:container) fields that also give type
@@ -107,7 +107,7 @@ CSL_SHORTCUTS = OrderedDict([
     ('cf', 'c_forum'),  # for post
     ('cb', 'c_blog'),
     ('cw', 'c_web'),
-    ])
+])
 
 BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
 BIB_SHORTCUTS.update(CSL_SHORTCUTS)
@@ -140,7 +140,7 @@ BIBLATEX_TYPES = {
     'periodical',
     'proceedings',
     'online',
-    }
+}
 
 CSL_TYPES = {
     'article',
@@ -178,7 +178,7 @@ CSL_TYPES = {
     'thesis',
     'treaty',
     'webpage',
-    }
+}
 
 BIB_TYPES = BIBLATEX_TYPES | CSL_TYPES
 
@@ -202,7 +202,7 @@ CSL_BIBLATEX_TYPE_MAP = OrderedDict([
     ('post',                    'online'),
     ('post-weblog',             'online'),
     ('webpage',                 'online'),
-    ])
+])
 
 BIBLATEX_CSL_TYPE_MAP = OrderedDict((v, k) for k, v in
                                     list(CSL_BIBLATEX_TYPE_MAP.items()))
@@ -229,7 +229,7 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
     ('urldate',        'accessed'),
     ('venue',          'event-place'),
     ('catalog',        'call-number'),
-    ])
+])
 
 CSL_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
                                      list(BIBLATEX_CSL_FIELD_MAP.items()))
@@ -1368,7 +1368,7 @@ def commit_entry(entry, entries):
             pull_citation(entry)    # break the citation up
         except:
             print((f"pull_citation error on {entry['author']}: "
-                f"{entry['_mm_file']}"))
+                   f"{entry['_mm_file']}"))
             raise
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
@@ -1518,7 +1518,7 @@ def build_bib(file_name, output):
                     os.path.dirname(mm_file) + '/' + link)
                 if link not in done:
                     if not any([word in link for word in (
-                               'syllabus', 'readings')]): # 'old'
+                               'syllabus', 'readings')]):  # 'old'
                         # dbg("    placing %s in mm_files" % link)
                         mm_files.append(link)
         done.append(os.path.abspath(mm_file))

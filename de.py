@@ -79,19 +79,19 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started:  # Do I need to close a previous entry
                 if in_subsection:
-                    fdo.write("""        </node>\n""")
+                    file_out.write("""        </node>\n""")
                     in_subsection = False
                 if in_section:
-                    fdo.write("""      </node>\n""")
+                    file_out.write("""      </node>\n""")
                     in_section = False
                 if in_chapter:
-                    fdo.write("""    </node>\n""")
+                    file_out.write("""    </node>\n""")
                     in_chapter = False
                 if in_part:
-                    fdo.write("""    </node>\n""")
+                    file_out.write("""    </node>\n""")
                     in_part = False
 
-                fdo.write("""</node>\n</node>\n""")
+                file_out.write("""</node>\n</node>\n""")
                 started = False
             started = True
             # should space be optional '(\w+) ?='
@@ -102,18 +102,23 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             for token, value in cite_pairs:
                 entry[token.lower()] = value.strip()
 
-            if 'author' not in entry: entry['author'] = 'Unknown'
-            if 'title' not in entry: entry['title'] = 'Untitled'
+            if 'author' not in entry:
+                entry['author'] = 'Unknown'
+            if 'title' not in entry:
+                entry['title'] = 'Untitled'
+            if 'subtitle' in entry:
+                entry['title'] += ': ' + entry['subtitle']
+                del entry['subtitle']
 
-            fdo.write(
+            file_out.write(
                 """<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
                 % ('author', clean(entry['author'].title())))
             if 'url' in entry:
-                fdo.write(
+                file_out.write(
                     """  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
                     % ('title', clean(entry['url']), clean(entry['title'])))
             else:
-                fdo.write(
+                file_out.write(
                     """  <node STYLE_REF="%s" TEXT="%s">\n"""
                     % ('title', clean(entry['title'])))
 
@@ -132,66 +137,66 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     citation = citation + citation_add
             if citation != "": clean(citation)
             citation += " r=%s" % get_date()
-            fdo.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                       % ('cite', clean(citation)))
 
         elif re.match('summary\.(.*)', line, re.I):
             matches = re.match('summary\.(.*)', line, re.I)
-            fdo.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                       % ('annotation', clean(matches.groups()[0])))
 
         elif re.match('part.*', line, re.I):
             if in_part:
                 if in_chapter:
-                    fdo.write("""    </node>\n""")      # close chapter
+                    file_out.write("""    </node>\n""")      # close chapter
                     in_chapter = False
                 if in_section:
-                    fdo.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")    # close section
                     in_section = False
                 if in_subsection:
-                    fdo.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")    # close section
                     in_subsection = False
-                fdo.write("""  </node>\n""")            # close part
+                file_out.write("""  </node>\n""")            # close part
                 in_part = False
-            fdo.write("""  <node STYLE_REF="%s" TEXT="%s">\n"""
+            file_out.write("""  <node STYLE_REF="%s" TEXT="%s">\n"""
                       % ('paraphrase', clean(line)))
             in_part = True
 
         elif re.match('chapter.*', line, re.I):
             if in_chapter:
                 if in_section:
-                    fdo.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")    # close section
                     in_section = False
                 if in_subsection:
-                    fdo.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")    # close section
                     in_subsection = False
-                fdo.write("""    </node>\n""")            # close chapter
+                file_out.write("""    </node>\n""")            # close chapter
                 in_chapter = False
-            fdo.write("""    <node STYLE_REF="%s" TEXT="%s">\n"""
+            file_out.write("""    <node STYLE_REF="%s" TEXT="%s">\n"""
                       % ('paraphrase', clean(line)))
             in_chapter = True
 
         elif re.match('section.*', line, re.I):
             if in_subsection:
-                fdo.write("""      </node>\n""")    # close section
+                file_out.write("""      </node>\n""")    # close section
                 in_subsection = False
             if in_section:
-                fdo.write("""    </node>\n""")
+                file_out.write("""    </node>\n""")
                 in_section = False
-            fdo.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
+            file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
                       % ('paraphrase', clean(line[9:])))
             in_section = True
 
         elif re.match('subsection.*', line, re.I):
             if in_subsection:
-                fdo.write("""    </node>\n""")
+                file_out.write("""    </node>\n""")
                 in_subsection = False
-            fdo.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
+            file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
                       % ('paraphrase', clean(line[12:])))
             in_subsection = True
 
         elif re.match('(--.*)', line, re.I):
-            fdo.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
+            file_out.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
                       % ('default', clean(line)))
 
         else:
@@ -220,14 +225,14 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 node_color = 'quote'
                 line_text = line_text[0:-9]
 
-            fdo.write(
+            file_out.write(
                 """          <node STYLE_REF="%s" TEXT="%s"/>\n"""
                 % (node_color, clean(' '.join((line_no, line_text)))))
 
     return started, in_part, in_chapter, in_section, in_subsection
 
 
-def check(text, fdo):
+def check(text, file_out):
 
     import traceback
 
@@ -238,7 +243,7 @@ def check(text, fdo):
     in_subsection = False
     line_number = 0
 
-    fdo.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
+    file_out.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
 
     for line in text.split('\n'):
         line = line.strip()
@@ -251,12 +256,12 @@ def check(text, fdo):
             sys.exit()
         line_number += 1
 
-    if in_subsection: fdo.write("""</node>""")  # close the last section
-    if in_section: fdo.write("""</node>""")  # close the last section
-    if in_chapter: fdo.write("""</node>""")  # close the last chapter
-    if in_part: fdo.write("""</node>""")  # close the last part
-    fdo.write("""</node>\n</node>\n</node>\n""")  # close the last entry
-    fdo.write("""</node>\n</map>\n""")   # close the document
+    if in_subsection: file_out.write("""</node>""")  # close the last section
+    if in_section: file_out.write("""</node>""")  # close the last section
+    if in_chapter: file_out.write("""</node>""")  # close the last chapter
+    if in_part: file_out.write("""</node>""")  # close the last part
+    file_out.write("""</node>\n</node>\n</node>\n""")  # close the last entry
+    file_out.write("""</node>\n</map>\n""")   # close the document
 
 
 # Check to see if the script is executing as main.
@@ -274,21 +279,21 @@ if __name__ == "__main__":
     import sys
 
     try:
-        (options, files) = getopt.getopt(sys.argv[1:], "")
+        (options, file_names) = getopt.getopt(sys.argv[1:], "")
     except getopt.error:
         print('Error: Unknown option or missing argument.')
-    files = [os.path.abspath(file) for file in files]
-    for file in files:
-        if file.endswith('.rtf'):
+    file_names = [os.path.abspath(file_name) for file_name in file_names]
+    for file_name in file_names:
+        if file_name.endswith('.rtf'):
             subprocess.call(
-                ['/usr/bin/X11/catdoc', '-aw', file],
-                stdout=open('%s.txt' % file[0:-4], 'w',
+                ['/usr/bin/X11/catdoc', '-aw', file_name],
+                stdout=open('%s.txt' % file_name[0:-4], 'w',
                 encoding='utf-8', errors='replace'))
-            file = file[0:-4] + '.txt'
+            file_name = file_name[0:-4] + '.txt'
         try:
             encoding = 'UTF-8'
-            # encoding = chardet.detect(open(file).read())['encoding']
-            fdi = open(file, "r", encoding=encoding, errors='replace')
+            # encoding = chardet.detect(open(file_name).read())['encoding']
+            fdi = open(file_name, "r", encoding=encoding, errors='replace')
             text = fdi.read()
             if encoding == 'UTF-8':
                 if text[0] == str(codecs.BOM_UTF8, "utf8"):
@@ -297,13 +302,13 @@ if __name__ == "__main__":
             # it's not decoding MS Word txt right, word is not starting with
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
-            fileOut = os.path.splitext(file)[0] + '.mm'
-            fdo = open(fileOut, "w", encoding="utf-8", errors='replace')
+            file_name_out = os.path.splitext(file_name)[0] + '.mm'
+            file_out = open(file_name_out, "w", encoding="utf-8", errors='replace')
             # sys.stdout = codecs.getwriter('UTF-8')(
             #     sys.__stdout__, errors='replace')
         except IOError:
-            print("    file does not exist")
+            print("    file_name does not exist")
             continue
 
-        check(text, fdo)
-        subprocess.call(['open', '-a', 'Freeplane.app', fileOut])
+        check(text, file_out)
+        subprocess.call(['open', '-a', 'Freeplane.app', file_name_out])

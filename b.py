@@ -501,7 +501,7 @@ class scrape_ISBN(scrape_default):
             title = biblio['title'].replace(': ', ': ')
             biblio['title'] = sentence_case(title)
             if 'subtitle' in json_bib:
-                biblio['subtitle'] = sentence_case(subtitle)
+                biblio['subtitle'] = sentence_case(json_bib['subtitle'])
         else:
             biblio['title'] = 'UNKNOWN'
         return biblio

@@ -135,15 +135,16 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                             sys.exit
                     citation_add = "%s=%s " % (t, v)
                     citation = citation + citation_add
-            if citation != "": clean(citation)
+            if citation != "":
+                clean(citation)
             citation += " r=%s" % get_date()
             file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                      % ('cite', clean(citation)))
+                           % ('cite', clean(citation)))
 
         elif re.match('summary\.(.*)', line, re.I):
             matches = re.match('summary\.(.*)', line, re.I)
             file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                      % ('annotation', clean(matches.groups()[0])))
+                           % ('annotation', clean(matches.groups()[0])))
 
         elif re.match('part.*', line, re.I):
             if in_part:
@@ -159,7 +160,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 file_out.write("""  </node>\n""")            # close part
                 in_part = False
             file_out.write("""  <node STYLE_REF="%s" TEXT="%s">\n"""
-                      % ('paraphrase', clean(line)))
+                           % ('paraphrase', clean(line)))
             in_part = True
 
         elif re.match('chapter.*', line, re.I):
@@ -173,7 +174,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 file_out.write("""    </node>\n""")            # close chapter
                 in_chapter = False
             file_out.write("""    <node STYLE_REF="%s" TEXT="%s">\n"""
-                      % ('paraphrase', clean(line)))
+                           % ('paraphrase', clean(line)))
             in_chapter = True
 
         elif re.match('section.*', line, re.I):
@@ -184,7 +185,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 file_out.write("""    </node>\n""")
                 in_section = False
             file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
-                      % ('paraphrase', clean(line[9:])))
+                           % ('paraphrase', clean(line[9:])))
             in_section = True
 
         elif re.match('subsection.*', line, re.I):
@@ -192,12 +193,12 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 file_out.write("""    </node>\n""")
                 in_subsection = False
             file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
-                      % ('paraphrase', clean(line[12:])))
+                           % ('paraphrase', clean(line[12:])))
             in_subsection = True
 
         elif re.match('(--.*)', line, re.I):
             file_out.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                      % ('default', clean(line)))
+                           % ('default', clean(line)))
 
         else:
             node_color = 'paraphrase'
@@ -303,7 +304,8 @@ if __name__ == "__main__":
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
             file_name_out = os.path.splitext(file_name)[0] + '.mm'
-            file_out = open(file_name_out, "w", encoding="utf-8", errors='replace')
+            file_out = open(file_name_out, "w", encoding="utf-8",
+                            errors='replace')
             # sys.stdout = codecs.getwriter('UTF-8')(
             #     sys.__stdout__, errors='replace')
         except IOError:

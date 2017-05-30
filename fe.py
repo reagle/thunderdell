@@ -1559,7 +1559,11 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            webbrowser.open(f'file://{results_file_name.encode("utf-8")}')
+            browser = webbrowser.get("chrome")
+            browser.open(f'file://{results_file_name}')
+            # TODO: restore below when osascript bug is fixed
+            # https://bugs.python.org/issue30392
+            # webbrowser.open(f'file://{results_file_name}')
     else:
         output(entries)
     return

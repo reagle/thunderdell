@@ -10,6 +10,7 @@
     See http://en.wikipedia.org/wiki/Sentence_case and
     https://www.zotero.org/trac/ticket/832 .'''
 
+import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
 from fe import BORING_WORDS
 import logging
@@ -19,26 +20,32 @@ import string
 import sys
 
 critical = logging.critical
+error = logging.error
+warn = logging.warn
 info = logging.info
-dbg = logging.debug
+debug = logging.debug
+excpt = logging.exception
 
 
-def create_wordset(file_name): # info() doesn't work here, level not yet set
-    '''Returns a wordset given a file'''
-    binary_path = os.path.split(sys.argv[0])[0]
-    full_file_name = binary_path + '/' + file_name
+def create_wordset(file_name):
+    """Returns a wordset given a file"""
+    # TODO: adding logging.info() in this function
+    # disables all logging up to critical. Why?
+
+    # info("file_name = '%s'" % (file_name))
     wordset = set()
-    if os.path.isfile(full_file_name):
-        for line in codecs.open(full_file_name, 'r', 'utf-8').readlines():
+    if os.path.isfile(file_name):
+        for line in codecs.open(file_name, 'r', 'utf-8').readlines():
             if line.strip() != '':
                 wordset.add(line.strip())
         return wordset
     else:
-        critical("Could not find wordset %s" % file_name)
-        return set()
+        raise Exception("Could not find wordset %s" % file_name)
+    return set()
 
-PROPER_NOUNS_FN = 'wordlist-proper-nouns.txt'
-WORD_LIST_FN = 'wordlist-american.txt'
+WORD_LIST_LOCATION = os.path.dirname(os.path.realpath(sys.argv[0]))
+PROPER_NOUNS_FN = WORD_LIST_LOCATION + "/wordlist-proper-nouns.txt"
+WORD_LIST_FN = WORD_LIST_LOCATION + "/wordlist-american.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
@@ -108,7 +115,7 @@ def safe_lower(text):
             else:
                 new_text.append(word.lower())
     info("  new_text = '%s'" % new_text)
-    return ' '.join(new_text)
+#     return ' '.join(new_text)
 
 
 def is_proper_noun(word):
@@ -251,11 +258,9 @@ def test(case_func):
 
 if '__main__' == __name__:
 
-    import argparse  # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description='Change the case of some text, '
         'defaulting to sentence case.')
-
     # positional arguments
     arg_parser.add_argument('text', nargs='*', metavar='TEXT')
     # optional arguments
@@ -285,9 +290,9 @@ if '__main__' == __name__:
     args = arg_parser.parse_args()
 
     log_level = 100  # default
-    if args.verbose == 1: log_level = logging.CRITICAL
-    elif args.verbose == 2: log_level = logging.INFO
-    elif args.verbose >= 3: log_level = logging.DEBUG
+    if args.verbose == 1: log_level = logging.CRITICAL  # 50
+    elif args.verbose == 2: log_level = logging.INFO    # 20
+    elif args.verbose >= 3: log_level = logging.DEBUG   # 10
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         info("logging to file")

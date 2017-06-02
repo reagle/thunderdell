@@ -43,9 +43,8 @@ def create_wordset(file_name):
         raise Exception("Could not find wordset %s" % file_name)
     return set()
 
-WORD_LIST_LOCATION = os.path.dirname(os.path.realpath(sys.argv[0]))
-PROPER_NOUNS_FN = WORD_LIST_LOCATION + "/wordlist-proper-nouns.txt"
-WORD_LIST_FN = WORD_LIST_LOCATION + "/wordlist-american.txt"
+PROPER_NOUNS_FN = "wordlist-proper-nouns.txt"
+WORD_LIST_FN = "wordlist-american.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])
@@ -115,7 +114,7 @@ def safe_lower(text):
             else:
                 new_text.append(word.lower())
     info("  new_text = '%s'" % new_text)
-#     return ' '.join(new_text)
+    return ' '.join(new_text)
 
 
 def is_proper_noun(word):
@@ -192,22 +191,23 @@ def change_case(text, case_direction='sentence'):
         for index, word in enumerate(words):
             # [0].upper() + word[1:].lower()
             word_capitalized = word.capitalize()
+            info("----------------")
             info("word = '%s'" % word)
             if is_proper_noun(word):
-                info("  word is_proper_noun")
+                # info("  word is_proper_noun")
                 new_word = word
             elif is_proper_noun(word_capitalized):
-                info("  word_capitalized is_proper_noun")
+                # info("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
             else:
-                info("  adding '%s' as is" % word)
+                info("  changing case of '%s'" % word)
                 if case_direction == 'sentence':
                     new_word = word.lower()
                 elif case_direction == 'title':
                     info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
                     if text_is_ALLCAPS:
+                        info('   lowering word because text_is_ALLCAPS')
                         word = safe_lower(word)
-                        info('  lowering word because text_is_ALLCAPS')
                     info("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
@@ -225,7 +225,7 @@ def change_case(text, case_direction='sentence'):
                     ).replace(' ? ', '? ')
 
 
-def test(case_func):
+def test(change_case, case_direction):
     '''Prints out sentence case (default) for a number of test strings'''
     TESTS = (
         'My Defamation 2.0 Experience: A Story of Wikipedia and a Boy',
@@ -256,7 +256,8 @@ def test(case_func):
         print((change_case(test, case_direction)))
 
 
-if '__main__' == __name__:
+def main(argv):
+    """Process arguments and execute."""
 
     arg_parser = argparse.ArgumentParser(
         description='Change the case of some text, '
@@ -307,9 +308,12 @@ if '__main__' == __name__:
     info("case_direction = %s" % case_direction)
 
     if args.test:
-        test(case_direction)
+        test(change_case, case_direction)
     else:
         text = ' '.join(args.text)
         result = change_case(text, case_direction)
         info(result)
         print(result)
+
+if '__main__' == __name__:
+    main(sys.argv[1:])

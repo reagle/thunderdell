@@ -43,8 +43,10 @@ def create_wordset(file_name):
         raise Exception("Could not find wordset %s" % file_name)
     return set()
 
-PROPER_NOUNS_FN = "wordlist-proper-nouns.txt"
-WORD_LIST_FN = "wordlist-american.txt"
+# TODO find some way not to use hardcoded path that works with import
+LIST_PATH = "/Users/reagle/bin/fe/"
+PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
+WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
 wordset_nocase = set([word.lower() for word in wordset])

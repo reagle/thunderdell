@@ -1079,6 +1079,7 @@ def emit_wp_citation(entries):
     See: http://en.wikipedia.org/wiki/Template:Cite
 
     """
+    # TODO: Wikipedia dates may not be YYYY-MM, only YYYY or YYYY-MM-DD
 
     def output_wp_names(field, names):
         """Rejigger names for WP odd author and editor conventions."""

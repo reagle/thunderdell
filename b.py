@@ -1338,6 +1338,46 @@ def do_console_annotation(biblio):
     return biblio, do_publish
 
 
+def shrink_tweet(comment, title, url, tags):
+    """Shrink tweet to fit into limit"""
+
+    TWEET_LIMIT = 140 - 5  # 5 = comment_delim + title quotes + spaces
+    SHORTENER_LEN = 23     # twitter uses t.co
+
+    tweet_room = TWEET_LIMIT - len(tags)
+    info(f"tweet_room after tags = {tweet_room}")
+
+    if len(url) > SHORTENER_LEN:
+        tweet_room = tweet_room - SHORTENER_LEN
+    else:
+        tweet_room = tweet_room - len(tweet)
+    info(f"tweet_room after url = {tweet_room}")
+
+    info(f"len(title) = {len(title)}")
+    if len(title) > tweet_room:
+        info("title is too long")
+        info(" truncating")
+        title = title[0:tweet_room - 1] + '…'
+    tweet_room = tweet_room - len(title)
+    info(f"tweet_room after title = {tweet_room}")
+
+    info(f"len(comment) = {len(comment)}")
+    if len(comment) > tweet_room:
+        info("comment is too long")
+        if tweet_room > 5:
+            info(" truncating")
+            comment = comment[0:tweet_room - 1] + '…'
+        else:
+            info(" skipping")
+            comment = ''
+    tweet_room = tweet_room - len(comment)
+    info(f"tweet_room after comment = {tweet_room}")
+
+    comment_delim = ": " if comment else ""
+    tweet = f'{comment}{comment_delim}“{title}” {url} {tags}'
+    return(tweet)
+
+
 def yasn_publish(comment, title, url, tags):
     "Send annotated URL to social networks, at this point: Twython"
     info("comment = %s, title = %s, url = %s, tags = %s"
@@ -1349,26 +1389,15 @@ def yasn_publish(comment, title, url, tags):
         tags = ''
     comment, title, url, tags = [v.strip()
                                  for v in [comment, title, url, tags]]
-    info("comment = %s, title = %s, url = %s, tags = %s"
-         % (comment, title, url, tags))
-    comment_delim = ": " if comment else ""
-    comment = comment + comment_delim + '"' + title + '"'
+    total_len = len(comment) + len(tags) + len(title) + len(url)
+    info(f"""comment = {len(comment)}: {comment}
+         title = {len(title)}: {title}
+         url = {len(url)}: {url}
+         tags = {len(tags)}: {tags}
+         total_len = {total_len}""")
+    tweet = shrink_tweet(comment, title, url, tags)
+    print(f"tweeting {len(tweet)}: {tweet}")
 
-    TWEET_LEN = 140
-    SHORTENER_LEN = 23  # twitter uses t.co
-    tweet_room = TWEET_LEN - len(comment) - len(tags) - len(url)
-    shortened_room = 'n/a'
-    info("length_comment = %s; tweet_room = %s" % (len(comment), tweet_room))
-    if tweet_room < 0:    # the comment is too big
-        shortened_room = TWEET_LEN - len(comment) - len(tags) - SHORTENER_LEN
-        info("length_comment = %s; shortened_room = %s" % (
-            len(comment), shortened_room))
-        if shortened_room < 0:
-            comment = comment[0:shortened_room - 3] + '...'
-    tweet = "%s %s %s" % (comment, url, tags)
-    info('tweet length = %s' % len(tweet))
-
-    print(("tweeting '%s' %s %s" % (tweet, tweet_room, shortened_room)))
     # https://twython.readthedocs.io/en/latest/index.html
     from twython import Twython, TwythonError
     # load keys, tokens, and secrets from twitter_token.py

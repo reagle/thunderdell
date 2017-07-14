@@ -988,7 +988,7 @@ def log2work(biblio):
 
     # parsing as XML needs namespaces in XPATH
     plan_tree = etree.parse(StringIO(plan_content),
-                            etree.XMLParser(ns_clean=True))
+                            etree.XMLParser(ns_clean=True, recover=True))
     # plan_tree = etree.parse(StringIO(plan_content), etree.HTMLParser())
     ul_found = plan_tree.xpath(
         '''//x:div[@id='Done']/x:ul''',

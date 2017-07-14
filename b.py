@@ -1350,7 +1350,7 @@ def shrink_tweet(comment, title, url, tags):
     if len(url) > SHORTENER_LEN:
         tweet_room = tweet_room - SHORTENER_LEN
     else:
-        tweet_room = tweet_room - len(tweet)
+        tweet_room = tweet_room - len(url)
     info(f"tweet_room after url = {tweet_room}")
 
     info(f"len(title) = {len(title)}")

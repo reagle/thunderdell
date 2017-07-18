@@ -1174,11 +1174,18 @@ def emit_results(entries, query, results_file):
             cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
 
         hypertext = text
+        
+        # if node has first child <font BOLD="true"/> then embolden
+        style = ""
+        if len(node) > 0:
+            if node[0].tag == "font" and node[0].get("BOLD")=="true":
+                 style="font-weight: bold"
+        
         if 'LINK' in node.attrib:
             link = escape(node.get('LINK'))
             hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
 
-        results_file.write(f'{spaces}<li class="{style_ref}">'
+        results_file.write(f'{spaces}<li style="{style}" class="{style_ref}">'
                            f'{prefix}{hypertext}{cite}</li>\n')
 
     def pretty_print(node, entry, spaces):

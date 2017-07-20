@@ -1545,11 +1545,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            browser = webbrowser.get("chrome")
-            browser.open(f'file://{results_file_name}')
-            # TODO: restore below when osascript bug is fixed
-            # https://bugs.python.org/issue30392
-            # webbrowser.open(f'file://{results_file_name}')
+            webbrowser.open(f'file://{results_file_name}')
     elif args.pretty:
         results_file_name = TMP_DIR + 'pretty-print.html'
         try:
@@ -1566,11 +1562,7 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            browser = webbrowser.get("chrome")
-            browser.open(f'file://{results_file_name}')
-            # TODO: restore below when osascript bug is fixed
-            # https://bugs.python.org/issue30392
-            # webbrowser.open(f'file://{results_file_name}')
+            webbrowser.open(f'file://{results_file_name}')
     else:
         output(entries)
     return

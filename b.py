@@ -1341,7 +1341,7 @@ def do_console_annotation(biblio):
 def shrink_tweet(comment, title, url, tags):
     """Shrink tweet to fit into limit"""
 
-    TWEET_LIMIT = 140 - 5  # 5 = comment_delim + title quotes + spaces
+    TWEET_LIMIT = 140 - 6  # 6 = comment_delim + title quotes + spaces
     SHORTENER_LEN = 23     # twitter uses t.co
 
     tweet_room = TWEET_LIMIT - len(tags)

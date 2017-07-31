@@ -1087,7 +1087,7 @@ def blog_at_opencodex(biblio):
         .replace("/", "-")
     filename = '%s%s/%s-%s.md' % (CODEX_ROOT, category, this_year, filename)
     info("filename = %s" % filename)
-    if exists(filename):
+    if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
     fd = open(filename, 'w', encoding='utf-8', errors='replace')
@@ -1131,7 +1131,7 @@ def blog_at_goatee(biblio):
         this_year, this_month, this_day, filename)
     info("blog_title = %s" % blog_title)
     info("filename = %s" % filename)
-    if exists(filename):
+    if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
     fd = open(filename, 'w', encoding='utf-8', errors='replace')

@@ -12,6 +12,7 @@
 # TODO
 
 from cgi import escape, parse_qs
+from change_case import BORING_WORDS
 from collections import OrderedDict
 import logging
 # from lxml.etree import parse
@@ -332,14 +333,6 @@ def normalize_whitespace(text):
 #################################################################
 # Entry construction
 #################################################################
-
-ARTICLES = {'a', 'an', 'the'}
-CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
-SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
-                      'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
-JUNK_WORDS = {'', 're', }
-BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
-
 
 def identity_add_title(ident, title):
     """Return a non-colliding identity.

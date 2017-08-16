@@ -12,7 +12,6 @@
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
-from fe import BORING_WORDS
 import logging
 import os.path
 import re
@@ -25,6 +24,15 @@ warn = logging.warn
 info = logging.info
 debug = logging.debug
 excpt = logging.exception
+
+HOME = os.path.expanduser('~')
+
+ARTICLES = {'a', 'an', 'the'}
+CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
+SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
+                      'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
+JUNK_WORDS = {'', 're', }
+BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 
 
 def create_wordset(file_name):

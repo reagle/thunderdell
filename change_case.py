@@ -44,7 +44,7 @@ def create_wordset(file_name):
     return set()
 
 # TODO find some way not to use hardcoded path that works with import
-LIST_PATH = "/Users/reagle/bin/fe/"
+LIST_PATH = HOME + "/bin/fe/"
 PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)

@@ -1178,8 +1178,8 @@ def emit_results(entries, query, results_file):
         # if node has first child <font BOLD="true"/> then embolden
         style = ""
         if len(node) > 0:
-            if node[0].tag == "font" and node[0].get("BOLD")=="true":
-                 style="font-weight: bold"
+            if node[0].tag == "font" and node[0].get("BOLD") == "true":
+                style = "font-weight: bold"
         
         if 'LINK' in node.attrib:
             link = escape(node.get('LINK'))

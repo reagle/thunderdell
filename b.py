@@ -565,7 +565,7 @@ class scrape_DOI(scrape_default):
             elif key == 'issue':
                 biblio['number'] = json_bib['issue']
             elif key == 'URL':
-                biblio['url'] = json_bib['URL']
+                biblio['permalink'] = biblio['url'] = json_bib['URL']
             else:
                 biblio[key] = json_bib[key]
         if 'title' not in json_bib:

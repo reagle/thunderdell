@@ -57,7 +57,7 @@ if '__main__' == __name__:
         "-s", "--style",
         help="style of bibliography data")
     arg_parser.add_argument(
-        '-l', '--log-to-file',
+        '-L', '--log-to-file',
         action="store_true", default=False,
         help="log to file %(prog)s.log")
     arg_parser.add_argument(

@@ -35,6 +35,7 @@ dbg = logging.debug
 useLXML = False
 HOME = os.path.expanduser('~')
 DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
+DEFAULT_PRETTY_MAP = f'{HOME}/joseph/2005/ethno/field-notes.mm'
 
 TMP_DIR = f'{HOME}/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
@@ -1167,13 +1168,13 @@ def emit_results(entries, query, results_file):
             cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
 
         hypertext = text
-        
+
         # if node has first child <font BOLD="true"/> then embolden
         style = ""
         if len(node) > 0:
             if node[0].tag == "font" and node[0].get("BOLD") == "true":
                 style = "font-weight: bold"
-        
+
         if 'LINK' in node.attrib:
             link = escape(node.get('LINK'))
             hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
@@ -1712,6 +1713,8 @@ if __name__ == '__main__':
     args.cgi = False
     args.outfd = sys.stdout
 
+    if args.pretty and file_name == DEFAULT_MAP:
+        file_name = DEFAULT_PRETTY_MAP
     if args.WP_citation:
         output = emit_wp_citation
     elif args.bibtex or args.biblatex:
@@ -1756,7 +1759,6 @@ if __name__ == '__main__':
         pretty_tabulate_dict(BIB_SHORTCUTS)
         print("         t=bibtex or CSL type")
         print("         ot=organization's subtype (e.g., W3C REC)\n\n")
-
         sys.exit()
     if args.query:
         args.query = urllib.parse.unquote(args.query)

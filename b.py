@@ -403,7 +403,7 @@ class scrape_default(object):
         title_regexps = (
             ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
             ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
-            ('', r'<title>(.*?)</title>')    # default: make sure last
+            ('', r'<title[^>]*>([^<]+)</title>')    # default: make sure last
         )
 
         for prefix, regexp in title_regexps:

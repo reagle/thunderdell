@@ -977,7 +977,7 @@ def emit_yaml_csl(entries):
         >>> yaml_protect_case("The iKettle – a world off its rocker")
         "The <span class='nocase'>iKettle</span> – a world off its rocker"
         """
-        protect_pat = re.compile(r'\b([a-z]+[A-Z]\S+)\b')
+        protect_pat = re.compile(r'\b([a-z]+[A-Z\.]\S+)\b')
         return protect_pat.sub(r"<span class='nocase'>\1</span>", title)
 
     # begin YAML file

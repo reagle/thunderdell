@@ -206,17 +206,18 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             # print(line)
             line_no = ''
             line_split = line.split(' ')
-            DIGIT_CHARS = '[\dcdilmxv]'
-            PAGE_NUM_PAT = '([\dcdilmxv]+)(\-[\dcdilmxv]+)?(.*?)(-[\dcdilmxv]+)?$'
+            # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
+            PAGE_NUM_PAT = '^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$'
 
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
-                # print(matches.groups())
+                print(matches.groups())
                 line_no = matches.group(1)
                 if matches.group(2):
                     line_no += matches.group(2)
                 if matches.group(4):
                     line_no += matches.group(4)
+                line_no = line_no.lower()   # lower case roman numbers
                 line_text = matches.group(3).strip()
 
             if line_text.startswith('excerpt.'):

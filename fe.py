@@ -593,44 +593,44 @@ def guess_bibtex_type(entry):
 
     """
     if 'entry_type' in entry:         # already has a type
-        et = entry['entry_type']
-        if et in BIBLATEX_TYPES:
+        e_t = entry['entry_type']
+        if e_t in BIBLATEX_TYPES:
             pass
-        elif et in CSL_TYPES:
-            et = CSL_BIBLATEX_TYPE_MAP[et]
+        elif e_t in CSL_TYPES:
+            e_t = CSL_BIBLATEX_TYPE_MAP[e_t]
         else:
-            print(f"Unknown entry_type = {et}")
+            print(f"Unknown entry_type = {e_t}")
             sys.exit()
-        return et
+        return e_t
 
     if 'entry_type' in entry:         # already has a type
         return entry['entry_type']
     else:
-        et = 'misc'
+        e_t = 'misc'
         if 'eventtitle' in entry:
-            if 'author' in entry:           et = 'inproceedings'
-            else:                           et = 'proceedings'
+            if 'author' in entry:           e_t = 'inproceedings'
+            else:                           e_t = 'proceedings'
         elif 'booktitle' in entry:
-            if 'editor' not in entry:       et = 'inbook'
+            if 'editor' not in entry:       e_t = 'inbook'
             else:
                 if 'author' in entry or \
-                    'chapter' in entry:      et = 'incollection'
-                else:                        et= 'collection'
-        elif 'journal' in entry:             et = 'article'
+                    'chapter' in entry:      e_t = 'incollection'
+                else:                        e_t= 'collection'
+        elif 'journal' in entry:             e_t = 'article'
 
         elif 'author' in entry and 'title' in entry and 'publisher' in entry:
-                                            et = 'book'
+                                            e_t = 'book'
         elif 'institution' in entry:
-            et = 'report'
+            e_t = 'report'
             if 'type' in entry:
-                if 'report' in entry['type'].lower(): et = 'report'
-                if 'thesis' in entry['type'].lower(): et = 'mastersthesis'
-                if 'dissertation' in entry['type'].lower(): et = 'phdthesis'
-        elif 'url' in entry:                et = 'online'
-        elif 'doi' in entry:                et = 'online'
-        elif 'year' not in entry:           et = 'unpublished'
+                if 'report' in entry['type'].lower(): e_t = 'report'
+                if 'thesis' in entry['type'].lower(): e_t = 'mastersthesis'
+                if 'dissertation' in entry['type'].lower(): e_t = 'phdthesis'
+        elif 'url' in entry:                e_t = 'online'
+        elif 'doi' in entry:                e_t = 'online'
+        elif 'year' not in entry:           e_t = 'unpublished'
 
-        return et
+        return e_t
 
 
 def guess_csl_type(entry):

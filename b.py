@@ -1292,7 +1292,7 @@ def do_console_annotation(biblio):
                 cite_pairs = list(zip(*[iter(cites)] * 2))
                 info("cite_pairs = %s" % cite_pairs)
                 for short, value in cite_pairs:
-                    if short == 'et':  # 'et=cj' -> cj = 'Nature'
+                    if short == 't':  # 't=cj' -> cj = 'Nature'
                         biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
                         del biblio['c_web']
                     else:

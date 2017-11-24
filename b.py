@@ -1341,14 +1341,18 @@ def do_console_annotation(biblio):
 def shrink_tweet(comment, title, url, tags):
     """Shrink tweet to fit into limit"""
 
-    TWEET_LIMIT = 140 - 6  # 6 = comment_delim + title quotes + spaces
+    # TWEET_LIMIT = 280 - 6 # API throws an error for unknown reason
+    TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
     SHORTENER_LEN = 23     # twitter uses t.co
 
+    info(f"TWEET_LIMIT = {TWEET_LIMIT}")
     tweet_room = TWEET_LIMIT - len(tags)
-    info(f"tweet_room after tags = {tweet_room}")
+    info(f"tweet_room - len(tags) = {tweet_room}")
 
+    info(f"len(url) = {len(url)}")
     if len(url) > SHORTENER_LEN:
         tweet_room = tweet_room - SHORTENER_LEN
+        info(f"  shortened to {SHORTENER_LEN}")
     else:
         tweet_room = tweet_room - len(url)
     info(f"tweet_room after url = {tweet_room}")
@@ -1356,8 +1360,8 @@ def shrink_tweet(comment, title, url, tags):
     info(f"len(title) = {len(title)}")
     if len(title) > tweet_room:
         info("title is too long")
-        info(" truncating")
         title = title[0:tweet_room - 1] + '…'
+        info(f"  truncated to {len(title)}")
     tweet_room = tweet_room - len(title)
     info(f"tweet_room after title = {tweet_room}")
 
@@ -1367,6 +1371,8 @@ def shrink_tweet(comment, title, url, tags):
         if tweet_room > 5:
             info(" truncating")
             comment = comment[0:tweet_room - 1] + '…'
+            info(f"  truncated to {len(comment)}")
+            info(f"{comment}")
         else:
             info(" skipping")
             comment = ''

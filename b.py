@@ -373,7 +373,7 @@ class scrape_default(object):
             parts = WEAK_DELIMITERS.split(title_ori)
         info("parts = '%s'" % (parts))
         if len(parts) >= 2:
-            beginning, end = parts[0], parts[-1]
+            beginning, end = ' : '.join(parts[0:-1]), parts[-1]
             title, org = beginning, end
             title_c14n = title.replace(' ', '').lower()
             org_c14n = org.replace(' ', '').lower()

@@ -1132,7 +1132,7 @@ def emit_results(entries, query, results_file):
         else:
             locator = ''
             locator_pat = re.compile(
-                '^(?:<strong>)?([\d-]+)(?:</strong>)? (.*)')
+                '^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)')
             matches = locator_pat.match(text)
             if matches:
                 text = matches.group(2)

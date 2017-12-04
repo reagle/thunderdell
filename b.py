@@ -279,7 +279,8 @@ class scrape_default(object):
                 if xpath_result:
                     info("xpath_result = '%s'; xpath = '%s'" % (
                         xpath_result, path))
-                    author = string.capwords(''.join(xpath_result).strip())
+                    # 20171204 added space to join below
+                    author = string.capwords(' '.join(xpath_result).strip())
                     if author.lower().startswith('by '):
                         author = author[3:]
                     info("author = '%s'; xpath = '%s'" % (author, path))

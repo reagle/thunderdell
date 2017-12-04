@@ -1392,8 +1392,6 @@ def yasn_publish(comment, title, url, tags):
     if tags and tags[0] != '#':  # they've not yet been hashified
         tags = ' '.join(['#' + KEY_SHORTCUTS.get(tag, tag)
                         for tag in tags.strip().split(' ')])
-    else:
-        tags = ''
     comment, title, url, tags = [v.strip()
                                  for v in [comment, title, url, tags]]
     total_len = len(comment) + len(tags) + len(title) + len(url)

@@ -698,16 +698,16 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
 
-    # APA specific strings for CSL
-    # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
-    if et == 'post':
-        genre = 'Online forum comment'
-    elif et == 'post-weblog':
-        genre = 'Web log message'
-    if 'url' in entry:
-        if any((site in entry['url'] for site in [
-                'youtube.com', 'vimeo.com'])):
-            genre = 'Video file'
+    # # APA specific strings for CSL
+    # # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
+    # if et == 'post':
+    #     genre = 'Online forum comment'
+    # elif et == 'post-weblog':
+    #     genre = 'Web log message'
+    # if 'url' in entry:
+    #     if any((site in entry['url'] for site in [
+    #             'youtube.com', 'vimeo.com'])):
+    #         genre = 'Video file'
 
     return et, genre
 
@@ -1053,7 +1053,13 @@ def emit_yaml_csl(entries):
                 if field == 'eventtitle' and 'container-title' not in entry:
                     args.outfd.write(
                         f'  container-title: "Proceedings of {value}"\n')
+                    continue
                 if field == 'c_blog' and entry[field] == 'Blog':
+                    # netloc = urllib.parse.urlparse(entry['url']).netloc
+                    # args.outfd.write(
+                    #     f'  container-title: "{netloc}"\n')
+                    args.outfd.write(
+                        f'''  container-title: "\N{ZERO WIDTH SPACE}"\n''')
                     continue
 
                 # info('field = %s' % (field))

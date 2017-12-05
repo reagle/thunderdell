@@ -642,21 +642,22 @@ def guess_csl_type(entry):
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
         'year': '2008'})
-    ('paper-conference', None)
+    ('paper-conference', None, None)
 
     """
     genre = None
+    medium = None
     if 'entry_type' in entry:         # already has a type
         et = entry['entry_type']
         if et in CSL_TYPES:
-            return et, genre
+            return et, genre, medium
         elif et in BIBLATEX_TYPES:
             if et == 'mastersthesis':
-                return 'thesis', "Master's thesis"
+                return 'thesis', "Master's thesis", medium
             elif et == 'phdthesis':
-                return 'thesis', "PhD thesis"
+                return 'thesis', "PhD thesis", medium
             else:
-                return BIBLATEX_CSL_TYPE_MAP[et], genre
+                return BIBLATEX_CSL_TYPE_MAP[et], genre, medium
         else:
             print((f"Unknown entry_type = {et}"))
             sys.exit()
@@ -698,18 +699,18 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
 
-    # # APA specific strings for CSL
-    # # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
-    # if et == 'post':
-    #     genre = 'Online forum comment'
-    # elif et == 'post-weblog':
-    #     genre = 'Web log message'
-    # if 'url' in entry:
-    #     if any((site in entry['url'] for site in [
-    #             'youtube.com', 'vimeo.com'])):
-    #         genre = 'Video file'
+    # APA specific strings for CSL
+    # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
+    if et == 'post':
+        medium = 'Online forum comment'
+    elif et == 'post-weblog':
+        medium = 'Web log message'
+    if 'url' in entry:
+        if any((site in entry['url'] for site in [
+                'youtube.com', 'vimeo.com'])):
+            medium = 'Video file'
 
-    return et, genre
+    return et, genre, medium
 
 
 def bibformat_title(title):
@@ -986,11 +987,13 @@ def emit_yaml_csl(entries):
     args.outfd.write('references:\n')
 
     for key, entry in sorted(entries.items()):
-        entry_type, genre = guess_csl_type(entry)
+        entry_type, genre, medium = guess_csl_type(entry)
         args.outfd.write(f'- id: {entry["identifier"]}\n')
         args.outfd.write(f'  type: {entry_type}\n')
         if genre:
             args.outfd.write(f'  genre: {genre}\n')
+        if medium:
+            args.outfd.write(f'  medium: {medium}\n')
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]

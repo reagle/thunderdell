@@ -486,7 +486,7 @@ class scrape_ISBN(scrape_default):
             elif key == 'year':
                 biblio['date'] = json_bib['year']
             elif key == 'isbn':
-                biblio['isbn'] = json_bib['isbn'][0]
+                biblio['isbn'] = json_bib['isbn']
             elif key == 'pageCount':
                 biblio['pages'] = json_bib['pageCount']
             elif key == 'publisher':

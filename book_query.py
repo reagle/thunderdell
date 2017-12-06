@@ -44,7 +44,7 @@ def google_query(isbn):
     r = requests.get(URL.format(isbn=isbn))
     returned_content_type = r.headers['content-type']
     # info("r.content = '%s'" % r.content)
-    json_bib = {}
+    json_bib = {'isbn': str(isbn)}
     if returned_content_type.startswith('application/json'):
         json_result = json.loads(r.content)
         info("json_result['totalItems'] = '%s'" % json_result['totalItems'])
@@ -57,7 +57,7 @@ def google_query(isbn):
                 json_bib['author'] = ', '.join(value)
             if key == 'publishedDate':
                 json_bib['date'] = value.replace('-', '')
-            elif type(value) == str or type(value) == str:
+            elif type(value) == str:
                 json_bib[key] = value.strip()
                 info("  value = '%s'" % json_bib[key])
         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn.replace('-', '')
@@ -89,9 +89,9 @@ def oclc_query(isbn):
             print(("OCLC invalid ISBN %s" % isbn))
             return False
         json_vol = json_result['list'][0]
-        json_bib = {}
+        json_bib = {'isbn': str(isbn)}
         for key, value in list(json_vol.items()):
-            if type(value) == str or type(value) == str:
+            if type(value) == str:
                 value = value.strip()
                 value = value[0:-1] if value.endswith('.') else value
                 info("  value = '%s'" % value)

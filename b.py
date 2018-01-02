@@ -62,6 +62,7 @@ GENERAL_KEY_SHORTCUTS = {
     'ide': 'identity',
     'lea': 'leadership',
     'leg': 'legal',
+    'lit': 'literacy',
     'ope': 'open',
     'nor': 'norms',
     'pat': 'patience',

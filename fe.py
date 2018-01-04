@@ -1517,7 +1517,7 @@ def build_bib(file_name, output):
         try:
             doc = parse(mm_file).getroot()
         except IOError as err:
-            # dbg("    failed to parse %s" % mm_file)
+            # dbg("    failed to parse %s because of %s" % (mm_file, err))
             continue
         # dbg("    successfully parsed %s" % mm_file)
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
@@ -1694,6 +1694,10 @@ if __name__ == '__main__':
         default=1,
         help="Increase verbosity (specify multiple times for more)")
     arg_parser.add_argument(
+        '-L', '--log-to-file',
+        action="store_true", default=False,
+        help="log to file %(prog)s.log")
+    arg_parser.add_argument(
         "-w", "--WP-citation", default=False,
         action="store_true",
         help="emit Wikipedia {{citation}} format which can be "
@@ -1709,14 +1713,20 @@ if __name__ == '__main__':
 
     args.year = True
 
-    if args.verbose == 1:
-        log_level = logging.CRITICAL
+    log_level = 100  # default
+    if args.verbose >= 3:
+        log_level = logging.DEBUG       # 10
     elif args.verbose == 2:
-        log_level = logging.INFO
-    elif args.verbose >= 3:
-        log_level = logging.DEBUG
-    logging.basicConfig(level=log_level,
-                        format="%(levelno)s %(funcName).5s: %(message)s")
+        log_level = logging.INFO      # 20
+    elif args.verbose == 1:
+        log_level = logging.ERROR     # 40
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    if args.log_to_file:
+        print("logging to file")
+        logging.basicConfig(filename='fe.log', filemode='w',
+                            level=log_level, format=LOG_FORMAT)
+    else:
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     args.cgi = False
     args.outfd = sys.stdout

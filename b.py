@@ -837,6 +837,7 @@ def log2mm(biblio):
     info("biblio = %s" % biblio)
     author = biblio['author']
     title = biblio['title']
+    subtitle = biblio['subtitle'] if 'subtitle' in biblio  else ''
     abstract = biblio['comment']
     excerpt = biblio['excerpt']
     permalink = biblio['permalink']
@@ -918,7 +919,7 @@ def log2mm(biblio):
     ElementTree(mindmap).write(ofile, encoding='utf-8')
 
     if args.publish:
-        yasn_publish(abstract, title, permalink, tags)
+        yasn_publish(abstract, title, subtitle, permalink, tags)
 
 
 def log2nifty(biblio):
@@ -1011,7 +1012,7 @@ def log2work(biblio):
         print_usage("Sorry, XML insertion failed.")
 
     if args.publish:
-        yasn_publish(comment, title, url, hashtags)
+        yasn_publish(comment, title, subtitle, url, hashtags)
 
 
 def log2console(biblio):
@@ -1038,8 +1039,10 @@ def log2console(biblio):
         if token not in biblio:
             if token == 'url':  # I want these printed even if don't exist
                 biblio['url'] = ''
-            if token == 'title':
+            elif token == 'title':
                 biblio['title'] = ''
+            elif token == 'subtitle':
+                biblio['subtitle'] = ''
         if token in biblio and biblio[token]:
             print(('%s = %s' % (token, biblio[token])))
             bib_in_single_line += '%s = %s ' % (token, biblio[token])
@@ -1050,7 +1053,8 @@ def log2console(biblio):
                 print(('%s = %s' % (identifer, value[0])))
 
     if args.publish:
-        yasn_publish(biblio['comment'], biblio['title'],
+        yasn_publish(biblio['comment'],
+                     biblio['title'], biblio['subtitle'],
                      biblio['url'], biblio['tags'])
 
 
@@ -1386,15 +1390,18 @@ def shrink_tweet(comment, title, url, tags):
     return(tweet)
 
 
-def yasn_publish(comment, title, url, tags):
+def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks, at this point: Twython"
-    info("comment = %s, title = %s, url = %s, tags = %s"
-         % (comment, title, url, tags))
+    info("comment = %s, title = %s, subtitle = %s, url = %s, tags = %s"
+         % (comment, title, subtitle, url, tags))
     if tags and tags[0] != '#':  # they've not yet been hashified
         tags = ' '.join(['#' + KEY_SHORTCUTS.get(tag, tag)
                         for tag in tags.strip().split(' ')])
-    comment, title, url, tags = [v.strip() if v else ''
-                                 for v in [comment, title, url, tags]]
+    comment, title, subtitle, url, tags = [
+        v.strip() if v else ''
+        for v in [comment, title, subtitle, url, tags]]
+    if subtitle:
+        title = title + ': ' + subtitle
     total_len = len(comment) + len(tags) + len(title) + len(url)
     info(f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}

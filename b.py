@@ -944,8 +944,8 @@ def log2nifty(biblio):
     fd.close()
 
     insertion_regexp = re.compile('(<dl style="clear: left;">)')
-    newcontent = insertion_regexp.sub('\\1 \n  %s'
-        % log_item, content, re.DOTALL | re.IGNORECASE)
+    newcontent = insertion_regexp.sub(
+        '\\1 \n  %s'% log_item, content, re.DOTALL | re.IGNORECASE)
     if newcontent:
         fd = open(ofile, 'w', encoding='utf-8', errors='replace')
         fd.write(newcontent)
@@ -1033,7 +1033,7 @@ def log2console(biblio):
         for tag in tags:
             tag = KEY_SHORTCUTS.get(tag, tag)
             tags_expanded += tag + ' '
-        biblio['tags'] = tags_expanded[0:-1]  # removes last comma
+        # biblio['keywords'] = tags_expanded[0:-1]  # removes last space
     bib_in_single_line = ''
     for token in TOKENS:
         info("token = '%s'" % token)
@@ -1045,8 +1045,13 @@ def log2console(biblio):
             elif token == 'subtitle':
                 biblio['subtitle'] = ''
         if token in biblio and biblio[token]:
-            print(('%s = %s' % (token, biblio[token])))
-            bib_in_single_line += '%s = %s ' % (token, biblio[token])
+            if token == 'tags':
+                for value in tags_expanded.strip().split(' '):
+                    print('keyword = %s' % value)
+                    bib_in_single_line += 'keyword = %s ' % value
+            else:
+                print(('%s = %s' % (token, biblio[token])))
+                bib_in_single_line += '%s = %s ' % (token, biblio[token])
     print(('\n%s\n' % bib_in_single_line))
     if 'identifiers' in biblio:
         for identifer, value in list(biblio['identifiers'].items()):

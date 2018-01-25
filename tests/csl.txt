@@ -48,7 +48,6 @@ references:
   issued:
     year: 1990
   container-title: "Proceedings of Event Title"
-  event: "Event Title"
   publisher: "Publisher"
   title: "Chapter title"
   URL: "http://example.com/1"
@@ -104,7 +103,6 @@ references:
   URL: "http://example.com/2"
 - id: A15d1999tle
   type: post-weblog
-  genre: Web log message
   author:
   - family: "A15d"
   container-title: "Blog Title"

@@ -10,7 +10,7 @@ references:
   keyword: "test"
   container-title: "Wikipedia"
   title-short: "Bracket (e.g., [], {}) (oldid=295177316)"
-  title: "Bracket (e.g., [], {})"
+  title: "Bracket (<span class='nocase'>e.g</span>., [], {})"
   URL: "http://en.wikipedia.org/?oldid=295177316"
   accessed:
     year: 2009

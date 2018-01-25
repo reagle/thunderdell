@@ -25,7 +25,7 @@ import urllib.parse
 import unicodedata
 import webbrowser
 
-from web_little import unescape_XML
+from web_little import unescape_XML, escape_XML
 
 log_level = 100  # default
 critical = logging.critical
@@ -1132,7 +1132,8 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry, spaces):
         """Move locator number to the end of the text with the Bibtex key"""
-        style_ref, text = node.get('STYLE_REF', 'default'), node.get('TEXT')
+        style_ref = node.get('STYLE_REF', 'default')
+        text = escape_XML(node.get('TEXT'))
         prefix = '&gt; ' if style_ref == 'quote' else ''
         # don't reverse short texts and certain style refs
         if len(text) < 50 or style_ref in ['author', 'title', 'cite']:

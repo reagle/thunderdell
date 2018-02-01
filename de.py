@@ -211,7 +211,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
 
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
-                print(matches.groups())
+                # print(matches.groups())
                 line_no = matches.group(1)
                 if matches.group(2):
                     line_no += matches.group(2)

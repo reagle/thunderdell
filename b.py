@@ -150,6 +150,7 @@ WP_KEY_SHORTCUTS = {
     'pol': 'policy',
     'qua': 'quality',
     'uni': 'universal',
+    'uto': 'utopia',
     'ver': 'verifiability',
     }
 

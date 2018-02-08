@@ -1134,6 +1134,9 @@ def emit_results(entries, query, results_file):
         """Move locator number to the end of the text with the Bibtex key"""
         style_ref = node.get('STYLE_REF', 'default')
         text = escape_XML(node.get('TEXT'))
+        text = text.replace(        # restore my query_highlight strongs
+            '&lt;strong&gt;', '<strong>').replace(
+            '&lt;/strong&gt;', '</strong>')
         prefix = '&gt; ' if style_ref == 'quote' else ''
         # don't reverse short texts and certain style refs
         if len(text) < 50 or style_ref in ['author', 'title', 'cite']:

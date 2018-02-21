@@ -432,6 +432,26 @@ def get_ident(entry, entries, delim=""):
     return ident
 
 
+def parse_date(date):
+    """parse dates formatted as biblatex or YYYYMMDD"""
+
+    if '/' in date:
+        # biblatex permits ranges delimited by '/', but I do not
+        raise Exception("'/' should not be in date.")
+    elif '-' in date:
+        date_parts = date.split('-')  # '2009-05-21'
+    else:                             # '20090521'
+        # filter drops empty strings
+        date_parts = [_f for _f in [date[0:4], date[4:6], date[6:8]] if _f]
+    if len(date_parts) == 3:
+        date = f'{date_parts[0]}-{date_parts[1]}-{date_parts[2]}'
+    elif len(date_parts) == 2:
+        date = f'{date_parts[0]}-{date_parts[1]}'
+    else:
+        date = f'{date_parts[0]}'
+    return date
+
+
 def pull_citation(entry):
     """Modifies entry with parsed citation
 
@@ -462,13 +482,7 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
-        entry['urldate'] = "%s-%s-%s" % (
-            entry['custom1'][0:4],  # year
-            entry['custom1'][4:6],  # month
-            entry['custom1'][6:8])  # day
-        del entry['custom1']
-
+    # Date processing, use bibtex %y-%m-%d
     if 'month' in entry:
         month_tmp = entry['month']
         if ' ' in month_tmp:
@@ -483,6 +497,7 @@ def pull_citation(entry):
             del entry['month']
 
     # bibtex:year, month, day -> biblatex 0.9+:date
+    # remove legacy year, month, day entries picked up in old mindmaps
     if 'year' in entry and 'date' not in entry:
         date = entry['year']
         if 'month' in entry:
@@ -497,26 +512,18 @@ def pull_citation(entry):
         entry['date'] = date
 
     # biblatex 0.9+:date -> bibtex:year
+    # preferred field and format is date, but
+    # redudant year is kept because used throughout fe.py
     if 'date' in entry:
-        date = entry['date']
-        if '/' in date:
-            # biblatex permits ranges delimited by '/', but I do not
-            raise Exception("'/' should not be in date.")
-        elif '-' in date:
-            date_parts = date.split('-')  # '2009-05-21'
-        else:                             # '20090521'
-            # filter drops empty strings
-            date_parts = [_f for _f in [date[0:4], date[4:6], date[6:8]] if _f]
-        if len(date_parts) == 3:
-            entry['year'], entry['month'], entry['day'] = date_parts
-            date = f'{date_parts[0]}-{date_parts[1]}-{date_parts[2]}'
-        elif len(date_parts) == 2:
-            entry['year'], entry['month'] = date_parts
-            date = f'{date_parts[0]}-{date_parts[1]}'
-        else:
-            entry['year'] = date_parts[0]
-            date = f'{date_parts[0]}'
-        entry['date'] = date
+        entry['date'] = parse_date(entry['date'])
+        entry['year'] = entry['date'][0:4]
+
+    if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
+        entry['urldate'] = parse_date(entry['custom1'])
+        del entry['custom1']
+
+    if 'origdate' in entry:         # original date of publication
+        entry['origdate'] = parse_date(entry['origdate'])
 
     if ': ' in entry['title']:
         if not entry['title'].startswith('Re:'):
@@ -963,6 +970,7 @@ def emit_yaml_csl(entries):
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
         year, month, day = (date.split('-') + 3 * [None])[0:3]
+        # info(f'year, month, day = {year}, {month}, {day}')
         if year:
             args.outfd.write(f'    year: {year}\n')
         if month:
@@ -1006,7 +1014,7 @@ def emit_yaml_csl(entries):
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                # info("short, field = '%s , %s'" % (short, field))
+                info("short, field = '%s , %s'" % (short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
                              'day', 'month', 'year', 'issue'):
@@ -1022,13 +1030,16 @@ def emit_yaml_csl(entries):
                     emit_yaml_people(value)
                     continue
                 if field in ('date', 'origdate', 'urldate'):
+                    # info(f'field = {field}')
                     if value == '0000':
                         continue
                     if field == 'date':
+                        # info("value = '%s'" % (value))
                         season = entry['issue'] if 'issue' in entry else None
                         args.outfd.write('  issued:\n')
                         emit_yaml_date(value, season)
                     if field == 'origdate':
+                        # info("value = '%s'" % (value))
                         args.outfd.write('  original-date:\n')
                         emit_yaml_date(value)
                     if field == 'urldate':

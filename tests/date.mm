@@ -1,4 +1,4 @@
-<map version="freeplane 1.5.9">
+<map version="freeplane 1.6.0">
 <!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
 <node TEXT="test" FOLDED="false" ID="ID_238118654"><hook NAME="MapStyle">
     <properties fit_to_viewport="false;"/>
@@ -82,7 +82,7 @@
 <node TEXT="pass" POSITION="left" ID="ID_1092147349"/>
 <node TEXT="A1" STYLE_REF="author" POSITION="right" ID="ID_688738488" COLOR="#338800">
 <node TEXT="T1" STYLE_REF="title" ID="ID_577892787" LINK="http://example.com/" COLOR="#090f6b">
-<node TEXT="y=2004 m=July 5 r=20040710" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
+<node TEXT="d=20040705 r=20040710" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
 </node>
 <node TEXT="T2" STYLE_REF="title" ID="ID_1277775152" COLOR="#090f6b">
 <node TEXT="d=20050615" STYLE_REF="cite" ID="ID_106881548" COLOR="#ff33b8"/>

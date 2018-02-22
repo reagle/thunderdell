@@ -82,18 +82,18 @@
 <node TEXT="foo" POSITION="right" ID="ID_645898657">
 <node TEXT="A1" STYLE_REF="author" ID="ID_1377722943" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_1568511335" COLOR="#090f6b">
-<node TEXT="y=1991" STYLE_REF="cite" ID="ID_103426878" COLOR="#ff33b8"/>
+<node TEXT="d=1991" STYLE_REF="cite" ID="ID_103426878" COLOR="#ff33b8"/>
 </node>
 <node TEXT="Title two" STYLE_REF="title" ID="ID_783482411" COLOR="#090f6b">
-<node TEXT="y=1992" STYLE_REF="cite" ID="ID_794626150" COLOR="#ff33b8"/>
+<node TEXT="d=1992" STYLE_REF="cite" ID="ID_794626150" COLOR="#ff33b8"/>
 <node TEXT="A2" STYLE_REF="author" ID="ID_1112147038" COLOR="#338800">
 <node TEXT="Title three" STYLE_REF="title" ID="ID_1870606547" COLOR="#090f6b">
-<node TEXT="y=1993" STYLE_REF="cite" ID="ID_925486400" COLOR="#ff33b8"/>
+<node TEXT="d=1993" STYLE_REF="cite" ID="ID_925486400" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>
 <node TEXT="Title four" STYLE_REF="title" ID="ID_1207177645" COLOR="#090f6b">
-<node TEXT="y=1994" STYLE_REF="cite" ID="ID_1806046677" COLOR="#ff33b8"/>
+<node TEXT="d=1994" STYLE_REF="cite" ID="ID_1806046677" COLOR="#ff33b8"/>
 <node TEXT="now passes!" ID="ID_1428020622">
 <edge WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="12"/>

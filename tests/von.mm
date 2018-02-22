@@ -81,7 +81,7 @@
 </hook>
 <node TEXT="George Von Krogh" STYLE_REF="author" POSITION="right" ID="ID_749812892" COLOR="#338800">
 <node TEXT="Care in knowledge creation" STYLE_REF="title" ID="ID_582359069" COLOR="#090f6b">
-<node TEXT="j=California Management Review n=3 m=Spring v=40 y=1998  r=20060504" STYLE_REF="cite" ID="ID_263160596" COLOR="#ff33b8"/>
+<node TEXT="j=California Management Review n=3 is=Spring v=40 d=1998  r=20060504" STYLE_REF="cite" ID="ID_263160596" COLOR="#ff33b8"/>
 <node TEXT="A definition of care in corporate organizations, a matrix of types of knowledge management techniques (Care x individual/social): capturing, transacting, bestowing, indwelling; ways of furthering care, and a case example of Unilever" STYLE_REF="annotation" ID="ID_268839799" COLOR="#999999"/>
 </node>
 </node>

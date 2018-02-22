@@ -82,16 +82,16 @@
 <node TEXT="foo" POSITION="right" ID="ID_1855386560">
 <node TEXT="A5" STYLE_REF="author" ID="ID_1160716553" COLOR="#338800">
 <node TEXT="Title five" STYLE_REF="title" ID="ID_562227695" COLOR="#090f6b">
-<node TEXT="y=1995" STYLE_REF="cite" ID="ID_1581870020" COLOR="#ff33b8"/>
+<node TEXT="d=1995" STYLE_REF="cite" ID="ID_1581870020" COLOR="#ff33b8"/>
 <node TEXT="A6" STYLE_REF="author" ID="ID_839218294" COLOR="#338800">
 <node TEXT="Title six" STYLE_REF="title" ID="ID_1141543347" COLOR="#090f6b">
-<node TEXT="y=1996" STYLE_REF="cite" ID="ID_677070787" COLOR="#ff33b8"/>
+<node TEXT="d=1996" STYLE_REF="cite" ID="ID_677070787" COLOR="#ff33b8"/>
 <node TEXT="my name is joseph reagle" ID="ID_863676788"/>
 </node>
 </node>
 <node TEXT="A7" STYLE_REF="author" ID="ID_1623531488" COLOR="#338800">
 <node TEXT="Title seven" STYLE_REF="title" ID="ID_101547309" COLOR="#090f6b">
-<node TEXT="y=1997" STYLE_REF="cite" ID="ID_329940015" COLOR="#ff33b8"/>
+<node TEXT="d=1997" STYLE_REF="cite" ID="ID_329940015" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

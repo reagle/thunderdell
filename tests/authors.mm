@@ -88,7 +88,7 @@
 <node TEXT="foo" POSITION="right" ID="ID_212443630">
 <node TEXT="A5, A6" STYLE_REF="author" ID="ID_774152587" COLOR="#338800">
 <node TEXT="Title five+six" STYLE_REF="title" ID="ID_1841066669" COLOR="#090f6b">
-<node TEXT="y=1995" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
+<node TEXT="d=1995" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

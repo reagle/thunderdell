@@ -433,22 +433,17 @@ def get_ident(entry, entries, delim=""):
 
 
 def parse_date(date):
-    """parse dates formatted as biblatex or YYYYMMDD"""
+    """parse dates that starts with YYYYMMDD and returns hyphen delimited"""
 
-    if '/' in date:
-        # biblatex permits ranges delimited by '/', but I do not
-        raise Exception("'/' should not be in date.")
-    elif '-' in date:
-        date_parts = date.split('-')  # '2009-05-21'
-    else:                             # '20090521'
-        # filter drops empty strings
-        date_parts = [_f for _f in [date[0:4], date[4:6], date[6:8]] if _f]
-    if len(date_parts) == 3:
-        date = f'{date_parts[0]}-{date_parts[1]}-{date_parts[2]}'
-    elif len(date_parts) == 2:
-        date = f'{date_parts[0]}-{date_parts[1]}'
+    date = date[0:8]  # strip time if it exists
+    if len(date) == 8:
+        date = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
+    elif len(date) == 6:
+        date = f'{date[0:4]}-{date[4:6]}'
+    elif len(date) == 4:
+        date = f'{date[0:4]}'
     else:
-        date = f'{date_parts[0]}'
+        raise Exception(f"{date} is malformed")
     return date
 
 

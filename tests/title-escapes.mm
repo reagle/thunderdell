@@ -81,7 +81,7 @@
 </hook>
 <node TEXT="Wikipedia" STYLE_REF="author" POSITION="right" ID="ID_1484729955" COLOR="#338800">
 <node TEXT="Bracket (e.g., [], {})" STYLE_REF="title" ID="ID_1278536345" LINK="http://en.wikipedia.org/w/index.php?title=Bracket&amp;oldid=295177316" COLOR="#090f6b">
-<node TEXT="or=Wikipedia m=June 8 y=2009 r=20090610 12:58 UTC kw=test" STYLE_REF="cite" ID="ID_1210073182" COLOR="#ff33b8"/>
+<node TEXT="or=Wikipedia d=20090608 r=20090610 12:58 UTC kw=test" STYLE_REF="cite" ID="ID_1210073182" COLOR="#ff33b8"/>
 <node TEXT="Brackets are punctuation marks used in pairs to set apart or interject text within other text. In computer science, the term is sometimes said to strictly apply to the square or box type.[1]" STYLE_REF="quote" ID="ID_1659017802" COLOR="#166799"/>
 </node>
 </node>

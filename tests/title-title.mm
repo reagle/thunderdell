@@ -82,25 +82,25 @@
 <node TEXT="pass" POSITION="left" ID="ID_1487071178"/>
 <node TEXT="A1" STYLE_REF="author" POSITION="right" ID="ID_41986915" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_1733529255" COLOR="#090f6b">
-<node TEXT="y=1995" STYLE_REF="cite" ID="ID_1244474181" COLOR="#ff33b8"/>
+<node TEXT="d=1995" STYLE_REF="cite" ID="ID_1244474181" COLOR="#ff33b8"/>
 <node TEXT="Title two" STYLE_REF="title" ID="ID_1389838189" COLOR="#090f6b">
-<node TEXT="y=1996" STYLE_REF="cite" ID="ID_1046366542" COLOR="#ff33b8"/>
+<node TEXT="d=1996" STYLE_REF="cite" ID="ID_1046366542" COLOR="#ff33b8"/>
 </node>
 <node TEXT="Title silly" STYLE_REF="title" ID="ID_1828390752" COLOR="#090f6b">
-<node TEXT="y=1996" STYLE_REF="cite" ID="ID_228653156" COLOR="#ff33b8"/>
+<node TEXT="d=1996" STYLE_REF="cite" ID="ID_228653156" COLOR="#ff33b8"/>
 </node>
 <node TEXT="Title sad" STYLE_REF="title" ID="ID_392988688" COLOR="#090f6b">
-<node TEXT="y=1996" STYLE_REF="cite" ID="ID_1951077131" COLOR="#ff33b8"/>
+<node TEXT="d=1996" STYLE_REF="cite" ID="ID_1951077131" COLOR="#ff33b8"/>
 </node>
 <node TEXT="Title sextet" STYLE_REF="title" ID="ID_540848705" COLOR="#090f6b">
-<node TEXT="y=1997" STYLE_REF="cite" ID="ID_1090608792" COLOR="#ff33b8"/>
+<node TEXT="d=1997" STYLE_REF="cite" ID="ID_1090608792" COLOR="#ff33b8"/>
 </node>
 </node>
 <node TEXT="The title&apos;s apostrophes" STYLE_REF="title" ID="ID_843625401" COLOR="#090f6b">
-<node TEXT="y=1997" STYLE_REF="cite" ID="ID_1137278027" COLOR="#ff33b8"/>
+<node TEXT="d=1997" STYLE_REF="cite" ID="ID_1137278027" COLOR="#ff33b8"/>
 </node>
 <node TEXT="The title with a great-hypen" STYLE_REF="title" ID="ID_1992142215" COLOR="#090f6b">
-<node TEXT="y=1998" STYLE_REF="cite" ID="ID_1533862653" COLOR="#ff33b8"/>
+<node TEXT="d=1998" STYLE_REF="cite" ID="ID_1533862653" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

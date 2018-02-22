@@ -88,12 +88,12 @@
 <node TEXT="foo" POSITION="right" ID="ID_212443630">
 <node TEXT="A1" STYLE_REF="author" ID="ID_774152587" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_1841066669" COLOR="#090f6b">
-<node TEXT="y=1991 e=John Smith, Sally Sue bt=Book One" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
+<node TEXT="d=1991 e=John Smith, Sally Sue bt=Book One" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
 </node>
 </node>
 <node TEXT="A2" STYLE_REF="author" ID="ID_1661967182" COLOR="#338800">
 <node TEXT="Title two" STYLE_REF="title" ID="ID_1994241845" COLOR="#090f6b">
-<node TEXT="y=1992 e=John Smith and Sally Sue bt=Book Two" STYLE_REF="cite" ID="ID_1918646975" COLOR="#ff33b8"/>
+<node TEXT="d=1992 e=John Smith and Sally Sue bt=Book Two" STYLE_REF="cite" ID="ID_1918646975" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

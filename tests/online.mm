@@ -82,17 +82,17 @@
 <node TEXT="pass" POSITION="left" ID="ID_1492349316"/>
 <node TEXT="A1" STYLE_REF="author" POSITION="right" ID="ID_138582676" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_1296597463" LINK="http://example.com/1" COLOR="#090f6b">
-<node TEXT="t=article y=1991" STYLE_REF="cite" ID="ID_1104465325" COLOR="#ff33b8"/>
+<node TEXT="t=article d=1991" STYLE_REF="cite" ID="ID_1104465325" COLOR="#ff33b8"/>
 </node>
 </node>
 <node TEXT="A2" STYLE_REF="author" POSITION="right" ID="ID_345867739" COLOR="#338800">
 <node TEXT="Title two" STYLE_REF="title" ID="ID_137058646" LINK="http://example.com/2" COLOR="#090f6b">
-<node TEXT="y=1992" STYLE_REF="cite" ID="ID_316727736" COLOR="#ff33b8"/>
+<node TEXT="d=1992" STYLE_REF="cite" ID="ID_316727736" COLOR="#ff33b8"/>
 </node>
 </node>
 <node TEXT="Joseph Reagle" STYLE_REF="author" POSITION="right" ID="ID_1940246043" COLOR="#338800">
 <node TEXT="Open content communities" STYLE_REF="title" ID="ID_685849484" LINK="http://journal.media-culture.org.au/0406/06_Reagle.rft.php" COLOR="#090f6b">
-<node TEXT="y=2004 m=July j=M/C: A Journal of Media and Culture v=7 n=3 r=20040701" STYLE_REF="cite" ID="ID_1733864065" COLOR="#ff33b8"/>
+<node TEXT="d=200407 j=M/C: A Journal of Media and Culture v=7 n=3 r=20040701" STYLE_REF="cite" ID="ID_1733864065" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

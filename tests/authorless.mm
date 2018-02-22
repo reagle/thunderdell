@@ -82,12 +82,12 @@
 <node TEXT="foo" POSITION="right" ID="ID_409003424">
 <node TEXT="Some Org" STYLE_REF="author" ID="ID_1401586764" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_17112185" COLOR="#090f6b">
-<node TEXT="y=1995 or=Some Org" STYLE_REF="cite" ID="ID_1664108970" COLOR="#ff33b8"/>
+<node TEXT="d=1995 or=Some Org" STYLE_REF="cite" ID="ID_1664108970" COLOR="#ff33b8"/>
 </node>
 </node>
 <node TEXT="Bob Turner" STYLE_REF="author" ID="ID_774152587" COLOR="#338800">
 <node TEXT="Title two" STYLE_REF="title" ID="ID_1841066669" COLOR="#090f6b">
-<node TEXT="y=1996 or=A6" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
+<node TEXT="d=1996 or=A6" STYLE_REF="cite" ID="ID_1197177406" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

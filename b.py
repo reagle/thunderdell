@@ -1299,7 +1299,7 @@ def do_console_annotation(biblio):
                 print_console_msg()
             elif line.startswith('. '):
                 biblio['comment'] = line[2:].strip()
-            elif '=' in line:
+            elif '=' in line[0:3]:  # citation only if near start of line
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))

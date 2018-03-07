@@ -149,6 +149,7 @@ WP_KEY_SHORTCUTS = {
     'phi': 'philosophy',
     'pol': 'policy',
     'qua': 'quality',
+    'sil': 'siliconvalley',
     'uni': 'universal',
     'uto': 'utopia',
     'ver': 'verifiability',

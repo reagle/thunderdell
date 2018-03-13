@@ -153,6 +153,7 @@ WP_KEY_SHORTCUTS = {
     'uni': 'universal',
     'uto': 'utopia',
     'ver': 'verifiability',
+    'wp' : 'wikipedia',
     }
 
 LIST_OF_KEYSHORTCUTS = (

@@ -617,7 +617,7 @@ def guess_bibtex_type(entry):
             else:
                 if 'author' in entry or \
                     'chapter' in entry:      e_t = 'incollection'
-                else:                        e_t= 'collection'
+                else:                        e_t = 'collection'
         elif 'journal' in entry:             e_t = 'article'
 
         elif 'author' in entry and 'title' in entry and 'publisher' in entry:
@@ -801,6 +801,7 @@ def bibformat_title(title):
 #################################################################
 # Emitters
 #################################################################
+
 
 EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
                 'amazon.com', 'data/1work/']

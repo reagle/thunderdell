@@ -76,7 +76,7 @@ GENERAL_KEY_SHORTCUTS = {
     'tec': 'technology',
     'tro': 'troll',
     'zei': 'zeitgeist',
-    }
+}
 
 GF_KEY_SHORTCUTS = {
     # Geek Feminism
@@ -86,7 +86,7 @@ GF_KEY_SHORTCUTS = {
     'sex': 'sexism',
     'mer': 'meritocracy',
     'prv': 'privilege',
-    }
+}
 
 LH_KEY_SHORTCUTS = {
     # Lifehack
@@ -96,7 +96,7 @@ LH_KEY_SHORTCUTS = {
     'sh': 'selfhelp',
     'too': 'tool',
     'min': 'minimalism',
-    }
+}
 
 RTC_KEY_SHORTCUTS = {
     # Comments
@@ -120,7 +120,7 @@ RTC_KEY_SHORTCUTS = {
     'sel': 'self',
     'soc': 'social',
     'pup': 'puppet',
-        }
+}
 
 WP_KEY_SHORTCUTS = {
     # Wikipedia
@@ -154,7 +154,7 @@ WP_KEY_SHORTCUTS = {
     'uto': 'utopia',
     'ver': 'verifiability',
     'wp' : 'wikipedia',
-    }
+}
 
 LIST_OF_KEYSHORTCUTS = (
     GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS,
@@ -331,7 +331,7 @@ class scrape_default(object):
         from dateutil.parser import parse
 
         DATE_XPATHS = (
-        '''//li/span[@class="byline_label"]/following-sibling::span/@title''',# tynan.com
+        '''//li/span[@class="byline_label"]/following-sibling::span/@title''', # tynan.com
         )
         if self.HTML_p is not None:
             info('checking date xpaths')
@@ -840,7 +840,7 @@ def log2mm(biblio):
     info("biblio = %s" % biblio)
     author = biblio['author']
     title = biblio['title']
-    subtitle = biblio['subtitle'] if 'subtitle' in biblio  else ''
+    subtitle = biblio['subtitle'] if 'subtitle' in biblio else ''
     abstract = biblio['comment']
     excerpt = biblio['excerpt']
     permalink = biblio['permalink']
@@ -948,7 +948,7 @@ def log2nifty(biblio):
 
     insertion_regexp = re.compile('(<dl style="clear: left;">)')
     newcontent = insertion_regexp.sub(
-        '\\1 \n  %s'% log_item, content, re.DOTALL | re.IGNORECASE)
+        '\\1 \n  %s' % log_item, content, re.DOTALL | re.IGNORECASE)
     if newcontent:
         fd = open(ofile, 'w', encoding='utf-8', errors='replace')
         fd.write(newcontent)

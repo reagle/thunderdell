@@ -1401,13 +1401,13 @@ def shrink_tweet(comment, title, url, tags):
 
 def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks, at this point: Twython"
-    info("comment = %s, title = %s, subtitle = %s, url = %s, tags = %s"
+    info("comment = '%s', title = %s, subtitle = %s, url = %s, tags = %s"
          % (comment, title, subtitle, url, tags))
     if tags and tags[0] != '#':  # they've not yet been hashified
         tags = ' '.join(['#' + KEY_SHORTCUTS.get(tag, tag)
                         for tag in tags.strip().split(' ')])
     comment, title, subtitle, url, tags = [
-        v.strip() if v else ''
+        v.strip() if isinstance(v, str) else ''
         for v in [comment, title, subtitle, url, tags]]
     if subtitle:
         title = title + ': ' + subtitle

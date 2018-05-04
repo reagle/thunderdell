@@ -348,6 +348,7 @@ def identity_add_title(ident, title):
 
     """
 
+    # dbg("title = '%s'" % (title))
     suffix = ''
     clean_title = title.replace('Wikipedia:', ''
                        ).replace('Category:', ''

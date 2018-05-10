@@ -153,7 +153,7 @@ WP_KEY_SHORTCUTS = {
     'uni': 'universal',
     'uto': 'utopia',
     'ver': 'verifiability',
-    'wp' : 'wikipedia',
+    'wp':  'wikipedia',
 }
 
 LIST_OF_KEYSHORTCUTS = (
@@ -330,9 +330,8 @@ class scrape_default(object):
 
         from dateutil.parser import parse
 
-        DATE_XPATHS = (
-        '''//li/span[@class="byline_label"]/following-sibling::span/@title''', # tynan.com
-        )
+        DATE_XPATHS = ('''//li/span[@class="byline_label"]'''
+                       '''/following-sibling::span/@title''',)  # tynan.com
         if self.HTML_p is not None:
             info('checking date xpaths')
             for path in DATE_XPATHS:
@@ -352,7 +351,7 @@ class scrape_default(object):
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return parse(dmatch.group(0)).strftime("%Y%m%d")
-        except:
+        except ValueError:
             NOW = time.gmtime()
             date = time.strftime('%Y%m%d', NOW)
             info("making date NOW = %s" % date)
@@ -698,7 +697,8 @@ class scrape_ENWP(scrape_default):
         '''find date within span'''
         _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
         time, day, month, year = re.search(
-            '''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) (\d\d\d\d)</span>''',
+            '''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) '''
+            '''(\d\d\d\d)</span>''',
             versioned_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))
@@ -1165,10 +1165,12 @@ def blog_at_goatee(biblio):
             thumb_url = path + '/thumbs/' + jpg
             alt_text = blog_title.replace('-', ' ')
             fd.write(
-                '''<p><a href="%s"><img alt="%s" class="thumb right" src="%s"/></a></p>\n\n'''
+                '''<p><a href="%s"><img alt="%s" class="thumb right" '''
+                '''src="%s"/></a></p>\n\n'''
                 % (url, alt_text, thumb_url, ))
             fd.write(
-                '''<p><a href="%s"><img alt="%s" class="view" src="%s"/></a></p>'''
+                '''<p><a href="%s"><img alt="%s" class="view" '''
+                '''src="%s"/></a></p>'''
                 % (url, alt_text, url))
     fd.close()
     Popen([VISUAL, filename])

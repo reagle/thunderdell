@@ -90,6 +90,7 @@ GF_KEY_SHORTCUTS = {
 
 LH_KEY_SHORTCUTS = {
     # Lifehack
+    'com': 'complicity',
     'lh': 'lifehack',
     'his': 'history',
     'qs': 'quantifiedself',
@@ -103,7 +104,6 @@ RTC_KEY_SHORTCUTS = {
     'ano': 'anonymous',
     'ass': 'assessment',
     'aut': 'automated',
-    'com': 'competitive',
     'cri': 'criticism',
     'est': 'esteem',
     'fak': 'fake',
@@ -1336,6 +1336,7 @@ def do_console_annotation(biblio):
     for key in biblio:
         if key.startswith('c_'):
             initial_text.append("%s=%s" % (fe.CSL_FIELDS[key], biblio[key]))
+        # include keywords and -p option too
     if 'comment' in biblio and biblio['comment'].strip():
         initial_text.append('. ' + biblio['comment'])
     initial_text = '\n'.join(initial_text) + '\n'

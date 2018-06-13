@@ -38,7 +38,7 @@ import time
 
 # personal Web utility module
 from web_little import get_HTML, get_text, unescape_XML, escape_XML
-from change_case import sentence_case
+from change_case import sentence_case, title_case
 
 log_level = 100  # default
 critical = logging.critical
@@ -1335,11 +1335,12 @@ def do_console_annotation(biblio):
                     biblio['author'], biblio['title']))]
     for key in biblio:
         if key.startswith('c_'):
-            initial_text.append("%s=%s" % (fe.CSL_FIELDS[key], biblio[key]))
+            initial_text.append("%s=%s" % (fe.CSL_FIELDS[key],
+                                title_case(biblio[key])))
         if key is 'tags':
             tags = biblio['tags']
             tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
-                        for tag in tags.strip().split(' ')])
+                            for tag in tags.strip().split(' ')])
             initial_text.append(tags)
             # TODO keywords added in edited_text are seperate in mindmap
             #      make sure they are contiguous

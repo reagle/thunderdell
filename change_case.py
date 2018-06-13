@@ -51,6 +51,7 @@ def create_wordset(file_name):
         raise Exception("Could not find wordset %s" % file_name)
     return set()
 
+
 # TODO find some way not to use hardcoded path that works with import
 LIST_PATH = HOME + "/bin/fe/"
 PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
@@ -111,7 +112,7 @@ def safe_lower(text):
     for word in words:
         info("  word = '%s'" % word)
         if word:  # this split will remove multiple white-spaces
-            word_capitalized = word.capitalize()  # [0].upper() + word[1:].lower()
+            word_capitalized = word.capitalize()
             info("  word_capitalized = '%s'" % word_capitalized)
             if word in proper_nouns:
                 new_text.append(word)
@@ -324,6 +325,7 @@ def main(argv):
         result = change_case(text, case_direction)
         info(result)
         print(result)
+
 
 if '__main__' == __name__:
     main(sys.argv[1:])

@@ -1336,7 +1336,14 @@ def do_console_annotation(biblio):
     for key in biblio:
         if key.startswith('c_'):
             initial_text.append("%s=%s" % (fe.CSL_FIELDS[key], biblio[key]))
-        # include keywords and -p option too
+        if key is 'tags':
+            tags = biblio['tags']
+            tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
+                        for tag in tags.strip().split(' ')])
+            initial_text.append(tags)
+            # TODO keywords added in edited_text are seperate in mindmap
+            #      make sure they are contiguous
+        # TODO include whether -p option passed in the initial_text
     if 'comment' in biblio and biblio['comment'].strip():
         initial_text.append('. ' + biblio['comment'])
     initial_text = '\n'.join(initial_text) + '\n'

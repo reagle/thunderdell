@@ -1288,7 +1288,7 @@ def do_console_annotation(biblio):
         '''Parse the bib assignments'''
 
         console_annotations = ''
-        do_publish = args.publish
+        do_publish = False
         print(('@%s\n' % (tentative_id)))
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         for line in edited_text:
@@ -1342,13 +1342,13 @@ def do_console_annotation(biblio):
             tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
                             for tag in tags.strip().split(' ')])
             initial_text.append(tags)
-            # TODO keywords added in edited_text are seperate in mindmap
+            # TODO keywords added in edited_text are separate in mindmap
             #      make sure they are contiguous
-        # TODO include whether -p option passed in the initial_text
+    if args.publish:
+        initial_text.append('-p')
     if 'comment' in biblio and biblio['comment'].strip():
         initial_text.append('. ' + biblio['comment'])
     initial_text = '\n'.join(initial_text) + '\n'
-
     edited_text = edit_annotation(initial_text)
     try:
         biblio, do_publish = parse_bib(biblio, edited_text)

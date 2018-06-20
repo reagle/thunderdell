@@ -830,6 +830,7 @@ def log2mm(biblio):
 
     print("to log2mm")
     biblio, args.publish = do_console_annotation(biblio)
+    info(f'{biblio}')
 
     # now = time.gmtime()
     this_week = time.strftime("%U", NOW)
@@ -1287,8 +1288,11 @@ def do_console_annotation(biblio):
     def parse_bib(biblio, edited_text):
         '''Parse the bib assignments'''
 
-        console_annotations = ''
+        # biblio['tags'] and whether to yasn publish are overwritten by
+        # pre-populated and edited console annotation
+        biblio['tags'] = ''
         do_publish = False
+        console_annotations = ''
         print(('@%s\n' % (tentative_id)))
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
         for line in edited_text:
@@ -1309,9 +1313,12 @@ def do_console_annotation(biblio):
                 cite_pairs = list(zip(*[iter(cites)] * 2))
                 info("cite_pairs = %s" % cite_pairs)
                 for short, value in cite_pairs:
+                    info(f"short,value = {short},{value}")
                     if short == 't':  # 't=cj' -> cj = 'Nature'
                         biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
                         del biblio['c_web']
+                    elif short == 'kw':  # 'kw=complicity
+                        biblio['tags'] += ' ' + value.strip()
                     else:
                         biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
             else:
@@ -1329,6 +1336,7 @@ def do_console_annotation(biblio):
             del biblio['c_web']
         return biblio, do_publish
 
+    # code of do_console_annotation
     info("biblio['author'] = '%s'" % (biblio['author']))
     tentative_id = get_tentative_ident(biblio)
     initial_text = [('d=%s au=%s ti=%s' % (biblio['date'],
@@ -1337,13 +1345,10 @@ def do_console_annotation(biblio):
         if key.startswith('c_'):
             initial_text.append("%s=%s" % (fe.CSL_FIELDS[key],
                                 title_case(biblio[key])))
-        if key is 'tags':
-            tags = biblio['tags']
+        if key is 'tags' and biblio['tags']:
             tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
-                            for tag in tags.strip().split(' ')])
+                            for tag in biblio['tags'].strip().split(' ')])
             initial_text.append(tags)
-            # TODO keywords added in edited_text are separate in mindmap
-            #      make sure they are contiguous
     if args.publish:
         initial_text.append('-p')
     if 'comment' in biblio and biblio['comment'].strip():

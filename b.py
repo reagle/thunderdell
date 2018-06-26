@@ -263,6 +263,7 @@ class scrape_default(object):
             '''//meta[@name='AUTHOR']/@content''',
             '''//meta[@name='authors']/@content''',
             '''//meta[@http-equiv='author']/@content''',
+            '''//meta[@name='sailthru.author']/@content''',
             '''//a[@rel='author']//text()''',
             '''//span[@class='author']/text()''',   # WashingtonPost
             '''//*[@itemprop='author']//text()''',  # engadget

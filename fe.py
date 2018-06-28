@@ -1493,7 +1493,7 @@ RESULT_FILE_HEADER = """<!DOCTYPE html>
 <head>
 <meta http-equiv="Content-Type"
 content="text/html; charset=UTF-8" />
-<link href="http://reagle.org/joseph/2005/01/mm-print.css"
+<link href="https://reagle.org/joseph/2005/01/mm-print.css"
 rel="stylesheet" type="text/css" />
 """
 
@@ -1501,7 +1501,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 </head>
 <body>
 <div>
-    <form method="get" action="http://reagle.org/joseph/plan/search.cgi">
+    <form method="get" action="https://reagle.org/joseph/plan/search.cgi">
     <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
     name="query" maxlength="80" /> <input type="radio" name="sitesearch"
     value="BusySponge" /> BS <input type="radio" name="sitesearch"

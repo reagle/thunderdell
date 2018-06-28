@@ -55,6 +55,7 @@ if not os.path.isdir(TMP_DIR):
 # Expansions for common tags/activities
 
 GENERAL_KEY_SHORTCUTS = {
+    'add': 'addiction',
     'con': 'conflict',
     'exi': 'exit',
     'for': 'fork',
@@ -76,6 +77,14 @@ GENERAL_KEY_SHORTCUTS = {
     'tec': 'technology',
     'tro': 'troll',
     'zei': 'zeitgeist',
+}
+
+TV_KEY_SHORTCUTS = {
+    # Tech Prediction, Vision, and Utopia
+    'pre': 'prediction',
+    'uni': 'universal',
+    'uto': 'utopia',
+    'vis': 'vision',
 }
 
 GF_KEY_SHORTCUTS = {
@@ -150,15 +159,13 @@ WP_KEY_SHORTCUTS = {
     'pol': 'policy',
     'qua': 'quality',
     'sil': 'siliconvalley',
-    'uni': 'universal',
-    'uto': 'utopia',
     'ver': 'verifiability',
     'wp':  'wikipedia',
 }
 
 LIST_OF_KEYSHORTCUTS = (
-    GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS,
-    RTC_KEY_SHORTCUTS, WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS)
+    GENERAL_KEY_SHORTCUTS, GF_KEY_SHORTCUTS, RTC_KEY_SHORTCUTS,
+    WP_KEY_SHORTCUTS, LH_KEY_SHORTCUTS, TV_KEY_SHORTCUTS)
 
 KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
 for short_dict in LIST_OF_KEYSHORTCUTS[1:]:

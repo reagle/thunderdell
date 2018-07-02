@@ -11,19 +11,19 @@
 
 # TODO
 
-from cgi import escape, parse_qs
 from change_case import BORING_WORDS
 from collections import OrderedDict
+from html import escape
 import logging
-# from lxml.etree import parse
-from xml.etree.ElementTree import parse
 import os
 import re
 from subprocess import call
 import sys
-import urllib.parse
 import unicodedata
+import urllib.parse
+from urllib.parse import parse_qs  # simplify this import with above line 
 import webbrowser
+from xml.etree.ElementTree import parse
 
 from web_little import unescape_XML, escape_XML
 

@@ -937,7 +937,7 @@ def emit_yaml_csl(entries):
 
     def esc_yaml(s):
         if s:  # faster to just quote than testing for tokens
-            s = s.replace('"', r"\'")
+            s = s.replace('"', r"''")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             # s = s.replace("@", r"\@") # not needed? causing bugs; delete
             s = f'"{s}"'

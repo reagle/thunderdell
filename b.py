@@ -1059,10 +1059,10 @@ def log2console(biblio):
         if token in biblio and biblio[token]:
             if token == 'tags':
                 for value in tags_expanded.strip().split(' '):
-                    print('keyword = %s' % value)
+                    # print('keyword = %s' % value)
                     bib_in_single_line += 'keyword = %s ' % value
             else:
-                print(('%s = %s' % (token, biblio[token])))
+                # print(('%s = %s' % (token, biblio[token])))
                 bib_in_single_line += '%s = %s ' % (token, biblio[token])
     print(('\n%s\n' % bib_in_single_line))
     if 'identifiers' in biblio:

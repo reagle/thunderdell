@@ -21,7 +21,7 @@ from subprocess import call
 import sys
 import unicodedata
 import urllib.parse
-from urllib.parse import parse_qs  # simplify this import with above line 
+from urllib.parse import parse_qs  # simplify this import with above line
 import webbrowser
 from xml.etree.ElementTree import parse
 

@@ -893,7 +893,7 @@ def emit_biblatex(entries):
                         # info("banned")
                         continue
                     # if online_only and not (online or online journal)
-                    if args.online_urls_only and not (
+                    if args.urls_online_only and not (
                             entry_type == 'online' or
                             any(j for j in ONLINE_JOURNALS
                                 if j in entry['url'])):
@@ -1052,8 +1052,8 @@ def emit_yaml_csl(entries):
                         # info("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
-                    if args.online_urls_only:
-                        # info("online_urls_only")
+                    if args.urls_online_only:
+                        # info("urls_online_only")
                         # don't skip online types
                         if entry_type in {'post', 'post-weblog', 'webpage'}:
                             pass
@@ -1587,48 +1587,48 @@ def _test_results():
     Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
 
-    >>> call('fe ~/bin/fe/tests/author-child.mm > \
+    >>> call('fe -i ~/bin/fe/tests/author-child.mm > \
     /tmp/author-child.txt; \
     diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/author-descendent.mm > \
+    >>> call('fe -i ~/bin/fe/tests/author-descendent.mm > \
     /tmp/author-descendent.txt; \
     diff ~/bin/fe/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/authorless.mm > \
+    >>> call('fe -i ~/bin/fe/tests/authorless.mm > \
     /tmp/authorless.txt; \
     diff ~/bin/fe/tests/authorless.txt /tmp/authorless.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/authors.mm > \
+    >>> call('fe -i ~/bin/fe/tests/authors.mm > \
     /tmp/authors.txt; \
     diff ~/bin/fe/tests/authors.txt /tmp/authors.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/case.mm > \
+    >>> call('fe -i ~/bin/fe/tests/case.mm > \
     /tmp/case.txt; \
     diff ~/bin/fe/tests/case.txt /tmp/case.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/csl.mm > \
+    >>> call('fe -i ~/bin/fe/tests/csl.mm > \
     /tmp/csl.txt; \
     diff ~/bin/fe/tests/csl.txt /tmp/csl.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/date.mm > /tmp/date.txt; \
+    >>> call('fe -i ~/bin/fe/tests/date.mm > /tmp/date.txt; \
     diff ~/bin/fe/tests/date.txt /tmp/date.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/editors.mm > /tmp/editors.txt; \
+    >>> call('fe -i ~/bin/fe/tests/editors.mm > /tmp/editors.txt; \
     diff ~/bin/fe/tests/editors.txt /tmp/editors.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/online.mm > /tmp/online.txt; \
+    >>> call('fe -i ~/bin/fe/tests/online.mm > /tmp/online.txt; \
     diff ~/bin/fe/tests/online.txt /tmp/online.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/title-escapes.mm > \
+    >>> call('fe -i ~/bin/fe/tests/title-escapes.mm > \
     /tmp/title-escapes.txt; \
     diff ~/bin/fe/tests/title-escapes.txt /tmp/title-escapes.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/title-title.mm > \
+    >>> call('fe -i ~/bin/fe/tests/title-title.mm > \
     /tmp/title-title.txt; \
     diff ~/bin/fe/tests/title-title.txt /tmp/title-title.txt', shell=True)
     0
-    >>> call('fe ~/bin/fe/tests/von.mm > /tmp/von.txt; \
+    >>> call('fe -i ~/bin/fe/tests/von.mm > /tmp/von.txt; \
     diff ~/bin/fe/tests/von.txt /tmp/von.txt', shell=True)
     0
 
@@ -1637,14 +1637,12 @@ def _test_results():
 if __name__ == '__main__':
     import argparse  # http://docs.python.org/dev/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""usage: %prog [options] [FILE.mm]\n
+        description="""usage: %prog [FILE.mm] [options]\n
     Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.""")
-    arg_parser.add_argument(
-        'file', nargs='?', default=DEFAULT_MAP, metavar='FILE')
     arg_parser.add_argument(
         "-a", "--author-create", default=False,
         action="store_true",
@@ -1666,13 +1664,12 @@ if __name__ == '__main__':
         action="store_true", default=False,
         help="chase, output YAML/CSL, use default map and output file")
     arg_parser.add_argument(
+        '-i', '--input_file', default=DEFAULT_MAP, metavar='FILENAME',
+        help="mindmap to process")
+    arg_parser.add_argument(
         "-k", "--keys", default='-no-keys',
         action="store_const", const='-use-keys',
         help="show bibtex keys in displayed HTML")
-    arg_parser.add_argument(
-        "-f", "--file-out",
-        action="store_true", default=False,
-        help="output goes to FILE.bib")
     arg_parser.add_argument(
         "-F", "--fields",
         action="store_true", default=False,
@@ -1682,15 +1679,15 @@ if __name__ == '__main__':
         action="store_true", default=False,
         help="use long URLs")
     arg_parser.add_argument(
-        "-o", "--online-urls-only",
+        "-o", "--output-file",
         action="store_true", default=False,
-        help="emit URLs for online resources only")
+        help="output goes to FILENAME.bib (boolean)")
     arg_parser.add_argument(
         "-p", "--pretty",
         action="store_true", default=False,
         help="pretty print")
     arg_parser.add_argument(
-        "-q", "--query",
+        "-q", "--query", nargs='+',
         help="query the mindmaps", metavar="QUERY")
     arg_parser.set_defaults(query_c=None)
     arg_parser.add_argument(
@@ -1701,6 +1698,10 @@ if __name__ == '__main__':
         "-T", "--tests",
         action="store_true", default=False,
         help="run tests")
+    arg_parser.add_argument(
+        "-u", "--urls_online_only",
+        action="store_true", default=False,
+        help="emit URLs for online resources only")
     arg_parser.add_argument(
         '-V', '--verbose', dest='verbose', action='count',
         default=1,
@@ -1721,7 +1722,8 @@ if __name__ == '__main__':
         help="emit YAML/CSL for use with pandoc [default]")
 
     args = arg_parser.parse_args()
-    file_name = os.path.abspath(args.file)
+    # print(args)
+    file_name = os.path.abspath(args.input_file)
 
     args.year = True
 
@@ -1754,8 +1756,8 @@ if __name__ == '__main__':
         output = emit_yaml_csl
     if args.defaults:
         args.chase = True
-        args.file_out = True
-    if args.file_out:
+        args.output_file = True
+    if args.output_file:
         if args.YAML_CSL:
             extension = '.yaml'
         elif args.bibtex or args.biblatex:
@@ -1791,6 +1793,7 @@ if __name__ == '__main__':
         print("         ot=organization's subtype (e.g., W3C REC)\n\n")
         sys.exit()
     if args.query:
+        args.query = ' '.join(args.query)
         args.query = urllib.parse.unquote(args.query)
         args.query_c = re.compile(re.escape(args.query), re.IGNORECASE)
         output = emit_results
@@ -1801,7 +1804,7 @@ else:
         cgi = True                # called from cgi
         chase = True              # Follow freeplane links to other local maps
         long_url = False          # Use short 'oldid' URLs for mediawikis
-        online_urls_only = False  # Emit urls for @online only
+        urls_online_only = False  # Emit urls for @online only
         pretty = False            # Print as HTML with citation at end
         query = None              # Query the bibliographies
         query_c = None            # Query re.compiled

@@ -7,7 +7,6 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 ''' Return bibliographic data for a given a ISBN.
-    See http://xisbn.worldcat.org/xisbnadmin/doc/api.htm#getmetadata
 '''
 
 import json
@@ -24,48 +23,13 @@ dbg = logging.debug
 
 def query(isbn):
     """Query available ISBN services"""
-    bib = oclc_query(isbn)
+    bib = open_query(isbn)
     if not bib:
         bib = google_query(isbn)
         if not bib:
-            raise Exception('ISBN queries failed')
+            raise Exception('All ISBN queries failed')
     return(bib)
 
-
-def google_query(isbn):
-    """Query the ISBN Web service; returns string"""
-    # https://books.google.com/books?isbn=0472069322
-
-    if isbn.startswith('isbn:'):
-        isbn = isbn[5:]
-    isbn = isbn.replace('-', '')
-    info("isbn = '%s'" % isbn)
-    URL = ('https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
-    info("isbn = '%s'" % isbn)
-    r = requests.get(URL.format(isbn=isbn))
-    returned_content_type = r.headers['content-type']
-    # info("r.content = '%s'" % r.content)
-    json_bib = {'isbn': str(isbn)}
-    if returned_content_type.startswith('application/json'):
-        json_result = json.loads(r.content)
-        info("json_result['totalItems'] = '%s'" % json_result['totalItems'])
-        if json_result['totalItems'] == 0:
-            print(("Google unknown ISBN for %s" % isbn))
-            return False
-        json_vol = json_result['items'][0]['volumeInfo']
-        for key, value in list(json_vol.items()):
-            if key == 'authors':
-                json_bib['author'] = ', '.join(value)
-            if key == 'publishedDate':
-                json_bib['date'] = value.replace('-', '')
-            elif type(value) == str:
-                json_bib[key] = value.strip()
-                info("  value = '%s'" % json_bib[key])
-        json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn
-        return(json_bib)
-    else:
-        print("Google ISBN API did not return application/json")
-        return False
 
 def open_query(isbn):
     """Query the ISBN Web service; returns string"""
@@ -75,18 +39,65 @@ def open_query(isbn):
     if isbn.startswith('isbn:'):
         isbn = isbn[5:]
     isbn = isbn.replace('-', '')
-    info("isbn = '%s'" % isbn)
-    URL = ('https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
-    info("isbn = '%s'" % isbn)
-    r = requests.get(URL.format(isbn=isbn))
+    info(f'isbn = {isbn}')
+    URL = (f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}'
+        '&jscmd=data&format=json')
+    info(f'url = {URL}')
+    r = requests.get(URL)
     returned_content_type = r.headers['content-type']
-    # info("r.content = '%s'" % r.content)
+    info(f"r.content = '{r.content}'")
+    if returned_content_type.startswith('application/json'):
+        if r.content != b'{}':
+            json_bib = {'isbn': str(isbn)}
+            json_result = json.loads(r.content)
+            json_vol = json_result[f'ISBN:{isbn}']
+            for key, value in list(json_vol.items()):
+                if key == 'authors':
+                    pass
+                if key == 'by_statement':
+                    json_bib['author'] = json_vol[key].replace(' and', ',')
+                elif key == 'publishers':
+                    json_bib['publisher'] = json_vol[key][0]['name']
+                elif key == 'publish_places':
+                    json_bib['address'] = json_vol[key][0]['name']
+                elif key == 'publish_date':
+                    json_bib['date'] = json_vol[key]
+                elif type(value) == str:
+                    json_bib[key] = value.strip()
+                    info("  value = '%s'" % json_bib[key])
+            json_bib['url'] = f'https://books.google.com/books?isbn={isbn}'
+            if 'title' in json_bib and 'subtitle' in json_bib:
+                subtitle = json_bib['subtitle']
+                json_bib['title'] += ': ' + subtitle[:1].upper() + subtitle[1:]
+                del json_bib['subtitle']
+            return(json_bib)
+        else:
+            print(f"Open Library unknown ISBN {isbn}")
+            return False
+    else:
+        print("Open Library ISBN API did not return application/json")
+        return False
+
+
+def google_query(isbn):
+    """Query the ISBN Web service; returns string"""
+    # https://books.google.com/books?isbn=0472069322
+
+    if isbn.startswith('isbn:'):
+        isbn = isbn[5:]
+    isbn = isbn.replace('-', '')
+    info(f'isbn = {isbn}')
+    URL = f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}'
+    info(f'url = {URL}')
+    r = requests.get(URL)
+    returned_content_type = r.headers['content-type']
+    # info(f"r.content = '{r.content}'")
     json_bib = {'isbn': str(isbn)}
     if returned_content_type.startswith('application/json'):
         json_result = json.loads(r.content)
-        info("json_result['totalItems'] = '%s'" % json_result['totalItems'])
+        info(f"json_result['totalItems']={json_result['totalItems']}")
         if json_result['totalItems'] == 0:
-            print(("Google unknown ISBN for %s" % isbn))
+            print((f"Google unknown ISBN for {isbn}"))
             return False
         json_vol = json_result['items'][0]['volumeInfo']
         for key, value in list(json_vol.items()):
@@ -96,52 +107,12 @@ def open_query(isbn):
                 json_bib['date'] = value.replace('-', '')
             elif type(value) == str:
                 json_bib[key] = value.strip()
-                info("  value = '%s'" % json_bib[key])
-        json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn
+                info(f"  value = '{json_bib[key]}'")
+        json_bib['url'] = f'https://books.google.com/books?isbn={isbn}'
         return(json_bib)
     else:
-        print("Open Library ISBN API did not return application/json")
+        print("Google ISBN API did not return application/json")
         return False
-
-
-def oclc_query(isbn):
-    return False  # XISBN service is down 20180816
-
-# def oclc_query(isbn):
-#     """Query the ISBN Web service; returns string"""
-#     # http://xisbn.worldcat.org/webservices/xid/isbn/0472069322?method=getMetadata&format=json&fl=*
-
-#     if isbn.startswith('isbn:'):
-#         isbn = isbn[5:]
-#     isbn = isbn.replace('-', '')
-#     info("isbn = '%s'" % isbn)
-#     URL = ('http://xisbn.worldcat.org/webservices/xid/isbn/{isbn}?method=getMetadata&format=json&fl=*')
-#     info("isbn = '%s'" % isbn)
-#     r = requests.get(URL.format(isbn=isbn))
-#     returned_content_type = r.headers['content-type']
-#     info("r.content = '%s'" % r.content)
-#     if returned_content_type.startswith('text/plain'):  # no 'application/json'
-#         json_result = json.loads(r.content)
-#         info("json_result['stat'] = '%s'" % json_result['stat'])
-#         if 'unknownId' in json_result['stat']:
-#             print(("OCLC unknown ISBN %s" % isbn))
-#             return False
-#         if 'invalidId' in json_result['stat']:
-#             print(("OCLC invalid ISBN %s" % isbn))
-#             return False
-#         json_vol = json_result['list'][0]
-#         json_bib = {'isbn': str(isbn)}
-#         for key, value in list(json_vol.items()):
-#             if type(value) == str:
-#                 value = value.strip()
-#                 value = value[0:-1] if value.endswith('.') else value
-#                 info("  value = '%s'" % value)
-#                 json_bib[key] = value
-#         json_bib['url'] = 'https://books.google.com/books?isbn=%s' % isbn
-#         return(json_bib)
-#     else:
-#         print("OCLC ISBN API did not return text/plain")
-#         return False
 
 
 if '__main__' == __name__:

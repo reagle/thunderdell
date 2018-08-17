@@ -359,7 +359,7 @@ class scrape_default(object):
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return parse(dmatch.group(0)).strftime("%Y%m%d")
-        except (AttributeError, ValueError):
+        except (AttributeError, TypeError, ValueError):
             NOW = time.gmtime()
             date = time.strftime('%Y%m%d', NOW)
             info("making date NOW = %s" % date)

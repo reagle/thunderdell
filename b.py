@@ -1456,6 +1456,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
     except TwythonError as e:
         print(e)
 
+    # include FB
+    # https://github.com/mobolic/facebook-sdk
+    # https://github.com/michaelhelmick/requests-facebook
+
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":

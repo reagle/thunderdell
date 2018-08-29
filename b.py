@@ -1447,10 +1447,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
     # https://twython.readthedocs.io/en/latest/index.html
     from twython import Twython, TwythonError
     # load keys, tokens, and secrets from twitter_token.py
-    from twitter_tokens import CONSUMER_KEY, CONSUMER_SECRET, \
-        ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-    twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET,
-                      ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    from web_api_tokens import TW_CONSUMER_KEY, TW_CONSUMER_SECRET, \
+        TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET
+    twitter = Twython(TW_CONSUMER_KEY, TW_CONSUMER_SECRET,
+                      TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
     try:
         twitter.update_status(status=tweet)
     except TwythonError as e:

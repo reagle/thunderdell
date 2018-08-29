@@ -228,7 +228,7 @@ class scrape_default(object):
     Default and base class scraper.
     """
     def __init__(self, url, comment):
-        print(("Scraping default Web page;"), end=' ')
+        print(("Scraping default Web page;"), end='\n')
         self.url = url
         self.comment = comment
         try:
@@ -467,7 +467,7 @@ class scrape_default(object):
 class scrape_ISBN(scrape_default):
 
     def __init__(self, url, comment):
-        print(("Scraping ISBN;"), end=' ')
+        print(("Scraping ISBN;"), end='\n')
         self.url = url
         self.comment = comment
 
@@ -546,7 +546,7 @@ class scrape_ISBN(scrape_default):
 class scrape_DOI(scrape_default):
 
     def __init__(self, url, comment):
-        print(("Scraping DOI;"), end=' ')
+        print(("Scraping DOI;"), end='\n')
         self.url = url
         self.comment = comment
 
@@ -623,7 +623,7 @@ class scrape_DOI(scrape_default):
 
 class scrape_MARC(scrape_default):
     def __init__(self, url, comment):
-        print(("Scraping MARC;"), end=' ')
+        print(("Scraping MARC;"), end='\n')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -678,7 +678,7 @@ class scrape_MARC(scrape_default):
 
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
-        print(("Scraping en.Wikipedia;"), end=' ')
+        print(("Scraping en.Wikipedia;"), end='\n')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -727,7 +727,7 @@ class scrape_ENWP(scrape_default):
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
-        print(("Scraping Wikimedia Meta;"), end=' ')
+        print(("Scraping Wikimedia Meta;"), end='\n')
         scrape_default.__init__(self, url, comment)
 
     def get_author(self):
@@ -761,7 +761,7 @@ class scrape_WMMeta(scrape_default):
 
 class scrape_geekfeminism_wiki(scrape_default):
     def __init__(self, url, comment):
-        print(("Scraping geekfeminism wiki"), end=' ')
+        print(("Scraping geekfeminism wiki"), end='\n')
         scrape_default.__init__(self, url, comment)
 
     def get_biblio(self):
@@ -780,7 +780,7 @@ class scrape_geekfeminism_wiki(scrape_default):
 
 class scrape_twitter(scrape_default):
     def __init__(self, url, comment):
-        print(("Scraping twitter"), end=' ')
+        print(("Scraping twitter"), end='\n')
         scrape_default.__init__(self, url, comment)
 
     def get_biblio(self):
@@ -1033,7 +1033,6 @@ def log2console(biblio):
     Log to console.
     '''
 
-    print('\n')
     TOKENS = (
         'author', 'title', 'subtitle', 'date', 'journal',
         'volume', 'number', 'publisher', 'address', 'DOI', 'isbn',
@@ -1064,7 +1063,7 @@ def log2console(biblio):
             else:
                 # print(('%s = %s' % (token, biblio[token])))
                 bib_in_single_line += '%s = %s ' % (token, biblio[token])
-    print(('\n%s\n' % bib_in_single_line))
+    print(f'{bib_in_single_line}')
     if 'identifiers' in biblio:
         for identifer, value in list(biblio['identifiers'].items()):
             if identifer.startswith('isbn'):
@@ -1373,7 +1372,7 @@ def do_console_annotation(biblio):
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
-        print(('logged: %s to' % get_tentative_ident(biblio)), end=' ')
+        print(('logged: %s to' % get_tentative_ident(biblio)), end='\n')
     return biblio, do_publish
 
 
@@ -1419,12 +1418,14 @@ def shrink_tweet(comment, title, url, tags):
     info(f"tweet_room after comment = {tweet_room}")
 
     comment_delim = ": " if comment else ""
-    tweet = f'{comment}{comment_delim}“{title}” {url} {tags}'
-    return(tweet)
+    title = f'“{title}”' if title else ""
+    tweet = f'{comment}{comment_delim}{title} {url} {tags}'
+    return(tweet.strip())
 
 
 def yasn_publish(comment, title, subtitle, url, tags):
-    "Send annotated URL to social networks, at this point: Twython"
+    "Send annotated URL to social networks"
+
     info("comment = '%s', title = %s, subtitle = %s, url = %s, tags = %s"
          % (comment, title, subtitle, url, tags))
     if tags and tags[0] != '#':  # they've not yet been hashified
@@ -1434,15 +1435,19 @@ def yasn_publish(comment, title, subtitle, url, tags):
         v.strip() if isinstance(v, str) else ''
         for v in [comment, title, subtitle, url, tags]]
     if subtitle:
-        title = title + ': ' + subtitle
+        title = f'“{title[1:-1]}: {subtitle}”'
+    if 'goatee.net/photo' in url and url.endswith('.jpg'):
+        title = ''
+        tags = '#photo #' + url.rsplit('/')[-1][8:-4].replace('-', ' #')
+        photo = open(HOME + '/f/' + url[19:], 'rb')
+    else:
+        photo = None
     total_len = len(comment) + len(tags) + len(title) + len(url)
     info(f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}
          url = {len(url)}: {url}
          tags = {len(tags)}: {tags}
          total_len = {total_len}""")
-    tweet = shrink_tweet(comment, title, url, tags)
-    print(f"tweeting {len(tweet)}: {tweet}")
 
     # https://twython.readthedocs.io/en/latest/index.html
     from twython import Twython, TwythonError
@@ -1452,13 +1457,59 @@ def yasn_publish(comment, title, subtitle, url, tags):
     twitter = Twython(TW_CONSUMER_KEY, TW_CONSUMER_SECRET,
                       TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
     try:
-        twitter.update_status(status=tweet)
+        if photo:
+            tweet = shrink_tweet(comment, title, '', tags)
+            response = twitter.upload_media(media=photo)
+            twitter.update_status(status=tweet,
+                                  media_ids=[response['media_id']])
+        else:
+            tweet = shrink_tweet(comment, title, url, tags)
+            twitter.update_status(status=tweet)
     except TwythonError as e:
         print(e)
+    finally:
+        print(f"tweeted {len(tweet)}: {tweet}")
 
-    # include FB
-    # https://github.com/mobolic/facebook-sdk
-    # https://github.com/michaelhelmick/requests-facebook
+    # https://selenium-python.readthedocs.io/
+    from selenium import webdriver
+    from selenium.common.exceptions import NoSuchElementException
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.common.keys import Keys
+    from web_api_tokens import CHROME_PROFILE, FB_USER, FB_PASSWORD
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--disable-notifications")
+    options.add_argument(f"--user-data-dir={HOME}/.config/selenium")
+    # options.add_argument('--headless')
+    driver = webdriver.Chrome(options=options)
+    driver.get('http://www.facebook.com')
+    try:
+        driver.find_element_by_xpath("//input[@id='email']")
+    except NoSuchElementException:
+        pass
+    else:
+        driver.find_element_by_xpath(
+                "//input[@id='email']").send_keys(FB_USER)
+        driver.find_element_by_xpath(
+                "//input[@id='pass']").send_keys(FB_PASSWORD)
+        driver.find_element_by_xpath(
+                "//input[starts-with(@id, 'u_0_')]""[@value='Log In']").click()
+    TEXT_BOX_XPATH = ("//div[starts-with(@id, 'u_0_')]"
+                      "//textarea[@name='xhpc_message']")
+    WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.XPATH, TEXT_BOX_XPATH)))
+    text_box = driver.find_element_by_xpath(TEXT_BOX_XPATH)
+    fb_status = f'{comment} “{title}” {url} {tags}'.strip()
+    text_box.send_keys(fb_status + Keys.ENTER)  # + Keys.COMMAND + Keys.ENTER)
+    ATTACH_XPATH = ("//div[@data-testid='attachment-preview-body']"
+                    "//button[@title='Remove']")
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, ATTACH_XPATH)))
+    driver.find_element_by_xpath("//button[contains(.,'Share')]").click()
+    time.sleep(4)
+    driver.quit()
 
 
 # Check to see if the script is executing as main.

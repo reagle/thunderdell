@@ -415,11 +415,13 @@ class scrape_default(object):
         title_regexps = (
             ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
             ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
+            ('https://www.youtube.com', r'''"title":"(.*?)"'''),
             ('', r'<title[^>]*>([^<]+)</title>')    # default: make sure last
         )
 
         for prefix, regexp in title_regexps:
             if self.url.startswith(prefix):
+                info(f"prefix = {prefix}")
                 break
 
         title = "UNKNOWN TITLE"
@@ -1225,6 +1227,10 @@ def get_logger(text):
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()
+        if 'url' in params:  # unescape zshell safe pasting/bracketing
+            params['url'] = params['url'].replace('\#', '#')\
+                                         .replace('\?', '?')\
+                                         .replace('\=', '=')
         info("params = '%s'" % (params))
         function = None
         if params['scheme'] == 'n':   function = log2nifty

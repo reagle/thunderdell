@@ -71,6 +71,7 @@ GENERAL_KEY_SHORTCUTS = {
     'pow': 'power',
     'pra': 'praxis',
     'pri': 'privacy',
+    'ske': 'skepticism',
     'spe': 'speech',
     'str': 'structure',
     'tea': 'teaching',

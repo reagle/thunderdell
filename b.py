@@ -1230,6 +1230,7 @@ def get_logger(text):
         params = LOG_REGEX.match(text).groupdict()
         if 'url' in params:  # unescape zshell safe pasting/bracketing
             params['url'] = params['url'].replace('\#', '#')\
+                                         .replace('\&', '&')\
                                          .replace('\?', '?')\
                                          .replace('\=', '=')
         info("params = '%s'" % (params))

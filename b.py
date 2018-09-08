@@ -1443,7 +1443,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
         v.strip() if isinstance(v, str) else ''
         for v in [comment, title, subtitle, url, tags]]
     if subtitle:
-        title = f'“{title[1:-1]}: {subtitle}”'
+        title = f'{title}: {subtitle}'
     if 'goatee.net/photo' in url and url.endswith('.jpg'):
         title = ''
         tags = '#photo #' + url.rsplit('/')[-1][8:-4].replace('-', ' #')
@@ -1509,7 +1509,8 @@ def yasn_publish(comment, title, subtitle, url, tags):
     WebDriverWait(driver, 5).until(
         EC.element_to_be_clickable((By.XPATH, TEXT_BOX_XPATH)))
     text_box = driver.find_element_by_xpath(TEXT_BOX_XPATH)
-    fb_status = f'{comment} “{title}” {url} {tags}'.strip()
+    title = f'“{title}”' if title else ''
+    fb_status = f'{comment} {title} {url} {tags}'.strip()
     text_box.send_keys(fb_status + Keys.ENTER)  # + Keys.COMMAND + Keys.ENTER)
     ATTACH_XPATH = ("//div[@data-testid='attachment-preview-body']"
                     "//button[@title='Remove']")

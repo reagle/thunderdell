@@ -1517,7 +1517,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, ATTACH_XPATH)))
     driver.find_element_by_xpath("//button[contains(.,'Share')]").click()
-    time.sleep(4)
+    time.sleep(8)
     driver.quit()
 
 

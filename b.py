@@ -56,7 +56,6 @@ if not os.path.isdir(TMP_DIR):
 
 GENERAL_KEY_SHORTCUTS = {
     'add': 'addiction',
-    'con': 'conflict',
     'exi': 'exit',
     'for': 'fork',
     'hum': 'humor',
@@ -67,7 +66,6 @@ GENERAL_KEY_SHORTCUTS = {
     'ope': 'open',
     'nor': 'norms',
     'pat': 'patience',
-    'pol': 'policing',
     'pow': 'power',
     'pra': 'praxis',
     'pri': 'privacy',
@@ -158,7 +156,6 @@ WP_KEY_SHORTCUTS = {
     'par': 'participation',
     'phi': 'philosophy',
     'pol': 'policy',
-    'qua': 'quality',
     'sil': 'siliconvalley',
     'ver': 'verifiability',
     'wp':  'wikipedia',

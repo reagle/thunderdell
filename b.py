@@ -363,6 +363,30 @@ class scrape_default(object):
             info("making date NOW = %s" % date)
             return date
 
+    def get_title(self):
+
+        title_regexps = (
+            ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
+            ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
+            ('https://www.youtube.com', r'''"title":"(.*?)"'''),
+            ('', r'<title[^>]*>([^<]+)</title>')    # default: make sure last
+        )
+
+        for prefix, regexp in title_regexps:
+            if self.url.startswith(prefix):
+                info(f"prefix = {prefix}")
+                break
+
+        title = "UNKNOWN TITLE"
+        if self.html_u:
+            tmatch = re.search(regexp, self.html_u, re.DOTALL | re.IGNORECASE)
+            if tmatch:
+                title = tmatch.group(1).strip()
+                title = unescape_XML(title)
+                title = sentence_case(title)
+                title = smart_punctuation_to_ascii(title)
+        return title
+
     def split_title_org(self):
         '''Separate the title by a delimiter and test if latter half is the
         organization (if it has certain words (blog) or is too short)'''
@@ -407,30 +431,6 @@ class scrape_default(object):
             title = sentence_case(title.strip())
             org = org.strip()
         return title, org
-
-    def get_title(self):
-
-        title_regexps = (
-            ('http://lists.w3.org/.*', '<!-- subject="(.*?)" -->'),
-            ('http://lists.kde.org/.*', r"<title>MARC: msg '(.*?)'</title>"),
-            ('https://www.youtube.com', r'''"title":"(.*?)"'''),
-            ('', r'<title[^>]*>([^<]+)</title>')    # default: make sure last
-        )
-
-        for prefix, regexp in title_regexps:
-            if self.url.startswith(prefix):
-                info(f"prefix = {prefix}")
-                break
-
-        title = "UNKNOWN TITLE"
-        if self.html_u:
-            tmatch = re.search(regexp, self.html_u, re.DOTALL | re.IGNORECASE)
-            if tmatch:
-                title = tmatch.group(1).strip()
-                title = unescape_XML(title)
-                title = sentence_case(title)
-                title = smart_punctuation_to_ascii(title)
-        return title
 
     def get_org(self):
         from urllib.parse import urlparse

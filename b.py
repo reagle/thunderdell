@@ -1487,7 +1487,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument(f"--user-data-dir={HOME}/.config/selenium")
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     driver = webdriver.Chrome(options=options)
     driver.get('http://www.facebook.com')
     try:
@@ -1514,7 +1514,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, ATTACH_XPATH)))
     driver.find_element_by_xpath("//button[contains(.,'Share')]").click()
-    time.sleep(8)
+    time.sleep(10)
     driver.quit()
 
 

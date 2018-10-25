@@ -1369,7 +1369,7 @@ def parse_names(names):
                     von = chunks.pop(-1)
             first = ' '.join(chunks)
         else:
-            last = chunks[0]
+            last = name
 
         names_p.append((first, von, last, jr))
     return names_p

@@ -35,13 +35,14 @@ def open_query(isbn):
     """Query the ISBN Web service; returns string"""
     # https://openlibrary.org/dev/docs/api/books
     # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=data&format=json
+    # service has gone wonky https://twitter.com/jmreagle/status/1069700295515664385
 
     if isbn.startswith('isbn:'):
         isbn = isbn[5:]
     isbn = isbn.replace('-', '')
     info(f'isbn = {isbn}')
     URL = (f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}'
-        '&jscmd=data&format=json')
+            '&jscmd=data&format=json')
     info(f'url = {URL}')
     r = requests.get(URL)
     returned_content_type = r.headers['content-type']

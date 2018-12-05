@@ -9,6 +9,8 @@
 ''' Return bibliographic data for a given a ISBN.
 '''
 
+from datetime import datetime
+from dateutil.parser import parse
 import json
 import logging
 import pprint
@@ -34,15 +36,14 @@ def query(isbn):
 def open_query(isbn):
     """Query the ISBN Web service; returns string"""
     # https://openlibrary.org/dev/docs/api/books
-    # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=data&format=json
-    # service has gone wonky https://twitter.com/jmreagle/status/1069700295515664385
+    # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=details&format=json
 
     if isbn.startswith('isbn:'):
         isbn = isbn[5:]
     isbn = isbn.replace('-', '')
     info(f'isbn = {isbn}')
     URL = (f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}'
-            '&jscmd=data&format=json')
+            '&jscmd=details&format=json')
     info(f'url = {URL}')
     r = requests.get(URL)
     returned_content_type = r.headers['content-type']
@@ -52,17 +53,19 @@ def open_query(isbn):
             json_bib = {'isbn': str(isbn)}
             json_result = json.loads(r.content)
             json_vol = json_result[f'ISBN:{isbn}']
-            for key, value in list(json_vol.items()):
+            json_details = json_vol['details']
+            for key, value in list(json_details.items()):
                 if key == 'authors':
-                    pass
-                if key == 'by_statement':
-                    json_bib['author'] = json_vol[key].replace(' and', ',')
+                    json_bib['author'] = ', '.join(
+                        [author['name'] for
+                         author in json_details['authors']])
                 elif key == 'publishers':
-                    json_bib['publisher'] = json_vol[key][0]['name']
+                    json_bib['publisher'] = json_details[key][0]
                 elif key == 'publish_places':
-                    json_bib['address'] = json_vol[key][0]['name']
+                    json_bib['address'] = json_details[key][0]
                 elif key == 'publish_date':
-                    json_bib['date'] = json_vol[key]
+                    json_bib['date'] = parse(
+                        json_details[key]).strftime("%Y%m%d")
                 elif type(value) == str:
                     json_bib[key] = value.strip()
                     info("  value = '%s'" % json_bib[key])

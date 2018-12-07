@@ -1474,7 +1474,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
                                   media_ids=[response['media_id']])
         else:
             tweet = shrink_tweet(comment, title, url, tags)
-            # twitter.update_status(status=tweet)
+            twitter.update_status(status=tweet)
     except TwythonError as e:
         print(e)
     finally:
@@ -1492,7 +1492,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument(f"--user-data-dir={HOME}/.config/selenium")
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     driver = webdriver.Chrome(options=options)
     driver.get('http://www.facebook.com')
     try:
@@ -1518,8 +1518,8 @@ def yasn_publish(comment, title, subtitle, url, tags):
                     "//button[@title='Remove']")
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, ATTACH_XPATH)))
-    SHARE_XPATH
-    driver.find_element_by_xpath("//button//span[contains(.,'Share')]").click()
+    SHARE_XPATH = "//button//span[contains(.,'Share')]"
+    driver.find_element_by_xpath(SHARE_XPATH).click()
     time.sleep(10)
     driver.quit()
 

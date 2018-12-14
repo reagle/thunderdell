@@ -1492,7 +1492,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument(f"--user-data-dir={HOME}/.config/selenium")
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
     driver = webdriver.Chrome(options=options)
     driver.get('http://www.facebook.com')
     try:

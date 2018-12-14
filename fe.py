@@ -1011,7 +1011,7 @@ def emit_yaml_csl(entries):
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                info("short, field = '%s , %s'" % (short, field))
+                # info("short, field = '%s , %s'" % (short, field))
                 # skipped fields
                 if field in ('identifier', 'entry_type',
                              'day', 'month', 'year', 'issue'):

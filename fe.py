@@ -11,7 +11,6 @@
 
 # TODO
 
-from change_case import BORING_WORDS
 from collections import OrderedDict
 from html import escape
 import logging
@@ -24,7 +23,6 @@ import urllib.parse
 from urllib.parse import parse_qs  # simplify this import with above line
 import webbrowser
 from xml.etree.ElementTree import parse
-
 from web_little import unescape_XML, escape_XML
 
 log_level = 100  # default
@@ -44,6 +42,15 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants and mappings
 #################################################################
+
+ARTICLES = {'a', 'an', 'the'}
+CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
+SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
+                      'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
+JUNK_WORDS = {'', 're', }
+BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
+# BORING_WORDS used in identity_add_title() and bibformat_title()
+# Not imported from change_case because it's an expensive import
 
 MONTH2DIGIT = {
     'jan': '1', 'feb': '2', 'mar': '3',
@@ -295,7 +302,7 @@ def pretty_tabulate_dict(mydict, cols=3):
 
 
 def escape_latex(text):
-    text = text.replace('$', '\$') \
+    text = text.replace('$', r'\$') \
         .replace('&', r'\&') \
         .replace('%', r'\%') \
         .replace('#', r'\#') \
@@ -350,16 +357,16 @@ def identity_add_title(ident, title):
 
     # dbg("title = '%s'" % (title))
     suffix = ''
-    clean_title = title.replace('Wikipedia:', ''
-                       ).replace('Category:', ''
-                       ).replace('WikiEN-l', ''
-                       ).replace('Wikipedia-l', ''
-                       ).replace('Wiki-l', ''
-                       ).replace('Wiktionary-l', ''
-                       ).replace('Foundation-l', ''
-                       ).replace('Textbook-l', ''
-                       ).replace('.0', ''
-                       ).replace("'", "")
+    clean_title = title.replace('Wikipedia:', '') \
+        .replace('Category:', '') \
+        .replace('WikiEN-l', '') \
+        .replace('Wikipedia-l', '') \
+        .replace('Wiki-l', '') \
+        .replace('Wiktionary-l', '') \
+        .replace('Foundation-l', '') \
+        .replace('Textbook-l', '') \
+        .replace('.0', '') \
+        .replace("'", "")
 
     not_alphanum_pat = re.compile("[^a-zA-Z0-9']")
     title_words = not_alphanum_pat.split(clean_title.lower())
@@ -1134,7 +1141,7 @@ def emit_results(entries, query, results_file):
         else:
             locator = ''
             locator_pat = re.compile(
-                '^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)')
+                r'^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)')
             matches = locator_pat.match(text)
             if matches:
                 text = matches.group(2)
@@ -1616,6 +1623,7 @@ def _test_results():
     0
 
     """
+
 
 if __name__ == '__main__':
     import argparse  # http://docs.python.org/dev/library/argparse.html

@@ -33,6 +33,8 @@ SHORT_PREPOSITIONS = {'among', 'as', 'at', 'by', 'for', 'from', 'in',
                       'of', 'on', 'out', 'per', 'to', 'upon', 'with', }
 JUNK_WORDS = {'', 're', }
 BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
+# BORING_WORDS used in safe_capwords() and change_case()
+# not used by fe.py because it doesn't require slow wordset processing  below
 
 
 def create_wordset(file_name):
@@ -52,19 +54,21 @@ def create_wordset(file_name):
     return set()
 
 
-# TODO find some way not to use hardcoded path that works with import
+# TODO find alternative to hardcoded path that also works with import
 LIST_PATH = HOME + "/bin/fe/"
-PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
-custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
-wordset_nocase = set([word.lower() for word in wordset])  # used in is_proper_noun
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
-# remove if in both
+# wordset_nocase used in is_proper_noun()
+wordset_nocase = set([word.lower() for word in wordset])
+
+PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
+custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset_proper_nouns = set([word for word in wordset_upper if
                            word.lower() not in wordset_lower])
-proper_nouns = custom_proper_nouns | wordset_proper_nouns  # used in safe_lower and is_proper_noun
+# proper_nouns used in safe_lower() and is_proper_noun()
+proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
 
 def safe_capwords(text):
@@ -230,10 +234,10 @@ def change_case(text, case_direction='sentence'):
 
             new_text.append(new_word)
 
-    return ' '.join(new_text[1:]
-                    ).replace(' : ', ': '
-                    ).replace(' . ', '. '
-                    ).replace(' ? ', '? ')
+    return ' '.join(new_text[1:]) \
+        .replace(' : ', ': ') \
+        .replace(' . ', '. ') \
+        .replace(' ? ', '? ')
 
 
 def test(change_case, case_direction):

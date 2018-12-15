@@ -1351,6 +1351,7 @@ def parse_names(names):
     # info("names = '%s'" % (names))
     names_split = names.split(',')
     for name in names_split:
+        name = name.strip()
         # info("name = '%s'" % (name))
         first = last = von = jr = ''
         chunks = name.strip().split()

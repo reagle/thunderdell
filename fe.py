@@ -729,28 +729,10 @@ def bibformat_title(title):
     """
     cased_title = quoted_title = []
 
-    articles = {'a', 'an', 'the'}
-    conjunctions = {'and', 'but', 'for', 'or', 'nor'}
-    contractions = {'s', 't', 've', 're'}   # following apostrophe
-    others = set()
-    prepositions = {
-        'aboard', 'about', 'above', 'across', 'after', 'against', 'along',
-        'among', 'around', 'as', 'at', 'before', 'behind', 'below',
-        'beneath', 'beside', '', 'between', 'beyond', 'but', 'by',
-        'concerning', 'despite', 'down', 'during', 'except', 'for',
-        'from', 'in', '', 'into', 'like', 'near',
-        'of', 'off', 'on', 'onto', 'out', 'outside', 'over',
-        'past', 'per', 'regarding', 'since',
-        'through', 'throughout', 'till', 'to', 'toward',
-        'under', 'underneath', 'until', 'up', '', 'upon', 'versus',
-        'with', 'within', 'without'
-    }
-    words2ignore = articles | conjunctions | contractions | others \
-        | prepositions
-    words2protect = {'vs.', 'oldid'}
+    WORDS2PROTECT = {'vs.', 'oldid'}
 
-    whitespace_pat = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
-    words = whitespace_pat.split(title)
+    WHITESPACE_PAT = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
+    words = WHITESPACE_PAT.split(title)
 
     chunk_pat = re.compile(r"""([-:])""", re.UNICODE)
 
@@ -771,10 +753,10 @@ def bibformat_title(title):
             if not (word[0].isalpha()):
                 # info("not (word[0].isalpha())")
                 cased_title.append(word)
-            elif word in words2ignore:
-                # info("word in words2ignore")
+            elif word in BORING_WORDS:  # imported from change_case.py
+                # info("word in BORING_WORDS")
                 cased_title.append(word)
-            elif (word in words2protect):
+            elif (word in WORDS2PROTECT):
                 # info("protecting lower '%s'" % (word))
                 cased_title.append(f'{{word}}')
             elif (word[0].isupper()):

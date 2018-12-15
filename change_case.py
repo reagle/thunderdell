@@ -58,13 +58,13 @@ PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset = create_wordset(WORD_LIST_FN)
-wordset_nocase = set([word.lower() for word in wordset])
+wordset_nocase = set([word.lower() for word in wordset])  # used in is_proper_noun
 wordset_lower = set([word for word in wordset if word[0].islower()])
 wordset_upper = set([word for word in wordset if word[0].isupper()])
 # remove if in both
 wordset_proper_nouns = set([word for word in wordset_upper if
                            word.lower() not in wordset_lower])
-proper_nouns = custom_proper_nouns | wordset_proper_nouns
+proper_nouns = custom_proper_nouns | wordset_proper_nouns  # used in safe_lower and is_proper_noun
 
 
 def safe_capwords(text):
@@ -248,10 +248,11 @@ def test(change_case, case_direction):
         'New Theorem Proved by Poincaré',
         'Wikipedia goes 3D',
         'Wikipedia trumps Britannica',
-        "Glycogen: A Trojan Horse for Neurons",
-        "Characterization of the SKN7 Ortholog of Aspergillus Fumigatus",
-        "Wikipedia:Attribution",
-        "Why Do People Write for Wikipedia? Incentives to Contribute",
+        "Wikirage: What's hot now on Wikipedia",
+        'Glycogen: A Trojan Horse for Neurons',
+        'Characterization of the SKN7 Ortholog of Aspergillus Fumigatus',
+        'Wikipedia:Attribution',
+        'Why Do People Write for Wikipedia? Incentives to Contribute',
         '<span class="pplri7t-x-x-120">Wikipedia:WikiLove</span>',
         'The Altruism Question: Toward a Social-Psychological Answer',
         '  Human Services:  Cambridge War Memorial Recreation Center',

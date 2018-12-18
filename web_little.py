@@ -66,7 +66,7 @@ def unescape_XML(text):  # .0937s 4.11%
             except KeyError:
                 pass
         return text  # leave as is
-    return re.sub("&#?\w+;", fixup, text)
+    return re.sub(r"&#?\w+;", fixup, text)
 
 
 def get_HTML(

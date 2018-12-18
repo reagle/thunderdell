@@ -368,8 +368,8 @@ def identity_add_title(ident, title):
         .replace('.0', '') \
         .replace("'", "")
 
-    not_alphanum_pat = re.compile("[^a-zA-Z0-9']")
-    title_words = not_alphanum_pat.split(clean_title.lower())
+    NOT_ALPHANUM_PAT = re.compile("[^a-zA-Z0-9']")
+    title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())
 
     if len(title_words) == 1:
         suffix = title_words[0][0] + title_words[0][-2] + title_words[0][-1]
@@ -741,14 +741,14 @@ def bibformat_title(title):
     WHITESPACE_PAT = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
     words = WHITESPACE_PAT.split(title)
 
-    chunk_pat = re.compile(r"""([-:])""", re.UNICODE)
+    CHUNK_PAT = re.compile(r"""([-:])""", re.UNICODE)
 
     def my_title(text):
         '''title case after some chars, but not ['.] like .title()'''
 
         text_list = list(text)
         text_list[0] = text_list[0].upper()
-        for chunk in chunk_pat.finditer(text):
+        for chunk in CHUNK_PAT.finditer(text):
             index = chunk.start()
             if index + 1 < len(text_list):
                 text_list[index + 1] = text_list[index + 1].upper()
@@ -972,8 +972,8 @@ def emit_yaml_csl(entries):
         >>> yaml_protect_case("The iKettle – a world off its rocker")
         "The <span class='nocase'>iKettle</span> – a world off its rocker"
         """
-        protect_pat = re.compile(r'\b([a-z]+[A-Z\.]\S+)\b')
-        return protect_pat.sub(r"<span class='nocase'>\1</span>", title)
+        PROTECT_PAT = re.compile(r'\b([a-z]+[A-Z\.]\S+)\b')
+        return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
@@ -1140,9 +1140,9 @@ def emit_results(entries, query, results_file):
             cite = ''
         else:
             locator = ''
-            locator_pat = re.compile(
+            LOCATOR_PAT = re.compile(
                 r'^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)')
-            matches = locator_pat.match(text)
+            matches = LOCATOR_PAT.match(text)
             if matches:
                 text = matches.group(2)
                 locator = matches.group(1)

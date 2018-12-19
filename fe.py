@@ -57,7 +57,7 @@ MONTH2DIGIT = {
     'apr': '4', 'may': '5', 'jun': '6',
     'jul': '7', 'aug': '8', 'sep': '9',
     'oct': '10', 'nov': '11', 'dec': '12'}
-DIGIT2MONTH = dict((v, k) for k, v in MONTH2DIGIT.items())
+DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
 
 
 # happy to keep using bibtex:address alias of bibtex:location
@@ -121,11 +121,9 @@ BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
 BIB_SHORTCUTS.update(CSL_SHORTCUTS)
 BIB_SHORTCUTS_ITEMS = sorted(BIB_SHORTCUTS.items(), key=lambda t: t[1])
 
-BIB_FIELDS = dict([(field, short) for short, field in
-                  BIB_SHORTCUTS.items()])
+BIB_FIELDS = {field: short for (short, field) in BIB_SHORTCUTS.items()}
 
-CSL_FIELDS = dict([(field, short) for short, field in
-                  CSL_SHORTCUTS.items()])
+CSL_FIELDS = {field: short for (short, field) in CSL_SHORTCUTS.items()}
 
 CONTAINERS = list(CSL_SHORTCUTS.values())
 CONTAINERS.append('organization')
@@ -1405,7 +1403,7 @@ def walk_freeplane(node, mm_file, entries, links):
     entry = {}
 
     if useLXML is False:
-        parent_map = dict((c, p) for p in node.getiterator() for c in p)
+        parent_map = {c: p for p in node.getiterator() for c in p}
         def get_parent(node):
             return parent_map[node]
     elif useLXML is True:
@@ -1720,7 +1718,7 @@ if __name__ == '__main__':
 
     log_level = 100  # default
     if args.verbose >= 3:
-        log_level = logging.DEBUG       # 10
+        log_level = logging.DEBUG     # 10
     elif args.verbose == 2:
         log_level = logging.INFO      # 20
     elif args.verbose == 1:

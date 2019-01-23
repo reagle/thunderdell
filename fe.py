@@ -11,7 +11,6 @@
 
 # TODO
 
-from collections import OrderedDict
 from html import escape
 import logging
 import os
@@ -62,7 +61,7 @@ DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
 
 # happy to keep using bibtex:address alias of bibtex:location
 # keep t, ot, and et straight
-BIBLATEX_SHORTCUTS = OrderedDict([
+BIBLATEX_SHORTCUTS = dict([
     ('id', 'identifier'),
     ('a', 'address'),
     ('ad', 'addendum'),
@@ -104,7 +103,7 @@ BIBLATEX_SHORTCUTS = OrderedDict([
     ('c3', 'catalog'), ('c4', 'custom4'), ('c5', 'custom5'),
 ])
 
-CSL_SHORTCUTS = OrderedDict([
+CSL_SHORTCUTS = dict([
     # title (csl:container) fields that also give type
     # hints towards the richer csl:types
     ('cj', 'c_journal'),  # containing_journal
@@ -189,7 +188,7 @@ CSL_TYPES = {
 BIB_TYPES = BIBLATEX_TYPES | CSL_TYPES
 
 # http://reagle.org/joseph/2013/08/bib-mapping.html
-CSL_BIBLATEX_TYPE_MAP = OrderedDict([
+CSL_BIBLATEX_TYPE_MAP = dict([
     # ordering is important so in the reverse mapping online => webpage
     ('article-journal',         'article'),
     ('article-magazine',        'article'),
@@ -210,10 +209,10 @@ CSL_BIBLATEX_TYPE_MAP = OrderedDict([
     ('webpage',                 'online'),
 ])
 
-BIBLATEX_CSL_TYPE_MAP = OrderedDict((v, k) for k, v in
+BIBLATEX_CSL_TYPE_MAP = dict((v, k) for k, v in
                                     list(CSL_BIBLATEX_TYPE_MAP.items()))
 
-BIBLATEX_CSL_FIELD_MAP = OrderedDict([
+BIBLATEX_CSL_FIELD_MAP = dict([
     ('address',        'publisher-place'),
     ('annotation',     'abstract'),
     ('booktitle',      'container-title'),
@@ -237,12 +236,12 @@ BIBLATEX_CSL_FIELD_MAP = OrderedDict([
     ('catalog',        'call-number'),
 ])
 
-CSL_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
+CSL_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
                                      list(BIBLATEX_CSL_FIELD_MAP.items()))
 
 
 # https://en.wikipedia.org/wiki/Template:Citation
-BIBLATEX_WP_FIELD_MAP = OrderedDict([
+BIBLATEX_WP_FIELD_MAP = dict([
     ('c_journal',       'journal'),
     ('c_magazine',      'magazine'),
     ('c_newspaper',     'newspaper'),
@@ -257,7 +256,7 @@ BIBLATEX_WP_FIELD_MAP = OrderedDict([
     ('origdate',        'orig-year'),
 ])
 
-WP_BIBLATEX_FIELD_MAP = OrderedDict((v, k) for k, v in
+WP_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
                                     list(BIBLATEX_WP_FIELD_MAP.items()))
 
 
@@ -1501,11 +1500,11 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 
 
 def build_bib(file_name, output):
-    """Collect the files to walk and invoke functions to build a bib"""
+    """Parse and process files, including new ones encountered if chasing"""
 
     links = set()          # set of other files encountered in the mind map
     done = set()           # set of files processed, kept to prevent loops
-    entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
+    entries = dict()       # dict of {id : {entry}}, by insertion order
     mm_files = set()
     mm_files.add(file_name)  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)

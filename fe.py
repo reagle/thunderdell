@@ -1503,17 +1503,15 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 def build_bib(file_name, output):
     """Collect the files to walk and invoke functions to build a bib"""
 
-    links = []          # list of other files encountered in the mind map
-    done = []           # list of files processed, kept to prevent loops
+    links = set()          # set of other files encountered in the mind map
+    done = set()           # set of files processed, kept to prevent loops
     entries = OrderedDict()  # dict of {id : {entry}}, by insertion order
-    mm_files = []
-    mm_files.append(file_name)  # list of file encountered (e.g., chase option)
+    mm_files = set()
+    mm_files.add(file_name)  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)
     while mm_files:
-        mm_file = mm_files.pop()
-        if mm_file in done:
-            continue
-        # dbg("   processing %s" % mm_file)
+        mm_file = os.path.abspath(mm_files.pop())
+        # dbg("   parsing %s" % mm_file)
         try:
             doc = parse(mm_file).getroot()
         except IOError as err:
@@ -1528,9 +1526,10 @@ def build_bib(file_name, output):
                 if link not in done:
                     if not any([word in link for word in (
                                'syllabus', 'readings')]):  # 'old'
-                        # dbg("    placing %s in mm_files" % link)
-                        mm_files.append(link)
-        done.append(os.path.abspath(mm_file))
+                        # dbg("    mm_files.add %s" % link)
+                        mm_files.add(link)
+        # dbg("     done.add %s" % os.path.abspath(mm_file))
+        done.add(mm_file)
 
     if args.query:
         results_file_name = f'{TMP_DIR}query-thunderdell.html'

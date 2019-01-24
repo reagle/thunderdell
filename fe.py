@@ -41,6 +41,12 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants and mappings
 #################################################################
+# fmt: off
+
+PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
+             "van", "van den", "van der", "von",
+             "Van", "Von"}
+SUFFIXES = {"Jr.", "Sr.", "II", "III", "IV"}
 
 ARTICLES = {'a', 'an', 'the'}
 CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
@@ -279,7 +285,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
-
+# fmt: on
 #################################################################
 # Utility functions
 #################################################################
@@ -407,9 +413,12 @@ def get_ident(entry, entries, delim=""):
     last_names = []
     for first, von, last, jr in entry['author']:
         last_names.append(von.replace(' ', '') + last.replace(' ', ''))
-    if len(last_names) == 1: name_part = last_names[0]
-    elif len(last_names) == 2: name_part = delim.join(last_names[0:2])
-    elif len(last_names) == 3: name_part = delim.join(last_names[0:3])
+    if len(last_names) == 1:
+        name_part = last_names[0]
+    elif len(last_names) == 2:
+        name_part = delim.join(last_names[0:2])
+    elif len(last_names) == 3:
+        name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
         name_part = last_names[0] + 'Etal'
 
@@ -1328,12 +1337,8 @@ def parse_names(names):
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
     """
-    PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
-                 "van", "van den", "van der", "von",
-                 "Van", "Von"}
-    SUFFIXES = {"Jr.", "Sr.", "II", "III", "IV"}
-    names_p = []
 
+    names_p = []
     # info("names = '%s'" % (names))
     names_split = names.split(',')
     for name in names_split:
@@ -1506,7 +1511,7 @@ def build_bib(file_name, output):
     done = []           # list of files processed, kept to prevent loops
     entries = dict()    # dict of {id : {entry}}, by insertion order
     mm_files = [file_name,]  # list of file encountered (e.g., chase option)
-    # dbg("   mm_files = %s" % mm_files)
+    dbg("   mm_files = %s" % mm_files)
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
         # dbg("   parsing %s" % mm_file)
@@ -1517,18 +1522,17 @@ def build_bib(file_name, output):
             continue
         # dbg("    successfully parsed %s" % mm_file)
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+        # dbg("    done.appending %s" % os.path.abspath(mm_file))
+        done.append(mm_file)
         if args.chase:
             for link in links:
                 link = os.path.abspath(
                     os.path.dirname(mm_file) + '/' + link)
-                if link not in done:
+                if link not in done and link not in mm_files:
                     if not any([word in link for word in (
                                'syllabus', 'readings')]):  # 'old'
-                        # dbg("    mm_files.append %s" % link)
-                        if 'link' not in mm_files:
-                            mm_files.append(link)
-        # dbg("     done.append %s" % os.path.abspath(mm_file))
-        done.append(mm_file)
+                        # dbg("    mm_files.appending %s" % link)
+                        mm_files.append(link)
 
     if args.query:
         results_file_name = f'{TMP_DIR}query-thunderdell.html'

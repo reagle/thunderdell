@@ -1502,11 +1502,10 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
 
-    links = set()          # set of other files encountered in the mind map
-    done = set()           # set of files processed, kept to prevent loops
-    entries = dict()       # dict of {id : {entry}}, by insertion order
-    mm_files = set()
-    mm_files.add(file_name)  # list of file encountered (e.g., chase option)
+    links = []          # list of other files encountered in the mind map
+    done = []           # list of files processed, kept to prevent loops
+    entries = dict()    # dict of {id : {entry}}, by insertion order
+    mm_files = [file_name,]  # list of file encountered (e.g., chase option)
     # dbg("   mm_files = %s" % mm_files)
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
@@ -1525,10 +1524,11 @@ def build_bib(file_name, output):
                 if link not in done:
                     if not any([word in link for word in (
                                'syllabus', 'readings')]):  # 'old'
-                        # dbg("    mm_files.add %s" % link)
-                        mm_files.add(link)
-        # dbg("     done.add %s" % os.path.abspath(mm_file))
-        done.add(mm_file)
+                        # dbg("    mm_files.append %s" % link)
+                        if 'link' not in mm_files:
+                            mm_files.append(link)
+        # dbg("     done.append %s" % os.path.abspath(mm_file))
+        done.append(mm_file)
 
     if args.query:
         results_file_name = f'{TMP_DIR}query-thunderdell.html'

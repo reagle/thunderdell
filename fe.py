@@ -19,12 +19,12 @@ from subprocess import call
 import sys
 import unicodedata
 import urllib.parse
-from urllib.parse import parse_qs  # simplify this import with above line
+from urllib.parse import parse_qs
 import webbrowser
 from xml.etree.ElementTree import parse
 from web_little import unescape_XML, escape_XML
 
-log_level = 100  # default
+log_level = 100
 critical = logging.critical
 info = logging.info
 dbg = logging.debug
@@ -41,6 +41,12 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants and mappings
 #################################################################
+# fmt: off yapf: disable
+
+PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
+             "van", "van den", "van der", "von",
+             "Van", "Von"}
+SUFFIXES = {"Jr.", "Sr.", "II", "III", "IV"}
 
 ARTICLES = {'a', 'an', 'the'}
 CONJUNCTIONS = {'and', 'but', 'nor', 'or'}
@@ -257,8 +263,7 @@ BIBLATEX_WP_FIELD_MAP = dict([
 ])
 
 WP_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
-                                    list(BIBLATEX_WP_FIELD_MAP.items()))
-
+                             list(BIBLATEX_WP_FIELD_MAP.items()))
 
 BIBTEX_FIELDS = {
     'address', 'annote', 'author', 'booktitle', 'chapter',
@@ -279,7 +284,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
-
+# fmt: on yapf: enable
 #################################################################
 # Utility functions
 #################################################################
@@ -407,9 +412,12 @@ def get_ident(entry, entries, delim=""):
     last_names = []
     for first, von, last, jr in entry['author']:
         last_names.append(von.replace(' ', '') + last.replace(' ', ''))
-    if len(last_names) == 1: name_part = last_names[0]
-    elif len(last_names) == 2: name_part = delim.join(last_names[0:2])
-    elif len(last_names) == 3: name_part = delim.join(last_names[0:3])
+    if len(last_names) == 1:
+        name_part = last_names[0]
+    elif len(last_names) == 2:
+        name_part = delim.join(last_names[0:2])
+    elif len(last_names) == 3:
+        name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
         name_part = last_names[0] + 'Etal'
 
@@ -587,6 +595,7 @@ def create_bibtex_author(names):
     return full_names
 
 
+# fmt: off  yapf: disable
 def guess_bibtex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -609,7 +618,6 @@ def guess_bibtex_type(entry):
             print(f"Unknown entry_type = {e_t}")
             sys.exit()
         return e_t
-
     if 'entry_type' in entry:         # already has a type
         return entry['entry_type']
     else:
@@ -705,20 +713,8 @@ def guess_csl_type(entry):
         elif 'url' in entry:                et = 'webpage'
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
-
-    # # APA specific strings for CSL
-    # # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
-    # if et == 'post':
-    #     medium = 'Online forum comment'
-    # elif et == 'post-weblog':
-    #     medium = 'Web log message'
-    # if 'url' in entry:
-    #     if any((site in entry['url'] for site in [
-    #             'youtube.com', 'vimeo.com'])):
-    #         medium = 'Video file'
-
     return et, genre, medium
-
+# fmt: on  yapf: enable
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -1328,12 +1324,8 @@ def parse_names(names):
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
     """
-    PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
-                 "van", "van den", "van der", "von",
-                 "Van", "Von"}
-    SUFFIXES = {"Jr.", "Sr.", "II", "III", "IV"}
-    names_p = []
 
+    names_p = []
     # info("names = '%s'" % (names))
     names_split = names.split(',')
     for name in names_split:
@@ -1506,7 +1498,7 @@ def build_bib(file_name, output):
     done = []           # list of files processed, kept to prevent loops
     entries = dict()    # dict of {id : {entry}}, by insertion order
     mm_files = [file_name,]  # list of file encountered (e.g., chase option)
-    # dbg("   mm_files = %s" % mm_files)
+    dbg("   mm_files = %s" % mm_files)
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
         # dbg("   parsing %s" % mm_file)
@@ -1517,18 +1509,17 @@ def build_bib(file_name, output):
             continue
         # dbg("    successfully parsed %s" % mm_file)
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+        # dbg("    done.appending %s" % os.path.abspath(mm_file))
+        done.append(mm_file)
         if args.chase:
             for link in links:
                 link = os.path.abspath(
                     os.path.dirname(mm_file) + '/' + link)
-                if link not in done:
+                if link not in done and link not in mm_files:
                     if not any([word in link for word in (
                                'syllabus', 'readings')]):  # 'old'
-                        # dbg("    mm_files.append %s" % link)
-                        if 'link' not in mm_files:
-                            mm_files.append(link)
-        # dbg("     done.append %s" % os.path.abspath(mm_file))
-        done.append(mm_file)
+                        # dbg("    mm_files.appending %s" % link)
+                        mm_files.append(link)
 
     if args.query:
         results_file_name = f'{TMP_DIR}query-thunderdell.html'

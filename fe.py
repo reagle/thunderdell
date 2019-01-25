@@ -41,7 +41,7 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants and mappings
 #################################################################
-# fmt: off
+# fmt: off yapf: disable
 
 PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
              "van", "van den", "van der", "von",
@@ -285,7 +285,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
-# fmt: on
+# fmt: on yapf: enable
 #################################################################
 # Utility functions
 #################################################################
@@ -596,6 +596,7 @@ def create_bibtex_author(names):
     return full_names
 
 
+# fmt: off  yapf: disable
 def guess_bibtex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -618,7 +619,6 @@ def guess_bibtex_type(entry):
             print(f"Unknown entry_type = {e_t}")
             sys.exit()
         return e_t
-
     if 'entry_type' in entry:         # already has a type
         return entry['entry_type']
     else:
@@ -714,20 +714,8 @@ def guess_csl_type(entry):
         elif 'url' in entry:                et = 'webpage'
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
-
-    # # APA specific strings for CSL
-    # # http://sourceforge.net/p/xbiblio/mailman/message/34324611/
-    # if et == 'post':
-    #     medium = 'Online forum comment'
-    # elif et == 'post-weblog':
-    #     medium = 'Web log message'
-    # if 'url' in entry:
-    #     if any((site in entry['url'] for site in [
-    #             'youtube.com', 'vimeo.com'])):
-    #         medium = 'Video file'
-
     return et, genre, medium
-
+# fmt: on  yapf: enable
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns

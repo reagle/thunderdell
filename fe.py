@@ -10,7 +10,10 @@
 """Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
+# This version parses some XML file in parallel and is TWICE as slow.
+# Multiprocessing is NOT worth it.
 
+from concurrent import futures
 from html import escape
 import logging
 import os
@@ -1491,8 +1494,6 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
 
-from concurrent import futures
-
 
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
@@ -1510,12 +1511,6 @@ def build_bib(file_name, output):
             mm_file = os.path.abspath(mm_files.pop(0))
             dbg("   doc[1]        %s" % doc[0].attrib)
             dbg("   processing %s" % mm_file)
-            # try:
-            #     doc = parse(mm_file).getroot()
-            # except IOError as err:
-            #     # dbg("    failed to parse %s because of %s" % (mm_file, err))
-            #     continue
-            # # dbg("    successfully parsed %s" % mm_file)
             entries, links = walk_freeplane(doc, mm_file, entries, links=[])
             dbg("    done.appending %s" % os.path.abspath(mm_file))
             done.append(mm_file)

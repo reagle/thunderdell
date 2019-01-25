@@ -1491,6 +1491,8 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
 
+from concurrent import futures
+
 
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
@@ -1501,26 +1503,31 @@ def build_bib(file_name, output):
     mm_files = [file_name,]  # list of file encountered (e.g., chase option)
     dbg("   mm_files = %s" % mm_files)
     while mm_files:
-        mm_file = os.path.abspath(mm_files.pop())
-        # dbg("   parsing %s" % mm_file)
-        try:
-            doc = parse(mm_file).getroot()
-        except IOError as err:
-            # dbg("    failed to parse %s because of %s" % (mm_file, err))
-            continue
-        # dbg("    successfully parsed %s" % mm_file)
-        entries, links = walk_freeplane(doc, mm_file, entries, links=[])
-        # dbg("    done.appending %s" % os.path.abspath(mm_file))
-        done.append(mm_file)
-        if args.chase:
-            for link in links:
-                link = os.path.abspath(
-                    os.path.dirname(mm_file) + '/' + link)
-                if link not in done and link not in mm_files:
-                    if not any([word in link for word in (
-                               'syllabus', 'readings')]):  # 'old'
-                        # dbg("    mm_files.appending %s" % link)
-                        mm_files.append(link)
+        with futures.ProcessPoolExecutor() as executor:
+            trees = executor.map(parse, mm_files)
+        for tree in trees:
+            doc = tree.getroot()
+            mm_file = os.path.abspath(mm_files.pop(0))
+            dbg("   doc[1]        %s" % doc[0].attrib)
+            dbg("   processing %s" % mm_file)
+            # try:
+            #     doc = parse(mm_file).getroot()
+            # except IOError as err:
+            #     # dbg("    failed to parse %s because of %s" % (mm_file, err))
+            #     continue
+            # # dbg("    successfully parsed %s" % mm_file)
+            entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+            dbg("    done.appending %s" % os.path.abspath(mm_file))
+            done.append(mm_file)
+            if args.chase:
+                for link in links:
+                    link = os.path.abspath(
+                        os.path.dirname(mm_file) + '/' + link)
+                    if link not in done and link not in mm_files:
+                        if not any([word in link for word in (
+                                   'syllabus', 'readings')]):  # 'old'
+                            dbg("    mm_files.appending %s" % link)
+                            mm_files.append(link)
 
     if args.query:
         results_file_name = f'{TMP_DIR}query-thunderdell.html'

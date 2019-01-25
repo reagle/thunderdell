@@ -374,7 +374,7 @@ def identity_add_title(ident, title):
     title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())
 
     if len(title_words) == 1:
-        suffix = title_words[0][0] + title_words[0][-2] + title_words[0][-1]
+        suffix = f'{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}'
     else:
         suffix = ''.join([word[0] for word in title_words
                           if word not in BORING_WORDS])

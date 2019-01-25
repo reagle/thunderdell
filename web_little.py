@@ -78,7 +78,7 @@ def get_HTML(
 
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
     r = requests.get(url, headers=agent_headers, verify=True)
-    info("r.headers['content-type'] = %s" % r.headers['content-type'])
+    info("r.headers['content-type'] = {r.headers['content-type']}")
     if 'html' in r.headers['content-type']:
         HTML_bytes = r.content
     else:
@@ -98,6 +98,4 @@ def get_text(url):
     '''Textual version of url'''
 
     import os
-
-    return str(os.popen('w3m -O utf8 -cols 10000 '
-                        '-dump "%s"' % url).read())
+    return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())

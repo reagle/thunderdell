@@ -41,7 +41,7 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants and mappings
 #################################################################
-# fmt: off yapf: disable
+# yapf: disable
 
 PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
              "van", "van den", "van der", "von",
@@ -216,7 +216,7 @@ CSL_BIBLATEX_TYPE_MAP = dict([
 ])
 
 BIBLATEX_CSL_TYPE_MAP = dict((v, k) for k, v in
-                                    list(CSL_BIBLATEX_TYPE_MAP.items()))
+                             list(CSL_BIBLATEX_TYPE_MAP.items()))
 
 BIBLATEX_CSL_FIELD_MAP = dict([
     ('address',        'publisher-place'),
@@ -243,7 +243,7 @@ BIBLATEX_CSL_FIELD_MAP = dict([
 ])
 
 CSL_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
-                                     list(BIBLATEX_CSL_FIELD_MAP.items()))
+                              list(BIBLATEX_CSL_FIELD_MAP.items()))
 
 
 # https://en.wikipedia.org/wiki/Template:Citation
@@ -284,7 +284,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
-# fmt: on yapf: enable
+# yapf: enable
 #################################################################
 # Utility functions
 #################################################################
@@ -356,8 +356,7 @@ def identity_add_title(ident, title):
     'Wikipedia 2008npv'
 
     """
-
-    # dbg("title = '%s'" % (title))
+    # dbg(f"title = '{title}'")
     suffix = ''
     clean_title = title.replace('Wikipedia:', '') \
         .replace('Category:', '') \
@@ -374,7 +373,7 @@ def identity_add_title(ident, title):
     title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())
 
     if len(title_words) == 1:
-        suffix = title_words[0][0] + title_words[0][-2] + title_words[0][-1]
+        suffix = f'{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}'
     else:
         suffix = ''.join([word[0] for word in title_words
                           if word not in BORING_WORDS])
@@ -395,14 +394,14 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:    # if it still collides
-        # dbg("\t trying     %s crash w/ %s"% (ident, entries[ident]['title']))
+        # dbg(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
             ident = ident[0:-1] + str(suffix)
         else:
             ident += '1'
-        # dbg("\t yielded    %s" % ident)
+        # dbg(f'\t yielded    {ident}')
     return ident
 
 
@@ -425,7 +424,7 @@ def get_ident(entry, entries, delim=""):
         entry['year'] = '0000'
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['year']))
-    # info("ident = %s '%s'" % (type(ident), ident))
+    # info(f"ident = {type(ident)} '{ident}'")
     ident = ident.replace(
         ':', '').replace(  # not permitted in xml name/id attributes
         "'", "").replace(  # punctuation
@@ -433,7 +432,7 @@ def get_ident(entry, entries, delim=""):
         '@', '').replace(  # '@' citation designator
         '<strong>', '').replace(  # added by walk_freeplane.query_highlight
         '</strong>', '')
-    # info("ident = %s '%s'" % (type(ident), ident))
+    # info(f"ident = {type(ident)} '{ident}'")
     ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
     if ident[0].isdigit():        # pandoc forbids keys starting with digits
         ident = 'a' + ident
@@ -441,7 +440,7 @@ def get_ident(entry, entries, delim=""):
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
         ident = identity_increment(ident, entries)
-    # info("ident = %s '%s' in %s" % (type(ident), ident, entry['_mm_file']))
+    # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
 
 
@@ -595,7 +594,7 @@ def create_bibtex_author(names):
     return full_names
 
 
-# fmt: off  yapf: disable
+# yapf: disable
 def guess_bibtex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -677,7 +676,7 @@ def guess_csl_type(entry):
             print((f"Unknown entry_type = {et}"))
             sys.exit()
     et = 'no-type'
-    # info("looking at containers for %s" % entry)
+    # info(f"looking at containers for {entry}")
     if 'c_web' in entry:                et = 'webpage'
     elif 'c_blog' in entry:             et = 'post-weblog'
     elif 'c_newspaper' in entry:        et = 'article-newspaper'
@@ -714,7 +713,8 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'year' not in entry:           et = 'manuscript'
     return et, genre, medium
-# fmt: on  yapf: enable
+# yapf: enable
+
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -749,7 +749,7 @@ def bibformat_title(title):
 
     for word in words:
         if len(word) > 0:
-            # info("word = '%s'" % (word))
+            # info(f"word = '{word}'")
             if not (word[0].isalpha()):
                 # info("not (word[0].isalpha())")
                 cased_title.append(word)
@@ -757,10 +757,10 @@ def bibformat_title(title):
                 # info("word in BORING_WORDS")
                 cased_title.append(word)
             elif (word in WORDS2PROTECT):
-                # info("protecting lower '%s'" % (word))
+                # info(f"protecting lower '{word}'")
                 cased_title.append(f'{{word}}')
             elif (word[0].isupper()):
-                # info("protecting title '%s'" % (word))
+                # info(f"protecting title '{word}'")
                 cased_title.append(f'{{{my_title(word)}}}')
             else:
                 # info("else nothing")
@@ -794,7 +794,7 @@ ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
-    # dbg("entries = '%s'" % (entries))
+    # dbg(f"entries = '{entries}'")
 
     for key, entry in sorted(entries.items()):
         entry_type = guess_bibtex_type(entry)
@@ -832,12 +832,12 @@ def emit_biblatex(entries):
         # if an edited collection, remove author and booktitle
         if all(f in entry for f in ('author', 'editor', 'title', 'booktitle')):
             if entry['author'] == entry['editor'] and \
-               entry['title'] == entry['booktitle']:
-                    del entry['author']
-                    del entry['booktitle']
+                   entry['title'] == entry['booktitle']:
+                del entry['author']
+                del entry['booktitle']
 
         # CSL type and field conversions
-        # info("entry = %s" % entry)
+        # info(f"entry = {entry}")
         for field in ('c_blog', 'c_web', 'c_forum'):
             if field in entry:
                 entry_type_copy = 'online'
@@ -862,7 +862,7 @@ def emit_biblatex(entries):
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
-                # critical("short, field = '%s , %s'" % (short, field))
+                # critical(f"short, field = '{short} , {field}'")
                 # skip these fields
                 value = entry[field]
                 if field in ('identifier', 'entry_type', 'ori_author'):
@@ -870,7 +870,7 @@ def emit_biblatex(entries):
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field in ('url'):
-                    # info("url = %s" % value)
+                    # info(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
                         continue
@@ -884,10 +884,10 @@ def emit_biblatex(entries):
 
                 # skip fields not in bibtex
                 if args.bibtex and field not in BIBTEX_FIELDS:
-                        continue
+                    continue
 
                 # if value not a proper string, make it so
-                # info("value = %s; type = %s" % (value, type(value)))
+                # info(f"value = {value}; type = {type(value)}")
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
                 if args.bibtex and field == 'month':
@@ -993,7 +993,7 @@ def emit_yaml_csl(entries):
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                # info("short, field = '%s , %s'" % (short, field))
+                # info(f"short, field = '{short} , {field}'")
                 # skipped fields
                 if field in ('identifier', 'entry_type',
                              'day', 'month', 'year', 'issue'):
@@ -1013,12 +1013,12 @@ def emit_yaml_csl(entries):
                     if value == '0000':
                         continue
                     if field == 'date':
-                        # info("value = '%s'" % (value))
+                        # info(f"value = '{value}'")
                         season = entry['issue'] if 'issue' in entry else None
                         args.outfd.write('  issued:\n')
                         emit_yaml_date(value, season)
                     if field == 'origdate':
-                        # info("value = '%s'" % (value))
+                        # info(f"value = '{value}'")
                         args.outfd.write('  original-date:\n')
                         emit_yaml_date(value)
                     if field == 'urldate':
@@ -1029,7 +1029,7 @@ def emit_yaml_csl(entries):
                 if field == 'urldate' and 'url' not in entry:
                     continue  # no url, no 'read on'
                 if field == 'url':
-                    # info("url = %s" % value)
+                    # info(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
                         continue
@@ -1054,13 +1054,13 @@ def emit_yaml_csl(entries):
                     #     f'  container-title: "Personal"\n')
                     continue
 
-                # info('field = %s' % (field))
+                # info(f"field = {field}")
                 if field in CONTAINERS:
                     field = 'container-title'
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    # info("bib2csl field FROM =  %s" % (field))
+                    # info(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    # info("bib2csl field TO   = %s" % (field))
+                    # info(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write('...\n')
 
@@ -1159,15 +1159,14 @@ def emit_results(entries, query, results_file):
                         locator = f', line {locator}'
                     else:
                         raise Exception(
-                            "unknown locator '%s' for '%s' in '%s'"
-                            % (entry['pagination'], entry['title'],
-                               entry['custom2']))
+                            f"unknown locator '{entry['pagination']}' "
+                            f"for '{entry['title']}' in '{entry['custom2']}'")
                 else:
                     if '-' in locator:
                         locator = f', pp. {locator}'
                     else:
                         locator = f', p. {locator}'
-            cite = ' [@%s%s]' % (entry['identifier'].replace(' ', ''), locator)
+            cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
 
         hypertext = text
 
@@ -1208,10 +1207,10 @@ def emit_results(entries, query, results_file):
         token = token.replace('<strong>', '').replace('</strong>', '')
         # urllib won't accept unicode
         token = urllib.parse.quote(token.encode('utf-8'))
-        # dbg("token = '%s' type = '%s'" % (token, type(token)))
+        # dbg(f"token = '{token}' type = '{type(token)}'")
         url_query = \
             escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
-        # dbg("url_query = '%s' type = '%s'" % (url_query, type(url_query)))
+        # dbg(f"url_query = '{url_query}' type = '{type(url_query)}'")
         return url_query
 
     def get_url_MM(file_name):
@@ -1223,9 +1222,9 @@ def emit_results(entries, query, results_file):
 
     def print_entry(identifier, author, date, title, url,
                     MM_mm_file, base_mm_file, spaces):
-
-        identifier_html = '<li class="identifier_html"><a href="%s">%s</a>' % (
-            get_url_query(identifier), identifier)
+        identifier_html = (
+            f'<li class="identifier_html">'
+            f'<a href="{get_url_query(identifier)}">{identifier}</a>')
         title_html = f'<a class="title_html"' \
             f' href="{get_url_query(title)}">{title}</a>'
         if url:
@@ -1234,9 +1233,9 @@ def emit_results(entries, query, results_file):
             link_html = ''
         from_html = f'from <a class="from_html" ' \
             f'href="{MM_mm_file}">{base_mm_file}</a>'
-        results_file.write('%s%s, <em>%s</em> %s [%s]'
-                           % (spaces, identifier_html, title_html, link_html,
-                              from_html))
+        results_file.write(
+            f"{spaces}{identifier_html}, "
+            f"<em>{title_html}</em> {link_html} [{from_html}]")
         results_file.write(
             f'{spaces}</li><!--identifier_html-->\n')
 
@@ -1326,18 +1325,18 @@ def parse_names(names):
     """
 
     names_p = []
-    # info("names = '%s'" % (names))
+    # info(f"names = '{names}'")
     names_split = names.split(',')
     for name in names_split:
         name = name.strip()
-        # info("name = '%s'" % (name))
+        # info(f"name = '{name}'")
         first = last = von = jr = ''
         chunks = name.strip().split()
 
         if 'van' in chunks and chunks[chunks.index('van') + 1] in (
                 'den', 'der'):
-                    chunks[chunks.index('van'):chunks.index('van') + 2] = \
-                        ['van ' + chunks[chunks.index('van') + 1]]
+            chunks[chunks.index('van'):chunks.index('van') + 2] = \
+                ['van ' + chunks[chunks.index('van') + 1]]
 
         if len(chunks) > 1:
             if chunks[-1] in SUFFIXES:
@@ -1395,9 +1394,12 @@ def walk_freeplane(node, mm_file, entries, links):
 
     if useLXML is False:
         parent_map = {c: p for p in node.getiterator() for c in p}
+
         def get_parent(node):
             return parent_map[node]
+
     elif useLXML is True:
+
         def get_parent(node):
             return node.getparent()
 
@@ -1497,17 +1499,17 @@ def build_bib(file_name, output):
     links = []          # list of other files encountered in the mind map
     done = []           # list of files processed, kept to prevent loops
     entries = dict()    # dict of {id : {entry}}, by insertion order
-    mm_files = [file_name,]  # list of file encountered (e.g., chase option)
-    dbg("   mm_files = %s" % mm_files)
+    mm_files = [file_name, ]  # list of file encountered (e.g., chase option)
+    # dbg(f"   mm_files = {mm_files}")
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
-        # dbg("   parsing %s" % mm_file)
+        # dbg(f"   parsing {mm_file}")
         try:
             doc = parse(mm_file).getroot()
         except IOError as err:
-            # dbg("    failed to parse %s because of %s" % (mm_file, err))
+            # dbg(f"    failed to parse {mm_file} because of {err}")
             continue
-        # dbg("    successfully parsed %s" % mm_file)
+        # dbg(f"    successfully parsed {mm_file}")
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
         # dbg("    done.appending %s" % os.path.abspath(mm_file))
         done.append(mm_file)
@@ -1518,7 +1520,7 @@ def build_bib(file_name, output):
                 if link not in done and link not in mm_files:
                     if not any([word in link for word in (
                                'syllabus', 'readings')]):  # 'old'
-                        # dbg("    mm_files.appending %s" % link)
+                        # dbg(f"    mm_files.appending {link}")
                         mm_files.append(link)
 
     if args.query:

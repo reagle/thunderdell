@@ -205,7 +205,7 @@ NOW = time.localtime()
 
 def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
-    info("old %s s = '%s'" % (type(s), s))
+    info(f"old {type(s)} s = '{s}'")
     punctuation = {
         0x2018: "'",    # apostrophe
         0x2019: "'",
@@ -214,7 +214,7 @@ def smart_punctuation_to_ascii(s):
     if s:
         s = s.translate(punctuation)
         s = s.replace("—", "--")
-        info("new %s s = '%s'" % (type(s), s))
+        info(f"new {type(s)} s = '{s}'")
     return s
 
 #######################################
@@ -252,7 +252,7 @@ class scrape_default(object):
         biblio['title'], biblio['c_web'] = self.split_title_org()
         for site, container, container_type in SITE_CONTAINER_MAP:
             if site in biblio['url']:
-                info("container = %s" % (container))
+                info(f"container = {container}")
                 biblio[container_type] = container
                 del biblio['c_web']
         return biblio
@@ -284,16 +284,15 @@ class scrape_default(object):
         if self.HTML_p is not None:
             info('checking author xpaths')
             for path in AUTHOR_XPATHS:
-                info("trying = '%s'" % path)
+                info(f"trying = '{path}'")
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    info("xpath_result = '%s'; xpath = '%s'" % (
-                        xpath_result, path))
+                    info(f"xpath_result = '{xpath_result}'; xpath = '{path}'")
                     # 20171204 added space to join below
                     author = string.capwords(' '.join(xpath_result).strip())
                     if author.lower().startswith('by '):
                         author = author[3:]
-                    info("author = '%s'; xpath = '%s'" % (author, path))
+                    info(f"author = '{author}'; xpath = '{path}'")
                     if author != '':
                         return author
                     else:
@@ -301,19 +300,19 @@ class scrape_default(object):
 
         if self.text:
             AUTHOR_REGEXS = (
-                "by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
-                "^\W*(?:posted )?by[:]? (.*)",
-                "\d\d\d\d.{,6}? by ([a-z ]*)",
-                "\s{3,}by[:]? (.*)",
+                r"by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
+                r"^\W*(?:posted )?by[:]? (.*)",
+                r"\d\d\d\d.{,6}? by ([a-z ]*)",
+                r"\s{3,}by[:]? (.*)",
             )
             # info(self.text)
             info('checking regexs')
             for regex in AUTHOR_REGEXS:
-                info("trying = '%s'" % regex)
+                info(f"trying = '{regex}'")
                 dmatch = re.search(regex, self.text,
                                    re.IGNORECASE | re.MULTILINE)
                 if dmatch:
-                    info('matched: "%s"' % regex)
+                    info(f'matched: "{regex}"')
                     author = dmatch.group(1).strip()
                     MAX_MATCH = 30
                     if ' and ' in author:
@@ -324,10 +323,9 @@ class scrape_default(object):
                     if len(author) > 4 and len(author) < MAX_MATCH:
                         return string.capwords(author)
                     else:
-                        info('length %d is <4 or > %d' % (
-                            len(author), MAX_MATCH))
+                        info(f"length {len(author)} is <4 or > {MAX_MATCH}")
                 else:
-                    info('failed: "%s"' % regex)
+                    info(f'failed: "{regex}"')
 
         return 'UNKNOWN'
 
@@ -341,26 +339,25 @@ class scrape_default(object):
         if self.HTML_p is not None:
             info('checking date xpaths')
             for path in DATE_XPATHS:
-                info("trying = '%s'" % path)
+                info(f"trying = '{path}'")
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    info("xpath_result = '%s'; xpath = '%s'"
-                         % (xpath_result, path))
+                    info(f"xpath_result = '{xpath_result}'; xpath = '{path}'")
                     date = parse(xpath_result[0]).strftime("%Y%m%d")
-                    info("date = '%s'; xpath = '%s'" % (date, path))
+                    info(f"date = '{date}'; xpath = '{path}'")
                     if date != '':
                         return date
                     else:
                         continue
 
-        date_regexp = "(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
+        date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return parse(dmatch.group(0)).strftime("%Y%m%d")
         except (AttributeError, TypeError, ValueError):
             NOW = time.gmtime()
             date = time.strftime('%Y%m%d', NOW)
-            info("making date NOW = %s" % date)
+            info(f"making date NOW = {date}")
             return date
 
     def get_title(self):
@@ -394,18 +391,18 @@ class scrape_default(object):
         ORG_WORDS = ['blog', 'lab', 'center']
 
         title = title_ori = self.get_title()
-        info("title_ori = '%s'" % (title_ori))
+        info(f"title_ori = '{title_ori}'")
         org = org_ori = self.get_org()
-        info("org_ori = '%s'" % (org_ori))
-        STRONG_DELIMTERS = re.compile('\s[\|—«»]\s')
-        WEAK_DELIMITERS = re.compile('[:;-]\s')
+        info(f"org_ori = '{org_ori}'")
+        STRONG_DELIMTERS = re.compile(r'\s[\|—«»]\s')
+        WEAK_DELIMITERS = re.compile(r'[:;-]\s')
         if STRONG_DELIMTERS.search(title_ori):
             info("STRONG_DELIMTERS")
             parts = STRONG_DELIMTERS.split(title_ori)
         else:
             info("WEAK_DELIMITERS")
             parts = WEAK_DELIMITERS.split(title_ori)
-        info("parts = '%s'" % (parts))
+        info(f"parts = '{parts}'")
         if len(parts) >= 2:
             beginning, end = ' : '.join(parts[0:-1]), parts[-1]
             title, org = beginning, end
@@ -418,7 +415,7 @@ class scrape_default(object):
                 info("org_ori.lower() in title_c14n: switch")
                 title, org = parts[-1], ' '.join(parts[0:-1])
             else:
-                info("beginning = %s, end = %s" % (beginning, end))
+                info(f"beginning = {beginning}, end = {end}")
                 end_ratio = float(len(end)) / len(beginning + end)
                 info(" end_ratio: %d / %d = %.2f" % (
                     len(end), len(beginning + end), end_ratio))
@@ -453,8 +450,8 @@ class scrape_default(object):
                 line = ' '.join(line.split())  # removes redundant space
                 if len(line) >= 250:
                     line = smart_punctuation_to_ascii(line)
-                    info("line = '%s'" % (line))
-                    info("length = %s; 2nd_char = '%s'" % (len(line), line[1]))
+                    info(f"line = '{line}'")
+                    info(f"length = {len(line)}; 2nd_char = '{line[1]}'")
                     if line[1].isalpha():
                         excerpt = line
                         return excerpt.strip()
@@ -474,10 +471,9 @@ class scrape_ISBN(scrape_default):
     def get_biblio(self):
 
         import book_query
-
-        info("url = %s" % self.url)
+        info(f"url = {self.url}")
         json_bib = book_query.query(self.url)
-        info("json_bib = '%s'" % json_bib)
+        info(f"json_bib = '{json_bib}'")
         biblio = {
             'permalink': self.url,
             'excerpt': '',
@@ -485,7 +481,7 @@ class scrape_ISBN(scrape_default):
         }
         info("### json_bib.items()")
         for key, value in list(json_bib.items()):
-            info("key = '%s'" % key)
+            info(f"key = '{key}'")
             if key.startswith('subject'):
                 continue
             info("key = '%s' value = '%s' type(value) = '%s'\n" % (
@@ -528,7 +524,7 @@ class scrape_ISBN(scrape_default):
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict['issued']['date-parts'][0]
-        info("date_parts = %s" % date_parts)
+        info(f"date_parts = {date_parts}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = '%d%02d%02' % (int(year), int(month), int(day))
@@ -539,7 +535,7 @@ class scrape_ISBN(scrape_default):
             date = str(date_parts[0])
         else:
             date = '0000'
-        info("date = %s" % date)
+        info(f"date = {date}")
         return date
 
 
@@ -553,8 +549,7 @@ class scrape_DOI(scrape_default):
     def get_biblio(self):
 
         import doi_query
-
-        info("url = %s" % self.url)
+        info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)
         biblio = {
             'permalink': self.url,
@@ -562,8 +557,7 @@ class scrape_DOI(scrape_default):
             'comment': self.comment,
         }
         for key, value in list(json_bib.items()):
-            info("key = '%s' value = '%s' type(value) = '%s'" % (
-                key, value, type(value)))
+            info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'")
             if value in (None, [], ''):
                 pass
             elif key == 'author':
@@ -585,7 +579,7 @@ class scrape_DOI(scrape_default):
         else:
             biblio['title'] = sentence_case(' '.join(
                 biblio['title'].split()))
-        info("biblio = %s" % biblio)
+        info(f"biblio = {biblio}")
         return biblio
 
     def get_author(self, bib_dict):
@@ -593,12 +587,12 @@ class scrape_DOI(scrape_default):
         if 'author' in bib_dict:
             names = ''
             for name_dic in bib_dict['author']:
-                info("name_dic = '%s'" % name_dic)
+                info(f"name_dic = '{name_dic}'")
                 if 'affiliation' in name_dic:
                     del name_dic['affiliation']
                 joined_name = ' '.join(
                     [item for item in list(name_dic.values()) if item])
-                info("joined_name = '%s'" % joined_name)
+                info(f"joined_name = '{joined_name}'")
                 names = names + ', ' + joined_name
             names = names[2:]  # remove first comma
         return names
@@ -606,7 +600,7 @@ class scrape_DOI(scrape_default):
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict['issued']['date-parts'][0]
-        info("date_parts = %s" % date_parts)
+        info(f"date_parts = {date_parts}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = '%d%02d%02d' % (int(year), int(month), int(day))
@@ -617,7 +611,7 @@ class scrape_DOI(scrape_default):
             date = str(date_parts[0])
         else:
             date = '0000'
-        info("date = %s" % date)
+        info(f"date = {date}")
         return date
 
 
@@ -689,7 +683,7 @@ class scrape_ENWP(scrape_default):
 
     def get_title(self):
         title = scrape_default.get_title(self)    # use super()?
-        info("title = '%s'" % (title))
+        info(f"title = '{title}'")
         return title.replace(' - Wikipedia', '')
 
     def get_permalink(self):
@@ -705,8 +699,8 @@ class scrape_ENWP(scrape_default):
         '''find date within span'''
         _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
         time, day, month, year = re.search(
-            '''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) '''
-            '''(\d\d\d\d)</span>''',
+            r'''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) '''
+            r'''(\d\d\d\d)</span>''',
             versioned_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))
@@ -742,7 +736,7 @@ class scrape_WMMeta(scrape_default):
         citelink = pre + '?title=Special:Cite&page=' + po
         _, _, cite_HTML_u, resp = get_HTML(citelink)
         day, month, year = re.search(
-            '''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''',
+            r'''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''',
             cite_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))
@@ -805,7 +799,7 @@ class scrape_twitter(scrape_default):
     def get_title(self):
 
         authororg_title = self.HTML_p.xpath("//title/text()")[0]
-        info("authororg_title = %s" % (authororg_title))
+        info(f"authororg_title = {authororg_title}")
         author_org, title = authororg_title.split(':', 1)
         # author_org, title = authororg_title.split('|', 1)
         # author = author_org.split('/', 1)[1]
@@ -846,7 +840,7 @@ def log2mm(biblio):
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
     ofile = HOME + '/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm'
-    info("biblio = %s" % biblio)
+    info(f"biblio = {biblio}")
     author = biblio['author']
     title = biblio['title']
     subtitle = biblio['subtitle'] if 'subtitle' in biblio else ''
@@ -861,9 +855,9 @@ def log2mm(biblio):
     citation = ''
     for key, value in list(biblio.items()):
         if key in fe.BIB_FIELDS:
-            info("key = %s value = %s" % (key, value))
-            citation += '%s=%s ' % (fe.BIB_FIELDS[key], value)
-    citation += ' r=%s ' % date_read
+            info(f"key = {key} value = {value}")
+            citation += f"{fe.BIB_FIELDS[key]}={value} "
+    citation += f" r={date_read} "
     if biblio['tags']:
         tags = biblio['tags']
         for tag in tags.strip().split(' '):
@@ -880,7 +874,7 @@ def log2mm(biblio):
             year_node = mm_year
             break
     else:
-        print(("creating %s" % year))
+        print(f"creating {year}")
         year_node = SubElement(
             mm_years, 'node',
             {'TEXT': this_year, 'POSITION': 'right'})
@@ -890,10 +884,10 @@ def log2mm(biblio):
 
     for week_node in year_node:
         if week_node.get('TEXT') == this_week:
-            print(("week %s" % this_week))
+            print(f"week {this_week}")
             break
     else:
-        print(("creating %s" % this_week))
+        print(f"creating {this_week}")
         week_node = SubElement(
             year_node, 'node',
             {'TEXT': this_week, 'POSITION': 'right'})
@@ -913,7 +907,7 @@ def log2mm(biblio):
             {'TEXT': abstract, 'STYLE_REF': 'annotation'})
     if excerpt:
         for exc in excerpt.split('\n\n'):
-            info("exc = %s" % (exc))
+            info(f"exc = {exc}")
             if exc.startswith(', '):
                 style_ref = 'paraphrase'
                 exc = exc[2:]
@@ -947,9 +941,9 @@ def log2nifty(biblio):
     url = biblio['url']
 
     date_token = time.strftime("%y%m%d", NOW)
-
-    log_item = '<dt><a href="%s">%s</a> (%s)</dt><dd>%s</dd>' % (
-        url, title, date_token, comment)
+    log_item = (
+        f'<dt><a href="{url}">{title}</a> '
+        '({date_token})</dt><dd>{comment}</dd>')
 
     fd = open(ofile)
     content = fd.read()
@@ -973,9 +967,9 @@ def log2work(biblio):
     import hashlib
 
     print("to log2work\n")
-    info("biblio = '%s'" % (biblio))
+    info(f"biblio = '{biblio}'")
     ofile = HOME + '/data/2web/reagle.org/joseph/plan/plans/index.html'
-    info("ofile = %s" % (ofile))
+    info(f"ofile = {ofile}")
     subtitle = biblio['subtitle'].strip() if 'subtitle' in biblio else ''
     title = biblio['title'].strip() + subtitle
     url = biblio['url'].strip()
@@ -987,15 +981,15 @@ def log2work(biblio):
         hashtags = hashtags.strip()
     else:
         hashtags = '#misc'
-    info("hashtags = '%s'" % (hashtags))
+    info(f"hashtags = '{hashtags}'")
     html_comment = comment + ' ' + '<a href="%s">%s</a>' % (escape_XML(url),
                                                             escape_XML(title))
 
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
-    log_item = '<li class="event" id="%s">%s: %s] %s</li>' % \
-        (uid, date_token, hashtags, html_comment)
+    log_item = (f'<li class="event" id="{uid}">{date_token}: '
+                '{hashtags}] {html_comment}</li>')
     info(log_item)
 
     plan_fd = open(ofile, 'r', encoding='utf-8', errors='replace')
@@ -1037,7 +1031,7 @@ def log2console(biblio):
         'author', 'title', 'subtitle', 'date', 'journal',
         'volume', 'number', 'publisher', 'address', 'DOI', 'isbn',
         'tags', 'comment', 'excerpt', 'url', )
-    info("biblio = '%s'" % biblio)
+    info(f"biblio = '{biblio}'")
     if biblio['tags']:
         tags = biblio['tags'].strip().split(' ')
         tags_expanded = ''
@@ -1047,7 +1041,7 @@ def log2console(biblio):
         # biblio['keywords'] = tags_expanded[0:-1]  # removes last space
     bib_in_single_line = ''
     for token in TOKENS:
-        info("token = '%s'" % token)
+        info(f"token = '{token}'")
         if token not in biblio:
             if token == 'url':  # I want these printed even if don't exist
                 biblio['url'] = ''
@@ -1067,7 +1061,7 @@ def log2console(biblio):
     if 'identifiers' in biblio:
         for identifer, value in list(biblio['identifiers'].items()):
             if identifer.startswith('isbn'):
-                print(('%s = %s' % (identifer, value[0])))
+                print(f"{identifer} = {value[0]}")
 
     if args.publish:
         yasn_publish(biblio['comment'],
@@ -1099,17 +1093,17 @@ def blog_at_opencodex(biblio):
 
     if entry:
         blog_title, sep, blog_body = entry.partition('.')
-        info("blog_title='%s' sep='%s' blog_body='%s'" % (
-            blog_title.strip(), sep, blog_body.strip()))
-    info("blog_title='%s'" % (blog_title))
+        info(f"blog_title='{blog_title.strip()}' sep='{sep}' "
+             f"blog_body='{blog_body.strip()}'")
+    info(f"blog_title='{blog_title}'")
 
     filename = blog_title.lower() \
         .replace(':', '') \
         .replace(' ', '-') \
         .replace("'", '') \
         .replace("/", "-")
-    filename = '%s%s/%s-%s.md' % (CODEX_ROOT, category, this_year, filename)
-    info("filename = %s" % filename)
+    filename = f"{CODEX_ROOT}{category}/{this_year}-{filename}.md"
+    info(f"filename = {filename}")
     if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
@@ -1139,8 +1133,8 @@ def blog_at_goatee(biblio):
     url = biblio.get('url', None)
     filename = blog_title.lower()
 
-    PHOTO_RE = re.compile('.*/photo/gallery/(\d\d\d\d/\d\d)'
-                          '/\d\d-\d\d\d\d-(.*)\.jpe?g')
+    PHOTO_RE = re.compile(r'.*/photo/gallery/(\d\d\d\d/\d\d)'
+                          r'/\d\d-\d\d\d\d-(.*)\.jpe?g')
     photo_match = False
     if 'goatee.net/photo/' in url:
         photo_match = re.match(PHOTO_RE, url)
@@ -1152,8 +1146,8 @@ def blog_at_goatee(biblio):
     filename = filename.strip().replace(' ', '-').replace("'", '')
     filename = GOATEE_ROOT + '%s/%s%s-%s.md' % (
         this_year, this_month, this_day, filename)
-    info("blog_title = %s" % blog_title)
-    info("filename = %s" % filename)
+    info(f"blog_title = {blog_title}")
+    info(f"filename = {filename}")
     if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
@@ -1177,9 +1171,8 @@ def blog_at_goatee(biblio):
                 '''src="%s"/></a></p>\n\n'''
                 % (url, alt_text, thumb_url, ))
             fd.write(
-                '''<p><a href="%s"><img alt="%s" class="view" '''
-                '''src="%s"/></a></p>'''
-                % (url, alt_text, url))
+                f'<p><a href="{url}"><img alt="{alt_text}" '
+                'class="view" src="{url}"/></a></p>')
     fd.close()
     Popen([VISUAL, filename])
 
@@ -1191,8 +1184,7 @@ def get_scraper(url, comment):
     '''
     Use the URL to specify a screenscraper.
     '''
-
-    info("url = '%s'" % (url))
+    info(f"url = '{url}'")
     if url.lower().startswith('doi:'):
         return scrape_DOI(url, comment)
     elif url.lower().startswith('isbn:'):
@@ -1211,7 +1203,7 @@ def get_scraper(url, comment):
 
         for prefix, scraper in dispatch_scraper:
             if host_path.startswith(prefix):
-                info("scrape = %s " % scraper)
+                info(f"scrape = {scraper} ")
                 return scraper(url, comment)    # creates instance
 
 
@@ -1223,7 +1215,7 @@ def get_logger(text):
     # tags must be prefixed by dot; URL no longer required
     LOG_REGEX = re.compile(
         r'(?P<scheme>\w) (?P<tags>(\.\w+ )+)?'
-        '(?P<url>(doi|isbn|http)\S* ?)?(?P<comment>.*)', re.IGNORECASE)
+        r'(?P<url>(doi|isbn|http)\S* ?)?(?P<comment>.*)', re.IGNORECASE)
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()
@@ -1231,11 +1223,11 @@ def get_logger(text):
             params['tags'] = params['tags'].replace('.', '')
         if 'url' in params and params['url']:
             # unescape zshell safe pasting/bracketing
-            params['url'] = params['url'].replace('\#', '#')\
-                                         .replace('\&', '&')\
-                                         .replace('\?', '?')\
-                                         .replace('\=', '=')
-        info("params = '%s'" % (params))
+            params['url'] = params['url'].replace(r'\#', '#')\
+                                         .replace(r'\&', '&')\
+                                         .replace(r'\?', '?')\
+                                         .replace(r'\=', '=')
+        info(f"params = '{params}'")
         function = None
         if params['scheme'] == 'n':   function = log2nifty
         elif params['scheme'] == 'j': function = log2work
@@ -1248,7 +1240,7 @@ def get_logger(text):
         else:
             print_usage("Sorry, unknown scheme: '%s'." % params['scheme'])
     else:
-        print_usage("Sorry, I can't parse the argument: '%s'." % text)
+        print_usage(f"Sorry, I can't parse the argument: '{text}'.")
     sys.exit()
 
 #######################################
@@ -1285,7 +1277,7 @@ def do_console_annotation(biblio):
             '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
             '''\t\tEntry types (et) values must be typed as shortcut:''')
         for key, value in list(fe.CSL_SHORTCUTS.items()):
-            print(('\t\t\t%s = %s' % (key, value)))
+            print(f'\t\t\t{key} = {value}')
         print('''\n\tEnd with CTRL-D.\n''')
 
     def edit_annotation(initial_text, resume_edit=False):
@@ -1328,7 +1320,7 @@ def do_console_annotation(biblio):
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))
-                info("cite_pairs = %s" % cite_pairs)
+                info(f"cite_pairs = {cite_pairs}")
                 for short, value in cite_pairs:
                     info(f"short,value = {short},{value}")
                     if short == 't':  # 't=cj' -> cj = 'Nature'
@@ -1343,7 +1335,7 @@ def do_console_annotation(biblio):
                     console_annotations += '\n\n' + line.strip()
 
         info("biblio.get('excerpt', '') = '%s'" % (biblio.get('excerpt', '')))
-        info("console_annotations = '%s'" % (console_annotations))
+        info(f"console_annotations = '{console_annotations}'")
         biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
 
         # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
@@ -1356,12 +1348,10 @@ def do_console_annotation(biblio):
     # code of do_console_annotation
     info("biblio['author'] = '%s'" % (biblio['author']))
     tentative_id = get_tentative_ident(biblio)
-    initial_text = [('d=%s au=%s ti=%s' % (biblio['date'],
-                    biblio['author'], biblio['title']))]
+    initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
     for key in biblio:
         if key.startswith('c_'):
-            initial_text.append("%s=%s" % (fe.CSL_FIELDS[key],
-                                title_case(biblio[key])))
+            initial_text.append(f"{fe.CSL_FIELDS[key]}={title_case(biblio[key])}")
         if key is 'tags' and biblio['tags']:
             tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
                             for tag in biblio['tags'].strip().split(' ')])
@@ -1435,9 +1425,8 @@ def shrink_tweet(comment, title, url, tags):
 
 def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks"
-
-    info("comment = '%s', title = %s, subtitle = %s, url = %s, tags = %s"
-         % (comment, title, subtitle, url, tags))
+    info(f"comment = '{comment}', title = {title}, "
+         "subtitle = {subtitle}, url = {url}, tags = {tags}")
     if tags and tags[0] != '#':  # they've not yet been hashified
         tags = ' '.join(['#' + KEY_SHORTCUTS.get(tag, tag)
                         for tag in tags.strip().split(' ')])
@@ -1584,7 +1573,7 @@ if __name__ == "__main__":
     logger, params = get_logger(' '.join(args.text))
     info("-------------------------------------------------------")
     info("-------------------------------------------------------")
-    info("params = '%s'" % (params))
+    info(f"params = '{params}'")
     comment = '' if not params['comment'] else params['comment']
     if params['url']:    # not all log2work entries have urls
         scraper = get_scraper(params['url'].strip(), comment)
@@ -1592,5 +1581,5 @@ if __name__ == "__main__":
     else:
         biblio = {'title': '', 'url': '', 'comment': comment}
     biblio['tags'] = params['tags']
-    info("biblio = '%s'" % (biblio))
+    info(f"biblio = '{biblio}'")
     logger(biblio)

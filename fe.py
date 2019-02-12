@@ -205,7 +205,7 @@ CSL_BIBLATEX_TYPE_MAP = dict([
     ('entry-encyclopedia',      'inreference'),
     ('legal_case',              'misc'),
     ('manuscript',              'unpublished'),
-    ('thesis',                  'phdthesis'),
+    ('thesis',                  'phdthesis'),  # TODO: duplicate key
     ('thesis',                  'mastersthesis'),
     ('pamphlet',                'booklet'),
     ('paper-conference',        'inproceedings'),
@@ -673,7 +673,7 @@ def guess_csl_type(entry):
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre, medium
         else:
-            print((f"Unknown entry_type = {et}"))
+            print(f"Unknown entry_type = {et}")
             sys.exit()
     et = 'no-type'
     # info(f"looking at containers for {entry}")
@@ -737,7 +737,7 @@ def bibformat_title(title):
     CHUNK_PAT = re.compile(r"""([-:])""", re.UNICODE)
 
     def my_title(text):
-        '''title case after some chars, but not ['.] like .title()'''
+        """title case after some chars, but not ['.] like .title()"""
 
         text_list = list(text)
         text_list[0] = text_list[0].upper()

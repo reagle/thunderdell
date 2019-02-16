@@ -588,10 +588,7 @@ class scrape_DOI(scrape_default):
             names = ''
             for name_dic in bib_dict['author']:
                 info(f"name_dic = '{name_dic}'")
-                if 'affiliation' in name_dic:
-                    del name_dic['affiliation']
-                joined_name = ' '.join(
-                    [item for item in list(name_dic.values()) if item])
+                joined_name = f"{name_dic['given']} {name_dic['family']}"
                 info(f"joined_name = '{joined_name}'")
                 names = names + ', ' + joined_name
             names = names[2:]  # remove first comma
@@ -989,7 +986,7 @@ def log2work(biblio):
     digest = hashlib.md5(html_comment.encode('utf-8', 'replace')).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = (f'<li class="event" id="{uid}">{date_token}: '
-                '{hashtags}] {html_comment}</li>')
+                f'{hashtags}] {html_comment}</li>')
     info(log_item)
 
     plan_fd = open(ofile, 'r', encoding='utf-8', errors='replace')

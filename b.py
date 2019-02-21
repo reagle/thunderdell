@@ -1466,49 +1466,6 @@ def yasn_publish(comment, title, subtitle, url, tags):
     finally:
         print(f"tweeted {len(tweet)}: {tweet}")
 
-    # https://selenium-python.readthedocs.io/
-    from selenium import webdriver
-    from selenium.common.exceptions import NoSuchElementException
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.common.keys import Keys
-    from web_api_tokens import CHROME_PROFILE, FB_USER, FB_PASSWORD
-
-    options = webdriver.ChromeOptions()
-    options.add_argument("--disable-notifications")
-    options.add_argument(f"--user-data-dir={HOME}/.config/selenium")
-    # options.add_argument('--headless')
-    driver = webdriver.Chrome(options=options)
-    driver.get('http://www.facebook.com')
-    try:
-        driver.find_element_by_xpath("//input[@id='email']")
-    except NoSuchElementException:
-        pass
-    else:
-        driver.find_element_by_xpath(
-                "//input[@id='email']").send_keys(FB_USER)
-        driver.find_element_by_xpath(
-                "//input[@id='pass']").send_keys(FB_PASSWORD)
-        driver.find_element_by_xpath(
-                "//input[starts-with(@id, 'u_0_')]""[@value='Log In']").click()
-    TEXT_BOX_XPATH = ("//div[starts-with(@id, 'u_0_')]"
-                      "//textarea[@name='xhpc_message']")
-    WebDriverWait(driver, 5).until(
-        EC.element_to_be_clickable((By.XPATH, TEXT_BOX_XPATH)))
-    text_box = driver.find_element_by_xpath(TEXT_BOX_XPATH)
-    title = f'“{title}”' if title else ''
-    fb_status = f'{comment} {title} {url} {tags}'.strip()
-    text_box.send_keys(fb_status + Keys.ENTER)  # + Keys.COMMAND + Keys.ENTER)
-    ATTACH_XPATH = ("//div[@data-testid='attachment-preview-body']"
-                    "//button[@title='Remove']")
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, ATTACH_XPATH)))
-    SHARE_XPATH = "//button//span[contains(.,'Share')]"
-    driver.find_element_by_xpath(SHARE_XPATH).click()
-    time.sleep(10)
-    driver.quit()
-
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":

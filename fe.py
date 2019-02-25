@@ -1403,17 +1403,21 @@ def walk_freeplane(node, mm_file, entries, links):
         def get_parent(node):
             return node.getparent()
 
-    def query_highlight(node, query_c):
+    def query_highlight(node, query):
         """ Return a modified node with matches highlighted"""
+        query_lower = query.lower()
         text = node.get('TEXT')
-        result = query_c.sub(
-            lambda m: f"<strong>{m.group()}</strong>",
-            text)
-        if text != result:
+        text_lower = text.lower()
+        if query_lower in text_lower:
+            start_index = text_lower.find(query_lower)
+            end_index = start_index + len(query_lower)
+            result = (
+                f'{text[0:start_index]}'
+                f'<strong>{text[start_index: end_index]}</strong>'
+                f'{text[end_index:]}')
             node.set('TEXT', result)
             return node
-        else:
-            return None
+        return None
 
     def get_author_node(node):
         """ Return the nearest author node ancestor """
@@ -1445,12 +1449,12 @@ def walk_freeplane(node, mm_file, entries, links):
                 entry['_title_node'] = d
                 if 'LINK' in d.attrib:
                     entry['url'] = d.get('LINK')
-                if args.query_c:
+                if args.query:
                     author_highlighted = query_highlight(
-                        author_node, args.query_c)
+                        author_node, args.query)
                     if author_highlighted is not None:
                         entry['_author_result'] = author_highlighted
-                    title_highlighted = query_highlight(d, args.query_c)
+                    title_highlighted = query_highlight(d, args.query)
                     if title_highlighted is not None:
                         entry['_title_result'] = title_highlighted
             else:
@@ -1458,8 +1462,8 @@ def walk_freeplane(node, mm_file, entries, links):
                     entry['cite'] = unescape_XML(d.get('TEXT'))
                 elif d.get('STYLE_REF') == 'annotation':
                     entry['annotation'] = unescape_XML(d.get('TEXT').strip())
-                if args.query_c:
-                    node_highlighted = query_highlight(d, args.query_c)
+                if args.query:
+                    node_highlighted = query_highlight(d, args.query)
                     if node_highlighted is not None:
                         entry.setdefault(
                             '_node_results', []).append(node_highlighted)
@@ -1669,7 +1673,6 @@ if __name__ == '__main__':
     arg_parser.add_argument(
         "-q", "--query", nargs='+',
         help="query the mindmaps", metavar="QUERY")
-    arg_parser.set_defaults(query_c=None)
     arg_parser.add_argument(
         "-s", "--style", default="apalike",
         help="use bibtex stylesheet (default: apalike)",
@@ -1775,7 +1778,6 @@ if __name__ == '__main__':
     if args.query:
         args.query = ' '.join(args.query)
         args.query = urllib.parse.unquote(args.query)
-        args.query_c = re.compile(re.escape(args.query), re.IGNORECASE)
         output = emit_results
     build_bib(file_name, output)
     args.outfd.close()
@@ -1787,4 +1789,3 @@ else:
         urls_online_only = False  # Emit urls for @online only
         pretty = False            # Print as HTML with citation at end
         query = None              # Query the bibliographies
-        query_c = None            # Query re.compiled

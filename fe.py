@@ -378,7 +378,7 @@ def identity_add_title(ident, title):
         suffix = ''.join([word[0] for word in title_words
                           if word not in BORING_WORDS])
         suffix = suffix[:3]
-    ident = ident + suffix
+    ident = f'{ident}{suffix}'
     return ident
 
 
@@ -398,7 +398,7 @@ def identity_increment(ident, entries):
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
-            ident = ident[0:-1] + str(suffix)
+            ident = f'{ident[0:-1]}{suffix}'
         else:
             ident += '1'
         # dbg(f'\t yielded    {ident}')
@@ -410,7 +410,7 @@ def get_ident(entry, entries, delim=""):
 
     last_names = []
     for first, von, last, jr in entry['author']:
-        last_names.append(von.replace(' ', '') + last.replace(' ', ''))
+        last_names.append(f'{von}{last}'.replace(' ', ''))
     if len(last_names) == 1:
         name_part = last_names[0]
     elif len(last_names) == 2:
@@ -418,7 +418,7 @@ def get_ident(entry, entries, delim=""):
     elif len(last_names) == 3:
         name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
-        name_part = last_names[0] + 'Etal'
+        name_part = f'{last_names[0]}Etal'
 
     if 'year' not in entry:
         entry['year'] = '0000'
@@ -435,7 +435,7 @@ def get_ident(entry, entries, delim=""):
     # info(f"ident = {type(ident)} '{ident}'")
     ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
     if ident[0].isdigit():        # pandoc forbids keys starting with digits
-        ident = 'a' + ident
+        ident = f'a{ident}'
 
     ident = identity_add_title(ident, entry['title'])    # get title suffix
     if ident in entries:    # there is a collision
@@ -471,8 +471,8 @@ def pull_citation(entry):
     if 'cite' in entry:
         citation = entry['cite']
         # split around tokens of length 1-3 and
-        # get rid of first empty string of results
         EQUAL_PAT = re.compile(r'(\w{1,3})=')
+        # get rid of first empty string of results
         cites = EQUAL_PAT.split(citation)[1:]
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = zip(*[iter(cites)] * 2)
@@ -508,13 +508,13 @@ def pull_citation(entry):
     if 'year' in entry and 'date' not in entry:
         date = entry['year']
         if 'month' in entry:
-            date += f'-{int(entry["month"]):02d}'
+            date = f'{date}-{int(entry["month"]):02d}'
             if 'day' in entry:
                 if '-' not in entry['day']:
-                    date += f'-{int(entry["day"]):02d}'
+                    date = f'{date}-{int(entry["day"]):02d}'
                 else:  # a range
                     start_date, end_date = entry['day'].split('-')
-                    date = date + f"-{int(start_date):02d}" \
+                    date = f"{date}-{int(start_date):02d}" \
                         f"/{date}-{int(end_date):02d}"
         entry['date'] = date
 
@@ -546,8 +546,8 @@ def pull_citation(entry):
         if not args.long_url:  # short URLs
             base = f'http://{url.split("/")[2]}'
             oldid = f'/?oldid={oldid}'
-            diff = '&diff=' + queries['diff'][0] if 'diff' in queries else ''
-            entry['url'] = base + oldid + diff
+            diff = f"&diff={queries['diff'][0]}" if 'diff' in queries else ''
+            entry['url'] = f'{base}{oldid}{diff}'
 
     if 'editor' in entry:
         entry['editor'] = parse_names(entry['editor'])
@@ -1540,7 +1540,7 @@ def build_bib(file_name, output):
         if not args.cgi:
             webbrowser.open(f'file://{results_file_name}')
     elif args.pretty:
-        results_file_name = TMP_DIR + 'pretty-print.html'
+        results_file_name = f'{TMP_DIR}pretty-print.html'
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
         except IOError:

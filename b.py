@@ -19,6 +19,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 # TODO
 # * archive URLs to f/old/`r=`
+# get reddit timestamp from API (no scraping possible?)
 
 import argparse
 from argparse import RawTextHelpFormatter

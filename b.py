@@ -197,12 +197,10 @@ SITE_CONTAINER_MAP = (
     # ('', '',  'c_magazine'),
 )
 
-
 #######################################
 # Utility functions
 
 NOW = time.localtime()
-
 
 def smart_punctuation_to_ascii(s):
     '''Convert unicode punctuation (i.e., "smart quotes") to simpler form.'''
@@ -217,6 +215,7 @@ def smart_punctuation_to_ascii(s):
         s = s.replace("—", "--")
         info(f"new {type(s)} s = '{s}'")
     return s
+
 
 #######################################
 # Screen scrapers
@@ -816,6 +815,7 @@ class scrape_twitter(scrape_default):
             "//p[contains(@class,'tweet-text')]/text()")[0]
         return excerpt
 
+
 #######################################
 # Output loggers
 
@@ -1174,6 +1174,7 @@ def blog_at_goatee(biblio):
     fd.close()
     Popen([VISUAL, filename])
 
+
 #######################################
 # Dispatchers
 
@@ -1240,6 +1241,7 @@ def get_logger(text):
     else:
         print_usage(f"Sorry, I can't parse the argument: '{text}'.")
     sys.exit()
+
 
 #######################################
 # Miscellaneous

@@ -25,11 +25,18 @@ dbg = logging.debug
 
 def query(isbn):
     """Query available ISBN services"""
-    bib = open_query(isbn)
-    if not bib:
-        bib = google_query(isbn)
-        if not bib:
-            raise Exception('All ISBN queries failed')
+    bib = {}
+    bib_open = bib_google = None
+
+    bib_open = open_query(isbn)
+    if not bib_open or 'author' not in bib_open:
+        bib_google = google_query(isbn)
+    if not (bib_open or bib_google):
+        raise Exception('All ISBN queries failed')
+    if bib_open:
+        bib.update(bib_open)
+    if bib_google:
+        bib.update(bib_google)
     return(bib)
 
 

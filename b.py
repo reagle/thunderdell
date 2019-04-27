@@ -67,6 +67,7 @@ GENERAL_KEY_SHORTCUTS = {
     'ope': 'open',
     'nor': 'norms',
     'pat': 'patience',
+    'pyt': 'python',
     'pow': 'power',
     'pra': 'praxis',
     'pri': 'privacy',

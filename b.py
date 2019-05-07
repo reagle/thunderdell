@@ -82,6 +82,7 @@ GENERAL_KEY_SHORTCUTS = {
 
 TV_KEY_SHORTCUTS = {
     # Tech Prediction, Vision, and Utopia
+    'nai': 'naive',
     'pre': 'prediction',
     'uni': 'universal',
     'uto': 'utopia',

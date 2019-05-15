@@ -107,6 +107,7 @@ LH_KEY_SHORTCUTS = {
     'qs': 'quantifiedself',
     'sh': 'selfhelp',
     'too': 'tool',
+    'mea': 'meaning',
     'min': 'minimalism',
 }
 
@@ -122,7 +123,6 @@ RTC_KEY_SHORTCUTS = {
     'inf': 'informed',
     'man': 'manipulation',
     'mar': 'market',
-    'mea': 'mean',
     'off': 'offensive',
     'qua': 'quant',
     'ran': 'ranking',
@@ -731,11 +731,10 @@ class scrape_WMMeta(scrape_default):
         return title.replace(' - Meta', '')
 
     def get_date(self):  # Meta is often foobar because of proxy bugs
-        pre, po = self.get_permalink().split('?title=')
-        citelink = pre + '?title=Special:Cite&page=' + po
-        _, _, cite_HTML_u, resp = get_HTML(citelink)
+        _, _, cite_HTML_u, resp = get_HTML(self.get_permalink())
+        # in browser, id="lastmod", but python gets id="footer-info-lastmod"
         day, month, year = re.search(
-            r'''<li> Date of last revision: (\d{1,2}) (\w+) (\d\d\d\d)''',
+            r'''<li id="footer-info-lastmod"> This page was last edited on (\d{1,2}) (\w+) (\d\d\d\d)''',
             cite_HTML_u).groups()
         month = fe.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))

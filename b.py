@@ -56,7 +56,9 @@ if not os.path.isdir(TMP_DIR):
 # Expansions for common tags/activities
 
 GENERAL_KEY_SHORTCUTS = {
+    'aca': 'academica',
     'add': 'addiction',
+    'eth': 'ethic',
     'exi': 'exit',
     'for': 'fork',
     'hum': 'humor',
@@ -109,6 +111,7 @@ LH_KEY_SHORTCUTS = {
     'too': 'tool',
     'mea': 'meaning',
     'min': 'minimalism',
+    'rati': 'rational',
 }
 
 RTC_KEY_SHORTCUTS = {
@@ -218,10 +221,8 @@ def smart_punctuation_to_ascii(s):
         info(f"new {type(s)} s = '{s}'")
     return s
 
-
 #######################################
 # Screen scrapers
-
 
 class scrape_default(object):
     """
@@ -462,7 +463,6 @@ class scrape_default(object):
     def get_permalink(self):
         return self.url
 
-
 class scrape_ISBN(scrape_default):
 
     def __init__(self, url, comment):
@@ -540,7 +540,6 @@ class scrape_ISBN(scrape_default):
         info(f"date = {date}")
         return date
 
-
 class scrape_DOI(scrape_default):
 
     def __init__(self, url, comment):
@@ -613,7 +612,6 @@ class scrape_DOI(scrape_default):
         info(f"date = {date}")
         return date
 
-
 class scrape_MARC(scrape_default):
     def __init__(self, url, comment):
         print(("Scraping MARC;"), end='\n')
@@ -668,7 +666,6 @@ class scrape_MARC(scrape_default):
     def get_permalink(self):
         return self.url
 
-
 class scrape_ENWP(scrape_default):
     def __init__(self, url, comment):
         print(("Scraping en.Wikipedia;"), end='\n')
@@ -716,7 +713,6 @@ class scrape_ENWP(scrape_default):
                 return line
         return ''
 
-
 class scrape_WMMeta(scrape_default):
 
     def __init__(self, url, comment):
@@ -750,7 +746,6 @@ class scrape_WMMeta(scrape_default):
             '''<li id="t-permalink"><a href="(.*?)"''', self.html_u).group(1)
         return unescape_XML(permalink)
 
-
 class scrape_geekfeminism_wiki(scrape_default):
     def __init__(self, url, comment):
         print(("Scraping geekfeminism wiki"), end='\n')
@@ -768,7 +763,6 @@ class scrape_geekfeminism_wiki(scrape_default):
         biblio['title'], biblio['organization'] = self.split_title_org()
         biblio['organization'] = 'Wikia'
         return biblio
-
 
 class scrape_twitter(scrape_default):
     def __init__(self, url, comment):
@@ -816,10 +810,8 @@ class scrape_twitter(scrape_default):
             "//p[contains(@class,'tweet-text')]/text()")[0]
         return excerpt
 
-
 #######################################
 # Output loggers
-
 
 def log2mm(biblio):
     '''
@@ -926,7 +918,6 @@ def log2mm(biblio):
     if args.publish:
         yasn_publish(abstract, title, subtitle, permalink, tags)
 
-
 def log2nifty(biblio):
     '''
     Log to personal blog.
@@ -957,7 +948,6 @@ def log2nifty(biblio):
         fd.close()
     else:
         print_usage("Sorry, output regexp subsitution failed.")
-
 
 def log2work(biblio):
     '''
@@ -1020,7 +1010,6 @@ def log2work(biblio):
     if args.publish:
         yasn_publish(comment, title, subtitle, url, hashtags)
 
-
 def log2console(biblio):
     '''
     Log to console.
@@ -1066,7 +1055,6 @@ def log2console(biblio):
         yasn_publish(biblio['comment'],
                      biblio['title'], biblio['subtitle'],
                      biblio['url'], biblio['tags'])
-
 
 def blog_at_opencodex(biblio):
     '''
@@ -1117,7 +1105,6 @@ def blog_at_opencodex(biblio):
         fd.write('> %s\n' % biblio['excerpt'])
     fd.close()
     Popen([VISUAL, filename])
-
 
 def blog_at_goatee(biblio):
     '''
@@ -1175,10 +1162,8 @@ def blog_at_goatee(biblio):
     fd.close()
     Popen([VISUAL, filename])
 
-
 #######################################
 # Dispatchers
-
 
 def get_scraper(url, comment):
     '''
@@ -1205,7 +1190,6 @@ def get_scraper(url, comment):
             if host_path.startswith(prefix):
                 info(f"scrape = {scraper} ")
                 return scraper(url, comment)    # creates instance
-
 
 def get_logger(text):
     """
@@ -1243,15 +1227,12 @@ def get_logger(text):
         print_usage(f"Sorry, I can't parse the argument: '{text}'.")
     sys.exit()
 
-
 #######################################
 # Miscellaneous
-
 
 def print_usage(message):
     print(message)
     print("Usage: b scheme [tags ]?[url ]?[comment ]?")
-
 
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
@@ -1376,7 +1357,6 @@ def do_console_annotation(biblio):
         print(('logged: %s to' % get_tentative_ident(biblio)), end='\n')
     return biblio, do_publish
 
-
 def shrink_tweet(comment, title, url, tags):
     """Shrink tweet to fit into limit"""
 
@@ -1423,7 +1403,6 @@ def shrink_tweet(comment, title, url, tags):
     tweet = f'{comment}{comment_delim}{title} {url} {tags}'
     return(tweet.strip())
 
-
 def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks"
     info(f"comment = '{comment}', title = {title}, "
@@ -1469,7 +1448,6 @@ def yasn_publish(comment, title, subtitle, url, tags):
         print(e)
     finally:
         print(f"tweeted {len(tweet)}: {tweet}")
-
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":

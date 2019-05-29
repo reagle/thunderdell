@@ -56,8 +56,9 @@ if not os.path.isdir(TMP_DIR):
 # Expansions for common tags/activities
 
 GENERAL_KEY_SHORTCUTS = {
-    'aca': 'academica',
+    'aca': 'academia',
     'add': 'addiction',
+    'edu': 'education',
     'eth': 'ethic',
     'exi': 'exit',
     'for': 'fork',

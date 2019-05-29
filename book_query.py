@@ -66,6 +66,8 @@ def open_query(isbn):
                     json_bib['author'] = ', '.join(
                         [author['name'] for
                          author in json_details['authors']])
+                if key == 'by_statement':
+                    json_bib['author'] = json_details['by_statement']
                 elif key == 'publishers':
                     json_bib['publisher'] = json_details[key][0]
                 elif key == 'publish_places':

@@ -73,6 +73,7 @@ GENERAL_KEY_SHORTCUTS = {
     'pow': 'power',
     'pra': 'praxis',
     'pri': 'privacy',
+    'rel': 'relationship',
     'ske': 'skepticism',
     'spe': 'speech',
     'str': 'structure',
@@ -86,9 +87,10 @@ TV_KEY_SHORTCUTS = {
     # Tech Prediction, Vision, and Utopia
     'nai': 'naive',
     'pre': 'prediction',
-    'uni': 'universal',
     'uto': 'utopia',
-    'vis': 'vision',
+    'opt': 'optimistic',
+    'pes': 'pessimistic',
+    'dis': 'disappointed',
 }
 
 GF_KEY_SHORTCUTS = {

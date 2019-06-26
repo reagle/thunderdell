@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
+# <https://reagle.org/joseph/2009/01/thunderdell>
 # (c) Copyright 2009-2017 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
@@ -193,7 +193,7 @@ CSL_TYPES = {
 
 BIB_TYPES = BIBLATEX_TYPES | CSL_TYPES
 
-# http://reagle.org/joseph/2013/08/bib-mapping.html
+# https://reagle.org/joseph/2013/08/bib-mapping.html
 CSL_BIBLATEX_TYPE_MAP = dict([
     # ordering is important so in the reverse mapping online => webpage
     ('article-journal',         'article'),
@@ -910,7 +910,7 @@ def emit_biblatex(entries):
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
 
-    See: http://reagle.org/joseph/2013/08/bib-mapping.html
+    See: https://reagle.org/joseph/2013/08/bib-mapping.html
         http://www.yaml.org/spec/1.2/spec.html
         http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
 
@@ -1209,7 +1209,7 @@ def emit_results(entries, query, results_file):
         token = urllib.parse.quote(token.encode('utf-8'))
         # dbg(f"token = '{token}' type = '{type(token)}'")
         url_query = \
-            escape("http://reagle.org/joseph/plan/search.cgi?query=%s") % token
+            escape("https://reagle.org/joseph/plan/search.cgi?query=%s") % token
         # dbg(f"url_query = '{url_query}' type = '{type(url_query)}'")
         return url_query
 

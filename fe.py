@@ -11,7 +11,9 @@
 
 # TODO
 
+import errno
 from html import escape
+import http.server
 import logging
 import os
 import re
@@ -24,6 +26,7 @@ import webbrowser
 from xml.etree.ElementTree import parse
 from web_little import unescape_XML, escape_XML
 
+
 log_level = 100
 critical = logging.critical
 info = logging.info
@@ -33,6 +36,7 @@ useLXML = False
 HOME = os.path.expanduser('~')
 DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
 DEFAULT_PRETTY_MAP = f'{HOME}/joseph/2005/ethno/field-notes.mm'
+CGI_DIR = f'{HOME}/joseph/plan/cgi-bin/'  # for local server
 
 TMP_DIR = f'{HOME}/tmp/.fe/'
 if not os.path.isdir(TMP_DIR):
@@ -1209,7 +1213,7 @@ def emit_results(entries, query, results_file):
         token = urllib.parse.quote(token.encode('utf-8'))
         # dbg(f"token = '{token}' type = '{type(token)}'")
         url_query = \
-            escape("https://reagle.org/joseph/plan/search.cgi?query=%s") % token
+            escape("search.cgi?query=%s") % token
         # dbg(f"url_query = '{url_query}' type = '{type(url_query)}'")
         return url_query
 
@@ -1486,7 +1490,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 </head>
 <body>
 <div>
-    <form method="get" action="https://reagle.org/joseph/plan/search.cgi">
+    <form method="get" action="search.cgi">
     <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
     name="query" maxlength="80" /> <input type="radio" name="sitesearch"
     value="BusySponge" /> BS <input type="radio" name="sitesearch"
@@ -1542,7 +1546,23 @@ def build_bib(file_name, output):
         results_file.write('</ul></body></html>\n')
         results_file.close()
         if not args.cgi:
-            webbrowser.open(f'file://{results_file_name}')
+            ADDRESS_IN_USE = False
+            os.chdir(CGI_DIR+'/..')
+            handler = http.server.CGIHTTPRequestHandler
+            handler.cgi_directories = ['/cgi-bin']
+            try:
+                server = http.server.HTTPServer(('localhost', 8000), handler)
+            except OSError as error:
+                if error.errno == errno.EADDRINUSE:
+                    ADDRESS_IN_USE = True
+                    print(f"address in use")
+                else:
+                    raise
+            # below runs the query twice I think, but still fast
+            webbrowser.open(f'http://localhost:8000/cgi-bin/'
+                            f'search.cgi?query={args.query}')
+            if not ADDRESS_IN_USE:
+                server.serve_forever()
     elif args.pretty:
         results_file_name = f'{TMP_DIR}pretty-print.html'
         try:
@@ -1560,6 +1580,7 @@ def build_bib(file_name, output):
         results_file.close()
         if not args.cgi:
             webbrowser.open(f'file://{results_file_name}')
+
     else:
         output(entries)
     return

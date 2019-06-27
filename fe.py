@@ -1542,7 +1542,7 @@ def build_bib(file_name, output):
         emit_results(entries, args.query, results_file)
         results_file.write('</ul></body></html>\n')
         results_file.close()
-        if not args.cgi:
+        if args.in_main:
             ADDRESS_IN_USE = False
             os.chdir(CGI_DIR+'/..')
             handler = http.server.CGIHTTPRequestHandler
@@ -1575,7 +1575,7 @@ def build_bib(file_name, output):
             emit_results(entries, args.query, results_file)
         results_file.write('</ul></body></html>\n')
         results_file.close()
-        if not args.cgi:
+        if args.in_main:
             webbrowser.open(f'file://{results_file_name}')
 
     else:
@@ -1743,7 +1743,7 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    args.cgi = False
+    args.in_main = True
     args.outfd = sys.stdout
 
     if args.pretty and file_name == DEFAULT_MAP:
@@ -1801,7 +1801,7 @@ if __name__ == '__main__':
     args.outfd.close()
 else:
     class args:
-        cgi = True                # called from cgi
+        in_main = False           # imported or called from cgi
         chase = True              # Follow freeplane links to other local maps
         long_url = False          # Use short 'oldid' URLs for mediawikis
         urls_online_only = False  # Emit urls for @online only

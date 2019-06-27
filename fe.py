@@ -26,7 +26,6 @@ import webbrowser
 from xml.etree.ElementTree import parse
 from web_little import unescape_XML, escape_XML
 
-
 log_level = 100
 critical = logging.critical
 info = logging.info
@@ -67,7 +66,6 @@ MONTH2DIGIT = {
     'jul': '7', 'aug': '8', 'sep': '9',
     'oct': '10', 'nov': '11', 'dec': '12'}
 DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
-
 
 # happy to keep using bibtex:address alias of bibtex:location
 # keep t, ot, and et straight
@@ -249,7 +247,6 @@ BIBLATEX_CSL_FIELD_MAP = dict([
 CSL_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
                               list(BIBLATEX_CSL_FIELD_MAP.items()))
 
-
 # https://en.wikipedia.org/wiki/Template:Citation
 BIBLATEX_WP_FIELD_MAP = dict([
     ('c_journal',       'journal'),
@@ -284,7 +281,6 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
     'pagination', 'pubstate', 'retype', 'shorttitle',
     'translator', 'url', 'urldate', 'venue'}
 
-
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
@@ -300,12 +296,10 @@ def pretty_tabulate_list(mylist, cols=3):
     print(("\n".join(pairs)))
     print("\n")
 
-
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
         sorted([f'{key}:{value}'
                 for key, value in list(mydict.items())]), cols)
-
 
 def escape_latex(text):
     text = text.replace('$', r'\$') \
@@ -319,7 +313,6 @@ def escape_latex(text):
         .replace('^', r'\^{}')
     return text
 
-
 def strip_accents(text):
     """strip accents and those chars that can't be stripped"""
     # >>> strip_accents(u'nôn-åscîî')
@@ -332,7 +325,6 @@ def strip_accents(text):
     else:
         return text
 
-
 def normalize_whitespace(text):
     """Remove redundant whitespace from a string, including before comma
     >>> normalize_whitespace('sally, joe , john')
@@ -342,7 +334,6 @@ def normalize_whitespace(text):
     text = text.replace(" ,", ",")
     text = ' '.join(text.split())
     return text
-
 
 #################################################################
 # Entry construction
@@ -385,7 +376,6 @@ def identity_add_title(ident, title):
     ident = f'{ident}{suffix}'
     return ident
 
-
 def identity_increment(ident, entries):
     """Increment numerical suffix of identity until no longer collides with
     pre-existing entry(s) in the entries dictionary.
@@ -407,7 +397,6 @@ def identity_increment(ident, entries):
             ident += '1'
         # dbg(f'\t yielded    {ident}')
     return ident
-
 
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
@@ -447,7 +436,6 @@ def get_ident(entry, entries, delim=""):
     # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
 
-
 def parse_date(date):
     """parse dates that starts with YYYYMMDD and returns hyphen delimited"""
 
@@ -461,7 +449,6 @@ def parse_date(date):
     else:
         raise Exception(f"{date} is malformed")
     return date
-
 
 def pull_citation(entry):
     """Modifies entry with parsed citation
@@ -562,7 +549,6 @@ def pull_citation(entry):
 # Bibtex utilities
 #################################################################
 
-
 def create_bibtex_author(names):
     """Return the parts of the name joined appropriately.
     The BibTex name parsing is best explained in
@@ -596,7 +582,6 @@ def create_bibtex_author(names):
     full_names = " and ".join(full_names)
     full_names = normalize_whitespace(full_names)
     return full_names
-
 
 # yapf: disable
 def guess_bibtex_type(entry):
@@ -649,7 +634,6 @@ def guess_bibtex_type(entry):
         elif 'year' not in entry:           e_t = 'unpublished'
 
         return e_t
-
 
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
@@ -718,7 +702,6 @@ def guess_csl_type(entry):
         elif 'year' not in entry:           et = 'manuscript'
     return et, genre, medium
 # yapf: enable
-
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -789,12 +772,10 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
-
 EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
                 'amazon.com', 'data/1work/']
 ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
                    'slate.com']
-
 
 def emit_biblatex(entries):
     """Emit a biblatex file, with option to emit bibtex"""
@@ -909,7 +890,6 @@ def emit_biblatex(entries):
 
                 args.outfd.write(f'   {field} = {{{value}}},\n')
         args.outfd.write("}\n")
-
 
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
@@ -1068,7 +1048,6 @@ def emit_yaml_csl(entries):
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write('...\n')
 
-
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{citation}} template format.
 
@@ -1119,7 +1098,6 @@ def emit_wp_citation(entries):
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f'| {field} = {value}\n')
         args.outfd.write("}}\n")
-
 
 def emit_results(entries, query, results_file):
     """Emit the results of the query"""
@@ -1309,7 +1287,6 @@ def emit_results(entries, query, results_file):
 # Mindmap parsing and bib building
 #################################################################
 
-
 def parse_names(names):
     """Do author parsing magic to figure out name components.
 
@@ -1356,7 +1333,6 @@ def parse_names(names):
         names_p.append((first, von, last, jr))
     return names_p
 
-
 def commit_entry(entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
@@ -1376,7 +1352,6 @@ def commit_entry(entry, entries):
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
     return entries
-
 
 def walk_freeplane(node, mm_file, entries, links):
     """Walk the freeplane XML tree and build:
@@ -1500,7 +1475,6 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
 
-
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
 
@@ -1585,7 +1559,6 @@ def build_bib(file_name, output):
         output(entries)
     return
 
-
 def _test_results():
     """
     Tests the overall parsing of Mindmap XML and the relationships between
@@ -1637,7 +1610,6 @@ def _test_results():
     0
 
     """
-
 
 if __name__ == '__main__':
     import argparse  # http://docs.python.org/dev/library/argparse.html

@@ -86,12 +86,13 @@ GENERAL_KEY_SHORTCUTS = {
 
 TV_KEY_SHORTCUTS = {
     # Tech Prediction, Vision, and Utopia
+    'dis': 'disappointed',
     'nai': 'naive',
-    'pre': 'prediction',
-    'uto': 'utopia',
     'opt': 'optimistic',
     'pes': 'pessimistic',
-    'dis': 'disappointed',
+    'pre': 'prediction',
+    'sil': 'siliconvalley',
+    'uto': 'utopia',
 }
 
 GF_KEY_SHORTCUTS = {
@@ -165,7 +166,6 @@ WP_KEY_SHORTCUTS = {
     'par': 'participation',
     'phi': 'philosophy',
     'pol': 'policy',
-    'sil': 'siliconvalley',
     'ver': 'verifiability',
     'wp':  'wikipedia',
 }

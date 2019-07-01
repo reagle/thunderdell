@@ -91,7 +91,7 @@ TV_KEY_SHORTCUTS = {
     'opt': 'optimistic',
     'pes': 'pessimistic',
     'pre': 'prediction',
-    'sil': 'siliconvalley',
+    'sv':  'siliconvalley',
     'uto': 'utopia',
 }
 

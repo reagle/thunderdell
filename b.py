@@ -936,7 +936,7 @@ def log2nifty(biblio):
     date_token = time.strftime("%y%m%d", NOW)
     log_item = (
         f'<dt><a href="{url}">{title}</a> '
-        '({date_token})</dt><dd>{comment}</dd>')
+        f'({date_token})</dt><dd>{comment}</dd>')
 
     fd = open(ofile)
     content = fd.read()
@@ -1161,7 +1161,7 @@ def blog_at_goatee(biblio):
                 % (url, alt_text, thumb_url, ))
             fd.write(
                 f'<p><a href="{url}"><img alt="{alt_text}" '
-                'class="view" src="{url}"/></a></p>')
+                f'class="view" src="{url}"/></a></p>')
     fd.close()
     Popen([VISUAL, filename])
 

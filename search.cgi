@@ -10,8 +10,7 @@ def cgi_main():
     import codecs, cgi, os, re, sys
     from urllib.parse import quote, unquote
 
-    from os.path import expanduser
-    HOME = expanduser("~")
+    HOME = os.path.expanduser('~')
 
     # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
@@ -42,7 +41,7 @@ def cgi_main():
         fileObj.close()
     else:
         sys.path.append(HOME+"/bin/fe")
-        MINDMAP = (HOME+'/data/2web/reagle.org/joseph/readings.mm')
+        MINDMAP = (HOME+'/joseph/readings.mm')
 
         import fe
         output = fe.emit_results

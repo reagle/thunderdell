@@ -32,7 +32,11 @@ info = logging.info
 dbg = logging.debug
 
 useLXML = False
+# HOME for path of mindmaps on webhost
 HOME = os.path.expanduser('~')
+# CLIENT_HOME for path on the client to open mindmaps there
+# as f'file://{CLIENT_HOME}/...'
+CLIENT_HOME = '/Users/reagle'
 DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
 DEFAULT_PRETTY_MAP = f'{HOME}/joseph/2005/ethno/field-notes.mm'
 CGI_DIR = f'{HOME}/joseph/plan/cgi-bin/'  # for local server
@@ -1219,7 +1223,8 @@ def emit_results(entries, query, results_file):
         if __name__ == '__main__':
             return file_name
         else:                               # CGI
-            return f'file:///Users/{file_name[6:]}'  # change from /home/
+            client_path = file_name.replace(f'{HOME}', f'{CLIENT_HOME}')
+            return f'file://{client_path}'
 
     def print_entry(identifier, author, date, title, url,
                     MM_mm_file, base_mm_file, spaces):

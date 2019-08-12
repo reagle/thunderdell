@@ -17,7 +17,7 @@ import http.server
 import logging
 import os
 import re
-from subprocess import call
+from subprocess import call  # needed for testing
 import sys
 import unicodedata
 import urllib.parse

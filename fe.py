@@ -451,6 +451,7 @@ def get_ident(entry, entries, delim=""):
 
 def parse_date(date):
     """parse dates that starts with YYYYMMDD and returns hyphen delimited"""
+    # TODO: allow BCE and circa dates, e.g., '-0348~'
 
     date = date[0:8]  # strip time if it exists
     if len(date) == 8:
@@ -953,6 +954,8 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
+        # TODO: allow BCE and circa dates, e.g., '-0348~'
+
         year, month, day = (date.split('-') + 3 * [None])[0:3]
         # info(f'year, month, day = {year}, {month}, {day}')
         if year:
@@ -1014,6 +1017,7 @@ def emit_yaml_csl(entries):
                     emit_yaml_people(value)
                     continue
                 if field in ('date', 'origdate', 'urldate'):
+                    # TODO: allow BCE and circa dates, e.g., '-0348~'
                     # info(f'field = {field}')
                     if value == '0000':
                         continue

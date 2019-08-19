@@ -47,9 +47,11 @@ if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
 #################################################################
-# Constants and mappings
+# Constants, classes, and mappings
 #################################################################
 # yapf: disable
+
+Date = namedtuple('Date', ['year', 'month', 'day', 'circa'])
 
 PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
              "van", "van den", "van der", "von",
@@ -426,10 +428,10 @@ def get_ident(entry, entries, delim=""):
     elif len(last_names) > 3:
         name_part = f'{last_names[0]}Etal'
 
-    if 'year' not in entry:
-        entry['year'] = '0000'
+    if 'date' not in entry:
+        entry['date'] = Date(year='0000')
     year_delim = ' ' if delim else ''
-    ident = year_delim.join((name_part, entry['year']))
+    ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
     ident = ident.replace(
         ':', '').replace(  # not permitted in xml name/id attributes
@@ -450,15 +452,12 @@ def get_ident(entry, entries, delim=""):
     return ident
 
 
-Date = namedtuple('Date', ['year', 'month', 'day', 'circa'])
-
-
 def parse_date(when):
     """parse dates that starts with YYYYMMDD and returns named tuple"""
     # TODO: allow BCE and circa dates, e.g., '-0348~'; move to
     # representation other than sliced string
 
-    year = mont = day = circa = None
+    year = month = day = circa = None
     when = when[0:8]  # strip time if it exists
     if len(when) == 8:
         # when = f'{when[0:4]}-{when[4:6]}-{when[6:8]}'
@@ -471,7 +470,7 @@ def parse_date(when):
         year = when[0:4]
         month = when[4:6]
         # return f'{date.year}-{date.month}'
-    elif len(when) == 4:   # TODO: allow dates before 1000
+    elif len(when) <= 4:
         # when = f'{when[0:4]}'
         year = when[0:4]
         # return f'{date.year}'
@@ -852,7 +851,8 @@ def emit_biblatex(entries):
                 if field in ('author', 'editor', 'translator'):
                     value = create_biblatex_author(value)
                 if field in ('date', 'urldate', 'origdate'):
-                    value = value.year
+                    value = '-'.join(filter(None, (
+                        value.year, value.month, value.day)))
 
                 # escape latex brackets.
                 #   url and howpublished shouldn't be changed
@@ -1066,14 +1066,19 @@ def emit_wp_citation(entries):
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in ('annotation', 'custom1', 'custom2',
-                             'day', 'entry_type', 'identifier', 'chapter',
-                             'keyword', 'month', 'shorttitle', 'year'):
+                             'entry_type', 'identifier', 'chapter',
+                             'keyword', 'shorttitle'):
                     continue
                 elif field == 'author':
                     output_wp_names(field, value)
                     continue
                 elif field == 'editor':
                     output_wp_names(field, value)
+                    continue
+                elif field in ('date', 'origdate', 'accessed'):
+                    date = '-'.join(filter(None, (
+                        value.year, value.month, value.day)))
+                    args.outfd.write(f'| {field} = {date}\n')
                     continue
                 elif field == 'title':  # TODO: convert value to title case?
                     if 'booktitle' in entry:

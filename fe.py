@@ -72,7 +72,7 @@ MONTH2DIGIT = {
     'oct': '10', 'nov': '11', 'dec': '12'}
 DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
 
-# happy to keep using bibtex:address alias of bibtex:location
+# happy to keep using biblatex:address alias of biblatex:location
 # keep t, ot, and et straight
 BIBLATEX_SHORTCUTS = dict([
     ('id', 'identifier'),
@@ -104,7 +104,7 @@ BIBLATEX_SHORTCUTS = dict([
     ('r', 'custom1'),      # read date
     ('sc', 'school'),
     ('se', 'series'),
-    ('t', 'entry_type'),   # bibtex type
+    ('t', 'entry_type'),   # biblatex type
     ('tr', 'translator'),
     ('ti', 'title'), ('st', 'shorttitle'),
     ('rt', 'retype'),
@@ -274,13 +274,13 @@ WP_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
 BIBTEX_FIELDS = {
     'address', 'annote', 'author', 'booktitle', 'chapter',
     'crossref', 'edition', 'editor', 'howpublished', 'institution', 'journal',
-    'key', 'month', 'note', 'number', 'organization', 'pages', 'publisher',
-    'school', 'series', 'title', 'type', 'volume', 'year'}
+    'key', 'note', 'number', 'organization', 'pages', 'publisher',
+    'school', 'series', 'title', 'type', 'volume'}
 
 BIBLATEX_FIELDS = BIBTEX_FIELDS | {
     'addendum', 'annotation',
     'catalog', 'custom1', 'custom2', 'custom4', 'custom5',
-    'date', 'day', 'doi', 'entry_type', 'eventtitle',
+    'date', 'doi', 'entry_type', 'eventtitle',
     'identifier', 'isbn', 'issue', 'keyword',
     'origdate', 'origlanguage', 'origpublisher''origyear',
     'pagination', 'pubstate', 'retype', 'shorttitle',
@@ -439,7 +439,7 @@ def get_ident(entry, entries, delim=""):
         '<strong>', '').replace(  # added by walk_freeplane.query_highlight
         '</strong>', '')
     # info(f"ident = {type(ident)} '{ident}'")
-    ident = strip_accents(ident)  # bibtex doesn't handle unicode in keys well
+    ident = strip_accents(ident)  # unicode buggy in bibtex keys
     if ident[0].isdigit():        # pandoc forbids keys starting with digits
         ident = f'a{ident}'
 
@@ -512,12 +512,8 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    # biblatex 0.9+:date -> bibtex:year
-    # preferred field and format is date, but
-    # redudant year is kept because used throughout fe.py
     if 'date' in entry:
         entry['date'] = parse_date(entry['date'])
-        # entry['year'] = entry['date'].year
 
     if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
         entry['urldate'] = parse_date(entry['custom1'])
@@ -549,16 +545,16 @@ def pull_citation(entry):
         entry['translator'] = parse_names(entry['translator'])
 
 #################################################################
-# Bibtex utilities
+# Biblatex utilities
 #################################################################
 
 
-def create_bibtex_author(names):
+def create_biblatex_author(names):
     """Return the parts of the name joined appropriately.
     The BibTex name parsing is best explained in
     http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
 
-    >>> create_bibtex_author([('First Middle', 'von', 'Last', 'Jr.'),\
+    >>> create_biblatex_author([('First Middle', 'von', 'Last', 'Jr.'),\
         ('First', '', 'Last', 'II')])
     'von Last, Jr., First Middle and Last, II, First'
 
@@ -589,10 +585,10 @@ def create_bibtex_author(names):
 # yapf: disable
 
 
-def guess_bibtex_type(entry):
+def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
-    >>> guess_bibtex_type({'author': [('', '', 'Smith', '')],\
+    >>> guess_biblatex_type({'author': [('', '', 'Smith', '')],\
         'eventtitle': 'Proceedings of WikiSym 08',\
         'publisher': 'ACM',\
         'title': 'A Great Paper',\
@@ -787,41 +783,16 @@ ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
 
 
 def emit_biblatex(entries):
-    """Emit a biblatex file, with option to emit bibtex"""
+    """Emit a biblatex file"""
     # dbg(f"entries = '{entries}'")
 
     for key, entry in sorted(entries.items()):
-        entry_type = guess_bibtex_type(entry)
+        entry_type = guess_biblatex_type(entry)
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry['ori_author'] in container_values:
             del entry['author']
-
-        # bibtex syntax accommodations
-        if 'eventtitle' in entry and 'booktitle' not in entry:
-            entry['booktitle'] = f'Proceedings of {entry["eventtitle"]}'
-        if args.bibtex:
-            if 'url' in entry:  # most bibtex styles doesn't support url
-                note = f' Available at: \\url{{entry["url"]}}'
-                if 'urldate' in entry:
-                    urldate = "%s-%s-%s" % (  # TODO: fix
-                        entry['urldate'][0:4],  # year
-                        entry['urldate'][4:6],  # month
-                        entry['urldate'][6:8])  # day
-                    note += f' [Accessed {urldate}]'
-                entry['note'] = entry.setdefault('note', '') + note
-            if entry_type == 'online':
-                entry_type_copy = 'misc'
-            if entry_type == 'report':
-                entry_type_copy = 'techreport'
-        # if args.bibtex or args.year:
-        #     if 'date' in entry:
-        #         del entry['date']
-        # else:  # remove bibtex fields from biblatex
-        #     for token in ('year', 'month', 'day'):
-        #         if token in entry:
-        #             del entry[token]
 
         # if an edited collection, remove author and booktitle
         if all(f in entry for f in ('author', 'editor', 'title', 'booktitle')):
@@ -876,18 +847,12 @@ def emit_biblatex(entries):
                         # info("not online")
                         continue
 
-                # skip fields not in bibtex
-                if args.bibtex and field not in BIBTEX_FIELDS:
-                    continue
-
                 # if value not a proper string, make it so
                 # info(f"value = {value}; type = {type(value)}")
                 if field in ('author', 'editor', 'translator'):
-                    value = create_bibtex_author(value)
+                    value = create_biblatex_author(value)
                 if field in ('date', 'urldate', 'origdate'):
                     value = value.year
-                if args.bibtex and field == 'month':
-                    value = DIGIT2MONTH[str(int(value))]
 
                 # escape latex brackets.
                 #   url and howpublished shouldn't be changed
@@ -929,7 +894,7 @@ def emit_yaml_csl(entries):
 
         for person in people:
             # info("person = '%s'" % (' '.join(person)))
-            # bibtex ('First Middle', 'von', 'Last', 'Jr.')
+            # biblatex ('First Middle', 'von', 'Last', 'Jr.')
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
             given, particle, family, suffix = person
@@ -1123,7 +1088,7 @@ def emit_results(entries, query, results_file):
     """Emit the results of the query"""
 
     def reverse_print(node, entry, spaces):
-        """Move locator number to the end of the text with the Bibtex key"""
+        """Move locator number to the end of the text with the biblatex key"""
         style_ref = node.get('STYLE_REF', 'default')
         text = escape_XML(node.get('TEXT'))
         text = text.replace(        # restore my query_highlight strongs
@@ -1245,7 +1210,7 @@ def emit_results(entries, query, results_file):
     spaces = ' '
     for key, entry in sorted(entries.items()):
         identifier = entry['identifier']
-        author = create_bibtex_author(entry['author'])
+        author = create_biblatex_author(entry['author'])
         title = entry['title']
         date = entry['date']
         url = entry.get('url', '')
@@ -1656,10 +1621,6 @@ if __name__ == '__main__':
         action="store_true",
         help="emit biblatex fields")
     arg_parser.add_argument(
-        "--bibtex", default=False,
-        action="store_true",
-        help="emit bibtex fields rather than biblatex")
-    arg_parser.add_argument(
         "-c", "--chase",
         action="store_true", default=False,
         help="chase links between MMs")
@@ -1673,7 +1634,7 @@ if __name__ == '__main__':
     arg_parser.add_argument(
         "-k", "--keys", default='-no-keys',
         action="store_const", const='-use-keys',
-        help="show bibtex keys in displayed HTML")
+        help="show biblatex keys in displayed HTML")
     arg_parser.add_argument(
         "-F", "--fields",
         action="store_true", default=False,
@@ -1695,7 +1656,7 @@ if __name__ == '__main__':
         help="query the mindmaps", metavar="QUERY")
     arg_parser.add_argument(
         "-s", "--style", default="apalike",
-        help="use bibtex stylesheet (default: apalike)",
+        help="use biblatex stylesheet (default: apalike)",
         metavar="BST")
     arg_parser.add_argument(
         "-T", "--tests",
@@ -1728,8 +1689,6 @@ if __name__ == '__main__':
     # print(args)
     file_name = os.path.abspath(args.input_file)
 
-    # args.year = True
-
     log_level = 100  # default
     if args.verbose >= 3:
         log_level = logging.DEBUG     # 10
@@ -1752,7 +1711,7 @@ if __name__ == '__main__':
         file_name = DEFAULT_PRETTY_MAP
     if args.WP_citation:
         output = emit_wp_citation
-    elif args.bibtex or args.biblatex:
+    elif args.biblatex:
         output = emit_biblatex
     else:
         args.YAML_CSL = True
@@ -1763,7 +1722,7 @@ if __name__ == '__main__':
     if args.output_file:
         if args.YAML_CSL:
             extension = '.yaml'
-        elif args.bibtex or args.biblatex:
+        elif args.biblatex:
             extension = '.bib'
         elif args.WP_citation:
             extension = '.wiki'
@@ -1774,7 +1733,7 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     if args.fields:
-        print("\n                           _BIBTEX_TYPES_ (deprecated)")
+        print("\n                           _BIBLATEX_TYPES_ (deprecated)")
         print("                  http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(list(BIBLATEX_TYPES))
         print("                             _EXAMPLES_\n")
@@ -1792,7 +1751,7 @@ if __name__ == '__main__':
         print("\n\n")
         print("\n                               _FIELD_SHORTCUTS_")
         pretty_tabulate_dict(BIB_SHORTCUTS)
-        print("         t=bibtex or CSL type")
+        print("         t=biblatex/CSL type")
         print("         ot=organization's subtype (e.g., W3C REC)\n\n")
         sys.exit()
     if args.query:

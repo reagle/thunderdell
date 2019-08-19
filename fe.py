@@ -429,7 +429,7 @@ def get_ident(entry, entries, delim=""):
         name_part = f'{last_names[0]}Etal'
 
     if 'date' not in entry:
-        entry['date'] = Date(year='0000')
+        entry['date'] = Date(year='0000', month=None, day=None, circa=None)
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
@@ -458,22 +458,17 @@ def parse_date(when):
     # representation other than sliced string
 
     year = month = day = circa = None
+    info(f"{when}")
     when = when[0:8]  # strip time if it exists
     if len(when) == 8:
-        # when = f'{when[0:4]}-{when[4:6]}-{when[6:8]}'
         year = when[0:4]
         month = when[4:6]
         day = when[6:8]
-        # return f'{date.year}-{date.month}-{date.date}'
     elif len(when) == 6:
-        # when = f'{when[0:4]}-{when[4:6]}'
         year = when[0:4]
         month = when[4:6]
-        # return f'{date.year}-{date.month}'
     elif len(when) <= 4:
-        # when = f'{when[0:4]}'
         year = when[0:4]
-        # return f'{date.year}'
     else:
         raise Exception(f"{when} is malformed")
     date = Date(year, month, day, circa)
@@ -504,8 +499,6 @@ def pull_citation(entry):
             except KeyError as error:
                 print(("Key error on ", error,
                        entry['title'], entry['_mm_file']))
-    else:
-        entry['date'] = '0000'
 
     # if 'url' in entry and entry['url'] is not None:
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):

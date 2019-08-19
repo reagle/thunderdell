@@ -11,6 +11,7 @@
 
 # TODO
 
+from collections import namedtuple
 import errno
 from html import escape
 import http.server
@@ -108,7 +109,7 @@ BIBLATEX_SHORTCUTS = dict([
     ('ti', 'title'), ('st', 'shorttitle'),
     ('rt', 'retype'),
     ('v', 'volume'), ('is', 'issue'), ('n', 'number'),
-    ('d', 'date'), ('y', 'year'), ('m', 'month'), ('da', 'day'),
+    ('d', 'date'), # ('y', 'year'), ('m', 'month'), ('da', 'day'),
     ('url', 'url'),
     ('urld', 'urldate'),
     ('ve', 'venue'),
@@ -449,20 +450,36 @@ def get_ident(entry, entries, delim=""):
     return ident
 
 
-def parse_date(date):
-    """parse dates that starts with YYYYMMDD and returns hyphen delimited"""
-    # TODO: allow BCE and circa dates, e.g., '-0348~'
+Date = namedtuple('Date', ['year', 'month', 'day', 'circa'])
 
-    date = date[0:8]  # strip time if it exists
-    if len(date) == 8:
-        date = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
-    elif len(date) == 6:
-        date = f'{date[0:4]}-{date[4:6]}'
-    elif len(date) == 4:
-        date = f'{date[0:4]}'
+
+def parse_date(when):
+    """parse dates that starts with YYYYMMDD and returns named tuple"""
+    # TODO: allow BCE and circa dates, e.g., '-0348~'; move to
+    # representation other than sliced string
+
+    year = mont = day = circa = None
+    when = when[0:8]  # strip time if it exists
+    if len(when) == 8:
+        # when = f'{when[0:4]}-{when[4:6]}-{when[6:8]}'
+        year = when[0:4]
+        month = when[4:6]
+        day = when[6:8]
+        # return f'{date.year}-{date.month}-{date.date}'
+    elif len(when) == 6:
+        # when = f'{when[0:4]}-{when[4:6]}'
+        year = when[0:4]
+        month = when[4:6]
+        # return f'{date.year}-{date.month}'
+    elif len(when) == 4:   # TODO: allow dates before 1000
+        # when = f'{when[0:4]}'
+        year = when[0:4]
+        # return f'{date.year}'
     else:
-        raise Exception(f"{date} is malformed")
+        raise Exception(f"{when} is malformed")
+    date = Date(year, month, day, circa)
     return date
+    # return f'{date.year}-{date.month}-{date.day}'
 
 
 def pull_citation(entry):
@@ -495,41 +512,12 @@ def pull_citation(entry):
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    # Date processing, use bibtex %y-%m-%d
-    if 'month' in entry:
-        month_tmp = entry['month']
-        if ' ' in month_tmp:
-            month, day = month_tmp.split()
-            entry['day'] = day
-        else:
-            month = month_tmp
-        try:
-            entry['month'] = MONTH2DIGIT[month[0:3].lower()]
-        except KeyError:
-            entry['issue'] = entry['month']
-            del entry['month']
-
-    # bibtex:year, month, day -> biblatex 0.9+:date
-    # remove legacy year, month, day entries picked up in old mindmaps
-    if 'year' in entry and 'date' not in entry:
-        date = entry['year']
-        if 'month' in entry:
-            date = f'{date}-{int(entry["month"]):02d}'
-            if 'day' in entry:
-                if '-' not in entry['day']:
-                    date = f'{date}-{int(entry["day"]):02d}'
-                else:  # a range
-                    start_date, end_date = entry['day'].split('-')
-                    date = f"{date}-{int(start_date):02d}" \
-                        f"/{date}-{int(end_date):02d}"
-        entry['date'] = date
-
     # biblatex 0.9+:date -> bibtex:year
     # preferred field and format is date, but
     # redudant year is kept because used throughout fe.py
     if 'date' in entry:
         entry['date'] = parse_date(entry['date'])
-        entry['year'] = entry['date'][0:4]
+        # entry['year'] = entry['date'].year
 
     if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
         entry['urldate'] = parse_date(entry['custom1'])
@@ -817,7 +805,7 @@ def emit_biblatex(entries):
             if 'url' in entry:  # most bibtex styles doesn't support url
                 note = f' Available at: \\url{{entry["url"]}}'
                 if 'urldate' in entry:
-                    urldate = "%s-%s-%s" % (
+                    urldate = "%s-%s-%s" % (  # TODO: fix
                         entry['urldate'][0:4],  # year
                         entry['urldate'][4:6],  # month
                         entry['urldate'][6:8])  # day
@@ -827,13 +815,13 @@ def emit_biblatex(entries):
                 entry_type_copy = 'misc'
             if entry_type == 'report':
                 entry_type_copy = 'techreport'
-        if args.bibtex or args.year:
-            if 'date' in entry:
-                del entry['date']
-        else:  # remove bibtex fields from biblatex
-            for token in ('year', 'month', 'day'):
-                if token in entry:
-                    del entry[token]
+        # if args.bibtex or args.year:
+        #     if 'date' in entry:
+        #         del entry['date']
+        # else:  # remove bibtex fields from biblatex
+        #     for token in ('year', 'month', 'day'):
+        #         if token in entry:
+        #             del entry[token]
 
         # if an edited collection, remove author and booktitle
         if all(f in entry for f in ('author', 'editor', 'title', 'booktitle')):
@@ -896,13 +884,18 @@ def emit_biblatex(entries):
                 # info(f"value = {value}; type = {type(value)}")
                 if field in ('author', 'editor', 'translator'):
                     value = create_bibtex_author(value)
+                if field in ('date', 'urldate', 'origdate'):
+                    value = value.year
                 if args.bibtex and field == 'month':
                     value = DIGIT2MONTH[str(int(value))]
 
                 # escape latex brackets.
                 #   url and howpublished shouldn't be changed
                 #   author may have curly brackets that should not be escaped
-                if field not in ('author', 'url', 'howpublished'):  # 'note',
+                #   date is a named_tuple that doesn't need escaping
+                # info(f"{field}")
+                if field not in (
+                        'author', 'url', 'howpublished', 'date', 'urldate'):
                     value = escape_latex(value)
 
                 # protect case in titles
@@ -956,14 +949,14 @@ def emit_yaml_csl(entries):
         """yaml writer for dates"""
         # TODO: allow BCE and circa dates, e.g., '-0348~'
 
-        year, month, day = (date.split('-') + 3 * [None])[0:3]
+        # year, month, day = (date.split('-') + 3 * [None])[0:3]
         # info(f'year, month, day = {year}, {month}, {day}')
-        if year:
-            args.outfd.write(f'    year: {year}\n')
-        if month:
-            args.outfd.write(f'    month: {month}\n')
-        if day:
-            args.outfd.write(f'    day: {day}\n')
+        if date.year:
+            args.outfd.write(f'    year: {date.year}\n')
+        if date.month:
+            args.outfd.write(f'    month: {date.month}\n')
+        if date.day:
+            args.outfd.write(f'    day: {date.day}\n')
         if season:
             args.outfd.write(f'    season: {season}\n')
 
@@ -1735,7 +1728,7 @@ if __name__ == '__main__':
     # print(args)
     file_name = os.path.abspath(args.input_file)
 
-    args.year = True
+    # args.year = True
 
     log_level = 100  # default
     if args.verbose >= 3:

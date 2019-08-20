@@ -51,7 +51,7 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # yapf: disable
 
-Date = namedtuple('Date', ['year', 'month', 'day', 'circa'])
+Date = namedtuple('Date', ['year', 'month', 'day', 'circa', 'time'])
 
 PARTICLES = {"al", "bin", "da", "de", "de la", "Du", "la",
              "van", "van den", "van der", "von",
@@ -296,7 +296,6 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # Utility functions
 #################################################################
 
-
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
         ['%20s' % j for j in mylist[i:i + cols]])
@@ -304,12 +303,10 @@ def pretty_tabulate_list(mylist, cols=3):
     print(("\n".join(pairs)))
     print("\n")
 
-
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
         sorted([f'{key}:{value}'
                 for key, value in list(mydict.items())]), cols)
-
 
 def escape_latex(text):
     text = text.replace('$', r'\$') \
@@ -323,7 +320,6 @@ def escape_latex(text):
         .replace('^', r'\^{}')
     return text
 
-
 def strip_accents(text):
     """strip accents and those chars that can't be stripped"""
     # >>> strip_accents(u'nôn-åscîî')
@@ -335,7 +331,6 @@ def strip_accents(text):
                        if unicodedata.category(x) != 'Mn')
     else:
         return text
-
 
 def normalize_whitespace(text):
     """Remove redundant whitespace from a string, including before comma
@@ -350,7 +345,6 @@ def normalize_whitespace(text):
 #################################################################
 # Entry construction
 #################################################################
-
 
 def identity_add_title(ident, title):
     """Return a non-colliding identity.
@@ -389,7 +383,6 @@ def identity_add_title(ident, title):
     ident = f'{ident}{suffix}'
     return ident
 
-
 def identity_increment(ident, entries):
     """Increment numerical suffix of identity until no longer collides with
     pre-existing entry(s) in the entries dictionary.
@@ -412,7 +405,6 @@ def identity_increment(ident, entries):
         # dbg(f'\t yielded    {ident}')
     return ident
 
-
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
@@ -429,7 +421,8 @@ def get_ident(entry, entries, delim=""):
         name_part = f'{last_names[0]}Etal'
 
     if 'date' not in entry:
-        entry['date'] = Date(year='0000', month=None, day=None, circa=None)
+        entry['date'] = Date(year='0000', month=None, day=None, circa=None,
+                             time=None)
     year_delim = ' ' if delim else ''
     ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
@@ -451,15 +444,32 @@ def get_ident(entry, entries, delim=""):
     # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
 
-
 def parse_date(when):
-    """parse dates that starts with YYYYMMDD and returns named tuple"""
-    # TODO: allow BCE and circa dates, e.g., '-0348~'; move to
-    # representation other than sliced string
+    """parse dates that starts with 'YYYY' and returns named tuple.
+    Without hyphens, strings such as '101210' are ambiguous: years
+    have precedence.
 
-    year = month = day = circa = None
+    >>> parse_date('20190820 22:24 UTC')
+    Date(year='2019', month='08', day='20', circa=None, time='22:24 UTC')
+    >>> parse_date('20190820')
+    Date(year='2019', month='08', day='20', circa=None, time=None)
+    >>> parse_date('101210')
+    Date(year='1012', month='10', day=None, circa=None, time=None)
+    >>> parse_date('-5')
+    Date(year='-5', month=None, day=None, circa=None, time=None)
+    >>> parse_date('130~')
+    Date(year='130', month=None, day=None, circa=True, time=None)
+
+
+    """
+
+    year = month = day = circa = time = None
     info(f"{when}")
-    when = when[0:8]  # strip time if it exists
+    if ' ' in when:
+        when, time = when.split(' ', 1)
+    if when.endswith('~'):
+        when = when[:-1]
+        circa = True
     if len(when) == 8:
         year = when[0:4]
         month = when[4:6]
@@ -471,10 +481,7 @@ def parse_date(when):
         year = when[0:4]
     else:
         raise Exception(f"{when} is malformed")
-    date = Date(year, month, day, circa)
-    return date
-    # return f'{date.year}-{date.month}-{date.day}'
-
+    return Date(year, month, day, circa, time)
 
 def pull_citation(entry):
     """Modifies entry with parsed citation
@@ -540,7 +547,6 @@ def pull_citation(entry):
 # Biblatex utilities
 #################################################################
 
-
 def create_biblatex_author(names):
     """Return the parts of the name joined appropriately.
     The BibTex name parsing is best explained in
@@ -575,7 +581,6 @@ def create_biblatex_author(names):
     full_names = normalize_whitespace(full_names)
     return full_names
 # yapf: disable
-
 
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
@@ -627,7 +632,6 @@ def guess_biblatex_type(entry):
         elif 'year' not in entry:           e_t = 'unpublished'
 
         return e_t
-
 
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
@@ -696,7 +700,6 @@ def guess_csl_type(entry):
         elif 'year' not in entry:           et = 'manuscript'
     return et, genre, medium
 # yapf: enable
-
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -767,12 +770,10 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
-
 EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
                 'amazon.com', 'data/1work/']
 ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
                    'slate.com']
-
 
 def emit_biblatex(entries):
     """Emit a biblatex file"""
@@ -862,7 +863,6 @@ def emit_biblatex(entries):
 
                 args.outfd.write(f'   {field} = {{{value}}},\n')
         args.outfd.write("}\n")
-
 
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
@@ -1024,7 +1024,6 @@ def emit_yaml_csl(entries):
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write('...\n')
 
-
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{citation}} template format.
 
@@ -1080,7 +1079,6 @@ def emit_wp_citation(entries):
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f'| {field} = {value}\n')
         args.outfd.write("}}\n")
-
 
 def emit_results(entries, query, results_file):
     """Emit the results of the query"""
@@ -1271,7 +1269,6 @@ def emit_results(entries, query, results_file):
 # Mindmap parsing and bib building
 #################################################################
 
-
 def parse_names(names):
     """Do author parsing magic to figure out name components.
 
@@ -1318,7 +1315,6 @@ def parse_names(names):
         names_p.append((first, von, last, jr))
     return names_p
 
-
 def commit_entry(entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
@@ -1338,7 +1334,6 @@ def commit_entry(entry, entries):
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
     return entries
-
 
 def walk_freeplane(node, mm_file, entries, links):
     """Walk the freeplane XML tree and build:
@@ -1438,7 +1433,6 @@ def walk_freeplane(node, mm_file, entries, links):
     entries = commit_entry(entry, entries)
     return entries, links
 
-
 RESULT_FILE_HEADER = """<!DOCTYPE html>
 <html>
 <head>
@@ -1461,7 +1455,6 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <h2>Results for '%s'</h2>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
-
 
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
@@ -1547,7 +1540,6 @@ def build_bib(file_name, output):
         output(entries)
     return
 
-
 def _test_results():
     """
     Tests the overall parsing of Mindmap XML and the relationships between
@@ -1599,7 +1591,6 @@ def _test_results():
     0
 
     """
-
 
 if __name__ == '__main__':
     import argparse  # http://docs.python.org/dev/library/argparse.html

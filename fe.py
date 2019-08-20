@@ -111,7 +111,7 @@ BIBLATEX_SHORTCUTS = dict([
     ('ti', 'title'), ('st', 'shorttitle'),
     ('rt', 'retype'),
     ('v', 'volume'), ('is', 'issue'), ('n', 'number'),
-    ('d', 'date'), # ('y', 'year'), ('m', 'month'), ('da', 'day'),
+    ('d', 'date'),
     ('url', 'url'),
     ('urld', 'urldate'),
     ('ve', 'venue'),
@@ -296,6 +296,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # Utility functions
 #################################################################
 
+
 def pretty_tabulate_list(mylist, cols=3):
     pairs = ["\t".join(
         ['%20s' % j for j in mylist[i:i + cols]])
@@ -303,10 +304,12 @@ def pretty_tabulate_list(mylist, cols=3):
     print(("\n".join(pairs)))
     print("\n")
 
+
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
         sorted([f'{key}:{value}'
                 for key, value in list(mydict.items())]), cols)
+
 
 def escape_latex(text):
     text = text.replace('$', r'\$') \
@@ -320,6 +323,7 @@ def escape_latex(text):
         .replace('^', r'\^{}')
     return text
 
+
 def strip_accents(text):
     """strip accents and those chars that can't be stripped"""
     # >>> strip_accents(u'nôn-åscîî')
@@ -331,6 +335,7 @@ def strip_accents(text):
                        if unicodedata.category(x) != 'Mn')
     else:
         return text
+
 
 def normalize_whitespace(text):
     """Remove redundant whitespace from a string, including before comma
@@ -345,6 +350,7 @@ def normalize_whitespace(text):
 #################################################################
 # Entry construction
 #################################################################
+
 
 def identity_add_title(ident, title):
     """Return a non-colliding identity.
@@ -383,13 +389,14 @@ def identity_add_title(ident, title):
     ident = f'{ident}{suffix}'
     return ident
 
+
 def identity_increment(ident, entries):
     """Increment numerical suffix of identity until no longer collides with
     pre-existing entry(s) in the entries dictionary.
 
     >>> identity_increment('Wikipedia 2008npv',\
     {'Wikipedia 2008npv': {'title': 'Wikipedia:No Point of View',\
-    'author': [('', '', 'Wikipedia', '')], 'year': '2008'}})
+    'author': [('', '', 'Wikipedia', '')], 'date': '2008'}})
     'Wikipedia 2008npv1'
 
     """
@@ -405,9 +412,11 @@ def identity_increment(ident, entries):
         # dbg(f'\t yielded    {ident}')
     return ident
 
+
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
+    critical(f"entry = {entry}")
     last_names = []
     for first, von, last, jr in entry['author']:
         last_names.append(f'{von}{last}'.replace(' ', ''))
@@ -424,6 +433,7 @@ def get_ident(entry, entries, delim=""):
         entry['date'] = Date(year='0000', month=None, day=None, circa=None,
                              time=None)
     year_delim = ' ' if delim else ''
+    critical(f"entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
     ident = ident.replace(
@@ -443,6 +453,7 @@ def get_ident(entry, entries, delim=""):
         ident = identity_increment(ident, entries)
     # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
+
 
 def parse_date(when):
     """parse dates that starts with 'YYYY' and returns named tuple.
@@ -482,6 +493,7 @@ def parse_date(when):
     else:
         raise Exception(f"{when} is malformed")
     return Date(year, month, day, circa, time)
+
 
 def pull_citation(entry):
     """Modifies entry with parsed citation
@@ -547,6 +559,7 @@ def pull_citation(entry):
 # Biblatex utilities
 #################################################################
 
+
 def create_biblatex_author(names):
     """Return the parts of the name joined appropriately.
     The BibTex name parsing is best explained in
@@ -582,6 +595,7 @@ def create_biblatex_author(names):
     return full_names
 # yapf: disable
 
+
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -590,7 +604,7 @@ def guess_biblatex_type(entry):
         'publisher': 'ACM',\
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
-        'year': '2008'})
+        'date': '2008'})
     'inproceedings'
 
     """
@@ -629,9 +643,10 @@ def guess_biblatex_type(entry):
                 if 'dissertation' in entry['type'].lower(): e_t = 'phdthesis'
         elif 'url' in entry:                e_t = 'online'
         elif 'doi' in entry:                e_t = 'online'
-        elif 'year' not in entry:           e_t = 'unpublished'
+        elif 'date' not in entry:           e_t = 'unpublished'
 
         return e_t
+
 
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
@@ -641,7 +656,7 @@ def guess_csl_type(entry):
         'publisher': 'ACM',\
         'title': 'A Great Paper',\
         'venue': 'Porto, Portugal California',\
-        'year': '2008'})
+        'date': '2008'})
     ('paper-conference', None, None)
 
     """
@@ -697,9 +712,10 @@ def guess_csl_type(entry):
                                             et = 'thesis'
         elif 'url' in entry:                et = 'webpage'
         elif 'doi' in entry:                et = 'article'
-        elif 'year' not in entry:           et = 'manuscript'
+        elif 'date' not in entry:           et = 'manuscript'
     return et, genre, medium
 # yapf: enable
+
 
 def bibformat_title(title):
     """Title case text, and preserve/bracket proper names/nouns
@@ -770,10 +786,12 @@ def bibformat_title(title):
 # Emitters
 #################################################################
 
+
 EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
                 'amazon.com', 'data/1work/']
 ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
                    'slate.com']
+
 
 def emit_biblatex(entries):
     """Emit a biblatex file"""
@@ -864,6 +882,7 @@ def emit_biblatex(entries):
                 args.outfd.write(f'   {field} = {{{value}}},\n')
         args.outfd.write("}\n")
 
+
 def emit_yaml_csl(entries):
     """Emit citations in YAML/CSL for input to pandoc
 
@@ -907,8 +926,6 @@ def emit_yaml_csl(entries):
         """yaml writer for dates"""
         # TODO: allow BCE and circa dates, e.g., '-0348~'
 
-        # year, month, day = (date.split('-') + 3 * [None])[0:3]
-        # info(f'year, month, day = {year}, {month}, {day}')
         if date.year:
             args.outfd.write(f'    year: {date.year}\n')
         if date.month:
@@ -954,8 +971,7 @@ def emit_yaml_csl(entries):
                 value = entry[field]
                 # info(f"short, field = '{short} , {field}'")
                 # skipped fields
-                if field in ('identifier', 'entry_type',
-                             'day', 'month', 'year', 'issue'):
+                if field in ('identifier', 'entry_type', 'issue'):
                     continue
 
                 # special format fields
@@ -1024,6 +1040,7 @@ def emit_yaml_csl(entries):
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write('...\n')
 
+
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{citation}} template format.
 
@@ -1079,6 +1096,7 @@ def emit_wp_citation(entries):
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f'| {field} = {value}\n')
         args.outfd.write("}}\n")
+
 
 def emit_results(entries, query, results_file):
     """Emit the results of the query"""
@@ -1257,7 +1275,8 @@ def emit_results(entries, query, results_file):
             results_file.write(f'{spaces}</li>\n')
         # if my author or title matched, print biblio w/ link to complete entry
         elif '_author_result' in entry:
-            author = entry['_author_result'].get('TEXT') + entry['year']
+            author = (f"{entry['_author_result'].get('TEXT')}"
+                      f"{entry['date'].year}")
             print_entry(identifier, author, date, title,
                         url, MM_mm_file, base_mm_file, spaces)
         elif '_title_result' in entry:
@@ -1268,6 +1287,7 @@ def emit_results(entries, query, results_file):
 #################################################################
 # Mindmap parsing and bib building
 #################################################################
+
 
 def parse_names(names):
     """Do author parsing magic to figure out name components.
@@ -1315,13 +1335,15 @@ def parse_names(names):
         names_p.append((first, von, last, jr))
     return names_p
 
+
 def commit_entry(entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
     if entry != {}:
         entry.setdefault('author', [('', 'John', 'Doe', '')])
         entry.setdefault('title', 'Unknown')
-        entry.setdefault('year', '0000')
+        entry.setdefault('date', Date(year='0000', month=None, day=None,
+                         circa=None, time=None))
         entry.setdefault('_mm_file', '')
 
         # pull the citation, create an identifier, and enter in entries
@@ -1334,6 +1356,7 @@ def commit_entry(entry, entries):
         entry['identifier'] = get_ident(entry, entries)
         entries[entry['identifier']] = entry
     return entries
+
 
 def walk_freeplane(node, mm_file, entries, links):
     """Walk the freeplane XML tree and build:
@@ -1433,6 +1456,7 @@ def walk_freeplane(node, mm_file, entries, links):
     entries = commit_entry(entry, entries)
     return entries, links
 
+
 RESULT_FILE_HEADER = """<!DOCTYPE html>
 <html>
 <head>
@@ -1455,6 +1479,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <h2>Results for '%s'</h2>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
+
 
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
@@ -1540,6 +1565,7 @@ def build_bib(file_name, output):
         output(entries)
     return
 
+
 def _test_results():
     """
     Tests the overall parsing of Mindmap XML and the relationships between
@@ -1591,6 +1617,7 @@ def _test_results():
     0
 
     """
+
 
 if __name__ == '__main__':
     import argparse  # http://docs.python.org/dev/library/argparse.html

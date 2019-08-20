@@ -416,7 +416,7 @@ def identity_increment(ident, entries):
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
-    critical(f"entry = {entry}")
+    # critical(f"entry = {entry}")
     last_names = []
     for first, von, last, jr in entry['author']:
         last_names.append(f'{von}{last}'.replace(' ', ''))
@@ -433,7 +433,7 @@ def get_ident(entry, entries, delim=""):
         entry['date'] = Date(year='0000', month=None, day=None, circa=None,
                              time=None)
     year_delim = ' ' if delim else ''
-    critical(f"entry['date'] = {entry['date']}")
+    # critical(f"entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
     ident = ident.replace(
@@ -1342,8 +1342,7 @@ def commit_entry(entry, entries):
     if entry != {}:
         entry.setdefault('author', [('', 'John', 'Doe', '')])
         entry.setdefault('title', 'Unknown')
-        entry.setdefault('date', Date(year='0000', month=None, day=None,
-                         circa=None, time=None))
+        entry.setdefault('0000')
         entry.setdefault('_mm_file', '')
 
         # pull the citation, create an identifier, and enter in entries

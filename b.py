@@ -23,7 +23,7 @@ http://reagle.org/joseph/blog/technology/python/busysponge-0.5
 
 import argparse
 from argparse import RawTextHelpFormatter
-from collections import Counter
+from collections import Counter, namedtuple
 from datetime import datetime
 from dateutil.parser import parse
 import fe
@@ -1259,15 +1259,16 @@ def print_usage(message):
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
 
-    # import readline # gives raw_input cursor and history support
+    Date = namedtuple('Date', ['year', 'month', 'day', 'circa', 'time'])
 
-    def get_tentative_ident(bibio):
+    def get_tentative_ident(biblio):
         info(biblio)
         return fe.get_ident({
             'author': fe.parse_names(biblio['author']),
             'title': biblio['title'],
-            'year': biblio['date'][0:4],
-            '_mm_file': 'CONSOLE'}, {}
+            # 'date': biblio['date'][0:4],
+            'date': Date(year=biblio['date'][0:4], month=None, day=None,
+                         circa=None, time=None), '_mm_file': 'CONSOLE'}, {}
         )
 
     def print_console_msg():

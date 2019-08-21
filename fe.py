@@ -416,7 +416,7 @@ def identity_increment(ident, entries):
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
-    # critical(f"entry = {entry}")
+    # info(f"entry = {entry}")
     last_names = []
     for first, von, last, jr in entry['author']:
         last_names.append(f'{von}{last}'.replace(' ', ''))
@@ -433,7 +433,7 @@ def get_ident(entry, entries, delim=""):
         entry['date'] = Date(year='0000', month=None, day=None, circa=None,
                              time=None)
     year_delim = ' ' if delim else ''
-    # critical(f"entry['date'] = {entry['date']}")
+    # info(f"entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry['date'].year))
     # info(f"ident = {type(ident)} '{ident}'")
     ident = ident.replace(
@@ -470,8 +470,6 @@ def parse_date(when):
     Date(year='-5', month=None, day=None, circa=None, time=None)
     >>> parse_date('130~')
     Date(year='130', month=None, day=None, circa=True, time=None)
-
-
     """
 
     year = month = day = circa = time = None
@@ -932,6 +930,8 @@ def emit_yaml_csl(entries):
             args.outfd.write(f'    month: {date.month}\n')
         if date.day:
             args.outfd.write(f'    day: {date.day}\n')
+        if date.circa:
+            args.outfd.write(f'    circa: true\n')
         if season:
             args.outfd.write(f'    season: {season}\n')
 

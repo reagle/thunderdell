@@ -1,4 +1,4 @@
-<map version="freeplane 1.6.0">
+<map version="freeplane 1.7.0">
 <!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
 <node TEXT="test" FOLDED="false" ID="ID_238118654"><hook NAME="MapStyle">
     <properties fit_to_viewport="false;"/>
@@ -82,10 +82,22 @@
 <node TEXT="pass" POSITION="left" ID="ID_1092147349"/>
 <node TEXT="A1" STYLE_REF="author" POSITION="right" ID="ID_688738488" COLOR="#338800">
 <node TEXT="T1" STYLE_REF="title" ID="ID_577892787" LINK="http://example.com/" COLOR="#090f6b">
-<node TEXT="d=20040705 r=20040710" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
+<node TEXT="d=20010705 r=20020806" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
 </node>
 <node TEXT="T2" STYLE_REF="title" ID="ID_1277775152" COLOR="#090f6b">
-<node TEXT="d=20050615" STYLE_REF="cite" ID="ID_106881548" COLOR="#ff33b8"/>
+<node TEXT="d=200202" STYLE_REF="cite" ID="ID_106881548" COLOR="#ff33b8"/>
+</node>
+<node TEXT="T3" STYLE_REF="title" ID="ID_638585131" COLOR="#090f6b">
+<node TEXT="d=2003" STYLE_REF="cite" ID="ID_1784556907" COLOR="#ff33b8"/>
+</node>
+<node TEXT="T4" STYLE_REF="title" ID="ID_251503336" COLOR="#090f6b">
+<node TEXT="d=2004~" STYLE_REF="cite" ID="ID_872124304" COLOR="#ff33b8"/>
+</node>
+<node TEXT="T5" STYLE_REF="title" ID="ID_746163209" COLOR="#090f6b">
+<node TEXT="d=-5" STYLE_REF="cite" ID="ID_1700738602" COLOR="#ff33b8"/>
+</node>
+<node TEXT="T6" STYLE_REF="title" ID="ID_1854152305" COLOR="#090f6b">
+<node TEXT="d=-6~" STYLE_REF="cite" ID="ID_329312029" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

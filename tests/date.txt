@@ -1,28 +1,61 @@
 ---
 references:
-- id: A12004tt1
-  type: webpage
-  author:
-  - family: "A1"
-  custom2: "date.mm"
-  issued:
-    year: 2004
-    month: 07
-    day: 05
-  title: "T1"
-  URL: "http://example.com/"
-  accessed:
-    year: 2004
-    month: 07
-    day: 10
-- id: A12005tt2
+- id: A1-5tt5
   type: no-type
   author:
   - family: "A1"
   custom2: "date.mm"
   issued:
-    year: 2005
-    month: 06
-    day: 15
+    year: -5
+  title: "T5"
+- id: A1-6tt6
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: -6
+    circa: true
+  title: "T6"
+- id: A12001tt1
+  type: webpage
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2001
+    month: 07
+    day: 05
+  title: "T1"
+  URL: "http://example.com/"
+  accessed:
+    year: 2002
+    month: 08
+    day: 06
+- id: A12002tt2
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2002
+    month: 02
   title: "T2"
+- id: A12003tt3
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2003
+  title: "T3"
+- id: A12004tt4
+  type: no-type
+  author:
+  - family: "A1"
+  custom2: "date.mm"
+  issued:
+    year: 2004
+    circa: true
+  title: "T4"
 ...

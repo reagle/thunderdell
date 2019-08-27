@@ -861,16 +861,18 @@ def emit_biblatex(entries):
                 if field in ('author', 'editor', 'translator'):
                     value = create_biblatex_author(value)
                 if field in ('date', 'urldate', 'origdate'):
-                    value = '-'.join(filter(None, (
+                    date = '-'.join(filter(None, (
                         value.year, value.month, value.day)))
+                    date = date + '~' if value.circa else date
+                    value = date
 
                 # escape latex brackets.
                 #   url and howpublished shouldn't be changed
                 #   author may have curly brackets that should not be escaped
                 #   date is a named_tuple that doesn't need escaping
                 # info(f"{field}")
-                if field not in (
-                        'author', 'url', 'howpublished', 'date', 'urldate'):
+                if field not in ('author', 'url', 'howpublished', 'date',
+                                 'origdate', 'urldate'):
                     value = escape_latex(value)
 
                 # protect case in titles
@@ -1084,15 +1086,16 @@ def emit_wp_citation(entries):
                 elif field == 'editor':
                     output_wp_names(field, value)
                     continue
-                elif field in ('date', 'origdate', 'accessed'):
+                elif field in ('date', 'origdate', 'urldate'):
                     date = '-'.join(filter(None, (
                         value.year, value.month, value.day)))
-                    args.outfd.write(f'| {field} = {date}\n')
-                    continue
+                    if value.circa:
+                        date = '{{circa|' + date + '}}'
+                    value = date
                 elif field == 'title':  # TODO: convert value to title case?
                     if 'booktitle' in entry:
                         field = 'chapter'
-                elif field in BIBLATEX_WP_FIELD_MAP:
+                if field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f'| {field} = {value}\n')
         args.outfd.write("}}\n")

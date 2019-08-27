@@ -15,7 +15,7 @@ references:
   custom2: "date.mm"
   issued:
     year: -6
-    circa: yes
+    circa: true
   title: "T6"
 - id: A12001tt1
   type: webpage
@@ -29,9 +29,9 @@ references:
   title: "T1"
   URL: "http://example.com/"
   accessed:
-    year: 2001
-    month: 07
-    day: 10
+    year: 2002
+    month: 08
+    day: 06
 - id: A12002tt2
   type: no-type
   author:
@@ -56,6 +56,6 @@ references:
   custom2: "date.mm"
   issued:
     year: 2004
-    circa: yes
+    circa: true
   title: "T4"
 ...

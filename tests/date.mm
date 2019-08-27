@@ -82,7 +82,7 @@
 <node TEXT="pass" POSITION="left" ID="ID_1092147349"/>
 <node TEXT="A1" STYLE_REF="author" POSITION="right" ID="ID_688738488" COLOR="#338800">
 <node TEXT="T1" STYLE_REF="title" ID="ID_577892787" LINK="http://example.com/" COLOR="#090f6b">
-<node TEXT="d=20010705 r=20010710" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
+<node TEXT="d=20010705 r=20020806" STYLE_REF="cite" ID="ID_166228020" COLOR="#ff33b8"/>
 </node>
 <node TEXT="T2" STYLE_REF="title" ID="ID_1277775152" COLOR="#090f6b">
 <node TEXT="d=200202" STYLE_REF="cite" ID="ID_106881548" COLOR="#ff33b8"/>

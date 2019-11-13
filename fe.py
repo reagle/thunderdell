@@ -1379,7 +1379,7 @@ def walk_freeplane(node, mm_file, entries, links):
     entry = {}
 
     if useLXML is False:
-        parent_map = {c: p for p in node.getiterator() for c in p}
+        parent_map = {c: p for p in node.iter() for c in p}
 
         def get_parent(node):
             return parent_map[node]
@@ -1412,7 +1412,7 @@ def walk_freeplane(node, mm_file, entries, links):
             ancestor = get_parent(ancestor)
         return ancestor
 
-    for d in node.getiterator():
+    for d in node.iter():
         if 'LINK' in d.attrib:                  # found a local reference link
             if (not d.get('LINK').startswith('http:')
                     and d.get('LINK').endswith('.mm')):

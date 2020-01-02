@@ -868,7 +868,7 @@ def log2mm(biblio):
             year_node = mm_year
             break
     else:
-        print(f"creating {year}")
+        print(f"creating {this_year}")
         year_node = SubElement(
             mm_years, 'node',
             {'TEXT': this_year, 'POSITION': 'right'})

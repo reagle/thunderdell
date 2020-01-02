@@ -1237,6 +1237,18 @@ def print_usage(message):
     print(message)
     print("Usage: b scheme [tags ]?[url ]?[comment ]?")
 
+def rotate_files(filename, max=5):
+    f"""create at most {max} rotating files"""
+
+    bare, ext = os.path.splitext(filename)
+    for counter in reversed(range(2, max+1)):
+        old_filename = f"{bare}{counter-1}{ext}"
+        new_filename = f"{bare}{counter}{ext}"
+        if os.path.exists(old_filename):
+            os.rename(old_filename, new_filename)
+    if os.path.exists(filename):
+        os.rename(filename, f"{bare}1{ext}")
+
 def do_console_annotation(biblio):
     '''Augment biblio with console annotations'''
 
@@ -1269,8 +1281,8 @@ def do_console_annotation(biblio):
     def edit_annotation(initial_text, resume_edit=False):
         '''Write initial bib info to a tmp file, edit and return'''
 
-        # TODO: give each file a unique tmp name
         annotation_file_name = TMP_DIR + 'b-annotation.txt'
+        rotate_files(annotation_file_name)
         if not resume_edit:
             if os.path.exists(annotation_file_name):
                 os.remove(annotation_file_name)

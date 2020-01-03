@@ -40,24 +40,24 @@ def cgi_main():
         print((fileObj.read()))
         fileObj.close()
     else:
-        sys.path.append(HOME+"/bin/fe")
+        sys.path.append(HOME+"/bin/td")
         MINDMAP = (HOME+'/joseph/readings.mm')
 
-        import fe
-        output = fe.emit_results
-        fe.args.query = query
-        fe.args.query_c = re.compile(re.escape(query), re.IGNORECASE)
-        fe.args.chase = True
-        fe.args.cgi = True
+        import thunderdell as td
+        output = td.emit_results
+        td.args.query = query
+        td.args.query_c = re.compile(re.escape(query), re.IGNORECASE)
+        td.args.chase = True
+        td.args.cgi = True
         
-        def _ignore(_): pass # this overrides fe's logging
-        fe.critical = _ignore
-        fe.info =  _ignore
-        fe.dbg =  _ignore
+        def _ignore(_): pass # this overrides td's logging
+        td.critical = _ignore
+        td.info =  _ignore
+        td.dbg =  _ignore
 
-        fe.build_bib(MINDMAP, output)
+        td.build_bib(MINDMAP, output)
 
-        fileObj = codecs.open(fe.TMP_DIR + 'query-thunderdell.html', 
+        fileObj = codecs.open(td.TMP_DIR + 'query-thunderdell.html', 
                               "r", "utf-8")
         print((fileObj.read()))
         fileObj.close()

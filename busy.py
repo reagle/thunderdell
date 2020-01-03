@@ -26,7 +26,7 @@ from argparse import RawTextHelpFormatter
 from collections import Counter, namedtuple
 from datetime import datetime
 from dateutil.parser import parse
-import fe
+import thunderdell as td
 from io import StringIO, BytesIO
 import logging
 from lxml import etree
@@ -37,7 +37,7 @@ from subprocess import call, Popen
 import sys
 import time
 
-# personal Web utility module
+# personal utilities
 from web_little import get_HTML, get_text, unescape_XML, escape_XML
 from change_case import sentence_case, title_case
 
@@ -701,7 +701,7 @@ class scrape_ENWP(scrape_default):
             r'''<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) '''
             r'''(\d\d\d\d)</span>''',
             versioned_HTML_u).groups()
-        month = fe.MONTH2DIGIT[month[0:3].lower()]
+        month = td.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))
 
     def get_org(self):
@@ -735,7 +735,7 @@ class scrape_WMMeta(scrape_default):
         day, month, year = re.search(
             r'''<li id="footer-info-lastmod"> This page was last edited '''
             r'''on (\d{1,2}) (\w+) (\d\d\d\d)''', cite_HTML_u).groups()
-        month = fe.MONTH2DIGIT[month[0:3].lower()]
+        month = td.MONTH2DIGIT[month[0:3].lower()]
         return '%d%02d%02d' % (int(year), int(month), int(day))
 
     def get_org(self):
@@ -848,9 +848,9 @@ def log2mm(biblio):
             del biblio[token]
     citation = ''
     for key, value in list(biblio.items()):
-        if key in fe.BIB_FIELDS:
+        if key in td.BIB_FIELDS:
             info(f"key = {key} value = {value}")
-            citation += f"{fe.BIB_FIELDS[key]}={value} "
+            citation += f"{td.BIB_FIELDS[key]}={value} "
     citation += f" r={date_read} "
     if biblio['tags']:
         tags = biblio['tags']
@@ -1256,8 +1256,8 @@ def do_console_annotation(biblio):
 
     def get_tentative_ident(biblio):
         info(biblio)
-        return fe.get_ident({
-            'author': fe.parse_names(biblio['author']),
+        return td.get_ident({
+            'author': td.parse_names(biblio['author']),
             'title': biblio['title'],
             # 'date': biblio['date'][0:4],
             'date': Date(year=biblio['date'][0:4], month=None, day=None,
@@ -1274,7 +1274,7 @@ def do_console_annotation(biblio):
             '''\t 'key=value' for metadata; e.g., \n'''
             '''\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n'''
             '''\t\tEntry types (et) values must be typed as shortcut:''')
-        for key, value in list(fe.CSL_SHORTCUTS.items()):
+        for key, value in list(td.CSL_SHORTCUTS.items()):
             print(f'\t\t\t{key} = {value}')
         print('''\n\tEnd with CTRL-D.\n''')
 
@@ -1323,12 +1323,12 @@ def do_console_annotation(biblio):
                 for short, value in cite_pairs:
                     info(f"short,value = {short},{value}")
                     if short == 't':  # 't=cj' -> cj = 'Nature'
-                        biblio[fe.BIB_SHORTCUTS[value]] = biblio['c_web']
+                        biblio[td.BIB_SHORTCUTS[value]] = biblio['c_web']
                         del biblio['c_web']
                     elif short == 'kw':  # 'kw=complicity
                         biblio['tags'] += ' ' + value.strip()
                     else:
-                        biblio[fe.BIB_SHORTCUTS[short]] = value.strip()
+                        biblio[td.BIB_SHORTCUTS[short]] = value.strip()
             else:
                 if line:
                     console_annotations += '\n\n' + line.strip()
@@ -1337,9 +1337,9 @@ def do_console_annotation(biblio):
         info(f"console_annotations = '{console_annotations}'")
         biblio['excerpt'] = biblio.get('excerpt', '') + console_annotations
 
-        # See if there is a container/fe.CSL_SHORTCUTS redundant with 'c_web'
+        # See if there is a container/td.CSL_SHORTCUTS redundant with 'c_web'
         if 'c_web' in biblio and \
-            len(list(biblio[c] for c in list(fe.CSL_SHORTCUTS.values())
+            len(list(biblio[c] for c in list(td.CSL_SHORTCUTS.values())
                 if c in biblio)) > 1:
             del biblio['c_web']
         return biblio, do_publish
@@ -1350,7 +1350,7 @@ def do_console_annotation(biblio):
     initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
     for key in biblio:
         if key.startswith('c_'):
-            initial_text.append(f"{fe.CSL_FIELDS[key]}={title_case(biblio[key])}")
+            initial_text.append(f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}")
         if key == 'tags' and biblio['tags']:
             tags = ' '.join(['kw=' + KEY_SHORTCUTS.get(tag, tag)
                             for tag in biblio['tags'].strip().split(' ')])
@@ -1520,7 +1520,7 @@ if __name__ == "__main__":
         sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
-            fe.pretty_tabulate_dict(dictionary, 3)
+            td.pretty_tabulate_dict(dictionary, 3)
         sys.exit()
 
     logger, params = get_logger(' '.join(args.text))

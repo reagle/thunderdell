@@ -9,9 +9,10 @@
 """extract a MM from a dictated text file using particular conventions"""
 
 import os
-HOME = os.path.expanduser('~')
 
-MINDMAP_PREAMBLE = '''<map version="freeplane 1.5.9">
+HOME = os.path.expanduser("~")
+
+MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
     <node TEXT="reading" FOLDED="false" ID="ID_327818409" STYLE="oval">
         <font SIZE="18"/>
         <hook NAME="MapStyle">
@@ -31,7 +32,7 @@ MINDMAP_PREAMBLE = '''<map version="freeplane 1.5.9">
                 </stylenode>
             </map_styles>
         </hook>
-'''
+"""
 
 # CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
 #     'cite': '#ff33b8', 'author': '#338800',
@@ -41,16 +42,22 @@ MINDMAP_PREAMBLE = '''<map version="freeplane 1.5.9">
 
 
 def clean(text):
-    '''clean and encode text'''
+    """clean and encode text"""
     # TODO: Maybe make use of b.smart_punctuation_to_ascii() and
     # web_little.escape_XML()
 
-    text = text.strip(', \f\r\n')
+    text = text.strip(", \f\r\n")
     REPLACEMENTS = [
-        ('&', '&amp;'), ("'", '&apos;'),
-        ('"', '&quot;'), ('“', '&quot;'),
-        ('”', '&quot;'), ("‘", "'"),
-        ("’", "'"), (" – ", " -- "), ("–", " -- ")]
+        ("&", "&amp;"),
+        ("'", "&apos;"),
+        ('"', "&quot;"),
+        ("“", "&quot;"),
+        ("”", "&quot;"),
+        ("‘", "'"),
+        ("’", "'"),
+        (" – ", " -- "),
+        ("–", " -- "),
+    ]
 
     for v1, v2 in REPLACEMENTS:
         text = text.replace(v1, v2)
@@ -60,6 +67,7 @@ def clean(text):
 def get_date():
     import string
     import time
+
     now = time.localtime()
     year = time.strftime("%Y", now).lower()
     month = time.strftime("%m", now).lower()
@@ -74,8 +82,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
     author = title = citation = ""
     entry = {}
 
-    if line not in ('', '\r', '\n'):
-        if line.lower().startswith('author ='):
+    if line not in ("", "\r", "\n"):
+        if line.lower().startswith("author ="):
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started:  # Do I need to close a previous entry
                 if in_subsection:
@@ -95,119 +103,140 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 started = False
             started = True
             # should space be optional '(\w+) ?='
-            cites = re.split(r'(\w+) =', line)[1:]
+            cites = re.split(r"(\w+) =", line)[1:]
             # 2 references to an iterable object that are
             # unpacked with '*' and rezipped
             cite_pairs = list(zip(*[iter(cites)] * 2))
             for token, value in cite_pairs:
                 entry[token.lower()] = value.strip()
 
-            if 'author' not in entry:
-                entry['author'] = 'Unknown'
-            if 'title' not in entry:
-                entry['title'] = 'Untitled'
-            if 'subtitle' in entry:
-                entry['title'] += ': ' + entry['subtitle']
-                del entry['subtitle']
+            if "author" not in entry:
+                entry["author"] = "Unknown"
+            if "title" not in entry:
+                entry["title"] = "Untitled"
+            if "subtitle" in entry:
+                entry["title"] += ": " + entry["subtitle"]
+                del entry["subtitle"]
 
             file_out.write(
                 """<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
-                % ('author', clean(entry['author'].title())))
-            if 'url' in entry:
+                % ("author", clean(entry["author"].title()))
+            )
+            if "url" in entry:
                 file_out.write(
                     """  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
-                    % ('title', clean(entry['url']), clean(entry['title'])))
+                    % ("title", clean(entry["url"]), clean(entry["title"]))
+                )
             else:
                 file_out.write(
                     """  <node STYLE_REF="%s" TEXT="%s">\n"""
-                    % ('title', clean(entry['title'])))
+                    % ("title", clean(entry["title"]))
+                )
 
             for token, value in sorted(entry.items()):
-                if token not in ('author', 'title', 'url'):
+                if token not in ("author", "title", "url"):
                     if token in BIB_SHORTCUTS:
                         t, v = token.lower(), value
                     else:
                         if token.lower() in BIB_FIELDS:
                             t, v = BIB_FIELDS[token.lower()], value
                         else:
-                            print("* Unknown token '%s' in %s" % (
-                                token, entry['author']))
+                            print(
+                                "* Unknown token '%s' in %s"
+                                % (token, entry["author"])
+                            )
                             sys.exit
                     citation_add = "%s=%s " % (t, v)
                     citation = citation + citation_add
             if citation != "":
                 clean(citation)
             citation += " r=%s" % get_date()
-            file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                           % ('cite', clean(citation)))
+            file_out.write(
+                """  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ("cite", clean(citation))
+            )
 
-        elif re.match(r'summary\.(.*)', line, re.I):
-            matches = re.match(r'summary\.(.*)', line, re.I)
-            file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                           % ('annotation', clean(matches.groups()[0])))
+        elif re.match(r"summary\.(.*)", line, re.I):
+            matches = re.match(r"summary\.(.*)", line, re.I)
+            file_out.write(
+                """  <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ("annotation", clean(matches.groups()[0]))
+            )
 
-        elif re.match('part.*', line, re.I):
+        elif re.match("part.*", line, re.I):
             if in_part:
                 if in_chapter:
-                    file_out.write("""    </node>\n""")      # close chapter
+                    file_out.write("""    </node>\n""")  # close chapter
                     in_chapter = False
                 if in_section:
-                    file_out.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")  # close section
                     in_section = False
                 if in_subsection:
-                    file_out.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")  # close section
                     in_subsection = False
-                file_out.write("""  </node>\n""")            # close part
+                file_out.write("""  </node>\n""")  # close part
                 in_part = False
-            file_out.write("""  <node STYLE_REF="%s" TEXT="%s">\n"""
-                           % ('paraphrase', clean(line)))
+            file_out.write(
+                """  <node STYLE_REF="%s" TEXT="%s">\n"""
+                % ("paraphrase", clean(line))
+            )
             in_part = True
 
-        elif re.match('chapter.*', line, re.I):
+        elif re.match("chapter.*", line, re.I):
             if in_chapter:
                 if in_section:
-                    file_out.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")  # close section
                     in_section = False
                 if in_subsection:
-                    file_out.write("""      </node>\n""")    # close section
+                    file_out.write("""      </node>\n""")  # close section
                     in_subsection = False
-                file_out.write("""    </node>\n""")            # close chapter
+                file_out.write("""    </node>\n""")  # close chapter
                 in_chapter = False
-            file_out.write("""    <node STYLE_REF="%s" TEXT="%s">\n"""
-                           % ('paraphrase', clean(line)))
+            file_out.write(
+                """    <node STYLE_REF="%s" TEXT="%s">\n"""
+                % ("paraphrase", clean(line))
+            )
             in_chapter = True
 
-        elif re.match('section.*', line, re.I):
+        elif re.match("section.*", line, re.I):
             if in_subsection:
-                file_out.write("""      </node>\n""")    # close section
+                file_out.write("""      </node>\n""")  # close section
                 in_subsection = False
             if in_section:
                 file_out.write("""    </node>\n""")
                 in_section = False
-            file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
-                           % ('paraphrase', clean(line[9:])))
+            file_out.write(
+                """      <node STYLE_REF="%s" TEXT="%s">\n"""
+                % ("paraphrase", clean(line[9:]))
+            )
             in_section = True
 
-        elif re.match('subsection.*', line, re.I):
+        elif re.match("subsection.*", line, re.I):
             if in_subsection:
                 file_out.write("""    </node>\n""")
                 in_subsection = False
-            file_out.write("""      <node STYLE_REF="%s" TEXT="%s">\n"""
-                           % ('paraphrase', clean(line[12:])))
+            file_out.write(
+                """      <node STYLE_REF="%s" TEXT="%s">\n"""
+                % ("paraphrase", clean(line[12:]))
+            )
             in_subsection = True
 
-        elif re.match('(--.*)', line, re.I):
-            file_out.write("""          <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                           % ('default', clean(line)))
+        elif re.match("(--.*)", line, re.I):
+            file_out.write(
+                """          <node STYLE_REF="%s" TEXT="%s"/>\n"""
+                % ("default", clean(line))
+            )
 
         else:
-            node_color = 'paraphrase'
+            node_color = "paraphrase"
             line_text = line
             # print(line)
-            line_no = ''
-            line_split = line.split(' ')
+            line_no = ""
+            line_split = line.split(" ")
             # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
-            PAGE_NUM_PAT = r'^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$'
+            PAGE_NUM_PAT = (
+                r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
+            )
 
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
@@ -217,19 +246,20 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                     line_no += matches.group(2)
                 if matches.group(4):
                     line_no += matches.group(4)
-                line_no = line_no.lower()   # lower case roman numbers
+                line_no = line_no.lower()  # lower case roman numbers
                 line_text = matches.group(3).strip()
 
-            if line_text.startswith('excerpt.'):
-                node_color = 'quote'
+            if line_text.startswith("excerpt."):
+                node_color = "quote"
                 line_text = line_text[9:]
-            if line_text.strip().endswith('excerpt.'):
-                node_color = 'quote'
+            if line_text.strip().endswith("excerpt."):
+                node_color = "quote"
                 line_text = line_text[0:-9]
 
             file_out.write(
                 """          <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % (node_color, clean(' '.join((line_no, line_text)))))
+                % (node_color, clean(" ".join((line_no, line_text))))
+            )
 
     return started, in_part, in_chapter, in_section, in_subsection
 
@@ -247,31 +277,37 @@ def check(text, file_out):
 
     file_out.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
 
-    for line in text.split('\n'):
+    for line in text.split("\n"):
         line = line.strip()
         try:
             started, in_part, in_chapter, in_section, in_subsection = parse(
-                line, started, in_part, in_chapter, in_section, in_subsection)
+                line, started, in_part, in_chapter, in_section, in_subsection
+            )
         except KeyError:
-            print(traceback.print_tb(
-                sys.exc_info()[2]), '\n', line_number, line)
+            print(
+                traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line
+            )
             sys.exit()
         line_number += 1
 
-    if in_subsection: file_out.write("""</node>""")  # close the last section
-    if in_section: file_out.write("""</node>""")  # close the last section
-    if in_chapter: file_out.write("""</node>""")  # close the last chapter
-    if in_part: file_out.write("""</node>""")  # close the last part
+    if in_subsection:
+        file_out.write("""</node>""")  # close the last section
+    if in_section:
+        file_out.write("""</node>""")  # close the last section
+    if in_chapter:
+        file_out.write("""</node>""")  # close the last chapter
+    if in_part:
+        file_out.write("""</node>""")  # close the last part
     file_out.write("""</node>\n</node>\n</node>\n""")  # close the last entry
-    file_out.write("""</node>\n</map>\n""")   # close the document
+    file_out.write("""</node>\n</map>\n""")  # close the document
 
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":
     # Parse the command line arguments for optional message and files.
 
-    from fe import BIB_SHORTCUTS   # a dict of shotcuts yeilding a field
-    from fe import BIB_FIELDS      # a dict of a field yielding its shortcut
+    from fe import BIB_SHORTCUTS  # a dict of shotcuts yeilding a field
+    from fe import BIB_FIELDS  # a dict of a field yielding its shortcut
 
     import codecs
     import chardet
@@ -283,30 +319,36 @@ if __name__ == "__main__":
     try:
         (options, file_names) = getopt.getopt(sys.argv[1:], "")
     except getopt.error:
-        print('Error: Unknown option or missing argument.')
+        print("Error: Unknown option or missing argument.")
     file_names = [os.path.abspath(file_name) for file_name in file_names]
     for file_name in file_names:
-        if file_name.endswith('.rtf'):
+        if file_name.endswith(".rtf"):
             subprocess.call(
-                ['/usr/bin/X11/catdoc', '-aw', file_name],
-                stdout=open('%s.txt' % file_name[0:-4], 'w',
-                encoding='utf-8', errors='replace'))
-            file_name = file_name[0:-4] + '.txt'
+                ["/usr/bin/X11/catdoc", "-aw", file_name],
+                stdout=open(
+                    "%s.txt" % file_name[0:-4],
+                    "w",
+                    encoding="utf-8",
+                    errors="replace",
+                ),
+            )
+            file_name = file_name[0:-4] + ".txt"
         try:
-            encoding = 'UTF-8'
+            encoding = "UTF-8"
             # encoding = chardet.detect(open(file_name).read())['encoding']
-            fdi = open(file_name, "r", encoding=encoding, errors='replace')
+            fdi = open(file_name, "r", encoding=encoding, errors="replace")
             text = fdi.read()
-            if encoding == 'UTF-8':
+            if encoding == "UTF-8":
                 if text[0] == str(codecs.BOM_UTF8, "utf8"):
                     text = text[1:]
                     print("removed BOM")
             # it's not decoding MS Word txt right, word is not starting with
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
-            file_name_out = os.path.splitext(file_name)[0] + '.mm'
-            file_out = open(file_name_out, "w", encoding="utf-8",
-                            errors='replace')
+            file_name_out = os.path.splitext(file_name)[0] + ".mm"
+            file_out = open(
+                file_name_out, "w", encoding="utf-8", errors="replace"
+            )
             # sys.stdout = codecs.getwriter('UTF-8')(
             #     sys.__stdout__, errors='replace')
         except IOError:
@@ -314,4 +356,4 @@ if __name__ == "__main__":
             continue
 
         check(text, file_out)
-        subprocess.call(['open', '-a', 'Freeplane.app', file_name_out])
+        subprocess.call(["open", "-a", "Freeplane.app", file_name_out])

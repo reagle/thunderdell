@@ -7,7 +7,9 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
-"""Extract a bibliography from a Freeplane mindmap"""
+"""Thunderdell, by Joseph Reagle http://reagle.org/joseph/
+
+Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
 
@@ -34,15 +36,15 @@ dbg = logging.debug
 
 useLXML = False
 # HOME for path of mindmaps on webhost
-HOME = os.path.expanduser('~')
+HOME = os.path.expanduser("~")
 # CLIENT_HOME for path on the client to open mindmaps there
 # as f'file://{CLIENT_HOME}/...'
-CLIENT_HOME = '/Users/reagle'
-DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
-DEFAULT_PRETTY_MAP = f'{HOME}/joseph/2005/ethno/field-notes.mm'
-CGI_DIR = f'{HOME}/joseph/plan/cgi-bin/'  # for local server
+CLIENT_HOME = "/Users/reagle"
+DEFAULT_MAP = f"{HOME}/joseph/readings.mm"
+DEFAULT_PRETTY_MAP = f"{HOME}/joseph/2005/ethno/field-notes.mm"
+CGI_DIR = f"{HOME}/joseph/plan/cgi-bin/"  # for local server
 
-TMP_DIR = f'{HOME}/tmp/.td/'
+TMP_DIR = f"{HOME}/tmp/.td/"
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
@@ -298,29 +300,32 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 
 
 def pretty_tabulate_list(mylist, cols=3):
-    pairs = ["\t".join(
-        ['%20s' % j for j in mylist[i:i + cols]])
-        for i in range(0, len(mylist), cols)]
+    pairs = [
+        "\t".join(["%20s" % j for j in mylist[i : i + cols]])
+        for i in range(0, len(mylist), cols)
+    ]
     print(("\n".join(pairs)))
     print("\n")
 
 
 def pretty_tabulate_dict(mydict, cols=3):
     pretty_tabulate_list(
-        sorted([f'{key}:{value}'
-                for key, value in list(mydict.items())]), cols)
+        sorted([f"{key}:{value}" for key, value in list(mydict.items())]), cols
+    )
 
 
 def escape_latex(text):
-    text = text.replace('$', r'\$') \
-        .replace('&', r'\&') \
-        .replace('%', r'\%') \
-        .replace('#', r'\#') \
-        .replace('_', r'\_') \
-        .replace('{', r'\{') \
-        .replace('}', r'\}') \
-        .replace('~', r'\~{}') \
-        .replace('^', r'\^{}')
+    text = (
+        text.replace("$", r"\$")
+        .replace("&", r"\&")
+        .replace("%", r"\%")
+        .replace("#", r"\#")
+        .replace("_", r"\_")
+        .replace("{", r"\{")
+        .replace("}", r"\}")
+        .replace("~", r"\~{}")
+        .replace("^", r"\^{}")
+    )
     return text
 
 
@@ -328,11 +333,14 @@ def strip_accents(text):
     """strip accents and those chars that can't be stripped"""
     # >>> strip_accents(u'nôn-åscîî')
     # ^ fails because of doctest bug u'non-ascii'
-    try:    # test if ascii
-        text.encode('ascii')
+    try:  # test if ascii
+        text.encode("ascii")
     except UnicodeEncodeError:
-        return ''.join(x for x in unicodedata.normalize('NFKD', text)
-                       if unicodedata.category(x) != 'Mn')
+        return "".join(
+            x
+            for x in unicodedata.normalize("NFKD", text)
+            if unicodedata.category(x) != "Mn"
+        )
     else:
         return text
 
@@ -344,8 +352,9 @@ def normalize_whitespace(text):
 
     """
     text = text.replace(" ,", ",")
-    text = ' '.join(text.split())
+    text = " ".join(text.split())
     return text
+
 
 #################################################################
 # Entry construction
@@ -365,28 +374,31 @@ def identity_add_title(ident, title):
 
     """
     # dbg(f"title = '{title}'")
-    suffix = ''
-    clean_title = title.replace('Wikipedia:', '') \
-        .replace('Category:', '') \
-        .replace('WikiEN-l', '') \
-        .replace('Wikipedia-l', '') \
-        .replace('Wiki-l', '') \
-        .replace('Wiktionary-l', '') \
-        .replace('Foundation-l', '') \
-        .replace('Textbook-l', '') \
-        .replace('.0', '') \
+    suffix = ""
+    clean_title = (
+        title.replace("Wikipedia:", "")
+        .replace("Category:", "")
+        .replace("WikiEN-l", "")
+        .replace("Wikipedia-l", "")
+        .replace("Wiki-l", "")
+        .replace("Wiktionary-l", "")
+        .replace("Foundation-l", "")
+        .replace("Textbook-l", "")
+        .replace(".0", "")
         .replace("'", "")
+    )
 
     NOT_ALPHANUM_PAT = re.compile("[^a-zA-Z0-9']")
     title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())
 
     if len(title_words) == 1:
-        suffix = f'{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}'
+        suffix = f"{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}"
     else:
-        suffix = ''.join([word[0] for word in title_words
-                          if word not in BORING_WORDS])
+        suffix = "".join(
+            [word[0] for word in title_words if word not in BORING_WORDS]
+        )
         suffix = suffix[:3]
-    ident = f'{ident}{suffix}'
+    ident = f"{ident}{suffix}"
     return ident
 
 
@@ -401,14 +413,14 @@ def identity_increment(ident, entries):
 
     """
 
-    while ident in entries:    # if it still collides
+    while ident in entries:  # if it still collides
         # dbg(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
-            ident = f'{ident[0:-1]}{suffix}'
+            ident = f"{ident[0:-1]}{suffix}"
         else:
-            ident += '1'
+            ident += "1"
         # dbg(f'\t yielded    {ident}')
     return ident
 
@@ -418,8 +430,8 @@ def get_ident(entry, entries, delim=""):
 
     # info(f"entry = {entry}")
     last_names = []
-    for first, von, last, jr in entry['author']:
-        last_names.append(f'{von}{last}'.replace(' ', ''))
+    for first, von, last, jr in entry["author"]:
+        last_names.append(f"{von}{last}".replace(" ", ""))
     if len(last_names) == 1:
         name_part = last_names[0]
     elif len(last_names) == 2:
@@ -427,29 +439,31 @@ def get_ident(entry, entries, delim=""):
     elif len(last_names) == 3:
         name_part = delim.join(last_names[0:3])
     elif len(last_names) > 3:
-        name_part = f'{last_names[0]}Etal'
+        name_part = f"{last_names[0]}Etal"
 
-    if 'date' not in entry:
-        entry['date'] = Date(year='0000', month=None, day=None, circa=None,
-                             time=None)
-    year_delim = ' ' if delim else ''
+    if "date" not in entry:
+        entry["date"] = Date(
+            year="0000", month=None, day=None, circa=None, time=None
+        )
+    year_delim = " " if delim else ""
     # info(f"entry['date'] = {entry['date']}")
-    ident = year_delim.join((name_part, entry['date'].year))
+    ident = year_delim.join((name_part, entry["date"].year))
     # info(f"ident = {type(ident)} '{ident}'")
-    ident = ident.replace(
-        ':', '').replace(  # not permitted in xml name/id attributes
-        "'", "").replace(  # punctuation
-        '.', '').replace(
-        '@', '').replace(  # '@' citation designator
-        '<strong>', '').replace(  # added by walk_freeplane.query_highlight
-        '</strong>', '')
+    ident = (
+        ident.replace(":", "")
+        .replace("'", "")  # not permitted in xml name/id attributes
+        .replace(".", "")  # punctuation
+        .replace("@", "")
+        .replace("<strong>", "")  # '@' citation designator
+        .replace("</strong>", "")  # added by walk_freeplane.query_highlight
+    )
     # info(f"ident = {type(ident)} '{ident}'")
     ident = strip_accents(ident)  # unicode buggy in bibtex keys
-    if ident[0].isdigit():        # pandoc forbids keys starting with digits
-        ident = f'a{ident}'
+    if ident[0].isdigit():  # pandoc forbids keys starting with digits
+        ident = f"a{ident}"
 
-    ident = identity_add_title(ident, entry['title'])    # get title suffix
-    if ident in entries:    # there is a collision
+    ident = identity_add_title(ident, entry["title"])  # get title suffix
+    if ident in entries:  # there is a collision
         ident = identity_increment(ident, entries)
     # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
@@ -474,9 +488,9 @@ def parse_date(when):
 
     year = month = day = circa = time = None
     info(f"{when}")
-    if ' ' in when:
-        when, time = when.split(' ', 1)
-    if when.endswith('~'):
+    if " " in when:
+        when, time = when.split(" ", 1)
+    if when.endswith("~"):
         when = when[:-1]
         circa = True
     if len(when) == 8:
@@ -500,12 +514,12 @@ def pull_citation(entry):
 
     """
 
-    entry['custom2'] = entry['_mm_file'].split('/')[-1]
+    entry["custom2"] = entry["_mm_file"].split("/")[-1]
 
-    if 'cite' in entry:
-        citation = entry['cite']
+    if "cite" in entry:
+        citation = entry["cite"]
         # split around tokens of length 1-3 and
-        EQUAL_PAT = re.compile(r'(\w{1,3})=')
+        EQUAL_PAT = re.compile(r"(\w{1,3})=")
         # get rid of first empty string of results
         cites = EQUAL_PAT.split(citation)[1:]
         # 2 refs to an iterable are '*' unpacked and rezipped
@@ -514,44 +528,46 @@ def pull_citation(entry):
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
-                print(("Key error on ", error,
-                       entry['title'], entry['_mm_file']))
+                print(
+                    ("Key error on ", error, entry["title"], entry["_mm_file"])
+                )
 
     # if 'url' in entry and entry['url'] is not None:
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
     #         entry['url'] = entry['url'].split('&')[0]
 
-    if 'date' in entry:
-        entry['date'] = parse_date(entry['date'])
+    if "date" in entry:
+        entry["date"] = parse_date(entry["date"])
 
-    if 'custom1' in entry and 'url' in entry:  # read/accessed date for URLs
-        entry['urldate'] = parse_date(entry['custom1'])
-        del entry['custom1']
+    if "custom1" in entry and "url" in entry:  # read/accessed date for URLs
+        entry["urldate"] = parse_date(entry["custom1"])
+        del entry["custom1"]
 
-    if 'origdate' in entry:         # original date of publication
-        entry['origdate'] = parse_date(entry['origdate'])
+    if "origdate" in entry:  # original date of publication
+        entry["origdate"] = parse_date(entry["origdate"])
 
-    if ': ' in entry['title']:
-        if not entry['title'].startswith('Re:'):
-            entry['shorttitle'] = entry['title'].split(':')[0].strip()
+    if ": " in entry["title"]:
+        if not entry["title"].startswith("Re:"):
+            entry["shorttitle"] = entry["title"].split(":")[0].strip()
 
-    if 'url' in entry and 'oldid' in entry['url']:
-        url = entry['url']
-        url = url.rsplit('#', 1)[0]  # remove fragment
-        query = url.split('?', 1)[1]
+    if "url" in entry and "oldid" in entry["url"]:
+        url = entry["url"]
+        url = url.rsplit("#", 1)[0]  # remove fragment
+        query = url.split("?", 1)[1]
         queries = parse_qs(query)
-        oldid = queries['oldid'][0]
-        entry['shorttitle'] = f'{entry["title"]} (oldid={oldid})'
+        oldid = queries["oldid"][0]
+        entry["shorttitle"] = f'{entry["title"]} (oldid={oldid})'
         if not args.long_url:  # short URLs
             base = f'http://{url.split("/")[2]}'
-            oldid = f'/?oldid={oldid}'
-            diff = f"&diff={queries['diff'][0]}" if 'diff' in queries else ''
-            entry['url'] = f'{base}{oldid}{diff}'
+            oldid = f"/?oldid={oldid}"
+            diff = f"&diff={queries['diff'][0]}" if "diff" in queries else ""
+            entry["url"] = f"{base}{oldid}{diff}"
 
-    if 'editor' in entry:
-        entry['editor'] = parse_names(entry['editor'])
-    if 'translator' in entry:
-        entry['translator'] = parse_names(entry['translator'])
+    if "editor" in entry:
+        entry["editor"] = parse_names(entry["editor"])
+    if "translator" in entry:
+        entry["translator"] = parse_names(entry["translator"])
+
 
 #################################################################
 # Biblatex utilities
@@ -571,21 +587,21 @@ def create_biblatex_author(names):
     full_names = []
 
     for name in names:
-        full_name = ''
+        full_name = ""
         first, von, last, jr = name[0:4]
 
         if all(s.islower() for s in (first, last)):  # {{hooks}, {bell}}
-            first = f'{{first}}'
-            last = f'{{last}}'
+            first = f"{{first}}"
+            last = f"{{last}}"
 
-        if von != '':
-            full_name += von + ' '
-        if last != '':
+        if von != "":
+            full_name += von + " "
+        if last != "":
             full_name += last
-        if jr != '':
-            full_name += ', ' + jr
-        if first != '':
-            full_name += ', ' + first
+        if jr != "":
+            full_name += ", " + jr
+        if first != "":
+            full_name += ", " + first
         full_names.append(full_name)
 
     full_names = " and ".join(full_names)
@@ -728,7 +744,7 @@ def bibformat_title(title):
     """
     cased_title = quoted_title = []
 
-    WORDS2PROTECT = {'vs.', 'oldid'}
+    WORDS2PROTECT = {"vs.", "oldid"}
 
     WHITESPACE_PAT = re.compile(r"""(\s+['(`"]?)""", re.UNICODE)  # \W+
     words = WHITESPACE_PAT.split(title)
@@ -744,7 +760,7 @@ def bibformat_title(title):
             index = chunk.start()
             if index + 1 < len(text_list):
                 text_list[index + 1] = text_list[index + 1].upper()
-        return ''.join(text_list)
+        return "".join(text_list)
 
     for word in words:
         if len(word) > 0:
@@ -755,40 +771,50 @@ def bibformat_title(title):
             elif word in BORING_WORDS:  # imported from change_case.py
                 # info("word in BORING_WORDS")
                 cased_title.append(word)
-            elif (word in WORDS2PROTECT):
+            elif word in WORDS2PROTECT:
                 # info(f"protecting lower '{word}'")
-                cased_title.append(f'{{word}}')
-            elif (word[0].isupper()):
+                cased_title.append(f"{{word}}")
+            elif word[0].isupper():
                 # info(f"protecting title '{word}'")
-                cased_title.append(f'{{{my_title(word)}}}')
+                cased_title.append(f"{{{my_title(word)}}}")
             else:
                 # info("else nothing")
                 cased_title.append(my_title(word))
-    quoted_title = ''.join(cased_title)
+    quoted_title = "".join(cased_title)
 
     # convert quotes to LaTeX then convert doubles to singles within the title
     if quoted_title[0] == '"':  # First char is a quote
-        quoted_title = f'``{quoted_title[1:]}'
+        quoted_title = f"``{quoted_title[1:]}"
     # open quote
-    quoted_title = quoted_title.replace(' "', ' ``').replace(" '", " `")
+    quoted_title = quoted_title.replace(' "', " ``").replace(" '", " `")
     # close quote
     quoted_title = quoted_title.replace('" ', "'' ")
     # left-over close quote
     quoted_title = quoted_title.replace('"', "''")
     # single quotes
-    quoted_title = quoted_title.replace('``', '`').replace("''", "'")
+    quoted_title = quoted_title.replace("``", "`").replace("''", "'")
 
     return quoted_title
+
 
 #################################################################
 # Emitters
 #################################################################
 
 
-EXCLUDE_URLS = ['search?q=cache', 'proquest', 'books.google',
-                'amazon.com', 'data/1work/']
-ONLINE_JOURNALS = ['firstmonday.org', 'media-culture.org', 'salon.com',
-                   'slate.com']
+EXCLUDE_URLS = [
+    "search?q=cache",
+    "proquest",
+    "books.google",
+    "amazon.com",
+    "data/1work/",
+]
+ONLINE_JOURNALS = [
+    "firstmonday.org",
+    "media-culture.org",
+    "salon.com",
+    "slate.com",
+]
 
 
 def emit_biblatex(entries):
@@ -800,35 +826,36 @@ def emit_biblatex(entries):
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        if entry['ori_author'] in container_values:
-            del entry['author']
+        if entry["ori_author"] in container_values:
+            del entry["author"]
 
         # if an edited collection, remove author and booktitle
-        if all(f in entry for f in ('author', 'editor', 'title', 'booktitle')):
-            if entry['author'] == entry['editor'] and \
-                   entry['title'] == entry['booktitle']:
-                del entry['author']
-                del entry['booktitle']
+        if all(f in entry for f in ("author", "editor", "title", "booktitle")):
+            if (
+                entry["author"] == entry["editor"]
+                and entry["title"] == entry["booktitle"]
+            ):
+                del entry["author"]
+                del entry["booktitle"]
 
         # CSL type and field conversions
         # info(f"entry = {entry}")
-        for field in ('c_blog', 'c_web', 'c_forum'):
+        for field in ("c_blog", "c_web", "c_forum"):
             if field in entry:
-                entry_type_copy = 'online'
-                entry['organization'] = entry[field]
+                entry_type_copy = "online"
+                entry["organization"] = entry[field]
                 del entry[field]
                 continue
-        for field in ('c_journal', 'c_magazine',
-                      'c_newspaper'):
+        for field in ("c_journal", "c_magazine", "c_newspaper"):
             if field in entry:
-                entry_type_copy = 'article'
-                entry['journal'] = entry[field]
+                entry_type_copy = "article"
+                entry["journal"] = entry[field]
                 del entry[field]
                 continue
-        for field in ('c_dictionary', 'c_encyclopedia'):
+        for field in ("c_dictionary", "c_encyclopedia"):
             if field in entry:
-                entry_type_copy = 'inreference'
-                entry['booktitle'] = entry[field]
+                entry_type_copy = "inreference"
+                entry["booktitle"] = entry[field]
                 del entry[field]
                 continue
 
@@ -839,31 +866,32 @@ def emit_biblatex(entries):
                 # critical(f"short, field = '{short} , {field}'")
                 # skip these fields
                 value = entry[field]
-                if field in ('identifier', 'entry_type', 'ori_author'):
+                if field in ("identifier", "entry_type", "ori_author"):
                     continue
-                if field == 'urldate' and 'url' not in entry:
+                if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
-                if field in ('url'):
+                if field in ("url"):
                     # info(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
                         continue
                     # if online_only and not (online or online journal)
                     if args.urls_online_only and not (
-                            entry_type == 'online' or
-                            any(j for j in ONLINE_JOURNALS
-                                if j in entry['url'])):
+                        entry_type == "online"
+                        or any(j for j in ONLINE_JOURNALS if j in entry["url"])
+                    ):
                         # info("not online")
                         continue
 
                 # if value not a proper string, make it so
                 # info(f"value = {value}; type = {type(value)}")
-                if field in ('author', 'editor', 'translator'):
+                if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
-                if field in ('date', 'urldate', 'origdate'):
-                    date = '-'.join(filter(None, (
-                        value.year, value.month, value.day)))
-                    date = date + '~' if value.circa else date
+                if field in ("date", "urldate", "origdate"):
+                    date = "-".join(
+                        filter(None, (value.year, value.month, value.day))
+                    )
+                    date = date + "~" if value.circa else date
                     value = date
 
                 # escape latex brackets.
@@ -871,15 +899,21 @@ def emit_biblatex(entries):
                 #   author may have curly brackets that should not be escaped
                 #   date is a named_tuple that doesn't need escaping
                 # info(f"{field}")
-                if field not in ('author', 'url', 'howpublished', 'date',
-                                 'origdate', 'urldate'):
+                if field not in (
+                    "author",
+                    "url",
+                    "howpublished",
+                    "date",
+                    "origdate",
+                    "urldate",
+                ):
                     value = escape_latex(value)
 
                 # protect case in titles
-                if field in ('title', 'shorttitle'):
+                if field in ("title", "shorttitle"):
                     value = bibformat_title(value)
 
-                args.outfd.write(f'   {field} = {{{value}}},\n')
+                args.outfd.write(f"   {field} = {{{value}}},\n")
         args.outfd.write("}\n")
 
 
@@ -910,32 +944,33 @@ def emit_yaml_csl(entries):
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
             given, particle, family, suffix = person
-            args.outfd.write(f'  - family: {esc_yaml(family)}\n')
+            args.outfd.write(f"  - family: {esc_yaml(family)}\n")
             if given:
-                args.outfd.write(f'    given: {esc_yaml(given)}\n')
+                args.outfd.write(f"    given: {esc_yaml(given)}\n")
                 # args.outfd.write('    given:\n')
                 # for given_part in given.split(' '):
                 #     args.outfd.write('    - %s\n' % esc_yaml(given_part))
             if suffix:
-                args.outfd.write(f'    suffix: {esc_yaml(suffix)}\n')
+                args.outfd.write(f"    suffix: {esc_yaml(suffix)}\n")
             if particle:
-                args.outfd.write(f'    non-dropping-particle: '
-                                 f'{esc_yaml(particle)}\n')
+                args.outfd.write(
+                    f"    non-dropping-particle: " f"{esc_yaml(particle)}\n"
+                )
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
         # TODO: allow BCE and circa dates, e.g., '-0348~'
 
         if date.year:
-            args.outfd.write(f'    year: {date.year}\n')
+            args.outfd.write(f"    year: {date.year}\n")
         if date.month:
-            args.outfd.write(f'    month: {date.month}\n')
+            args.outfd.write(f"    month: {date.month}\n")
         if date.day:
-            args.outfd.write(f'    day: {date.day}\n')
+            args.outfd.write(f"    day: {date.day}\n")
         if date.circa:
-            args.outfd.write(f'    circa: true\n')
+            args.outfd.write(f"    circa: true\n")
         if season:
-            args.outfd.write(f'    season: {season}\n')
+            args.outfd.write(f"    season: {season}\n")
 
     def yaml_protect_case(title):
         """Preserve/bracket proper names/nouns
@@ -943,70 +978,70 @@ def emit_yaml_csl(entries):
         >>> yaml_protect_case("The iKettle – a world off its rocker")
         "The <span class='nocase'>iKettle</span> – a world off its rocker"
         """
-        PROTECT_PAT = re.compile(r'\b([a-z]+[A-Z\.]\S+)\b')
+        PROTECT_PAT = re.compile(r"\b([a-z]+[A-Z\.]\S+)\b")
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
-    args.outfd.write('---\n')
-    args.outfd.write('references:\n')
+    args.outfd.write("---\n")
+    args.outfd.write("references:\n")
 
     for key, entry in sorted(entries.items()):
         entry_type, genre, medium = guess_csl_type(entry)
         args.outfd.write(f'- id: {entry["identifier"]}\n')
-        args.outfd.write(f'  type: {entry_type}\n')
+        args.outfd.write(f"  type: {entry_type}\n")
         if genre:
-            args.outfd.write(f'  genre: {genre}\n')
+            args.outfd.write(f"  genre: {genre}\n")
         if medium:
-            args.outfd.write(f'  medium: {medium}\n')
+            args.outfd.write(f"  medium: {medium}\n")
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        if entry['ori_author'] in container_values:
+        if entry["ori_author"] in container_values:
             if not args.author_create:  # TODO create config for this
-                del entry['author']
+                del entry["author"]
             else:
-                entry['author'] = [['', '', ''.join(entry['ori_author']), '']]
+                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 # info(f"short, field = '{short} , {field}'")
                 # skipped fields
-                if field in ('identifier', 'entry_type', 'issue'):
+                if field in ("identifier", "entry_type", "issue"):
                     continue
 
                 # special format fields
-                if field == 'title':
+                if field == "title":
                     title = yaml_protect_case(esc_yaml((value)))
-                    args.outfd.write(f'  title: {title}\n')
+                    args.outfd.write(f"  title: {title}\n")
                     continue
-                if field in ('author', 'editor', 'translator'):
-                    args.outfd.write(f'  {field}:\n')
+                if field in ("author", "editor", "translator"):
+                    args.outfd.write(f"  {field}:\n")
                     emit_yaml_people(value)
                     continue
-                if field in ('date', 'origdate', 'urldate'):
+                if field in ("date", "origdate", "urldate"):
                     # TODO: allow BCE and circa dates, e.g., '-0348~'
                     # info(f'field = {field}')
-                    if value == '0000':
+                    if value == "0000":
                         continue
-                    if field == 'date':
+                    if field == "date":
                         # info(f"value = '{value}'")
-                        season = entry['issue'] if 'issue' in entry else None
-                        args.outfd.write('  issued:\n')
+                        season = entry["issue"] if "issue" in entry else None
+                        args.outfd.write("  issued:\n")
                         emit_yaml_date(value, season)
-                    if field == 'origdate':
+                    if field == "origdate":
                         # info(f"value = '{value}'")
-                        args.outfd.write('  original-date:\n')
+                        args.outfd.write("  original-date:\n")
                         emit_yaml_date(value)
-                    if field == 'urldate':
-                        args.outfd.write('  accessed:\n')
+                    if field == "urldate":
+                        args.outfd.write("  accessed:\n")
                         emit_yaml_date(value)
                     continue
 
-                if field == 'urldate' and 'url' not in entry:
+                if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
-                if field == 'url':
+                if field == "url":
                     # info(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
                         # info("banned")
@@ -1015,18 +1050,19 @@ def emit_yaml_csl(entries):
                     if args.urls_online_only:
                         # info("urls_online_only")
                         # don't skip online types
-                        if entry_type in {'post', 'post-weblog', 'webpage'}:
+                        if entry_type in {"post", "post-weblog", "webpage"}:
                             pass
                         # skip items that are paginated
-                        elif 'pages' in entry:
+                        elif "pages" in entry:
                             # info("  skipping url, paginated item")
                             continue
-                if field == 'eventtitle' and 'container-title' not in entry:
+                if field == "eventtitle" and "container-title" not in entry:
                     args.outfd.write(
-                        f'  container-title: "Proceedings of {value}"\n')
+                        f'  container-title: "Proceedings of {value}"\n'
+                    )
                     continue
                 # 'Blog' is the null value I use in the mindmap
-                if field == 'c_blog' and entry[field] == 'Blog':
+                if field == "c_blog" and entry[field] == "Blog":
                     # netloc = urllib.parse.urlparse(entry['url']).netloc
                     # args.outfd.write(
                     #     f'  container-title: "Personal"\n')
@@ -1034,13 +1070,13 @@ def emit_yaml_csl(entries):
 
                 # info(f"field = {field}")
                 if field in CONTAINERS:
-                    field = 'container-title'
+                    field = "container-title"
                 if field in BIBLATEX_CSL_FIELD_MAP:
                     # info(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # info(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
-    args.outfd.write('...\n')
+    args.outfd.write("...\n")
 
 
 def emit_wp_citation(entries):
@@ -1056,48 +1092,56 @@ def emit_wp_citation(entries):
         name_num = 0
         for name in names:
             name_num += 1
-            if field == 'author':
-                prefix = ''
+            if field == "author":
+                prefix = ""
                 suffix = name_num
-            elif field == 'editor':
-                prefix = f'editor{str(name_num)}-'
-                suffix = ''
+            elif field == "editor":
+                prefix = f"editor{str(name_num)}-"
+                suffix = ""
+            args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
             args.outfd.write(
-                f'| {prefix}first{suffix} = {name[0]}\n')
-            args.outfd.write(
-                f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
+                f'| {prefix}last{suffix} = {" ".join(name[1:])}\n'
+            )
 
     for key, entry in sorted(entries.items()):
-        args.outfd.write('{{ citation\n')
-        if 'identifier' in entry:
+        args.outfd.write("{{ citation\n")
+        if "identifier" in entry:
             wp_ident = get_ident(entry, entries, delim=" & ")
-            args.outfd.write('| ref = {{sfnref|%s}}\n' % wp_ident)
+            args.outfd.write("| ref = {{sfnref|%s}}\n" % wp_ident)
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                if field in ('annotation', 'custom1', 'custom2',
-                             'entry_type', 'identifier', 'chapter',
-                             'keyword', 'shorttitle'):
+                if field in (
+                    "annotation",
+                    "custom1",
+                    "custom2",
+                    "entry_type",
+                    "identifier",
+                    "chapter",
+                    "keyword",
+                    "shorttitle",
+                ):
                     continue
-                elif field == 'author':
+                elif field == "author":
                     output_wp_names(field, value)
                     continue
-                elif field == 'editor':
+                elif field == "editor":
                     output_wp_names(field, value)
                     continue
-                elif field in ('date', 'origdate', 'urldate'):
-                    date = '-'.join(filter(None, (
-                        value.year, value.month, value.day)))
+                elif field in ("date", "origdate", "urldate"):
+                    date = "-".join(
+                        filter(None, (value.year, value.month, value.day))
+                    )
                     if value.circa:
-                        date = '{{circa|' + date + '}}'
+                        date = "{{circa|" + date + "}}"
                     value = date
-                elif field == 'title':  # TODO: convert value to title case?
-                    if 'booktitle' in entry:
-                        field = 'chapter'
+                elif field == "title":  # TODO: convert value to title case?
+                    if "booktitle" in entry:
+                        field = "chapter"
                 if field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
-                args.outfd.write(f'| {field} = {value}\n')
+                args.outfd.write(f"| {field} = {value}\n")
         args.outfd.write("}}\n")
 
 
@@ -1106,19 +1150,20 @@ def emit_results(entries, query, results_file):
 
     def reverse_print(node, entry, spaces):
         """Move locator number to the end of the text with the biblatex key"""
-        style_ref = node.get('STYLE_REF', 'default')
-        text = escape_XML(node.get('TEXT'))
-        text = text.replace(        # restore my query_highlight strongs
-            '&lt;strong&gt;', '<strong>').replace(
-            '&lt;/strong&gt;', '</strong>')
-        prefix = '&gt; ' if style_ref == 'quote' else ''
+        style_ref = node.get("STYLE_REF", "default")
+        text = escape_XML(node.get("TEXT"))
+        text = text.replace(  # restore my query_highlight strongs
+            "&lt;strong&gt;", "<strong>"
+        ).replace("&lt;/strong&gt;", "</strong>")
+        prefix = "&gt; " if style_ref == "quote" else ""
         # don't reverse short texts and certain style refs
-        if len(text) < 50 or style_ref in ['author', 'title', 'cite']:
-            cite = ''
+        if len(text) < 50 or style_ref in ["author", "title", "cite"]:
+            cite = ""
         else:
-            locator = ''
+            locator = ""
             LOCATOR_PAT = re.compile(
-                r'^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)')
+                r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)"
+            )
             matches = LOCATOR_PAT.match(text)
             if matches:
                 text = matches.group(2)
@@ -1126,30 +1171,31 @@ def emit_results(entries, query, results_file):
                 # http://ctan.mirrorcatalogs.com/macros/latex/contrib/biblatex/doc/biblatex.pdf
                 # biblatex: page, column, line, verse, section, paragraph
                 # kindle: location
-                if 'pagination' in entry:
-                    if entry['pagination'] == 'section':
-                        locator = f', sec. {locator}'
-                    elif entry['pagination'] == 'paragraph':
-                        locator = f', para. {locator}'
-                    elif entry['pagination'] == 'location':
-                        locator = f', loc. {locator}'
-                    elif entry['pagination'] == 'chapter':
-                        locator = f', ch. {locator}'
-                    elif entry['pagination'] == 'verse':
-                        locator = f', vers. {locator}'
-                    elif entry['pagination'] == 'column':
-                        locator = f', col. {locator}'
-                    elif entry['pagination'] == 'line':
-                        locator = f', line {locator}'
+                if "pagination" in entry:
+                    if entry["pagination"] == "section":
+                        locator = f", sec. {locator}"
+                    elif entry["pagination"] == "paragraph":
+                        locator = f", para. {locator}"
+                    elif entry["pagination"] == "location":
+                        locator = f", loc. {locator}"
+                    elif entry["pagination"] == "chapter":
+                        locator = f", ch. {locator}"
+                    elif entry["pagination"] == "verse":
+                        locator = f", vers. {locator}"
+                    elif entry["pagination"] == "column":
+                        locator = f", col. {locator}"
+                    elif entry["pagination"] == "line":
+                        locator = f", line {locator}"
                     else:
                         raise Exception(
                             f"unknown locator '{entry['pagination']}' "
-                            f"for '{entry['title']}' in '{entry['custom2']}'")
+                            f"for '{entry['title']}' in '{entry['custom2']}'"
+                        )
                 else:
-                    if '-' in locator:
-                        locator = f', pp. {locator}'
+                    if "-" in locator:
+                        locator = f", pp. {locator}"
                     else:
-                        locator = f', p. {locator}'
+                        locator = f", p. {locator}"
             cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
 
         hypertext = text
@@ -1160,132 +1206,166 @@ def emit_results(entries, query, results_file):
             if node[0].tag == "font" and node[0].get("BOLD") == "true":
                 style = "font-weight: bold"
 
-        if 'LINK' in node.attrib:
-            link = escape(node.get('LINK'))
+        if "LINK" in node.attrib:
+            link = escape(node.get("LINK"))
             hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
 
-        results_file.write(f'{spaces}<li style="{style}" class="{style_ref}">'
-                           f'{prefix}{hypertext}{cite}</li>\n')
+        results_file.write(
+            f'{spaces}<li style="{style}" class="{style_ref}">'
+            f"{prefix}{hypertext}{cite}</li>\n"
+        )
 
     def pretty_print(node, entry, spaces):
         """Pretty print a node and descendants into indented HTML"""
         # bug: nested titles are printed twice. 101217
-        if node.get('TEXT') is not None:
+        if node.get("TEXT") is not None:
             reverse_print(node, entry, spaces)
         # I should clean all of this up to use simpleHTMLwriter,
         # markup.py, or yattag
         if len(node) > 0:
-            results_file.write(
-                f'{spaces}<li><ul class="pprint_recurse">\n')
-            spaces = spaces + ' '
+            results_file.write(f'{spaces}<li><ul class="pprint_recurse">\n')
+            spaces = spaces + " "
             for child in node:
-                if child.get('STYLE_REF') == 'author':
+                if child.get("STYLE_REF") == "author":
                     break
                 pretty_print(child, entry, spaces)
             spaces = spaces[0:-1]
-            results_file.write(
-                f'{spaces}</ul></li><!--pprint_recurse-->\n')
+            results_file.write(f"{spaces}</ul></li><!--pprint_recurse-->\n")
 
     def get_url_query(token):
         """Return the URL for an HTML link to the actual title"""
-        token = token.replace('<strong>', '').replace('</strong>', '')
+        token = token.replace("<strong>", "").replace("</strong>", "")
         # urllib won't accept unicode
-        token = urllib.parse.quote(token.encode('utf-8'))
+        token = urllib.parse.quote(token.encode("utf-8"))
         # dbg(f"token = '{token}' type = '{type(token)}'")
-        url_query = \
-            escape("search.cgi?query=%s") % token
+        url_query = escape("search.cgi?query=%s") % token
         # dbg(f"url_query = '{url_query}' type = '{type(url_query)}'")
         return url_query
 
     def get_url_MM(file_name):
         """Return URL for the source MindMap based on whether CGI or cmdline"""
-        if __name__ == '__main__':
+        if __name__ == "__main__":
             return file_name
-        else:                               # CGI
-            client_path = file_name.replace(f'{HOME}', f'{CLIENT_HOME}')
-            return f'file://{client_path}'
+        else:  # CGI
+            client_path = file_name.replace(f"{HOME}", f"{CLIENT_HOME}")
+            return f"file://{client_path}"
 
-    def print_entry(identifier, author, date, title, url,
-                    MM_mm_file, base_mm_file, spaces):
+    def print_entry(
+        identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces
+    ):
         identifier_html = (
             f'<li class="identifier_html">'
-            f'<a href="{get_url_query(identifier)}">{identifier}</a>')
-        title_html = f'<a class="title_html"' \
+            f'<a href="{get_url_query(identifier)}">{identifier}</a>'
+        )
+        title_html = (
+            f'<a class="title_html"'
             f' href="{get_url_query(title)}">{title}</a>'
+        )
         if url:
             link_html = f'[<a class="link_html" href="{url}">url</a>]'
         else:
-            link_html = ''
-        from_html = f'from <a class="from_html" ' \
+            link_html = ""
+        from_html = (
+            f'from <a class="from_html" '
             f'href="{MM_mm_file}">{base_mm_file}</a>'
+        )
         results_file.write(
             f"{spaces}{identifier_html}, "
-            f"<em>{title_html}</em> {link_html} [{from_html}]")
-        results_file.write(
-            f'{spaces}</li><!--identifier_html-->\n')
+            f"<em>{title_html}</em> {link_html} [{from_html}]"
+        )
+        results_file.write(f"{spaces}</li><!--identifier_html-->\n")
 
-    spaces = ' '
+    spaces = " "
     for key, entry in sorted(entries.items()):
-        identifier = entry['identifier']
-        author = create_biblatex_author(entry['author'])
-        title = entry['title']
-        date = entry['date']
-        url = entry.get('url', '')
-        base_mm_file = os.path.basename(entry['_mm_file'])
-        MM_mm_file = get_url_MM(entry['_mm_file'])
+        identifier = entry["identifier"]
+        author = create_biblatex_author(entry["author"])
+        title = entry["title"]
+        date = entry["date"]
+        url = entry.get("url", "")
+        base_mm_file = os.path.basename(entry["_mm_file"])
+        MM_mm_file = get_url_MM(entry["_mm_file"])
 
         # if I am what was queried, print all of me
-        if entry['identifier'] == args.query:
-            results_file.write('%s<li class="li_entry_identifier">\n'
-                               % (spaces))
-            spaces = spaces + ' '
-            results_file.write('%s<ul class="tit_tree">\n'
-                               % (spaces))
-            spaces = spaces + ' '
+        if entry["identifier"] == args.query:
+            results_file.write(
+                '%s<li class="li_entry_identifier">\n' % (spaces)
+            )
+            spaces = spaces + " "
+            results_file.write('%s<ul class="tit_tree">\n' % (spaces))
+            spaces = spaces + " "
             results_file.write(
                 '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
-                % (spaces, MM_mm_file, base_mm_file),)
-            fl_names = ', '.join(name[0] + ' '
-                                 + name[2] for name in entry['author'])
+                % (spaces, MM_mm_file, base_mm_file),
+            )
+            fl_names = ", ".join(
+                name[0] + " " + name[2] for name in entry["author"]
+            )
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
             results_file.write(
                 '%s<li class="mdn">[%s]: %s, %s, "%s".</li>\n'
-                % (spaces, identifier, fl_names, date[0], title_mdn))
+                % (spaces, identifier, fl_names, date[0], title_mdn)
+            )
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
-            pretty_print(entry['_title_node'], entry, spaces)
+            pretty_print(entry["_title_node"], entry, spaces)
             # results_file.write(f'{spaces}</li><!--pretty_print-->')
-            results_file.write(f'{spaces}</ul><!--tit_tree-->\n'),
-            results_file.write(f'{spaces}</li>\n'),
+            results_file.write(f"{spaces}</ul><!--tit_tree-->\n"),
+            results_file.write(f"{spaces}</li>\n"),
 
         # if some nodes were matched, PP with citation info reversed
-        if '_node_results' in entry:
-            print_entry(identifier, author, date, title, url,
-                        MM_mm_file, base_mm_file, spaces)
-            if len(entry['_node_results']) > 0:
-                results_file.write(f'{spaces}<li>\n')
-                spaces = spaces + ' '
+        if "_node_results" in entry:
+            print_entry(
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
+            )
+            if len(entry["_node_results"]) > 0:
+                results_file.write(f"{spaces}<li>\n")
+                spaces = spaces + " "
                 results_file.write(f'{spaces}<ul class="li_node_results">\n')
-                spaces = spaces + ' '
-                for node in entry['_node_results']:
+                spaces = spaces + " "
+                for node in entry["_node_results"]:
                     reverse_print(node, entry, spaces)
                 spaces = spaces[0:-1]
-            results_file.write(
-                f'{spaces}</ul><!--li_node_results-->\n')
+            results_file.write(f"{spaces}</ul><!--li_node_results-->\n")
             spaces = spaces[0:-1]
-            results_file.write(f'{spaces}</li>\n')
+            results_file.write(f"{spaces}</li>\n")
         # if my author or title matched, print biblio w/ link to complete entry
-        elif '_author_result' in entry:
-            author = (f"{entry['_author_result'].get('TEXT')}"
-                      f"{entry['date'].year}")
-            print_entry(identifier, author, date, title,
-                        url, MM_mm_file, base_mm_file, spaces)
-        elif '_title_result' in entry:
-            title = entry['_title_result'].get('TEXT')
-            print_entry(identifier, author, date, title,
-                        url, MM_mm_file, base_mm_file, spaces)
+        elif "_author_result" in entry:
+            author = (
+                f"{entry['_author_result'].get('TEXT')}"
+                f"{entry['date'].year}"
+            )
+            print_entry(
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
+            )
+        elif "_title_result" in entry:
+            title = entry["_title_result"].get("TEXT")
+            print_entry(
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
+            )
+
 
 #################################################################
 # Mindmap parsing and bib building
@@ -1312,17 +1392,20 @@ def parse_names(names):
 
     names_p = []
     # info(f"names = '{names}'")
-    names_split = names.split(',')
+    names_split = names.split(",")
     for name in names_split:
         name = name.strip()
         # info(f"name = '{name}'")
-        first = last = von = jr = ''
+        first = last = von = jr = ""
         chunks = name.strip().split()
 
-        if 'van' in chunks and chunks[chunks.index('van') + 1] in (
-                'den', 'der'):
-            chunks[chunks.index('van'):chunks.index('van') + 2] = \
-                ['van ' + chunks[chunks.index('van') + 1]]
+        if "van" in chunks and chunks[chunks.index("van") + 1] in (
+            "den",
+            "der",
+        ):
+            chunks[chunks.index("van") : chunks.index("van") + 2] = [
+                "van " + chunks[chunks.index("van") + 1]
+            ]
 
         if len(chunks) > 1:
             if chunks[-1] in SUFFIXES:
@@ -1331,7 +1414,7 @@ def parse_names(names):
             if len(chunks) > 0:
                 if chunks[-1] in PARTICLES:
                     von = chunks.pop(-1)
-            first = ' '.join(chunks)
+            first = " ".join(chunks)
         else:
             last = name
 
@@ -1343,20 +1426,22 @@ def commit_entry(entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
     if entry != {}:
-        entry.setdefault('author', [('', 'John', 'Doe', '')])
-        entry.setdefault('title', 'Unknown')
-        entry.setdefault('0000')
-        entry.setdefault('_mm_file', '')
+        entry.setdefault("author", [("", "John", "Doe", "")])
+        entry.setdefault("title", "Unknown")
+        entry.setdefault("0000")
+        entry.setdefault("_mm_file", "")
 
         # pull the citation, create an identifier, and enter in entries
         try:
-            pull_citation(entry)    # break the citation up
+            pull_citation(entry)  # break the citation up
         except:
-            print((f"pull_citation error on {entry['author']}: "
-                   f"{entry['_mm_file']}"))
+            print(
+                f"pull_citation error on {entry['author']}: "
+                f"{entry['_mm_file']}"
+            )
             raise
-        entry['identifier'] = get_ident(entry, entries)
-        entries[entry['identifier']] = entry
+        entry["identifier"] = get_ident(entry, entries)
+        entries[entry["identifier"]] = entry
     return entries
 
 
@@ -1392,67 +1477,71 @@ def walk_freeplane(node, mm_file, entries, links):
     def query_highlight(node, query):
         """ Return a modified node with matches highlighted"""
         query_lower = query.lower()
-        text = node.get('TEXT')
+        text = node.get("TEXT")
         text_lower = text.lower()
         if query_lower in text_lower:
             start_index = text_lower.find(query_lower)
             end_index = start_index + len(query_lower)
             result = (
-                f'{text[0:start_index]}'
-                f'<strong>{text[start_index: end_index]}</strong>'
-                f'{text[end_index:]}')
-            node.set('TEXT', result)
+                f"{text[0:start_index]}"
+                f"<strong>{text[start_index: end_index]}</strong>"
+                f"{text[end_index:]}"
+            )
+            node.set("TEXT", result)
             return node
         return None
 
     def get_author_node(node):
         """ Return the nearest author node ancestor """
         ancestor = get_parent(node)
-        while ancestor.get('STYLE_REF') != 'author':
+        while ancestor.get("STYLE_REF") != "author":
             ancestor = get_parent(ancestor)
         return ancestor
 
     for d in node.iter():
-        if 'LINK' in d.attrib:                  # found a local reference link
-            if (not d.get('LINK').startswith('http:')
-                    and d.get('LINK').endswith('.mm')):
-                links.append(unescape_XML(d.get('LINK')))
+        if "LINK" in d.attrib:  # found a local reference link
+            if not d.get("LINK").startswith("http:") and d.get(
+                "LINK"
+            ).endswith(".mm"):
+                links.append(unescape_XML(d.get("LINK")))
         # skip nodes that are structure, comment, and empty of text
-        if 'STYLE_REF' in d.attrib and d.get('TEXT'):
-            if d.get('STYLE_REF') == 'author':
+        if "STYLE_REF" in d.attrib and d.get("TEXT"):
+            if d.get("STYLE_REF") == "author":
                 # pass author as it will be fetched upon new title
                 pass
-            elif d.get('STYLE_REF') == 'title':
-                commit_entry(entry, entries)     # new entry, so store previous
-                entry = {}                       # and create new one
+            elif d.get("STYLE_REF") == "title":
+                commit_entry(entry, entries)  # new entry, so store previous
+                entry = {}  # and create new one
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
                 author_node = get_author_node(d)
-                entry['ori_author'] = unescape_XML(author_node.get('TEXT'))
-                entry['author'] = parse_names(entry['ori_author'])
-                entry['title'] = unescape_XML(d.get('TEXT'))
-                entry['_mm_file'] = mm_file
-                entry['_title_node'] = d
-                if 'LINK' in d.attrib:
-                    entry['url'] = d.get('LINK')
+                entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
+                entry["author"] = parse_names(entry["ori_author"])
+                entry["title"] = unescape_XML(d.get("TEXT"))
+                entry["_mm_file"] = mm_file
+                entry["_title_node"] = d
+                if "LINK" in d.attrib:
+                    entry["url"] = d.get("LINK")
                 if args.query:
                     author_highlighted = query_highlight(
-                        author_node, args.query)
+                        author_node, args.query
+                    )
                     if author_highlighted is not None:
-                        entry['_author_result'] = author_highlighted
+                        entry["_author_result"] = author_highlighted
                     title_highlighted = query_highlight(d, args.query)
                     if title_highlighted is not None:
-                        entry['_title_result'] = title_highlighted
+                        entry["_title_result"] = title_highlighted
             else:
-                if d.get('STYLE_REF') == 'cite':
-                    entry['cite'] = unescape_XML(d.get('TEXT'))
-                elif d.get('STYLE_REF') == 'annotation':
-                    entry['annotation'] = unescape_XML(d.get('TEXT').strip())
+                if d.get("STYLE_REF") == "cite":
+                    entry["cite"] = unescape_XML(d.get("TEXT"))
+                elif d.get("STYLE_REF") == "annotation":
+                    entry["annotation"] = unescape_XML(d.get("TEXT").strip())
                 if args.query:
                     node_highlighted = query_highlight(d, args.query)
                     if node_highlighted is not None:
-                        entry.setdefault(
-                            '_node_results', []).append(node_highlighted)
+                        entry.setdefault("_node_results", []).append(
+                            node_highlighted
+                        )
 
     # commit the last entry as no new titles left
     entries = commit_entry(entry, entries)
@@ -1486,10 +1575,12 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 def build_bib(file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
 
-    links = []          # list of other files encountered in the mind map
-    done = []           # list of files processed, kept to prevent loops
-    entries = dict()    # dict of {id : {entry}}, by insertion order
-    mm_files = [file_name, ]  # list of file encountered (e.g., chase option)
+    links = []  # list of other files encountered in the mind map
+    done = []  # list of files processed, kept to prevent loops
+    entries = dict()  # dict of {id : {entry}}, by insertion order
+    mm_files = [
+        file_name,
+    ]  # list of file encountered (e.g., chase option)
     # dbg(f"   mm_files = {mm_files}")
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
@@ -1505,16 +1596,16 @@ def build_bib(file_name, output):
         done.append(mm_file)
         if args.chase:
             for link in links:
-                link = os.path.abspath(
-                    os.path.dirname(mm_file) + '/' + link)
+                link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
                 if link not in done and link not in mm_files:
-                    if not any([word in link for word in (
-                               'syllabus', 'readings')]):  # 'old'
+                    if not any(
+                        [word in link for word in ("syllabus", "readings")]
+                    ):  # 'old'
                         # dbg(f"    mm_files.appending {link}")
                         mm_files.append(link)
 
     if args.query:
-        results_file_name = f'{TMP_DIR}query-thunderdell.html'
+        results_file_name = f"{TMP_DIR}query-thunderdell.html"
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
         try:
@@ -1525,15 +1616,15 @@ def build_bib(file_name, output):
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
         emit_results(entries, args.query, results_file)
-        results_file.write('</ul></body></html>\n')
+        results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
             ADDRESS_IN_USE = False
-            os.chdir(CGI_DIR+'/..')
+            os.chdir(CGI_DIR + "/..")
             handler = http.server.CGIHTTPRequestHandler
-            handler.cgi_directories = ['/cgi-bin']
+            handler.cgi_directories = ["/cgi-bin"]
             try:
-                server = http.server.HTTPServer(('localhost', 8000), handler)
+                server = http.server.HTTPServer(("localhost", 8000), handler)
             except OSError as error:
                 if error.errno == errno.EADDRINUSE:
                     ADDRESS_IN_USE = True
@@ -1541,27 +1632,31 @@ def build_bib(file_name, output):
                 else:
                     raise
             # below runs the query twice I think, but still fast
-            webbrowser.open(f'http://localhost:8000/cgi-bin/'
-                            f'search.cgi?query={args.query}')
+            webbrowser.open(
+                f"http://localhost:8000/cgi-bin/"
+                f"search.cgi?query={args.query}"
+            )
             if not ADDRESS_IN_USE:
                 server.serve_forever()
     elif args.pretty:
-        results_file_name = f'{TMP_DIR}pretty-print.html'
+        results_file_name = f"{TMP_DIR}pretty-print.html"
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
         except IOError:
             print(("There was an error writing to", results_file_name))
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
-        results_file.write('    <title>Pretty Mind Map</title></head>'
-                           '<body>\n<ul class="top">\n')
+        results_file.write(
+            "    <title>Pretty Mind Map</title></head>"
+            '<body>\n<ul class="top">\n'
+        )
         for entry in list(entries.values()):
-            args.query = entry['identifier']
+            args.query = entry["identifier"]
             emit_results(entries, args.query, results_file)
-        results_file.write('</ul></body></html>\n')
+        results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
-            webbrowser.open(f'file://{results_file_name}')
+            webbrowser.open(f"file://{results_file_name}")
 
     else:
         output(entries)
@@ -1621,87 +1716,139 @@ def _test_results():
     """
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse  # http://docs.python.org/dev/library/argparse.html
+
     arg_parser = argparse.ArgumentParser(
         description="""usage: %prog [FILE.mm] [options]\n
     Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
-    and last character.""")
+    and last character."""
+    )
     arg_parser.add_argument(
-        "-a", "--author-create", default=False,
+        "-a",
+        "--author-create",
+        default=False,
         action="store_true",
-        help="create author for anon entries using container")
+        help="create author for anon entries using container",
+    )
     arg_parser.add_argument(
-        "-b", "--biblatex", default=False,
+        "-b",
+        "--biblatex",
+        default=False,
         action="store_true",
-        help="emit biblatex fields")
+        help="emit biblatex fields",
+    )
     arg_parser.add_argument(
-        "-c", "--chase",
-        action="store_true", default=False,
-        help="chase links between MMs")
+        "-c",
+        "--chase",
+        action="store_true",
+        default=False,
+        help="chase links between MMs",
+    )
     arg_parser.add_argument(
-        "-D", "--defaults",
-        action="store_true", default=False,
-        help="chase, output YAML/CSL, use default map and output file")
+        "-D",
+        "--defaults",
+        action="store_true",
+        default=False,
+        help="chase, output YAML/CSL, use default map and output file",
+    )
     arg_parser.add_argument(
-        '-i', '--input_file', default=DEFAULT_MAP, metavar='FILENAME',
-        help="mindmap to process")
+        "-i",
+        "--input_file",
+        default=DEFAULT_MAP,
+        metavar="FILENAME",
+        help="mindmap to process",
+    )
     arg_parser.add_argument(
-        "-k", "--keys", default='-no-keys',
-        action="store_const", const='-use-keys',
-        help="show biblatex keys in displayed HTML")
+        "-k",
+        "--keys",
+        default="-no-keys",
+        action="store_const",
+        const="-use-keys",
+        help="show biblatex keys in displayed HTML",
+    )
     arg_parser.add_argument(
-        "-F", "--fields",
-        action="store_true", default=False,
-        help="show biblatex shortcuts, fields, and types used by fe")
+        "-F",
+        "--fields",
+        action="store_true",
+        default=False,
+        help="show biblatex shortcuts, fields, and types used by fe",
+    )
     arg_parser.add_argument(
-        "-l", "--long-url",
-        action="store_true", default=False,
-        help="use long URLs")
+        "-l",
+        "--long-url",
+        action="store_true",
+        default=False,
+        help="use long URLs",
+    )
     arg_parser.add_argument(
-        "-o", "--output-file",
-        action="store_true", default=False,
-        help="output goes to FILENAME.bib (boolean)")
+        "-o",
+        "--output-file",
+        action="store_true",
+        default=False,
+        help="output goes to FILENAME.bib (boolean)",
+    )
     arg_parser.add_argument(
-        "-p", "--pretty",
-        action="store_true", default=False,
-        help="pretty print")
+        "-p",
+        "--pretty",
+        action="store_true",
+        default=False,
+        help="pretty print",
+    )
     arg_parser.add_argument(
-        "-q", "--query", nargs='+',
-        help="query the mindmaps", metavar="QUERY")
+        "-q", "--query", nargs="+", help="query the mindmaps", metavar="QUERY"
+    )
     arg_parser.add_argument(
-        "-s", "--style", default="apalike",
+        "-s",
+        "--style",
+        default="apalike",
         help="use biblatex stylesheet (default: apalike)",
-        metavar="BST")
+        metavar="BST",
+    )
     arg_parser.add_argument(
-        "-T", "--tests",
-        action="store_true", default=False,
-        help="run tests")
+        "-T", "--tests", action="store_true", default=False, help="run tests"
+    )
     arg_parser.add_argument(
-        "-u", "--urls_online_only",
-        action="store_true", default=False,
-        help="emit URLs for online resources only")
+        "-u",
+        "--urls_online_only",
+        action="store_true",
+        default=False,
+        help="emit URLs for online resources only",
+    )
     arg_parser.add_argument(
-        '-V', '--verbose', dest='verbose', action='count',
+        "-V",
+        "--verbose",
+        dest="verbose",
+        action="count",
         default=1,
-        help="Increase verbosity (specify multiple times for more)")
+        help="Increase verbosity (specify multiple times for more)",
+    )
     arg_parser.add_argument(
-        '-L', '--log-to-file',
-        action="store_true", default=False,
-        help="log to file %(prog)s.log")
+        "-L",
+        "--log-to-file",
+        action="store_true",
+        default=False,
+        help="log to file %(prog)s.log",
+    )
     arg_parser.add_argument(
-        "-w", "--WP-citation", default=False,
+        "-w",
+        "--WP-citation",
+        default=False,
         action="store_true",
         help="emit Wikipedia {{citation}} format which can be "
         "cited via {{sfn|Author2004|loc=p. 45}}. "
-        "See: http://en.wikipedia.org/wiki/Template:Cite")
+        "See: http://en.wikipedia.org/wiki/Template:Cite",
+    )
     arg_parser.add_argument(
-        "-y", "--YAML-CSL", default=False,
+        "-y",
+        "--YAML-CSL",
+        default=False,
         action="store_true",
-        help="emit YAML/CSL for use with pandoc [default]")
+        help="emit YAML/CSL for use with pandoc [default]",
+    )
 
     args = arg_parser.parse_args()
     # print(args)
@@ -1709,16 +1856,17 @@ if __name__ == '__main__':
 
     log_level = 100  # default
     if args.verbose >= 3:
-        log_level = logging.DEBUG     # 10
+        log_level = logging.DEBUG  # 10
     elif args.verbose == 2:
-        log_level = logging.INFO      # 20
+        log_level = logging.INFO  # 20
     elif args.verbose == 1:
-        log_level = logging.ERROR     # 40
+        log_level = logging.ERROR  # 40
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         print("logging to file")
-        logging.basicConfig(filename='fe.log', filemode='w',
-                            level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(
+            filename="fe.log", filemode="w", level=log_level, format=LOG_FORMAT
+        )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
@@ -1739,16 +1887,17 @@ if __name__ == '__main__':
         args.output_file = True
     if args.output_file:
         if args.YAML_CSL:
-            extension = '.yaml'
+            extension = ".yaml"
         elif args.biblatex:
-            extension = '.bib'
+            extension = ".bib"
         elif args.WP_citation:
-            extension = '.wiki'
+            extension = ".wiki"
         output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
         print("Running doctests")
         import doctest
+
         doctest.testmod()
     if args.fields:
         print("\n                           _BIBLATEX_TYPES_ (deprecated)")
@@ -1773,16 +1922,17 @@ if __name__ == '__main__':
         print("         ot=organization's subtype (e.g., W3C REC)\n\n")
         sys.exit()
     if args.query:
-        args.query = ' '.join(args.query)
+        args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
         output = emit_results
     build_bib(file_name, output)
     args.outfd.close()
 else:
+
     class args:
-        in_main = False           # imported or called from cgi
-        chase = True              # Follow freeplane links to other local maps
-        long_url = False          # Use short 'oldid' URLs for mediawikis
+        in_main = False  # imported or called from cgi
+        chase = True  # Follow freeplane links to other local maps
+        long_url = False  # Use short 'oldid' URLs for mediawikis
         urls_online_only = False  # Emit urls for @online only
-        pretty = False            # Print as HTML with citation at end
-        query = None              # Query the bibliographies
+        pretty = False  # Print as HTML with citation at end
+        query = None  # Query the bibliographies

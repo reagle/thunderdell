@@ -62,6 +62,7 @@ def cgi_main():
         print((fileObj.read()))
         fileObj.close()
 
+
 def print_error(msg):
     import sys
 

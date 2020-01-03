@@ -95,7 +95,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                 started = False
             started = True
             # should space be optional '(\w+) ?='
-            cites = re.split('(\w+) =', line)[1:]
+            cites = re.split(r'(\w+) =', line)[1:]
             # 2 references to an iterable object that are
             # unpacked with '*' and rezipped
             cite_pairs = list(zip(*[iter(cites)] * 2))
@@ -141,8 +141,8 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                            % ('cite', clean(citation)))
 
-        elif re.match('summary\.(.*)', line, re.I):
-            matches = re.match('summary\.(.*)', line, re.I)
+        elif re.match(r'summary\.(.*)', line, re.I):
+            matches = re.match(r'summary\.(.*)', line, re.I)
             file_out.write("""  <node STYLE_REF="%s" TEXT="%s"/>\n"""
                            % ('annotation', clean(matches.groups()[0])))
 
@@ -207,7 +207,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             line_no = ''
             line_split = line.split(' ')
             # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
-            PAGE_NUM_PAT = '^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$'
+            PAGE_NUM_PAT = r'^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$'
 
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:

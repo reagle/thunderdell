@@ -30,6 +30,7 @@ def parse_token(name, year):
         year, page = year.split(':')
     return name, name_non, year, page
 
+
 try:
     (options, files) = getopt.getopt(sys.argv[1:], "m:")
 except getopt.error:
@@ -52,10 +53,10 @@ for line in fd:
             year = year[0:-1]  # remove last parens
             name, name_non, year, page = parse_token(name, year)
             if page:
-                insert_txt = '''%s \citeyearpar[p. %s]{%s%s}''' \
+                insert_txt = r'''%s \citeyearpar[p. %s]{%s%s}''' \
                     % (name, page, name_non, year)
             else:
-                insert_txt = '''%s \citeyearpar{%s%s}''' \
+                insert_txt = r'''%s \citeyearpar{%s%s}''' \
                     % (name, name_non, year)
             # print "*** insert_txt = ", insert_txt
             line = line.replace(catch, insert_txt)
@@ -82,7 +83,7 @@ for line in fd:
                 prefix_txt = "[%s]" % prefix
             if page:
                 page_txt = "[p. %s]" % page
-            insert_txt = '''\citep%s%s{%s%s}''' \
+            insert_txt = r'''\citep%s%s{%s%s}''' \
                 % (prefix_txt, page_txt, name_non, year)
             # print "*** insert_txt = '%s'" % insert_txt
             # print "original = '%s'" % (prefix + catch)
@@ -96,7 +97,7 @@ for line in fd:
             # print "catch = '%s'" % catch
             names = catch[1:-1]
             authors = names.split('; ')
-            insert_txt = '(\citealt{'
+            insert_txt = r'(\citealt{'
             for author in authors:
                 author = author.replace(' ', '').replace(', ', '')
                 insert_txt += '''%s,''' % author

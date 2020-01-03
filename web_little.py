@@ -18,7 +18,7 @@ from xml.sax.saxutils import escape, unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
 
-HOMEDIR = os.path.expanduser('~')
+HOMEDIR = os.path.expanduser("~")
 
 log = logging.getLogger("web_little")
 critical = logging.critical
@@ -27,18 +27,18 @@ dbg = logging.debug
 
 
 def escape_XML(s):  # http://wiki.python.org/moin/EscapingXml
-    '''Escape XML character entities; & < > are defaulted'''
-    extras = {'\t': '  '}
+    """Escape XML character entities; & < > are defaulted"""
+    extras = {"\t": "  "}
     return escape(s, extras)
 
 
 def unescape_XML(text):  # .0937s 4.11%
-    '''
+    """
     Removes HTML or XML character references and entities from text.
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
     Marginally faster than `from xml.sax.saxutils import escape, unescape`
 
-    '''
+    """
 
     def fixup(m):
         text = m.group(0)
@@ -58,20 +58,21 @@ def unescape_XML(text):  # .0937s 4.11%
             except KeyError:
                 pass
         return text  # leave as is
+
     return re.sub(r"&#?\w+;", fixup, text)
 
 
 def get_HTML(
-        url, referer='', data=None, cookie=None,
-        retry_counter=0, cache_control=None):
-    '''Return [HTML content, response] of a given URL.'''
+    url, referer="", data=None, cookie=None, retry_counter=0, cache_control=None
+):
+    """Return [HTML content, response] of a given URL."""
 
     from lxml import etree
 
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
     r = requests.get(url, headers=agent_headers, verify=True)
     info("r.headers['content-type'] = {r.headers['content-type']}")
-    if 'html' in r.headers['content-type']:
+    if "html" in r.headers["content-type"]:
         HTML_bytes = r.content
     else:
         raise IOError("URL content is not HTML.")
@@ -80,14 +81,15 @@ def get_HTML(
     doc = etree.fromstring(HTML_bytes, parser_html)
     HTML_parsed = doc
 
-    HTML_utf8 = etree.tostring(HTML_parsed, encoding='utf-8')
-    HTML_unicode = HTML_utf8.decode('utf-8', 'replace')
+    HTML_utf8 = etree.tostring(HTML_parsed, encoding="utf-8")
+    HTML_unicode = HTML_utf8.decode("utf-8", "replace")
 
     return HTML_bytes, HTML_parsed, HTML_unicode, r
 
 
 def get_text(url):
-    '''Textual version of url'''
+    """Textual version of url"""
 
     import os
+
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())

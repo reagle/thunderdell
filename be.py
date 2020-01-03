@@ -29,8 +29,8 @@ excpt = logging.exception
 def regexParse(text):
 
     entries = {}
-    key_pat = re.compile('@\w+{(.*),')
-    value_pat = re.compile('\s+(\w+) ?= ?{(.*)},?')
+    key_pat = re.compile(r'@\w+{(.*),')
+    value_pat = re.compile(r'\s+(\w+) ?= ?{(.*)},?')
     for line in text:
         key_match = key_pat.match(line)
         if key_match:
@@ -110,7 +110,7 @@ def process(entries):
         if 'note' in entry:
             cite.append(('nt', entry['note']))
 
-        fdo.write("""      <node COLOR="#ff33b8" TEXT="%s"/>\n""" % 
+        fdo.write("""      <node COLOR="#ff33b8" TEXT="%s"/>\n""" %
                   xml_escape(' '.join(["%s=%s" % vals for vals in cite])))
 
         if 'abstract' in entry:
@@ -120,6 +120,7 @@ def process(entries):
         fdo.write("""    </node>\n  </node>\n""")
 
     fdo.write("""</node>\n</map>\n""")
+
 
 if __name__ == "__main__":
 

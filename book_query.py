@@ -50,7 +50,7 @@ def open_query(isbn):
     isbn = isbn.replace('-', '')
     info(f'isbn = {isbn}')
     URL = (f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}'
-            '&jscmd=details&format=json')
+           '&jscmd=details&format=json')
     info(f'url = {URL}')
     r = requests.get(URL)
     returned_content_type = r.headers['content-type']

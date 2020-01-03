@@ -42,7 +42,7 @@ DEFAULT_MAP = f'{HOME}/joseph/readings.mm'
 DEFAULT_PRETTY_MAP = f'{HOME}/joseph/2005/ethno/field-notes.mm'
 CGI_DIR = f'{HOME}/joseph/plan/cgi-bin/'  # for local server
 
-TMP_DIR = f'{HOME}/tmp/.fe/'
+TMP_DIR = f'{HOME}/tmp/.td/'
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
@@ -591,9 +591,9 @@ def create_biblatex_author(names):
     full_names = " and ".join(full_names)
     full_names = normalize_whitespace(full_names)
     return full_names
+
+
 # yapf: disable
-
-
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -1573,49 +1573,49 @@ def _test_results():
     Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
 
-    >>> call('fe -i ~/bin/fe/tests/author-child.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/author-child.mm > \
     /tmp/author-child.txt; \
-    diff ~/bin/fe/tests/author-child.txt /tmp/author-child.txt', shell=True)
+    diff ~/bin/td/tests/author-child.txt /tmp/author-child.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/author-descendent.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/author-descendent.mm > \
     /tmp/author-descendent.txt; \
-    diff ~/bin/fe/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
+    diff ~/bin/td/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/authorless.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/authorless.mm > \
     /tmp/authorless.txt; \
-    diff ~/bin/fe/tests/authorless.txt /tmp/authorless.txt', shell=True)
+    diff ~/bin/td/tests/authorless.txt /tmp/authorless.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/authors.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/authors.mm > \
     /tmp/authors.txt; \
-    diff ~/bin/fe/tests/authors.txt /tmp/authors.txt', shell=True)
+    diff ~/bin/td/tests/authors.txt /tmp/authors.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/case.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/case.mm > \
     /tmp/case.txt; \
-    diff ~/bin/fe/tests/case.txt /tmp/case.txt', shell=True)
+    diff ~/bin/td/tests/case.txt /tmp/case.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/csl.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/csl.mm > \
     /tmp/csl.txt; \
-    diff ~/bin/fe/tests/csl.txt /tmp/csl.txt', shell=True)
+    diff ~/bin/td/tests/csl.txt /tmp/csl.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/date.mm > /tmp/date.txt; \
-    diff ~/bin/fe/tests/date.txt /tmp/date.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/date.mm > /tmp/date.txt; \
+    diff ~/bin/td/tests/date.txt /tmp/date.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/editors.mm > /tmp/editors.txt; \
-    diff ~/bin/fe/tests/editors.txt /tmp/editors.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/editors.mm > /tmp/editors.txt; \
+    diff ~/bin/td/tests/editors.txt /tmp/editors.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/online.mm > /tmp/online.txt; \
-    diff ~/bin/fe/tests/online.txt /tmp/online.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/online.mm > /tmp/online.txt; \
+    diff ~/bin/td/tests/online.txt /tmp/online.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/title-escapes.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/title-escapes.mm > \
     /tmp/title-escapes.txt; \
-    diff ~/bin/fe/tests/title-escapes.txt /tmp/title-escapes.txt', shell=True)
+    diff ~/bin/td/tests/title-escapes.txt /tmp/title-escapes.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/title-title.mm > \
+    >>> call('thunderdell.py -i ~/bin/td/tests/title-title.mm > \
     /tmp/title-title.txt; \
-    diff ~/bin/fe/tests/title-title.txt /tmp/title-title.txt', shell=True)
+    diff ~/bin/td/tests/title-title.txt /tmp/title-title.txt', shell=True)
     0
-    >>> call('fe -i ~/bin/fe/tests/von.mm > /tmp/von.txt; \
-    diff ~/bin/fe/tests/von.txt /tmp/von.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/von.mm > /tmp/von.txt; \
+    diff ~/bin/td/tests/von.txt /tmp/von.txt', shell=True)
     0
 
     """

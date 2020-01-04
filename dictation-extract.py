@@ -237,7 +237,6 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
             PAGE_NUM_PAT = (
                 r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
             )
-
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
                 # print(matches.groups())
@@ -306,8 +305,8 @@ def check(text, file_out):
 if __name__ == "__main__":
     # Parse the command line arguments for optional message and files.
 
-    from fe import BIB_SHORTCUTS  # a dict of shotcuts yeilding a field
-    from fe import BIB_FIELDS  # a dict of a field yielding its shortcut
+    from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
+    from thunderdell import BIB_FIELDS  # dict of field to its shortcut
 
     import codecs
     import chardet

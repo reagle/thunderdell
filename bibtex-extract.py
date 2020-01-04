@@ -187,9 +187,13 @@ if __name__ == "__main__":
     files = [abspath(file_name) for file_name in args.files]
     for file_name in files:
         try:
+<<<<<<< HEAD
             src = open(
                 file_name, "r", encoding="utf-8", errors="replace"
             ).read()
+=======
+            src = open(file_name, "r", encoding="utf-8", errors="replace").read()
+>>>>>>> 0c9f3dd5a069cb78a83556b8af617fd755ab83ec
             fileOut = splitext(file_name)[0] + ".mm"
             fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
         except IOError:

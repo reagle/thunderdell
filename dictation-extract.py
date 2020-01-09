@@ -145,7 +145,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
                                 "* Unknown token '%s' in %s"
                                 % (token, entry["author"])
                             )
-                            sys.exit
+                            sys.exit()
                     citation_add = "%s=%s " % (t, v)
                     citation = citation + citation_add
             if citation != "":
@@ -308,8 +308,8 @@ if __name__ == "__main__":
     from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
     from thunderdell import BIB_FIELDS  # dict of field to its shortcut
 
+    # import chardet
     import codecs
-    import chardet
     import getopt
     import os
     import subprocess

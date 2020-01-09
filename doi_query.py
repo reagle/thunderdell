@@ -14,7 +14,6 @@ import json
 import logging
 import pprint
 import requests
-import sys
 
 log_level = 100  # default
 critical = logging.critical

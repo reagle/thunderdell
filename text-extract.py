@@ -43,7 +43,7 @@ def fix_authors(authors):
 def parse(line):
 
     import re
-    from fe import terms_reverse  # a dict of a term yielding its token
+    from td import terms_reverse  # a dict of a term yielding its token
 
     formats = (
         (

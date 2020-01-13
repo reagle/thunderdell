@@ -51,7 +51,7 @@ JUNK_WORDS = {
 }
 BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 # BORING_WORDS used in safe_capwords() and change_case()
-# not used by fe.py because it doesn't require slow wordset processing  below
+# not used by td.py because it doesn't require slow wordset processing  below
 
 
 def create_wordset(file_name):

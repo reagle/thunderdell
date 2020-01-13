@@ -82,7 +82,7 @@ def process(entries):
             )
 
         # it would be more elegant to just loop through
-        #   `from fe import terms`
+        #   `from td import terms`
         # but this creates an ordering that I like
         if "year" in entry:
             cite.append(("y", entry["year"]))

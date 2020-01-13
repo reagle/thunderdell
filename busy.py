@@ -27,7 +27,7 @@ from collections import Counter, namedtuple
 from datetime import datetime
 from dateutil.parser import parse
 import thunderdell as td
-from io import StringIO, BytesIO
+from io import StringIO
 import logging
 from lxml import etree
 import os
@@ -49,7 +49,7 @@ dbg = logging.debug
 EDITOR = os.environ.get("EDITOR", "nano")
 VISUAL = os.environ.get("VISUAL", "nano")
 HOME = os.path.expanduser("~")
-TMP_DIR = HOME + "/tmp/.fe/"
+TMP_DIR = HOME + "/tmp/.td/"
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 
@@ -331,7 +331,9 @@ class scrape_default(object):
             info("checking regexs")
             for regex in AUTHOR_REGEXS:
                 info(f"trying = '{regex}'")
-                dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
+                dmatch = re.search(
+                    regex, self.text, re.IGNORECASE | re.MULTILINE
+                )
                 if dmatch:
                     info(f'matched: "{regex}"')
                     author = dmatch.group(1).strip()
@@ -352,8 +354,6 @@ class scrape_default(object):
 
     def get_date(self):
         """rough match of a date, then pass to dateutil's magic abilities"""
-
-        from dateutil.parser import parse
 
         DATE_XPATHS = (
             """//li/span[@class="byline_label"]"""
@@ -585,7 +585,9 @@ class scrape_DOI(scrape_default):
             "comment": self.comment,
         }
         for key, value in list(json_bib.items()):
-            info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'")
+            info(
+                f"key = '{key}' value = '{value}' type(value) = '{type(value)}'"
+            )
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -646,7 +648,9 @@ class scrape_MARC(scrape_default):
 
     def get_author(self):
         try:
-            author = re.search("""From: *<a href=".*?">(.*?)</a>""", self.html_u)
+            author = re.search(
+                """From: *<a href=".*?">(.*?)</a>""", self.html_u
+            )
         except AttributeError:
             author = re.search("""From: *(.*)""", self.html_u)
         author = author.group(1)
@@ -663,12 +667,18 @@ class scrape_MARC(scrape_default):
     def get_title(self):
         subject = re.search("""Subject: *(.*)""", self.html_u).group(1)
         if subject.startswith("<a href"):
-            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(1)
-        subject = subject.replace("[Wikipedia-l] ", "").replace("[WikiEN-l] ", "")
+            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(
+                1
+            )
+        subject = subject.replace("[Wikipedia-l] ", "").replace(
+            "[WikiEN-l] ", ""
+        )
         return subject
 
     def get_date(self):
-        mdate = re.search("""Date: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        mdate = re.search(
+            """Date: *<a href=".*?">(.*?)</a>""", self.html_u
+        ).group(1)
         try:
             date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
         except ValueError:
@@ -676,7 +686,9 @@ class scrape_MARC(scrape_default):
         return time.strftime("%Y%m%d", date)
 
     def get_org(self):
-        return re.search("""List: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        return re.search(
+            """List: *<a href=".*?">(.*?)</a>""", self.html_u
+        ).group(1)
 
     def get_excerpt(self):
         excerpt = ""
@@ -840,7 +852,9 @@ class scrape_twitter(scrape_default):
 
     def get_excerpt(self):
 
-        excerpt = self.HTML_p.xpath("//p[contains(@class,'tweet-text')]/text()")[0]
+        excerpt = self.HTML_p.xpath(
+            "//p[contains(@class,'tweet-text')]/text()"
+        )[0]
         return excerpt
 
 
@@ -919,11 +933,17 @@ def log2mm(biblio):
             year_node, "node", {"TEXT": this_week, "POSITION": "right"}
         )
 
-    author_node = SubElement(week_node, "node", {"TEXT": author, "STYLE_REF": "author"})
-    title_node = SubElement(
-        author_node, "node", {"TEXT": title, "STYLE_REF": "title", "LINK": permalink},
+    author_node = SubElement(
+        week_node, "node", {"TEXT": author, "STYLE_REF": "author"}
     )
-    cite_node = SubElement(title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"})
+    title_node = SubElement(
+        author_node,
+        "node",
+        {"TEXT": title, "STYLE_REF": "title", "LINK": permalink},
+    )
+    cite_node = SubElement(
+        title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"}
+    )
     if abstract:
         abstract_node = SubElement(
             title_node, "node", {"TEXT": abstract, "STYLE_REF": "annotation"}
@@ -966,7 +986,8 @@ def log2nifty(biblio):
 
     date_token = time.strftime("%y%m%d", NOW)
     log_item = (
-        f'<dt><a href="{url}">{title}</a> ' f"({date_token})</dt><dd>{comment}</dd>"
+        f'<dt><a href="{url}">{title}</a> '
+        f"({date_token})</dt><dd>{comment}</dd>"
     )
 
     fd = open(ofile)
@@ -1008,7 +1029,9 @@ def log2work(biblio):
         hashtags = "#misc"
     info(f"hashtags = '{hashtags}'")
     html_comment = (
-        comment + " " + '<a href="%s">%s</a>' % (escape_XML(url), escape_XML(title))
+        comment
+        + " "
+        + '<a href="%s">%s</a>' % (escape_XML(url), escape_XML(title))
     )
 
     date_token = time.strftime("%y%m%d", NOW)
@@ -1192,7 +1215,7 @@ def blog_at_goatee(biblio):
     if "goatee.net/photo/" in url:
         photo_match = re.match(PHOTO_RE, url)
         if photo_match:
-            blog_date = re.match(PHOTO_RE, url).group(1).replace("/", "-")
+            # blog_date = re.match(PHOTO_RE, url).group(1).replace("/", "-")
             blog_title = re.match(PHOTO_RE, url).group(2)
             filename = blog_title
             blog_title = blog_title.replace("-", " ")
@@ -1448,7 +1471,11 @@ def do_console_annotation(biblio):
         if (
             "c_web" in biblio
             and len(
-                list(biblio[c] for c in list(td.CSL_SHORTCUTS.values()) if c in biblio)
+                list(
+                    biblio[c]
+                    for c in list(td.CSL_SHORTCUTS.values())
+                    if c in biblio
+                )
             )
             > 1
         ):
@@ -1458,10 +1485,14 @@ def do_console_annotation(biblio):
     # code of do_console_annotation
     info("biblio['author'] = '%s'" % (biblio["author"]))
     tentative_id = get_tentative_ident(biblio)
-    initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
+    initial_text = [
+        f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"
+    ]
     for key in biblio:
         if key.startswith("c_"):
-            initial_text.append(f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}")
+            initial_text.append(
+                f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}"
+            )
         if key == "tags" and biblio["tags"]:
             tags = " ".join(
                 [
@@ -1545,7 +1576,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
     )
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
-            ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
+            [
+                "#" + KEY_SHORTCUTS.get(tag, tag)
+                for tag in tags.strip().split(" ")
+            ]
         )
     comment, title, subtitle, url, tags = [
         v.strip() if isinstance(v, str) else ""
@@ -1580,13 +1614,18 @@ def yasn_publish(comment, title, subtitle, url, tags):
     )
 
     twitter = Twython(
-        TW_CONSUMER_KEY, TW_CONSUMER_SECRET, TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET,
+        TW_CONSUMER_KEY,
+        TW_CONSUMER_SECRET,
+        TW_ACCESS_TOKEN,
+        TW_ACCESS_TOKEN_SECRET,
     )
     try:
         if photo:
             tweet = shrink_tweet(comment, title, "", tags)
             response = twitter.upload_media(media=photo)
-            twitter.update_status(status=tweet, media_ids=[response["media_id"]])
+            twitter.update_status(
+                status=tweet, media_ids=[response["media_id"]]
+            )
         else:
             tweet = shrink_tweet(comment, title, url, tags)
             twitter.update_status(status=tweet)
@@ -1613,7 +1652,11 @@ if __name__ == "__main__":
         formatter_class=RawTextHelpFormatter,
     )
     arg_parser.add_argument(
-        "-T", "--tests", action="store_true", default=False, help="run doc tests",
+        "-T",
+        "--tests",
+        action="store_true",
+        default=False,
+        help="run doc tests",
     )
     arg_parser.add_argument(
         "-K",
@@ -1657,7 +1700,10 @@ if __name__ == "__main__":
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="doi_query.log", filemode="w", level=log_level, format=LOG_FORMAT,
+            filename="doi_query.log",
+            filemode="w",
+            level=log_level,
+            format=LOG_FORMAT,
         )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)

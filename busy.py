@@ -22,20 +22,20 @@ https://github.com/reagle/thunderdell
 # get reddit timestamp from API (no scraping possible?)
 
 import argparse
-from argparse import RawTextHelpFormatter
-from collections import Counter, namedtuple
-from datetime import datetime
-from dateutil.parser import parse
-import thunderdell as td
-from io import StringIO
 import logging
-from lxml import etree
 import os
 import re
 import string
-from subprocess import call, Popen
 import sys
+import thunderdell as td
 import time
+from collections import Counter, namedtuple
+from datetime import datetime
+from dateutil.parser import parse as dt_parse
+from io import StringIO
+from lxml import etree as l_etree
+from subprocess import call, Popen
+from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
 
 # personal utilities
 from web_little import get_HTML, get_text, unescape_XML, escape_XML
@@ -366,7 +366,7 @@ class scrape_default(object):
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
                     info(f"xpath_result = '{xpath_result}'; xpath = '{path}'")
-                    date = parse(xpath_result[0]).strftime("%Y%m%d")
+                    date = dt_parse(xpath_result[0]).strftime("%Y%m%d")
                     info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date
@@ -376,7 +376,7 @@ class scrape_default(object):
         date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         try:
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
-            return parse(dmatch.group(0)).strftime("%Y%m%d")
+            return dt_parse(dmatch.group(0)).strftime("%Y%m%d")
         except (AttributeError, TypeError, ValueError):
             NOW = time.gmtime()
             date = time.strftime("%Y%m%d", NOW)
@@ -869,8 +869,6 @@ def log2mm(biblio):
         http://reagle.org/joseph/2009/01/thunderdell.html
     """
 
-    from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
-
     print("to log2mm")
     biblio, args.publish = do_console_annotation(biblio)
     info(f"{biblio}")
@@ -1048,10 +1046,10 @@ def log2work(biblio):
     plan_fd.close()
 
     # parsing as XML needs namespaces in XPATH
-    plan_tree = etree.parse(
-        StringIO(plan_content), etree.XMLParser(ns_clean=True, recover=True)
+    plan_tree = l_etree.parse(
+        StringIO(plan_content), l_etree.XMLParser(ns_clean=True, recover=True)
     )
-    # plan_tree = etree.parse(StringIO(plan_content), etree.HTMLParser())
+    # plan_tree = l_etree.parse(StringIO(plan_content), l_etree.HTMLParser())
     ul_found = plan_tree.xpath(
         """//x:div[@id='Done']/x:ul""",
         namespaces={"x": "http://www.w3.org/1999/xhtml"},
@@ -1060,10 +1058,10 @@ def log2work(biblio):
     info("ul_found = %s" % (ul_found))
     if ul_found:
         ul_found[0].text = "\n      "
-        log_item_xml = etree.XML(log_item)
+        log_item_xml = l_etree.XML(log_item)
         log_item_xml.tail = "\n\n      "
         ul_found[0].insert(0, log_item_xml)
-        new_content = etree.tostring(
+        new_content = l_etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="xml"
         )
         new_plan_fd = open(ofile, "w", encoding="utf-8", errors="replace")
@@ -1649,7 +1647,7 @@ if __name__ == "__main__":
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
         description=DESCRIPTION,
-        formatter_class=RawTextHelpFormatter,
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     arg_parser.add_argument(
         "-T",

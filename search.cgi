@@ -33,16 +33,15 @@ def cgi_main():
     if query.startswith("@"):
         query = query[1:]
 
+    sys.path.append(HOME + "/bin/td")
     if site == "BusySponge":
-        sys.path.append(HOME + "/bin")
-        import bsq
+        import busy_query
 
-        query_result_file = bsq.queryBSponge(query)
+        query_result_file = busy_query.query_sponge(query)
         fileObj = codecs.open(query_result_file, "r", "utf-8", "replace")
         print((fileObj.read()))
         fileObj.close()
     else:
-        sys.path.append(HOME + "/bin/td")
         MINDMAP = HOME + "/joseph/readings.mm"
 
         import thunderdell as td
@@ -61,7 +60,6 @@ def cgi_main():
         td.dbg = _ignore
 
         td.build_bib(MINDMAP, output)
-        print("foobar")
 
         fileObj = codecs.open(td.TMP_DIR + "query-thunderdell.html", "r", "utf-8")
         print((fileObj.read()))

@@ -63,7 +63,12 @@ def unescape_XML(text):  # .0937s 4.11%
 
 
 def get_HTML(
-    url, referer="", data=None, cookie=None, retry_counter=0, cache_control=None
+    url,
+    referer="",
+    data=None,
+    cookie=None,
+    retry_counter=0,
+    cache_control=None,
 ):
     """Return [HTML content, response] of a given URL."""
 

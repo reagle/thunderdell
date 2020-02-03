@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
-# On Webfaction [1] this script and its parent directory must be chmod 711
-# [1]: http://docs.webfaction.com/software/static.html#error-500-internal-server-error
-# On Webfaction env python3 = python3.2; so I must set 3.7 on the shebang above
+# set the shebang on a2hosting to
+# /home/goateene/opt/bin/python3
 
 
 def cgi_main():

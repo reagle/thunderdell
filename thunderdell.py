@@ -1633,8 +1633,7 @@ def build_bib(file_name, output):
                     raise
             # below runs the query twice I think, but still fast
             webbrowser.open(
-                f"http://localhost:8000/cgi-bin/"
-                f"search.cgi?query={args.query}"
+                f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}"
             )
             if not ADDRESS_IN_USE:
                 server.serve_forever()

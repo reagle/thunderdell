@@ -1401,17 +1401,15 @@ def do_console_annotation(biblio):
     def edit_annotation(initial_text, resume_edit=False):
         """Write initial bib info to a tmp file, edit and return"""
 
-        annotation_file_name = TMP_DIR + "b-annotation.txt"
-        rotate_files(annotation_file_name)
+        annotation_fn = TMP_DIR + "b-annotation.txt"
         if not resume_edit:
-            if os.path.exists(annotation_file_name):
-                os.remove(annotation_file_name)
-            annotation_file = open(annotation_file_name, "w", encoding="utf-8")
-            annotation_file.write(initial_text)
-            annotation_file.close()
-        call([EDITOR, annotation_file_name])
-        annotation_file = open(annotation_file_name, "r", encoding="utf-8")
-        return annotation_file.readlines()
+            rotate_files(annotation_fn)
+            if os.path.exists(annotation_fn):
+                os.remove(annotation_fn)
+            with open(annotation_fn, "w", encoding="utf-8") as annotation_file:
+                annotation_file.write(initial_text)
+        call([EDITOR, annotation_fn])
+        return open(annotation_fn, "r", encoding="utf-8").readlines()
 
     def parse_bib(biblio, edited_text):
         """Parse the bib assignments"""

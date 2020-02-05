@@ -1,8 +1,10 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# set shebang locally to
+#!/usr/bin/env python3.8
 # set the shebang on a2hosting to
-# /home/goateene/opt/bin/python3
+#!/home/goateene/opt/bin/python3
 
 
 def cgi_main():

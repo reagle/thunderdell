@@ -218,6 +218,7 @@ NOW = time.localtime()
 
 def smart_punctuation_to_ascii(s):
     """Convert unicode punctuation (i.e., "smart quotes") to simpler form."""
+
     info(f"old {type(s)} s = '{s}'")
     punctuation = {
         0x2018: "'",  # apostrophe
@@ -274,7 +275,7 @@ class scrape_default(object):
         biblio["title"], biblio["c_web"] = self.split_title_org()
         for site, container, container_type in SITE_CONTAINER_MAP:
             if site in biblio["url"]:
-                info(f"container = {container}")
+                info(f"{container=}")
                 biblio[container_type] = container
                 del biblio["c_web"]
         return biblio
@@ -309,12 +310,12 @@ class scrape_default(object):
                 info(f"trying = '{path}'")
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    info(f"xpath_result = '{xpath_result}'; xpath = '{path}'")
+                    info(f"{xpath_result=}; {path=}")
                     # 20171204 added space to join below
                     author = string.capwords(" ".join(xpath_result).strip())
                     if author.lower().startswith("by "):
                         author = author[3:]
-                    info(f"author = '{author}'; xpath = '{path}'")
+                    info(f"{author=}; {path=}")
                     if author != "":
                         return author
                     else:
@@ -365,7 +366,7 @@ class scrape_default(object):
                 info(f"trying = '{path}'")
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
-                    info(f"xpath_result = '{xpath_result}'; xpath = '{path}'")
+                    info(f"'{xpath_result=}'; '{path=}'")
                     date = dt_parse(xpath_result[0]).strftime("%Y%m%d")
                     info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
@@ -394,7 +395,7 @@ class scrape_default(object):
 
         for prefix, regexp in title_regexps:
             if self.url.startswith(prefix):
-                info(f"prefix = {prefix}")
+                info(f"{prefix=}")
                 break
 
         title = "UNKNOWN TITLE"
@@ -438,7 +439,7 @@ class scrape_default(object):
                 info("org_ori.lower() in title_c14n: switch")
                 title, org = parts[-1], " ".join(parts[0:-1])
             else:
-                info(f"beginning = {beginning}, end = {end}")
+                info(f"{beginning=}, {end=}")
                 end_ratio = float(len(end)) / len(beginning + end)
                 info(
                     " end_ratio: %d / %d = %.2f"
@@ -545,14 +546,14 @@ class scrape_ISBN(scrape_default):
     def get_author(self, bib_dict):
         names = "UNKNOWN"
         if "author" in bib_dict:
-            info("bib_dict['author'] = '%s'" % bib_dict["author"])
+            info(f"{bib_dict['author']=}")
             names = bib_dict["author"]
         return names
 
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
-        info(f"date_parts = {date_parts}")
+        info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = "%d%02d%02" % (int(year), int(month), int(day))
@@ -563,7 +564,7 @@ class scrape_ISBN(scrape_default):
             date = str(date_parts[0])
         else:
             date = "0000"
-        info(f"date = {date}")
+        info(f"{date=}")
         return date
 
 
@@ -585,9 +586,7 @@ class scrape_DOI(scrape_default):
             "comment": self.comment,
         }
         for key, value in list(json_bib.items()):
-            info(
-                f"key = '{key}' value = '{value}' type(value) = '{type(value)}'"
-            )
+            info(f"{key=} {value=} {type(value)=}")
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -608,7 +607,7 @@ class scrape_DOI(scrape_default):
             biblio["title"] = "UNKNOWN"
         else:
             biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
-        info(f"biblio = {biblio}")
+        info(f"{biblio=}")
         return biblio
 
     def get_author(self, bib_dict):
@@ -626,7 +625,7 @@ class scrape_DOI(scrape_default):
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
-        info(f"date_parts = {date_parts}")
+        info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = "%d%02d%02d" % (int(year), int(month), int(day))
@@ -637,7 +636,7 @@ class scrape_DOI(scrape_default):
             date = str(date_parts[0])
         else:
             date = "0000"
-        info(f"date = {date}")
+        info(f"{date=}")
         return date
 
 
@@ -836,7 +835,7 @@ class scrape_twitter(scrape_default):
     def get_title(self):
 
         authororg_title = self.HTML_p.xpath("//title/text()")[0]
-        info(f"authororg_title = {authororg_title}")
+        info(f"{authororg_title=}")
         author_org, title = authororg_title.split(":", 1)
         # author_org, title = authororg_title.split('|', 1)
         # author = author_org.split('/', 1)[1]
@@ -879,7 +878,7 @@ def log2mm(biblio):
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
     ofile = HOME + "/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
-    info(f"biblio = {biblio}")
+    info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
     subtitle = biblio["subtitle"] if "subtitle" in biblio else ""
@@ -894,7 +893,7 @@ def log2mm(biblio):
     citation = ""
     for key, value in list(biblio.items()):
         if key in td.BIB_FIELDS:
-            info(f"key = {key} value = {value}")
+            info(f"{key=} {value=}")
             citation += f"{td.BIB_FIELDS[key]}={value} "
     citation += f" r={date_read} "
     if biblio["tags"]:
@@ -948,7 +947,7 @@ def log2mm(biblio):
         )
     if excerpt:
         for exc in excerpt.split("\n\n"):
-            info(f"exc = {exc}")
+            info(f"{exc=}")
             if exc.startswith(", "):
                 style_ref = "paraphrase"
                 exc = exc[2:]
@@ -1013,7 +1012,7 @@ def log2work(biblio):
     print("to log2work\n")
     info(f"biblio = '{biblio}'")
     ofile = HOME + "/data/2web/reagle.org/joseph/plan/plans/index.html"
-    info(f"ofile = {ofile}")
+    info(f"{ofile=}")
     subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
     title = biblio["title"].strip() + subtitle
     url = biblio["url"].strip()
@@ -1176,7 +1175,7 @@ def blog_at_opencodex(biblio):
         .replace("/", "-")
     )
     filename = f"{CODEX_ROOT}{category}/{this_year}-{filename}.md"
-    info(f"filename = {filename}")
+    info(f"{filename=}")
     if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
@@ -1199,7 +1198,7 @@ def blog_at_goatee(biblio):
     """
 
     GOATEE_ROOT = HOME + "/data/2web/goatee.net/content/"
-    info("biblio['comment'] = '%s'" % (biblio["comment"]))
+    info(f"{biblio['comment']=}")
     blog_title, sep, blog_body = biblio["comment"].partition(". ")
 
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
@@ -1224,8 +1223,8 @@ def blog_at_goatee(biblio):
         this_day,
         filename,
     )
-    info(f"blog_title = {blog_title}")
-    info(f"filename = {filename}")
+    info(f"{blog_title=}")
+    info(f"{filename=}")
     if os.path.exists(filename):
         print(("\nfilename '%s' already exists'" % filename))
         sys.exit()
@@ -1439,7 +1438,7 @@ def do_console_annotation(biblio):
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2))
-                info(f"cite_pairs = {cite_pairs}")
+                info(f"{cite_pairs=}")
                 for short, value in cite_pairs:
                     info(f"short,value = {short},{value}")
                     if short == "t":  # 't=cj' -> cj = 'Nature'
@@ -1479,7 +1478,7 @@ def do_console_annotation(biblio):
         return biblio, do_publish
 
     # code of do_console_annotation
-    info("biblio['author'] = '%s'" % (biblio["author"]))
+    info(f"{biblio['author']=}")
     tentative_id = get_tentative_ident(biblio)
     initial_text = [
         f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"
@@ -1524,7 +1523,7 @@ def shrink_tweet(comment, title, url, tags):
     TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
     SHORTENER_LEN = 23  # twitter uses t.co
 
-    info(f"TWEET_LIMIT = {TWEET_LIMIT}")
+    info(f"{TWEET_LIMIT=}")
     tweet_room = TWEET_LIMIT - len(tags)
     info(f"tweet_room - len(tags) = {tweet_room}")
 
@@ -1566,10 +1565,7 @@ def shrink_tweet(comment, title, url, tags):
 
 def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks"
-    info(
-        f"comment = '{comment}', title = {title}, "
-        "subtitle = {subtitle}, url = {url}, tags = {tags}"
-    )
+    info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
             [
@@ -1595,7 +1591,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
          title = {len(title)}: {title}
          url = {len(url)}: {url}
          tags = {len(tags)}: {tags}
-         total_len = {total_len}"""
+         {total_len=}"""
     )
 
     # https://twython.readthedocs.io/en/latest/index.html
@@ -1718,7 +1714,7 @@ if __name__ == "__main__":
     logger, params = get_logger(" ".join(args.text))
     info("-------------------------------------------------------")
     info("-------------------------------------------------------")
-    info(f"params = '{params}'")
+    info(f"{params=}")
     comment = "" if not params["comment"] else params["comment"]
     if params["url"]:  # not all log2work entries have urls
         scraper = get_scraper(params["url"].strip(), comment)
@@ -1726,5 +1722,5 @@ if __name__ == "__main__":
     else:
         biblio = {"title": "", "url": "", "comment": comment}
     biblio["tags"] = params["tags"]
-    info(f"biblio = '{biblio}'")
+    info(f"{biblio=}")
     logger(biblio)

@@ -29,18 +29,15 @@ ACCEPT_HEADERS = {
 def query(doi, accept="application/citeproc+json"):
     """Query the DOI Web service; returns string"""
 
-    info("accept = %s " % accept)
-    info("doi = %s" % doi)
+    info(f"{accept=}")
+    info(f"{doi=}")
     headers = {"Accept": accept}
     url = "http://dx.doi.org/%s" % doi
-    info("url = '%s'" % url)
+    info(f"{url=}")
     r = requests.get(url, headers=headers)
     requested_content_type = accept.split(";")[0]
     returned_content_type = r.headers["content-type"]
-    info(
-        "returned_content_type = '%s'; requested_content_type = '%s'"
-        % (returned_content_type, requested_content_type)
-    )
+    info("{returned_content_type=}; {requested_content_type=}")
     if requested_content_type in returned_content_type:
         json_bib = json.loads(r.content)
         return json_bib

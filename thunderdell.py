@@ -428,7 +428,7 @@ def identity_increment(ident, entries):
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
-    # info(f"entry = {entry}")
+    # info(f"{entry=}")
     last_names = []
     for first, von, last, jr in entry["author"]:
         last_names.append(f"{von}{last}".replace(" ", ""))
@@ -839,7 +839,7 @@ def emit_biblatex(entries):
                 del entry["booktitle"]
 
         # CSL type and field conversions
-        # info(f"entry = {entry}")
+        # info(f"{entry=}")
         for field in ("c_blog", "c_web", "c_forum"):
             if field in entry:
                 entry_type_copy = "online"
@@ -884,7 +884,7 @@ def emit_biblatex(entries):
                         continue
 
                 # if value not a proper string, make it so
-                # info(f"value = {value}; type = {type(value)}")
+                # info(f"{value=}; type = {type(value)}")
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
@@ -1068,7 +1068,7 @@ def emit_yaml_csl(entries):
                     #     f'  container-title: "Personal"\n')
                     continue
 
-                # info(f"field = {field}")
+                # info(f"{field=}")
                 if field in CONTAINERS:
                     field = "container-title"
                 if field in BIBLATEX_CSL_FIELD_MAP:

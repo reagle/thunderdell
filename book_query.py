@@ -156,7 +156,11 @@ if "__main__" == __name__:
         default=0,
         help="Increase verbosity (specify multiple times for more)",
     )
-    arg_parser.add_argument("--version", action="version", version="0.1")
+    arg_parser.add_argument(
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
+    )
     args = arg_parser.parse_args()
 
     if args.verbose == 1:

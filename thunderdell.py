@@ -1826,6 +1826,11 @@ if __name__ == "__main__":
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
+    )
+    arg_parser.add_argument(
         "-L",
         "--log-to-file",
         action="store_true",

@@ -343,7 +343,11 @@ def main(argv):
         default=0,
         help="Increase verbosity (specify multiple times for more)",
     )
-    arg_parser.add_argument("--version", action="version", version="TBD")
+    arg_parser.add_argument(
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
+    )
     args = arg_parser.parse_args()
 
     log_level = 100  # default

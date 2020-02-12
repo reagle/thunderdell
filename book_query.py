@@ -53,7 +53,7 @@ def open_query(isbn):
         f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}"
         "&jscmd=details&format=json"
     )
-    info(f"{url=}")
+    info(f"{URL=}")
     r = requests.get(URL)
     returned_content_type = r.headers["content-type"]
     info(f"r.content = '{r.content}'")
@@ -104,7 +104,7 @@ def google_query(isbn):
     isbn = isbn.replace("-", "")
     info(f"{isbn=}")
     URL = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-    info(f"{url=}")
+    info(f"{URL=}")
     r = requests.get(URL)
     returned_content_type = r.headers["content-type"]
     # info(f"r.content = '{r.content}'")

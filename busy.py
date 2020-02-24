@@ -1424,6 +1424,7 @@ def do_console_annotation(biblio):
         print(("@%s\n" % (tentative_id)))
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
+            line = line.replace("\u200b", "")  # Instapaper export artifact
             line = line.strip()
             if line == "":
                 continue

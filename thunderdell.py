@@ -142,7 +142,9 @@ BIB_FIELDS = {field: short for (short, field) in BIB_SHORTCUTS.items()}
 CSL_FIELDS = {field: short for (short, field) in CSL_SHORTCUTS.items()}
 
 CONTAINERS = list(CSL_SHORTCUTS.values())
-CONTAINERS.append('organization')
+# 2020-03-23 why append, 
+#   leads to duplicate "container-title" errors in YAML parsing
+# CONTAINERS.append('organization') 
 
 BIBLATEX_TYPES = {
     'article',
@@ -1056,7 +1058,11 @@ def emit_yaml_csl(entries):
                         elif "pages" in entry:
                             # info("  skipping url, paginated item")
                             continue
-                if field == "eventtitle" and "container-title" not in entry:
+                if (
+                    field == "eventtitle"
+                    and "container-title" not in entry
+                    and "booktitle" not in entry
+                ):
                     args.outfd.write(
                         f'  container-title: "Proceedings of {value}"\n'
                     )
@@ -1082,7 +1088,7 @@ def emit_yaml_csl(entries):
 def emit_wp_citation(entries):
     """Emit citations in Wikipedia's {{citation}} template format.
 
-    See: http://en.wikipedia.org/wiki/Template:Cite
+    See: https://en.wikipedia.org/wiki/Template:Cite
 
     """
     # TODO: Wikipedia dates may not be YYYY-MM, only YYYY or YYYY-MM-DD
@@ -1168,7 +1174,7 @@ def emit_results(entries, query, results_file):
             if matches:
                 text = matches.group(2)
                 locator = matches.group(1)
-                # http://ctan.mirrorcatalogs.com/macros/latex/contrib/biblatex/doc/biblatex.pdf
+                # http://mirrors.ibiblio.org/CTAN/macros/latex/exptl/biblatex/doc/biblatex.pdf
                 # biblatex: page, column, line, verse, section, paragraph
                 # kindle: location
                 if "pagination" in entry:

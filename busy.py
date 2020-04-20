@@ -108,6 +108,7 @@ GF_KEY_SHORTCUTS = {
 
 LH_KEY_SHORTCUTS = {
     # Lifehack
+    "adv": "advice",
     "com": "complicity",
     "lh": "lifehack",
     "his": "history",

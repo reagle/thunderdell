@@ -13,6 +13,7 @@ Extract a bibliography from a Freeplane mindmap"""
 
 # TODO
 
+import calendar
 from collections import namedtuple
 import errno
 from html import escape
@@ -22,6 +23,7 @@ import os
 import re
 from subprocess import call  # needed for testing
 import sys
+from typing import List, Set, Dict, NamedTuple, Tuple, Optional
 import unicodedata
 import urllib.parse
 from urllib.parse import parse_qs
@@ -471,7 +473,7 @@ def get_ident(entry, entries, delim=""):
     return ident
 
 
-def parse_date(when):
+def parse_date(when: str) -> NamedTuple:
     """parse dates that starts with 'YYYY' and returns named tuple.
     Without hyphens, strings such as '101210' are ambiguous: years
     have precedence.
@@ -1086,15 +1088,17 @@ def emit_yaml_csl(entries):
 
 
 def emit_wp_citation(entries):
-    """Emit citations in Wikipedia's {{citation}} template format.
+    """Emit citations in Wikipedia's {{citation}} template format for
+    use in a List-defined references block.
 
+    See: https://en.wikipedia.org/wiki/Help:List-defined_references
     See: https://en.wikipedia.org/wiki/Template:Cite
 
     """
     # TODO: Wikipedia dates may not be YYYY-MM, only YYYY or YYYY-MM-DD
 
     def output_wp_names(field, names):
-        """Rejigger names for WP odd author and editor conventions."""
+        """Rejigger names for odd WP author and editor conventions."""
         name_num = 0
         for name in names:
             name_num += 1
@@ -1110,22 +1114,22 @@ def emit_wp_citation(entries):
             )
 
     for key, entry in sorted(entries.items()):
-        args.outfd.write("{{ citation\n")
-        if "identifier" in entry:
-            wp_ident = get_ident(entry, entries, delim=" & ")
-            args.outfd.write("| ref = {{sfnref|%s}}\n" % wp_ident)
+        wp_ident = get_ident(entry, entries, delim="")
+        args.outfd.write(f"<ref name={wp_ident}>\n")
+        args.outfd.write(f"{{{{citation\n")
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 if field in (
                     "annotation",
+                    "chapter",
                     "custom1",
                     "custom2",
                     "entry_type",
                     "identifier",
-                    "chapter",
                     "keyword",
+                    "note",
                     "shorttitle",
                 ):
                     continue
@@ -1136,9 +1140,16 @@ def emit_wp_citation(entries):
                     output_wp_names(field, value)
                     continue
                 elif field in ("date", "origdate", "urldate"):
-                    date = "-".join(
-                        filter(None, (value.year, value.month, value.day))
-                    )
+                    date = value.year
+                    if value.month:
+                        date = (
+                            f"{calendar.month_name[int(value.month)]} {date}"
+                        )
+                    if value.day:
+                        date = f"{value.day} {date}"
+                    # date = "-".join(
+                    #     filter(None, (value.year, value.month, value.day))
+                    # )
                     if value.circa:
                         date = "{{circa|" + date + "}}"
                     value = date
@@ -1148,7 +1159,7 @@ def emit_wp_citation(entries):
                 if field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f"| {field} = {value}\n")
-        args.outfd.write("}}\n")
+        args.outfd.write("}}\n</ref>\n")
 
 
 def emit_results(entries, query, results_file):

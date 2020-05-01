@@ -2,13 +2,15 @@
 references:
 - id: Wikipedia2009beg
   type: webpage
+  author:
+  - family: "Wikipedia"
   custom2: "title-escapes.mm"
   issued:
     year: 2009
     month: 06
     day: 08
   keyword: "test"
-  container-title: "Wikipedia"
+  publisher: "Wikipedia"
   title-short: "Bracket (e.g., [], {}) (oldid=295177316)"
   title: "Bracket (<span class='nocase'>e.g</span>., [], {})"
   URL: "http://en.wikipedia.org/?oldid=295177316"

@@ -31,10 +31,14 @@ import webbrowser
 from xml.etree.ElementTree import parse
 from web_little import unescape_XML, escape_XML
 
-log_level = 100
+log_level = logging.ERROR  # 40 # declared here for when imported
+
+# function aliases
 critical = logging.critical
+error = logging.error
+warning = logging.warning
 info = logging.info
-dbg = logging.debug
+debug = logging.debug
 
 useLXML = False
 # HOME for path of mindmaps on webhost
@@ -432,7 +436,7 @@ def identity_increment(ident, entries):
 def get_ident(entry, entries, delim=""):
     """Create an identifier (key) for the entry"""
 
-    # info(f"{entry=}")
+    # debug(f"1 {entry=}")
     last_names = []
     for first, von, last, jr in entry["author"]:
         last_names.append(f"{von}{last}".replace(" ", ""))
@@ -449,10 +453,10 @@ def get_ident(entry, entries, delim=""):
         entry["date"] = Date(
             year="0000", month=None, day=None, circa=None, time=None
         )
-    year_delim = " " if delim else ""
-    # info(f"entry['date'] = {entry['date']}")
+    year_delim = delim if delim else ""
+    # debug(f"2 entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry["date"].year))
-    # info(f"ident = {type(ident)} '{ident}'")
+    # debug(f"3 ident = {type(ident)} '{ident}'")
     ident = (
         ident.replace(":", "")
         .replace("'", "")  # not permitted in xml name/id attributes
@@ -461,15 +465,18 @@ def get_ident(entry, entries, delim=""):
         .replace("<strong>", "")  # '@' citation designator
         .replace("</strong>", "")  # added by walk_freeplane.query_highlight
     )
-    # info(f"ident = {type(ident)} '{ident}'")
+    # debug(f"4 ident = {type(ident)} '{ident}'")
     ident = strip_accents(ident)  # unicode buggy in bibtex keys
     if ident[0].isdigit():  # pandoc forbids keys starting with digits
         ident = f"a{ident}"
 
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
+        warning(
+            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
+        )
         ident = identity_increment(ident, entries)
-    # info(f"ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
+    # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
 
 
@@ -491,7 +498,6 @@ def parse_date(when: str) -> NamedTuple:
     """
 
     year = month = day = circa = time = None
-    info(f"{when}")
     if " " in when:
         when, time = when.split(" ", 1)
     if when.endswith("~"):
@@ -665,7 +671,6 @@ def guess_biblatex_type(entry):
 
         return e_t
 
-
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -695,7 +700,7 @@ def guess_csl_type(entry):
             print(f"Unknown entry_type = {et}")
             sys.exit()
     et = 'no-type'
-    # info(f"looking at containers for {entry}")
+    # debug(f"looking at containers for {entry}")
     if 'c_web' in entry:                et = 'webpage'
     elif 'c_blog' in entry:             et = 'post-weblog'
     elif 'c_newspaper' in entry:        et = 'article-newspaper'
@@ -768,21 +773,21 @@ def bibformat_title(title):
 
     for word in words:
         if len(word) > 0:
-            # info(f"word = '{word}'")
+            # debug(f"word = '{word}'")
             if not (word[0].isalpha()):
-                # info("not (word[0].isalpha())")
+                # debug("not (word[0].isalpha())")
                 cased_title.append(word)
             elif word in BORING_WORDS:  # imported from change_case.py
-                # info("word in BORING_WORDS")
+                # debug("word in BORING_WORDS")
                 cased_title.append(word)
             elif word in WORDS2PROTECT:
-                # info(f"protecting lower '{word}'")
+                # debug(f"protecting lower '{word}'")
                 cased_title.append(f"{{word}}")
             elif word[0].isupper():
-                # info(f"protecting title '{word}'")
+                # debug(f"protecting title '{word}'")
                 cased_title.append(f"{{{my_title(word)}}}")
             else:
-                # info("else nothing")
+                # debug("else nothing")
                 cased_title.append(my_title(word))
     quoted_title = "".join(cased_title)
 
@@ -804,7 +809,6 @@ def bibformat_title(title):
 #################################################################
 # Emitters
 #################################################################
-
 
 EXCLUDE_URLS = [
     "search?q=cache",
@@ -843,7 +847,7 @@ def emit_biblatex(entries):
                 del entry["booktitle"]
 
         # CSL type and field conversions
-        # info(f"{entry=}")
+        # debug(f"{entry=}")
         for field in ("c_blog", "c_web", "c_forum"):
             if field in entry:
                 entry_type_copy = "online"
@@ -875,20 +879,20 @@ def emit_biblatex(entries):
                 if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
                 if field in ("url"):
-                    # info(f"url = {value}")
+                    # debug(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
-                        # info("banned")
+                        # debug("banned")
                         continue
                     # if online_only and not (online or online journal)
                     if args.urls_online_only and not (
                         entry_type == "online"
                         or any(j for j in ONLINE_JOURNALS if j in entry["url"])
                     ):
-                        # info("not online")
+                        # debug("not online")
                         continue
 
                 # if value not a proper string, make it so
-                # info(f"{value=}; type = {type(value)}")
+                # debug(f"{value=}; type = {type(value)}")
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
@@ -902,7 +906,7 @@ def emit_biblatex(entries):
                 #   url and howpublished shouldn't be changed
                 #   author may have curly brackets that should not be escaped
                 #   date is a named_tuple that doesn't need escaping
-                # info(f"{field}")
+                # debug(f"{field}")
                 if field not in (
                     "author",
                     "url",
@@ -943,7 +947,7 @@ def emit_yaml_csl(entries):
         """yaml writer for authors and editors"""
 
         for person in people:
-            # info("person = '%s'" % (' '.join(person)))
+            # debug("person = '%s'" % (' '.join(person)))
             # biblatex ('First Middle', 'von', 'Last', 'Jr.')
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
@@ -1010,7 +1014,7 @@ def emit_yaml_csl(entries):
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                # info(f"short, field = '{short} , {field}'")
+                # debug(f"short, field = '{short} , {field}'")
                 # skipped fields
                 if field in ("identifier", "entry_type", "issue"):
                     continue
@@ -1026,16 +1030,16 @@ def emit_yaml_csl(entries):
                     continue
                 if field in ("date", "origdate", "urldate"):
                     # TODO: allow BCE and circa dates, e.g., '-0348~'
-                    # info(f'field = {field}')
+                    # debug(f'field = {field}')
                     if value == "0000":
                         continue
                     if field == "date":
-                        # info(f"value = '{value}'")
+                        # debug(f"value = '{value}'")
                         season = entry["issue"] if "issue" in entry else None
                         args.outfd.write("  issued:\n")
                         emit_yaml_date(value, season)
                     if field == "origdate":
-                        # info(f"value = '{value}'")
+                        # debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")
                         emit_yaml_date(value)
                     if field == "urldate":
@@ -1046,19 +1050,19 @@ def emit_yaml_csl(entries):
                 if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
                 if field == "url":
-                    # info(f"url = {value}")
+                    # debug(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
-                        # info("banned")
+                        # debug("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if args.urls_online_only:
-                        # info("urls_online_only")
+                        # debug("urls_online_only")
                         # don't skip online types
                         if entry_type in {"post", "post-weblog", "webpage"}:
                             pass
                         # skip items that are paginated
                         elif "pages" in entry:
-                            # info("  skipping url, paginated item")
+                            # debug("  skipping url, paginated item")
                             continue
                 if (
                     field == "eventtitle"
@@ -1076,13 +1080,13 @@ def emit_yaml_csl(entries):
                     #     f'  container-title: "Personal"\n')
                     continue
 
-                # info(f"{field=}")
+                # debug(f"{field=}")
                 if field in CONTAINERS:
                     field = "container-title"
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    # info(f"bib2csl field FROM =  {field}")
+                    # debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    # info(f"bib2csl field TO   = {field}")
+                    # debug(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
     args.outfd.write("...\n")
 
@@ -1096,6 +1100,9 @@ def emit_wp_citation(entries):
 
     """
     # TODO: Wikipedia dates may not be YYYY-MM, only YYYY or YYYY-MM-DD
+
+    debug(f"********************")
+    debug(f"{entries=}")
 
     def output_wp_names(field, names):
         """Rejigger names for odd WP author and editor conventions."""
@@ -1114,7 +1121,8 @@ def emit_wp_citation(entries):
             )
 
     for key, entry in sorted(entries.items()):
-        wp_ident = get_ident(entry, entries, delim="")
+        wp_ident = key
+        # debug(f"{wp_ident=}")
         args.outfd.write(f"<ref name={wp_ident}>\n")
         args.outfd.write(f"{{{{citation\n")
 
@@ -1146,7 +1154,7 @@ def emit_wp_citation(entries):
                             f"{calendar.month_name[int(value.month)]} {date}"
                         )
                     if value.day:
-                        date = f"{value.day} {date}"
+                        date = f"{value.day.lstrip('0')} {date}"
                     # date = "-".join(
                     #     filter(None, (value.year, value.month, value.day))
                     # )
@@ -1408,11 +1416,11 @@ def parse_names(names):
     """
 
     names_p = []
-    # info(f"names = '{names}'")
+    # debug(f"names = '{names}'")
     names_split = names.split(",")
     for name in names_split:
         name = name.strip()
-        # info(f"name = '{name}'")
+        # debug(f"name = '{name}'")
         first = last = von = jr = ""
         chunks = name.strip().split()
 
@@ -1839,7 +1847,7 @@ if __name__ == "__main__":
         "--verbose",
         dest="verbose",
         action="count",
-        default=1,
+        default=0,
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
@@ -1875,14 +1883,14 @@ if __name__ == "__main__":
     # print(args)
     file_name = os.path.abspath(args.input_file)
 
-    log_level = 100  # default
-    if args.verbose >= 3:
-        log_level = logging.DEBUG  # 10
+    log_level = logging.ERROR  # 40
+    if args.verbose == 1:
+        log_level = logging.WARNING  # 30
     elif args.verbose == 2:
         log_level = logging.INFO  # 20
-    elif args.verbose == 1:
-        log_level = logging.ERROR  # 40
-    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    elif args.verbose >= 3:
+        log_level = logging.DEBUG  # 10
+    LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
     if args.log_to_file:
         print("logging to file")
         logging.basicConfig(

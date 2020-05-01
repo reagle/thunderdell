@@ -41,10 +41,12 @@ from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
 from web_little import get_HTML, get_text, unescape_XML, escape_XML
 from change_case import sentence_case, title_case
 
-log_level = 100  # default
+# function aliases
 critical = logging.critical
+error = logging.error
+warning = logging.warning
 info = logging.info
-dbg = logging.debug
+debug = logging.debug
 
 EDITOR = os.environ.get("EDITOR", "nano")
 VISUAL = os.environ.get("VISUAL", "nano")
@@ -1691,16 +1693,19 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
+    log_level = logging.ERROR  # 40
+
     if args.verbose == 1:
-        log_level = logging.CRITICAL
+        log_level = logging.WARNING  # 30
     elif args.verbose == 2:
-        log_level = logging.INFO
+        log_level = logging.INFO  # 20
     elif args.verbose >= 3:
-        log_level = logging.DEBUG
-    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+        log_level = logging.DEBUG  # 10
+    LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
     if args.log_to_file:
+        print("logging to file")
         logging.basicConfig(
-            filename="doi_query.log",
+            filename="busy.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,

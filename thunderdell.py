@@ -1693,48 +1693,51 @@ def _test_results():
     authors with multiple titles and nested authors.
 
     >>> call('thunderdell.py -i ~/bin/td/tests/author-child.mm > \
-    /tmp/author-child.txt; \
-    diff ~/bin/td/tests/author-child.txt /tmp/author-child.txt', shell=True)
+    /tmp/author-child.yaml; \
+    diff ~/bin/td/tests/author-child.yaml /tmp/author-child.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/author-descendent.mm > \
-    /tmp/author-descendent.txt; \
-    diff ~/bin/td/tests/author-descendent.txt /tmp/author-descendent.txt', shell=True)
+    /tmp/author-descendent.yaml; \
+    diff ~/bin/td/tests/author-descendent.yaml /tmp/author-descendent.yaml', \
+    shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/authorless.mm > \
-    /tmp/authorless.txt; \
-    diff ~/bin/td/tests/authorless.txt /tmp/authorless.txt', shell=True)
+    /tmp/authorless.yaml; \
+    diff ~/bin/td/tests/authorless.yaml /tmp/authorless.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/authors.mm > \
-    /tmp/authors.txt; \
-    diff ~/bin/td/tests/authors.txt /tmp/authors.txt', shell=True)
+    /tmp/authors.yaml; \
+    diff ~/bin/td/tests/authors.yaml /tmp/authors.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/case.mm > \
-    /tmp/case.txt; \
-    diff ~/bin/td/tests/case.txt /tmp/case.txt', shell=True)
+    /tmp/case.yaml; \
+    diff ~/bin/td/tests/case.yaml /tmp/case.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/csl.mm > \
-    /tmp/csl.txt; \
-    diff ~/bin/td/tests/csl.txt /tmp/csl.txt', shell=True)
+    /tmp/csl.yaml; \
+    diff ~/bin/td/tests/csl.yaml /tmp/csl.yaml', shell=True)
     0
-    >>> call('thunderdell.py -i ~/bin/td/tests/date.mm > /tmp/date.txt; \
-    diff ~/bin/td/tests/date.txt /tmp/date.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/date.mm > /tmp/date.yaml; \
+    diff ~/bin/td/tests/date.yaml /tmp/date.yaml', shell=True)
     0
-    >>> call('thunderdell.py -i ~/bin/td/tests/editors.mm > /tmp/editors.txt; \
-    diff ~/bin/td/tests/editors.txt /tmp/editors.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/editors.mm > \
+    /tmp/editors.yaml; \
+    diff ~/bin/td/tests/editors.yaml /tmp/editors.yaml', shell=True)
     0
-    >>> call('thunderdell.py -i ~/bin/td/tests/online.mm > /tmp/online.txt; \
-    diff ~/bin/td/tests/online.txt /tmp/online.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/online.mm > /tmp/online.yaml; \
+    diff ~/bin/td/tests/online.yaml /tmp/online.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/title-escapes.mm > \
-    /tmp/title-escapes.txt; \
-    diff ~/bin/td/tests/title-escapes.txt /tmp/title-escapes.txt', shell=True)
+    /tmp/title-escapes.yaml; \
+    diff ~/bin/td/tests/title-escapes.yaml /tmp/title-escapes.yaml', \
+    shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/title-title.mm > \
-    /tmp/title-title.txt; \
-    diff ~/bin/td/tests/title-title.txt /tmp/title-title.txt', shell=True)
+    /tmp/title-title.yaml; \
+    diff ~/bin/td/tests/title-title.yaml /tmp/title-title.yaml', shell=True)
     0
-    >>> call('thunderdell.py -i ~/bin/td/tests/von.mm > /tmp/von.txt; \
-    diff ~/bin/td/tests/von.txt /tmp/von.txt', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/von.mm > /tmp/von.yaml; \
+    diff ~/bin/td/tests/von.yaml /tmp/von.yaml', shell=True)
     0
 
     """

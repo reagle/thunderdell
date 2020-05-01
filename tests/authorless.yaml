@@ -2,10 +2,13 @@
 references:
 - id: Org1995to
   type: no-type
+  author:
+  - family: "Org"
+    given: "Some"
   custom2: "authorless.mm"
   issued:
     year: 1995
-  container-title: "Some Org"
+  publisher: "Some Org"
   title: "Title one"
 - id: Turner1996tt
   type: no-type
@@ -15,6 +18,6 @@ references:
   custom2: "authorless.mm"
   issued:
     year: 1996
-  container-title: "A6"
+  publisher: "A6"
   title: "Title two"
 ...

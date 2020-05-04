@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 # set shebang locally to
@@ -10,12 +10,21 @@
 def cgi_main():
     global args
     import codecs, cgi, os, re, sys
+    import logging
     from urllib.parse import quote, unquote
 
     HOME = os.path.expanduser("~")
 
     # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+
+    #  https://docs.python.org/3/library/logging.html
+    # "Note that the root logger is created with level WARNING."
+    # Set level to ERROR here so I don't see warnings imported from
+    # thunderdell when running as server.
+    # Alternatively, perhaps could name thunderdell logger, so it's not root
+    LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
+    logging.basicConfig(level=logging.ERROR, format=LOG_FORMAT)
 
     env = os.environ
 

@@ -61,7 +61,7 @@ GENERAL_KEY_SHORTCUTS = {
     "aca": "academia",
     "add": "addiction",
     "edu": "education",
-    "eth": "ethic",
+    "eth": "ethics",
     "exi": "exit",
     "for": "fork",
     "hum": "humor",

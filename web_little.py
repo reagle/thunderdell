@@ -76,7 +76,7 @@ def get_HTML(
 
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
     r = requests.get(url, headers=agent_headers, verify=True)
-    info(f"{r.headers['content-type']=}")
+    # info(f"{r.headers['content-type']=}")
     if "html" in r.headers["content-type"]:
         HTML_bytes = r.content
     else:

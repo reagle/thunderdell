@@ -1747,8 +1747,7 @@ if __name__ == "__main__":
     import argparse  # http://docs.python.org/dev/library/argparse.html
 
     arg_parser = argparse.ArgumentParser(
-        description="""usage: %prog [FILE.mm] [options]\n
-    Outputs YAML/CSL bibliography.\n
+        description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,

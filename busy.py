@@ -1727,6 +1727,7 @@ if __name__ == "__main__":
     logger, params = get_logger(" ".join(args.text))
     info("-------------------------------------------------------")
     info("-------------------------------------------------------")
+    info(f"{logger=}")
     info(f"{params=}")
     comment = "" if not params["comment"] else params["comment"]
     if params["url"]:  # not all log2work entries have urls
@@ -1737,3 +1738,7 @@ if __name__ == "__main__":
     biblio["tags"] = params["tags"]
     info(f"{biblio=}")
     logger(biblio)
+else:  # imported as module
+
+    class args:
+        publish = False

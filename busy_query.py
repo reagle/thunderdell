@@ -31,6 +31,7 @@ def query_sponge(query):
 
     in_files = [
         HOME + "/joseph/plan/plans/index.html",
+        HOME + "/joseph/plan/plans/18.html",
         HOME + "/joseph/plan/plans/16.html",
         HOME + "/joseph/plan/plans/15.html",
         HOME + "/joseph/plan/plans/12.html",

@@ -1783,7 +1783,7 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument(
         "-i",
-        "--input_file",
+        "--input-file",
         default=DEFAULT_MAP,
         metavar="FILENAME",
         help="mindmap to process",
@@ -1812,10 +1812,10 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument(
         "-o",
-        "--output-file",
-        action="store_true",
+        "--output-to-file",
         default=False,
-        help="output goes to FILENAME.bib (boolean)",
+        action="store_true",
+        help="output goes to FILENAME.yaml (BOOLEAN)",
     )
     arg_parser.add_argument(
         "-p",
@@ -1915,8 +1915,8 @@ if __name__ == "__main__":
         output = emit_yaml_csl
     if args.defaults:
         args.chase = True
-        args.output_file = True
-    if args.output_file:
+        args.output_to_file = True
+    if args.output_to_file:
         if args.YAML_CSL:
             extension = ".yaml"
         elif args.biblatex:

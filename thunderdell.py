@@ -710,9 +710,7 @@ def guess_csl_type(entry):
     elif 'c_encyclopedia' in entry:     et = 'entry-encyclopedia'
     elif 'c_forum' in entry:            et = 'post'
     else:
-        if 'eventtitle' in entry:
-            if 'publisher' in entry:        et = 'paper-conference'
-            else:                           et = 'speech'
+        if 'eventtitle' in entry:           et = 'paper-conference'
         elif 'booktitle' in entry:
             if 'editor' in entry:           # collection or incollection
                 if 'chapter' in entry:      et = 'chapter'

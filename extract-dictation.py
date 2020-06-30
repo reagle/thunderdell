@@ -8,9 +8,24 @@
 
 """extract a MM from a dictated text file using particular conventions"""
 
+from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
+from thunderdell import BIB_FIELDS  # dict of field to its shortcut
+from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
+import argparse  # http://docs.python.org/dev/library/argparse.html
+import codecs
+import logging
 import os
+import subprocess
+import sys
 
-HOME = os.path.expanduser("~")
+HOME = str(Path("~").expanduser())
+
+debug = logging.debug
+info = logging.info
+warning = logging.warning
+error = logging.error
+critical = logging.critical
+exception = logging.exception
 
 MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
     <node TEXT="reading" FOLDED="false" ID="ID_327818409" STYLE="oval">
@@ -301,24 +316,63 @@ def check(text, file_out):
     file_out.write("""</node>\n</map>\n""")  # close the document
 
 
+def main(argv):
+    """Process arguments"""
+    # https://docs.python.org/3/library/argparse.html
+    arg_parser = argparse.ArgumentParser(
+        description="""Convert dictated notes to mindmap in 
+            https://github.com/reagle/thunderdell
+        """
+    )
+
+    # positional arguments
+    arg_parser.add_argument("file_names", nargs="*", metavar="FILE_NAMES")
+    # optional arguments
+    arg_parser.add_argument(
+        "-L",
+        "--log-to-file",
+        action="store_true",
+        default=False,
+        help="log to file %(prog)s.log",
+    )
+    arg_parser.add_argument(
+        "-V",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase verbosity (specify multiple times for more)",
+    )
+    arg_parser.add_argument("--version", action="version", version="0.1")
+    args = arg_parser.parse_args(argv)
+
+    log_level = 100  # default
+    if args.verbose >= 3:
+        log_level = logging.DEBUG  # 10
+    elif args.verbose == 2:
+        log_level = logging.INFO  # 20
+    elif args.verbose == 1:
+        log_level = logging.ERROR  # 40
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    if args.log_to_file:
+        logging.basicConfig(
+            filename="extract-dictation.log",
+            filemode="w",
+            level=log_level,
+            format=LOG_FORMAT,
+        )
+    else:
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+
+    return args
+
+
 # Check to see if the script is executing as main.
 if __name__ == "__main__":
     # Parse the command line arguments for optional message and files.
-
-    from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
-    from thunderdell import BIB_FIELDS  # dict of field to its shortcut
-
-    # import chardet
-    import codecs
-    import getopt
-    import os
-    import subprocess
-    import sys
-
-    try:
-        (options, file_names) = getopt.getopt(sys.argv[1:], "")
-    except getopt.error:
-        print("Error: Unknown option or missing argument.")
+    args = main(sys.argv[1:])
+    critical(f"==================================")
+    critical(f"{args=}")
+    file_names = args.file_names
     file_names = [os.path.abspath(file_name) for file_name in file_names]
     for file_name in file_names:
         if file_name.endswith(".rtf"):

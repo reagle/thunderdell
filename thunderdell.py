@@ -1948,7 +1948,10 @@ if __name__ == "__main__":
         print("\n                               _FIELD_SHORTCUTS_")
         pretty_tabulate_dict(BIB_SHORTCUTS)
         print("         t=biblatex/CSL type")
-        print("         ot=organization's subtype (e.g., W3C REC)\n\n")
+        print("         ot=organization's subtype (e.g., W3C REC)")
+        print(
+            "         pa=section|paragraph|location|chapter|verse|column|line\n\n"
+        )
         sys.exit()
     if args.query:
         args.query = " ".join(args.query)

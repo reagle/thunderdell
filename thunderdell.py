@@ -933,11 +933,11 @@ def emit_yaml_csl(entries):
     """
     # import yaml
 
-    def esc_yaml(s):
+    def escape_yaml(s):
         if s:  # faster to just quote than testing for tokens
             s = s.replace('"', r"''")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
-            # s = s.replace("@", r"\@") # not needed? causing bugs; delete
+            s = s.replace("@", r"\\@")  # single slash caused bugs in past
             s = f'"{s}"'
         return s
 
@@ -950,17 +950,17 @@ def emit_yaml_csl(entries):
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
             given, particle, family, suffix = person
-            args.outfd.write(f"  - family: {esc_yaml(family)}\n")
+            args.outfd.write(f"  - family: {escape_yaml(family)}\n")
             if given:
-                args.outfd.write(f"    given: {esc_yaml(given)}\n")
+                args.outfd.write(f"    given: {escape_yaml(given)}\n")
                 # args.outfd.write('    given:\n')
                 # for given_part in given.split(' '):
-                #     args.outfd.write('    - %s\n' % esc_yaml(given_part))
+                #     args.outfd.write('    - %s\n' % escape_yaml(given_part))
             if suffix:
-                args.outfd.write(f"    suffix: {esc_yaml(suffix)}\n")
+                args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
             if particle:
                 args.outfd.write(
-                    f"    non-dropping-particle: " f"{esc_yaml(particle)}\n"
+                    f"    non-dropping-particle: " f"{escape_yaml(particle)}\n"
                 )
 
     def emit_yaml_date(date, season=None):
@@ -1019,7 +1019,7 @@ def emit_yaml_csl(entries):
 
                 # special format fields
                 if field == "title":
-                    title = yaml_protect_case(esc_yaml((value)))
+                    title = yaml_protect_case(escape_yaml((value)))
                     args.outfd.write(f"  title: {title}\n")
                     continue
                 if field in ("author", "editor", "translator"):
@@ -1054,14 +1054,16 @@ def emit_yaml_csl(entries):
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if args.urls_online_only:
-                        # debug("urls_online_only")
-                        # don't skip online types
+                        # debug("urls_online_only TRUE")
                         if entry_type in {"post", "post-weblog", "webpage"}:
+                            # debug(f"  not skipping online types")
                             pass
-                        # skip items that are paginated
                         elif "pages" in entry:
                             # debug("  skipping url, paginated item")
                             continue
+                    # debug(f"  writing url WITHOUT escape_yaml")
+                    args.outfd.write(f"""  URL: "{value}"\n""")
+                    continue
                 if (
                     field == "eventtitle"
                     and "container-title" not in entry
@@ -1085,7 +1087,7 @@ def emit_yaml_csl(entries):
                     # debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # debug(f"bib2csl field TO   = {field}")
-                args.outfd.write(f"  {field}: {esc_yaml(value)}\n")
+                args.outfd.write(f"  {field}: {escape_yaml(value)}\n")
     args.outfd.write("...\n")
 
 

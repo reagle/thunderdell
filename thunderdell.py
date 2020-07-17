@@ -833,7 +833,10 @@ def emit_biblatex(entries):
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry["ori_author"] in container_values:
-            del entry["author"]
+            if not args.author_create:
+                del entry["author"]
+            else:
+                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         # if an edited collection, remove author and booktitle
         if all(f in entry for f in ("author", "editor", "title", "booktitle")):
@@ -1004,7 +1007,7 @@ def emit_yaml_csl(entries):
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry["ori_author"] in container_values:
-            if not args.author_create:  # TODO create config for this
+            if not args.author_create:
                 del entry["author"]
             else:
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]

@@ -29,7 +29,7 @@ import urllib.parse
 from urllib.parse import parse_qs
 import webbrowser
 from xml.etree.ElementTree import parse
-from web_little import unescape_XML, escape_XML
+from web_utils import unescape_XML, escape_XML
 
 log_level = logging.ERROR  # 40 # declared here for when imported
 

@@ -38,7 +38,7 @@ from subprocess import call, Popen
 from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
 
 # personal utilities
-from web_little import get_HTML, get_text, unescape_XML, escape_XML
+from web_utils import get_HTML, get_text, unescape_XML, escape_XML
 from change_case import sentence_case, title_case
 
 # function aliases
@@ -1140,6 +1140,7 @@ def log2console(biblio):
             biblio["url"],
             biblio["tags"],
         )
+    return bib_in_single_line
 
 
 def blog_at_opencodex(biblio):

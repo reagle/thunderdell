@@ -20,7 +20,7 @@ import requests  # http://docs.python-requests.org/en/latest/
 
 HOMEDIR = os.path.expanduser("~")
 
-log = logging.getLogger("web_little")
+log = logging.getLogger("web_utils")
 critical = logging.critical
 info = logging.info
 dbg = logging.debug

@@ -17,6 +17,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 
 HOME = str(Path("~").expanduser())
 
@@ -59,7 +60,7 @@ MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
 def clean(text):
     """clean and encode text"""
     # TODO: Maybe make use of b.smart_punctuation_to_ascii() and
-    # web_little.escape_XML()
+    # web_utils.escape_XML()
 
     text = text.strip(", \f\r\n")
     REPLACEMENTS = [
@@ -80,8 +81,6 @@ def clean(text):
 
 
 def get_date():
-    import string
-    import time
 
     now = time.localtime()
     year = time.strftime("%Y", now).lower()
@@ -90,7 +89,9 @@ def get_date():
     return date_token
 
 
-def parse(line, started, in_part, in_chapter, in_section, in_subsection):
+def build_mm_from_txt(
+    line, started, in_part, in_chapter, in_section, in_subsection
+):
 
     import re
 
@@ -278,7 +279,7 @@ def parse(line, started, in_part, in_chapter, in_section, in_subsection):
     return started, in_part, in_chapter, in_section, in_subsection
 
 
-def check(text, file_out):
+def create_mm(text, file_out):
 
     import traceback
 
@@ -294,7 +295,13 @@ def check(text, file_out):
     for line in text.split("\n"):
         line = line.strip()
         try:
-            started, in_part, in_chapter, in_section, in_subsection = parse(
+            (
+                started,
+                in_part,
+                in_chapter,
+                in_section,
+                in_subsection,
+            ) = build_mm_from_txt(
                 line, started, in_part, in_chapter, in_section, in_subsection
             )
         except KeyError:
@@ -320,7 +327,7 @@ def main(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""Convert dictated notes to mindmap in 
+        description="""Convert dictated notes to mindmap in
             https://github.com/reagle/thunderdell
         """
     )
@@ -366,16 +373,14 @@ def main(argv):
     return args
 
 
-# Check to see if the script is executing as main.
 if __name__ == "__main__":
-    # Parse the command line arguments for optional message and files.
     args = main(sys.argv[1:])
     critical(f"==================================")
     critical(f"{args=}")
     file_names = args.file_names
     file_names = [os.path.abspath(file_name) for file_name in file_names]
     for file_name in file_names:
-        if file_name.endswith(".rtf"):
+        if file_name.endswith(".rtf"):  # when MS Word saves as RTF
             subprocess.call(
                 ["/usr/bin/X11/catdoc", "-aw", file_name],
                 stdout=open(
@@ -395,7 +400,7 @@ if __name__ == "__main__":
                 if text[0] == str(codecs.BOM_UTF8, "utf8"):
                     text = text[1:]
                     print("removed BOM")
-            # it's not decoding MS Word txt right, word is not starting with
+            # it's not decoding MS Word txt right, Word is not starting with
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
             file_name_out = os.path.splitext(file_name)[0] + ".mm"
@@ -408,5 +413,6 @@ if __name__ == "__main__":
             print("    file_name does not exist")
             continue
 
-        check(text, file_out)
+        create_mm(text, file_out)
+        file_out.close()
         subprocess.call(["open", "-a", "Freeplane.app", file_name_out])

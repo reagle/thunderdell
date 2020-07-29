@@ -4,9 +4,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 
 # TODO
-# * keep first line clear of "summary" that starts with "."
-# * default keyword to #misc
-# * remove empty lines between excerpts
+# - default keyword to #misc
 
 
 import argparse  # http://docs.python.org/dev/library/argparse.html

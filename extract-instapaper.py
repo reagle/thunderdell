@@ -85,7 +85,9 @@ def process_files(file_names):
             lines = f.readlines()
             first_line = lines[0]
             info(f"{first_line=}")
-            comment = "\n" + "".join(lines)
+            comment = "\n" + "".join(lines).replace("\n\u200b\n", "").replace(
+                "\n\n", "\n"
+            )
             url = URL_RE.match(first_line).groups()[0]
             info(f"{url=}")
             params = {"scheme": "c", "tags": None, "url": url, "comment": ""}

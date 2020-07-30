@@ -11,6 +11,7 @@ Web functionality I frequently make use of.
 """
 
 import html.entities
+import json
 import logging
 import os
 import re
@@ -90,6 +91,29 @@ def get_HTML(
     HTML_unicode = HTML_utf8.decode("utf-8", "replace")
 
     return HTML_bytes, HTML_parsed, HTML_unicode, r
+
+
+def get_JSON(
+    url,
+    referer="",
+    data=None,
+    cookie=None,
+    retry_counter=0,
+    cache_control=None,
+    requested_content_type="application/json",
+):
+    """Return [JSON content, response] of a given URL."""
+
+    AGENT_HEADERS = {"User-Agent": "Thunderdell/BusySponge"}
+    info(f"{url=}")
+    r = requests.get(url, headers=AGENT_HEADERS, verify=True)
+    returned_content_type = r.headers["content-type"].split(";")[0]
+    info(f"{requested_content_type=} == {returned_content_type=}?")
+    if requested_content_type == returned_content_type:
+        json_content = json.loads(r.content)
+        return json_content
+    else:
+        raise IOError("URL content is not JSON.")
 
 
 def get_text(url):

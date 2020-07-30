@@ -862,6 +862,76 @@ class scrape_twitter(scrape_default):
         return excerpt
 
 
+class scrape_reddit(scrape_default):
+    def __init__(self, url, comment):
+        print(("Scraping reddit"), end="\n")
+        scrape_default.__init__(self, url, comment)
+
+        RE_REDDIT_URL = re.compile(
+            r"""
+            (?P<prefix>http.*?reddit\.com/)
+            (?P<type>(r/\w+)|(u(ser)?/\w+)|(wiki/\w+))
+            (?P<post>/comments/(?P<pid>\w+)/(?P<title>\w+)/)?
+            (?P<comment>\w+)?
+            """,
+            re.VERBOSE,
+        )
+
+        if RE_REDDIT_URL.match(url):
+            url_dict = RE_REDDIT_URL.match(url).groupdict()
+            info(f"{url_dict=}")
+            if "cid" in url_dict:
+                info(f"a comment")
+                self.json = get_JSON(
+                    f'https://api.reddit.com/api/info/?id=t1_{url_dict["cid"]}'
+                )
+                debug(f"{json=}")
+            elif "pid" in url_dict:
+                info(f"a post")
+                self.json = get_JSON(
+                    f'https://api.reddit.com/api/info/?id=t3_{url_dict["pid"]}'
+                )
+                debug(f"{json=}")
+            else:
+                raise Exception(f"Unknown type of reddit thing")
+
+    def get_biblio(self):
+        biblio = {
+            "author": self.get_author(),
+            "title": self.get_title(),
+            "date": self.get_date(),
+            "permalink": self.get_permalink(),
+            "excerpt": self.get_excerpt(),
+            "comment": self.comment,
+            "url": self.url,
+            "organization": "Reddit",
+        }
+        return biblio
+
+    def get_author(self):
+
+        author = self.json["data"]["children"][0]["data"]["author"]
+        return author.strip()
+
+    def get_title(self):
+
+        title = self.json["data"]["children"][0]["data"]["title"]
+        return title.strip()
+
+    def get_date(self):
+
+        created = self.json["data"]["children"][0]["data"]["created"]
+        date = datetime.fromtimestamp(created).strftime("%Y%m%d")
+        return date
+
+    def get_excerpt(self):
+
+        excerpt = self.HTML_p.xpath(
+            "//p[contains(@class,'tweet-text')]/text()"
+        )[0]
+        return excerpt
+
+
 #######################################
 # Output loggers
 #######################################

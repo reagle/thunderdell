@@ -18,8 +18,7 @@ https://github.com/reagle/thunderdell
 """
 
 # TODO
-# * archive URLs to f/old/`r=`
-# get reddit timestamp from API (no scraping possible?)
+# - archive URLs to f/old/`r=`
 
 import argparse
 import logging
@@ -38,7 +37,7 @@ from subprocess import call, Popen
 from xml.etree.ElementTree import ElementTree, Element, SubElement, parse
 
 # personal utilities
-from web_utils import get_HTML, get_text, unescape_XML, escape_XML
+from web_utils import get_HTML, get_JSON, get_text, unescape_XML, escape_XML
 from change_case import sentence_case, title_case
 
 # function aliases
@@ -474,7 +473,7 @@ class scrape_default(object):
         return org.title()
 
     def get_excerpt(self):
-        """Select a paragraph if is is long enough and textual"""
+        """Select a paragraph if it is long enough and textual"""
 
         if self.text:
             lines = self.text.split("\n")
@@ -869,31 +868,38 @@ class scrape_reddit(scrape_default):
 
         RE_REDDIT_URL = re.compile(
             r"""
-            (?P<prefix>http.*?reddit\.com/)
-            (?P<type>(r/\w+)|(u(ser)?/\w+)|(wiki/\w+))
-            (?P<post>/comments/(?P<pid>\w+)/(?P<title>\w+)/)?
-            (?P<comment>\w+)?
-            """,
+                (?P<prefix>http.*?reddit\.com/)
+                (?P<root>(r/\w+)|(u(ser)?/\w+)|(wiki/\w+))
+                (?P<post>/comments/(?P<pid>\w+)/(?P<title>\w+)/)?
+                (?P<comment>(?P<cid>\w+))?
+                """,
             re.VERBOSE,
         )
 
+        self.type = "unknown"
         if RE_REDDIT_URL.match(url):
-            url_dict = RE_REDDIT_URL.match(url).groupdict()
-            info(f"{url_dict=}")
-            if "cid" in url_dict:
-                info(f"a comment")
+            self.url_dict = RE_REDDIT_URL.match(url).groupdict()
+            info(f"{self.url_dict=}")
+            if self.url_dict["cid"]:
+                self.type = "comment"
                 self.json = get_JSON(
-                    f'https://api.reddit.com/api/info/?id=t1_{url_dict["cid"]}'
+                    f'https://api.reddit.com/api/info/?id=t1_{self.url_dict["cid"]}'
                 )
-                debug(f"{json=}")
-            elif "pid" in url_dict:
-                info(f"a post")
+                debug(f"{self.json=}")
+            elif self.url_dict["pid"]:
+                self.type = "post"
                 self.json = get_JSON(
-                    f'https://api.reddit.com/api/info/?id=t3_{url_dict["pid"]}'
+                    f'https://api.reddit.com/api/info/?id=t3_{self.url_dict["pid"]}'
                 )
-                debug(f"{json=}")
-            else:
-                raise Exception(f"Unknown type of reddit thing")
+                debug(f"{self.json=}")
+            elif self.url_dict["root"]:
+                if self.url_dict["root"].startswith("r/"):
+                    self.type = "subreddit"
+                elif self.url_dict["root"].startswith("u/"):
+                    self.type = "user"
+                if self.url_dict["root"].startswith("wiki/"):
+                    self.type = "wiki"
+        info(f"!!! {self.type=}")
 
     def get_biblio(self):
         biblio = {
@@ -910,26 +916,55 @@ class scrape_reddit(scrape_default):
 
     def get_author(self):
 
-        author = self.json["data"]["children"][0]["data"]["author"]
+        author = "Reddit"
+        if self.type in ["post", "comment"]:
+            author = self.json["data"]["children"][0]["data"]["author"]
         return author.strip()
 
     def get_title(self):
 
-        title = self.json["data"]["children"][0]["data"]["title"]
+        # title = "UNKNOWN"
+        if self.type == "subreddit":
+            title = self.url_dict["root"]
+        elif self.type == "post":
+            title = sentence_case(
+                self.json["data"]["children"][0]["data"]["title"]
+            )
+        elif self.type == "comment":
+            comment_data = self.json["data"]["children"][0]["data"]
+            parent_url = f'https://api.reddit.com/api/info/?id={comment_data["link_id"]}'
+            debug(f"{parent_url=}")
+            parent_json = get_JSON(parent_url)
+            debug(f"{parent_json=}")
+            parent_data = parent_json["data"]["children"][0]["data"]
+            debug(f"{parent_data=}")
+            title = sentence_case(parent_data["title"])
+        else:
+            title = self.title()
+        info(f"{title=}")
         return title.strip()
 
     def get_date(self):
 
-        created = self.json["data"]["children"][0]["data"]["created"]
-        date = datetime.fromtimestamp(created).strftime("%Y%m%d")
-        return date
+        date = time.strftime("%Y%m%d", NOW)
+        if self.type in ["post", "comment"]:
+            created = self.json["data"]["children"][0]["data"]["created"]
+            date = datetime.fromtimestamp(created).strftime("%Y%m%d")
+        return date.strip()
 
     def get_excerpt(self):
 
-        excerpt = self.HTML_p.xpath(
-            "//p[contains(@class,'tweet-text')]/text()"
-        )[0]
-        return excerpt
+        excerpt = ""
+        if self.type in ["post", "comment"]:
+            data = self.json["data"]["children"][0]["data"]
+            if "selftext" in data:
+                excerpt = data["selftext"]
+            elif "body" in data:
+                excerpt = data["body"]
+            else:
+                excerpt = "NO EXCERPT"
+            info(f"returning {excerpt}")
+        return excerpt.strip()
 
 
 #######################################
@@ -1066,8 +1101,8 @@ def log2nifty(biblio):
     content = fd.read()
     fd.close()
 
-    insertion_regexp = re.compile('(<dl style="clear: left;">)')
-    newcontent = insertion_regexp.sub(
+    INSERTION_RE = re.compile('(<dl style="clear: left;">)')
+    newcontent = INSERTION_RE.sub(
         "\\1 \n  %s" % log_item, content, re.DOTALL | re.IGNORECASE
     )
     if newcontent:
@@ -1340,6 +1375,12 @@ def get_scraper(url, comment):
     """
     Use the URL to specify a screenscraper.
     """
+
+    url = re.sub(  # use canonical reddit domain
+        r"(https?://(old|i)\.reddit.com/(.*))",
+        r"https://www.reddit.com/\3",
+        url,
+    )
     info(f"url = '{url}'")
     if url.lower().startswith("doi:"):
         return scrape_DOI(url, comment)
@@ -1347,13 +1388,13 @@ def get_scraper(url, comment):
         return scrape_ISBN(url, comment)
     else:
         host_path = url.split("//")[1]
-
         dispatch_scraper = (
             ("en.wikipedia.org/w", scrape_ENWP),
             ("meta.wikimedia.org/w", scrape_WMMeta),
             ("marc.info/", scrape_MARC),
             ("geekfeminism.wikia.com/", scrape_geekfeminism_wiki),
             ("twitter.com/", scrape_twitter),
+            ("www.reddit.com/", scrape_reddit),
             ("", scrape_default),  # default: make sure last
         )
 

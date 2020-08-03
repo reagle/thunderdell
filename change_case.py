@@ -56,10 +56,10 @@ BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 
 def create_wordset(file_name):
     """Returns a wordset given a file"""
-    # TODO: adding logging.info() in this function
+    # TODO: adding logging.debug() in this function
     # disables all logging up to critical. Why?
 
-    # info("file_name = '%s'" % (file_name))
+    # debug("file_name = '%s'" % (file_name))
     wordset = set()
     if os.path.isfile(file_name):
         for line in codecs.open(file_name, "r", "utf-8").readlines():
@@ -101,11 +101,11 @@ def safe_capwords(text):
 
     """
 
-    info("  safe_capwords: %s text = '%s'" % (type(text), text))
+    debug("  safe_capwords: %s text = '%s'" % (type(text), text))
     new_text = []
     words = text.split(" ")
     for word in words:
-        info("word = '%s'" % word)
+        debug("word = '%s'" % word)
         if word:  # this split will remove multiple white-spaces
             if word.lower() in BORING_WORDS:
                 new_text.append(word.lower())
@@ -128,25 +128,25 @@ def safe_lower(text):
 
     """
 
-    info("  safe_lower: %s text = '%s'" % (type(text), text))
+    debug("  safe_lower: %s text = '%s'" % (type(text), text))
     new_text = []
     words = text.split(" ")
     for word in words:
-        info("  word = '%s'" % word)
+        debug("  word = '%s'" % word)
         if word:  # this split will remove multiple white-spaces
             word_capitalized = word.capitalize()
-            info("  word_capitalized = '%s'" % word_capitalized)
+            debug("  word_capitalized = '%s'" % word_capitalized)
             if word in proper_nouns:
                 new_text.append(word)
             elif word.isupper():
-                info("    word.isupper(): True")
+                debug("    word.isupper(): True")
                 if word_capitalized in proper_nouns:
                     new_text.append(word_capitalized)
                 else:
                     new_text.append(word.lower())
             else:
                 new_text.append(word.lower())
-    info("  new_text = '%s'" % new_text)
+    debug("  new_text = '%s'" % new_text)
     return " ".join(new_text)
 
 
@@ -160,21 +160,21 @@ def is_proper_noun(word):
     False
 
     """
-    info("    word = '%s'" % word)
+    debug("    word = '%s'" % word)
     parts = word.split("-")  # '([\W]+)'
-    # info("parts = '%s'" %parts)
+    # debug("parts = '%s'" %parts)
     if len(parts) > 1:
-        info("    recursing")
+        debug("    recursing")
         return any(is_proper_noun(part) for part in parts)
     word = "".join(ch for ch in word if ch not in set(string.punctuation))
     if word in proper_nouns:  # in list of proper nouns?
-        info("    word in proper_nouns: True")
+        debug("    word in proper_nouns: True")
         return True
     if word.lower() not in wordset_nocase:  # not known to me at all: proper
-        info("    word.lower() = '%s'" % word.lower())
-        info("    word.lower() not in wordset_nocase: True")
+        debug("    word.lower() = '%s'" % word.lower())
+        debug("    word.lower() not in wordset_nocase: True")
         return True
-    info("    '%s' is_proper_noun: False" % word)
+    debug("    '%s' is_proper_noun: False" % word)
     return False
 
 
@@ -194,24 +194,24 @@ def change_case(text, case_direction="sentence"):
 
     """
     text = text.strip().replace("  ", " ")
-    info("** sentence_case: %s text = '%s'" % (type(text), text))
+    debug("** sentence_case: %s text = '%s'" % (type(text), text))
 
     # create abbreviation sans BORING words
-    info(set(text.split()).difference(BORING_WORDS))
+    debug(set(text.split()).difference(BORING_WORDS))
     text_abbreviation = "".join(
         [word[0] for word in set(text.split()).difference(BORING_WORDS)]
     )
-    info("  text_abbreviation = %s " % text_abbreviation)
+    debug("  text_abbreviation = %s " % text_abbreviation)
     text_is_titlecase = text_abbreviation.isupper()
-    info("  text_is_titlecase = '%s'" % text_is_titlecase)
+    debug("  text_is_titlecase = '%s'" % text_is_titlecase)
     text_is_ALLCAPS = text.isupper()
-    info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
+    debug("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
 
     text = ": " + text  # make first phrase consistent for processing below
     PUNCTUATION = ":.?"
     PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep them in the split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    info("  phrases = '%s'" % phrases)
+    debug("  phrases = '%s'" % phrases)
     new_text = []
     for phrase in phrases:
         if phrase == "":
@@ -221,35 +221,35 @@ def change_case(text, case_direction="sentence"):
             continue
 
         words = phrase.split(" ")
-        info("words = '%s'" % words)
+        debug("words = '%s'" % words)
         for index, word in enumerate(words):
             # [0].upper() + word[1:].lower()
             word_capitalized = word.capitalize()
-            info("----------------")
-            info("word = '%s'" % word)
+            debug("----------------")
+            debug("word = '%s'" % word)
             if is_proper_noun(word):
-                # info("  word is_proper_noun")
+                # debug("  word is_proper_noun")
                 new_word = word
             elif is_proper_noun(word_capitalized):
-                # info("  word_capitalized is_proper_noun")
+                # debug("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
             else:
-                info("  changing case of '%s'" % word)
+                debug("  changing case of '%s'" % word)
                 if case_direction == "sentence":
                     new_word = word.lower()
                 elif case_direction == "title":
-                    info("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
+                    debug("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
                     if text_is_ALLCAPS:
-                        info("   lowering word because text_is_ALLCAPS")
+                        debug("   lowering word because text_is_ALLCAPS")
                         word = safe_lower(word)
-                    info("  adding '%s' as is" % word)
+                    debug("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
                     raise Exception(
                         "Unknown case_direction = '%s'" % case_direction
                     )
             if word and index == 0:  # capitalize first word in a phrase
-                info("  capitalizing it as first word in phrase")
+                debug("  capitalizing it as first word in phrase")
                 new_word = new_word[0].capitalize() + new_word[1:]
 
             new_text.append(new_word)
@@ -292,7 +292,7 @@ def test(change_case, case_direction):
     doctest.testmod()
 
     for test in TESTS:
-        info("case_direction = '%s'" % case_direction)
+        debug("case_direction = '%s'" % case_direction)
         print((change_case(test, case_direction)))
 
 
@@ -359,7 +359,7 @@ def main(argv):
         log_level = logging.DEBUG  # 10
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        info("logging to file")
+        debug("logging to file")
         logging.basicConfig(
             filename="change_case.log",
             filemode="w",
@@ -372,14 +372,14 @@ def main(argv):
     case_direction = "sentence"
     if args.title_case:
         case_direction = "title"
-    info("case_direction = %s" % case_direction)
+    debug("case_direction = %s" % case_direction)
 
     if args.test:
         test(change_case, case_direction)
     else:
         text = " ".join(args.text)
         result = change_case(text, case_direction)
-        info(result)
+        debug(result)
         print(result)
 
 

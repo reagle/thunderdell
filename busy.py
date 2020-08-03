@@ -877,21 +877,15 @@ class scrape_reddit(scrape_default):
         )
 
         self.type = "unknown"
+        self.json = get_JSON(f"{url}.json")
+        debug(f"{self.json=}")
         if RE_REDDIT_URL.match(url):
             self.url_dict = RE_REDDIT_URL.match(url).groupdict()
             info(f"{self.url_dict=}")
             if self.url_dict["cid"]:
                 self.type = "comment"
-                self.json = get_JSON(
-                    f'https://api.reddit.com/api/info/?id=t1_{self.url_dict["cid"]}'
-                )
-                debug(f"{self.json=}")
             elif self.url_dict["pid"]:
                 self.type = "post"
-                self.json = get_JSON(
-                    f'https://api.reddit.com/api/info/?id=t3_{self.url_dict["pid"]}'
-                )
-                debug(f"{self.json=}")
             elif self.url_dict["root"]:
                 if self.url_dict["root"].startswith("r/"):
                     self.type = "subreddit"
@@ -899,7 +893,7 @@ class scrape_reddit(scrape_default):
                     self.type = "user"
                 if self.url_dict["root"].startswith("wiki/"):
                     self.type = "wiki"
-        info(f"!!! {self.type=}")
+        info(f"{self.type=}")
 
     def get_biblio(self):
         biblio = {
@@ -917,53 +911,49 @@ class scrape_reddit(scrape_default):
     def get_author(self):
 
         author = "Reddit"
-        if self.type in ["post", "comment"]:
-            author = self.json["data"]["children"][0]["data"]["author"]
+        if self.type == "post":
+            author = self.json[0]["data"]["children"][0]["data"]["author"]
+        if self.type == "comment":
+            info(f"{self.json[1]=}")
+            author = self.json[1]["data"]["children"][0]["data"]["author"]
+        info(f"{author=}")
         return author.strip()
 
     def get_title(self):
 
-        # title = "UNKNOWN"
+        title = "UNKNOWN"
         if self.type == "subreddit":
             title = self.url_dict["root"]
-        elif self.type == "post":
+        elif self.type in ["post", "comment"]:
             title = sentence_case(
-                self.json["data"]["children"][0]["data"]["title"]
+                self.json[0]["data"]["children"][0]["data"]["title"]
             )
-        elif self.type == "comment":
-            comment_data = self.json["data"]["children"][0]["data"]
-            parent_url = f'https://api.reddit.com/api/info/?id={comment_data["link_id"]}'
-            debug(f"{parent_url=}")
-            parent_json = get_JSON(parent_url)
-            debug(f"{parent_json=}")
-            parent_data = parent_json["data"]["children"][0]["data"]
-            debug(f"{parent_data=}")
-            title = sentence_case(parent_data["title"])
-        else:
-            title = self.title()
         info(f"{title=}")
         return title.strip()
 
     def get_date(self):
 
         date = time.strftime("%Y%m%d", NOW)
-        if self.type in ["post", "comment"]:
-            created = self.json["data"]["children"][0]["data"]["created"]
-            date = datetime.fromtimestamp(created).strftime("%Y%m%d")
+        if self.type == "post":
+            created = self.json[0]["data"]["children"][0]["data"]["created"]
+        if self.type == "comment":
+            created = self.json[1]["data"]["children"][0]["data"]["created"]
+        date = datetime.fromtimestamp(created).strftime("%Y%m%d")
+        info(f"{date=}")
         return date.strip()
 
     def get_excerpt(self):
 
         excerpt = ""
-        if self.type in ["post", "comment"]:
-            data = self.json["data"]["children"][0]["data"]
-            if "selftext" in data:
-                excerpt = data["selftext"]
-            elif "body" in data:
-                excerpt = data["body"]
-            else:
-                excerpt = "NO EXCERPT"
-            info(f"returning {excerpt}")
+        if self.type == "post":
+            post_data = self.json[0]["data"]["children"][0]["data"]
+            if "selftext" in post_data:
+                excerpt = post_data["selftext"]  # self post
+            elif "url_overridden_by_dest" in post_data:
+                excerpt = post_data["url_overridden_by_dest"]  # link post
+        elif self.type == "comment":
+            excerpt = self.json[1]["data"]["children"][0]["data"]["body"]
+        info(f"returning {excerpt}")
         return excerpt.strip()
 
 
@@ -1377,7 +1367,7 @@ def get_scraper(url, comment):
     """
 
     url = re.sub(  # use canonical reddit domain
-        r"(https?://(old|i)\.reddit.com/(.*))",
+        r"(https?://(old|i)\.reddit.com/(.*)(\.compact)?)",
         r"https://www.reddit.com/\3",
         url,
     )

@@ -7,6 +7,7 @@
 
 
 from bs4 import BeautifulSoup
+from email import policy
 from email.parser import BytesParser
 from extract_utils import uncurly, get_bib_preamble
 from os.path import basename, splitext
@@ -59,10 +60,7 @@ def process_html(content):
         elif "noteText" in str(div):
             note = uncurly(str(div)[27:-7])
             if color == "blue":
-                if change_case_available:
-                    note = change_case.title_case(note)
-                else:
-                    note = note.title()
+                note = change_case.title_case(note)
                 text_new.append(f"section. {note}")
             elif color == "yellow":
                 text_new.append(f"{page} excerpt. {note}")
@@ -196,7 +194,7 @@ if __name__ == "__main__":
 
         if file_name.endswith(".eml"):
             with open(file_name, "rb") as fp:
-                msg = BytesParser(policy=email.policy.default).parse(fp)
+                msg = BytesParser(policy=policy.default).parse(fp)
                 for part in msg.walk():
                     debug(f"{part=}")
                     msg_content_type = part.get_content_subtype()

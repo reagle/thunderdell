@@ -59,6 +59,7 @@ if not os.path.isdir(TMP_DIR):
 GENERAL_KEY_SHORTCUTS = {
     "aca": "academia",
     "add": "addiction",
+    "adv": "advice",
     "edu": "education",
     "eth": "ethics",
     "exi": "exit",
@@ -904,9 +905,19 @@ class scrape_reddit(scrape_default):
             "excerpt": self.get_excerpt(),
             "comment": self.comment,
             "url": self.url,
-            "organization": "Reddit",
+            "organization": self.get_org(),
         }
         return biblio
+
+    def get_org(self):
+
+        info("GETTING ORG")
+        organization = "Reddit"
+        info(f"{self.type=}")
+        if self.type in ["post", "comment"]:
+            organization = self.url_dict["root"]
+        info(f"{organization=}")
+        return organization.strip()
 
     def get_author(self):
 

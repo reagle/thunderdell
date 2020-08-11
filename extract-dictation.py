@@ -194,7 +194,7 @@ def build_mm_from_txt(
                 in_part = False
             file_out.write(
                 """  <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("paraphrase", clean(line))
+                % ("quote", clean(line))
             )
             in_part = True
 
@@ -210,7 +210,7 @@ def build_mm_from_txt(
                 in_chapter = False
             file_out.write(
                 """    <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("paraphrase", clean(line))
+                % ("quote", clean(line))
             )
             in_chapter = True
 
@@ -223,7 +223,7 @@ def build_mm_from_txt(
                 in_section = False
             file_out.write(
                 """      <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("paraphrase", clean(line[9:]))
+                % ("quote", clean(line[9:]))
             )
             in_section = True
 
@@ -233,7 +233,7 @@ def build_mm_from_txt(
                 in_subsection = False
             file_out.write(
                 """      <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("paraphrase", clean(line[12:]))
+                % ("quote", clean(line[12:]))
             )
             in_subsection = True
 

@@ -1187,6 +1187,7 @@ def emit_results(entries, query, results_file):
         # don't reverse short texts and certain style refs
         if len(text) < 50 or style_ref in ["author", "title", "cite"]:
             cite = ""
+            # prefix = ""  # this could remove ">" from short quotes
         else:
             locator = ""
             LOCATOR_PAT = re.compile(

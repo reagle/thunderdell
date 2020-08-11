@@ -8,11 +8,12 @@
 
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import busy
 import logging
 import re
 import sys
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
+
+import busy
 
 HOME = str(Path("~").expanduser())
 

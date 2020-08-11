@@ -24,8 +24,8 @@ import webbrowser
 def query_sponge(query):
 
     import codecs
-    from os.path import expanduser
     import re
+    from os.path import expanduser
 
     HOME = os.path.expanduser("~")
 

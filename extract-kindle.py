@@ -6,19 +6,21 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 
 
-from bs4 import BeautifulSoup
-from email import policy
-from email.parser import BytesParser
-from extract_utils import uncurly, get_bib_preamble
-from os.path import basename, splitext
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import busy  # https://github.com/reagle/thunderdell
-import change_case
 import difflib
 import email
 import logging
 import re
 import sys
+from email import policy
+from email.parser import BytesParser
+from os.path import basename, splitext
+
+from bs4 import BeautifulSoup
+
+import busy  # https://github.com/reagle/thunderdell
+import change_case
+from extract_utils import get_bib_preamble, uncurly
 
 debug = logging.debug
 info = logging.info
@@ -52,9 +54,7 @@ def process_html(content):
         debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, page = (
-                    RE_COLOR_PAGE.search(str(div)).groupdict().values()
-                )
+                color, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
@@ -98,11 +98,7 @@ def main(argv):
         help="log to file %(prog)s.log",
     )
     arg_parser.add_argument(
-        "-T",
-        "--test",
-        action="store_true",
-        default=False,
-        help="run doc tests",
+        "-T", "--test", action="store_true", default=False, help="run doc tests",
     )
     arg_parser.add_argument(
         "-V",
@@ -210,7 +206,5 @@ if __name__ == "__main__":
             fixed_fd.close()
 
         else:
-            print(
-                "Do not recognize file type: {file_name} {splitext(file_name)[1]}."
-            )
+            print("Do not recognize file type: {file_name} {splitext(file_name)[1]}.")
             sys.exit()

@@ -6,16 +6,18 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import busy  # https://github.com/reagle/thunderdell
 import difflib
 import logging
 import re
 import sys
 from email import policy
 from email.parser import BytesParser
-from extract_utils import uncurly, get_bib_preamble
-from enchant.checker import SpellChecker  # https://pypi.org/project/pyenchant/
 from os.path import basename, splitext
+
+from enchant.checker import SpellChecker  # https://pypi.org/project/pyenchant/
+
+import busy  # https://github.com/reagle/thunderdell
+from extract_utils import get_bib_preamble, uncurly
 
 debug = logging.debug
 info = logging.info
@@ -151,11 +153,7 @@ def main(argv):
         help="log to file %(prog)s.log",
     )
     arg_parser.add_argument(
-        "-T",
-        "--test",
-        action="store_true",
-        default=False,
-        help="run doc tests",
+        "-T", "--test", action="store_true", default=False, help="run doc tests",
     )
     arg_parser.add_argument(
         "-V",

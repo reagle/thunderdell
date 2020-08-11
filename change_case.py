@@ -245,9 +245,7 @@ def change_case(text, case_direction="sentence"):
                     debug("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
-                    raise Exception(
-                        "Unknown case_direction = '%s'" % case_direction
-                    )
+                    raise Exception("Unknown case_direction = '%s'" % case_direction)
             if word and index == 0:  # capitalize first word in a phrase
                 debug("  capitalizing it as first word in phrase")
                 new_word = new_word[0].capitalize() + new_word[1:]
@@ -300,8 +298,7 @@ def main(argv):
     """Process arguments and execute."""
 
     arg_parser = argparse.ArgumentParser(
-        description="Change the case of some text, "
-        "defaulting to sentence case."
+        description="Change the case of some text, " "defaulting to sentence case."
     )
     # positional arguments
     arg_parser.add_argument("text", nargs="*", metavar="TEXT")
@@ -324,10 +321,7 @@ def main(argv):
         "-T", "--test", action="store_true", default=False, help="Test"
     )
     arg_parser.add_argument(
-        "-o",
-        "--out-filename",
-        help="output results to filename",
-        metavar="FILE",
+        "-o", "--out-filename", help="output results to filename", metavar="FILE",
     )
     arg_parser.add_argument(
         "-L",
@@ -344,9 +338,7 @@ def main(argv):
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
-        "--version",
-        action="version",
-        version=f"1.0 using Python {sys.version}",
+        "--version", action="version", version=f"1.0 using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 

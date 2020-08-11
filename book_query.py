@@ -9,13 +9,14 @@
 """ Return bibliographic data for a given a ISBN.
 """
 
-from datetime import datetime
-from dateutil.parser import parse
 import json
 import logging
 import pprint
-import requests
 import sys
+from datetime import datetime
+
+import requests
+from dateutil.parser import parse
 
 log_level = 100  # default
 critical = logging.critical
@@ -75,9 +76,7 @@ def open_query(isbn):
                 elif key == "publish_places":
                     json_bib["address"] = json_details[key][0]
                 elif key == "publish_date":
-                    json_bib["date"] = parse(json_details[key]).strftime(
-                        "%Y%m%d"
-                    )
+                    json_bib["date"] = parse(json_details[key]).strftime("%Y%m%d")
                 elif type(value) == str:
                     json_bib[key] = value.strip()
                     info("  value = '%s'" % json_bib[key])
@@ -157,9 +156,7 @@ if "__main__" == __name__:
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
-        "--version",
-        action="version",
-        version=f"1.0 using Python {sys.version}",
+        "--version", action="version", version=f"1.0 using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 
@@ -172,10 +169,7 @@ if "__main__" == __name__:
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="isbn_query.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
+            filename="isbn_query.log", filemode="w", level=log_level, format=LOG_FORMAT,
         )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)

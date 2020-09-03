@@ -11,6 +11,7 @@ import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging
 import re
 import sys
+import webbrowser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 import busy
@@ -91,6 +92,7 @@ def process_files(file_names):
             )
             url = URL_RE.match(first_line).groups()[0]
             info(f"{url=}")
+            webbrowser.open(url)
             params = {"scheme": "c", "tags": None, "url": url, "comment": ""}
             scraper = busy.get_scraper(params["url"].strip(), comment)
             biblio = scraper.get_biblio()

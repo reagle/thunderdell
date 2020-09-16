@@ -403,7 +403,9 @@ def identity_add_title(ident, title):
     if len(title_words) == 1:
         suffix = f"{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}"
     else:
-        suffix = "".join([word[0] for word in title_words if word not in BORING_WORDS])
+        suffix = "".join(
+            [word[0] for word in title_words if word not in BORING_WORDS]
+        )
         suffix = suffix[:3]
     ident = f"{ident}{suffix}"
     return ident
@@ -449,7 +451,9 @@ def get_ident(entry, entries, delim=""):
         name_part = f"{last_names[0]}Etal"
 
     if "date" not in entry:
-        entry["date"] = Date(year="0000", month=None, day=None, circa=None, time=None)
+        entry["date"] = Date(
+            year="0000", month=None, day=None, circa=None, time=None
+        )
     year_delim = delim if delim else ""
     # debug(f"2 entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry["date"].year))
@@ -469,7 +473,9 @@ def get_ident(entry, entries, delim=""):
 
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
-        warning(f"collision on {ident}: {entry['title']} & {entries[ident]['title']}")
+        warning(
+            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
+        )
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
@@ -533,7 +539,9 @@ def pull_citation(entry):
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
-                print(("Key error on ", error, entry["title"], entry["_mm_file"]))
+                print(
+                    ("Key error on ", error, entry["title"], entry["_mm_file"])
+                )
 
     # if 'url' in entry and entry['url'] is not None:
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
@@ -890,7 +898,9 @@ def emit_biblatex(entries):
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
-                    date = "-".join(filter(None, (value.year, value.month, value.day)))
+                    date = "-".join(
+                        filter(None, (value.year, value.month, value.day))
+                    )
                     date = date + "~" if value.circa else date
                     value = date
 
@@ -1063,7 +1073,9 @@ def emit_yaml_csl(entries):
                     and "container-title" not in entry
                     and "booktitle" not in entry
                 ):
-                    args.outfd.write(f'  container-title: "Proceedings of {value}"\n')
+                    args.outfd.write(
+                        f'  container-title: "Proceedings of {value}"\n'
+                    )
                     continue
                 # 'Blog' is the null value I use in the mindmap
                 if field == "c_blog" and entry[field] == "Blog":
@@ -1108,7 +1120,9 @@ def emit_wp_citation(entries):
                 prefix = f"editor{str(name_num)}-"
                 suffix = ""
             args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
-            args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
+            args.outfd.write(
+                f'| {prefix}last{suffix} = {" ".join(name[1:])}\n'
+            )
 
     for key, entry in sorted(entries.items()):
         wp_ident = key
@@ -1140,7 +1154,9 @@ def emit_wp_citation(entries):
                 elif field in ("date", "origdate", "urldate"):
                     date = value.year
                     if value.month:
-                        date = f"{calendar.month_name[int(value.month)]} {date}"
+                        date = (
+                            f"{calendar.month_name[int(value.month)]} {date}"
+                        )
                     if value.day:
                         date = f"{value.day.lstrip('0')} {date}"
                     # date = "-".join(
@@ -1175,7 +1191,9 @@ def emit_results(entries, query, results_file):
             # prefix = ""  # this could remove ">" from short quotes
         else:
             locator = ""
-            LOCATOR_PAT = re.compile(r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)")
+            LOCATOR_PAT = re.compile(
+                r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)"
+            )
             matches = LOCATOR_PAT.match(text)
             if matches:
                 text = matches.group(2)
@@ -1270,14 +1288,16 @@ def emit_results(entries, query, results_file):
             f'<a href="{get_url_query(identifier)}">{identifier}</a>'
         )
         title_html = (
-            f'<a class="title_html"' f' href="{get_url_query(title)}">{title}</a>'
+            f'<a class="title_html"'
+            f' href="{get_url_query(title)}">{title}</a>'
         )
         if url:
             link_html = f'[<a class="link_html" href="{url}">url</a>]'
         else:
             link_html = ""
         from_html = (
-            f'from <a class="from_html" ' f'href="{MM_mm_file}">{base_mm_file}</a>'
+            f'from <a class="from_html" '
+            f'href="{MM_mm_file}">{base_mm_file}</a>'
         )
         results_file.write(
             f"{spaces}{identifier_html}, "
@@ -1297,7 +1317,9 @@ def emit_results(entries, query, results_file):
 
         # if I am what was queried, print all of me
         if entry["identifier"] == args.query:
-            results_file.write('%s<li class="li_entry_identifier">\n' % (spaces))
+            results_file.write(
+                '%s<li class="li_entry_identifier">\n' % (spaces)
+            )
             spaces = spaces + " "
             results_file.write('%s<ul class="tit_tree">\n' % (spaces))
             spaces = spaces + " "
@@ -1305,7 +1327,9 @@ def emit_results(entries, query, results_file):
                 '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
                 % (spaces, MM_mm_file, base_mm_file),
             )
-            fl_names = ", ".join(name[0] + " " + name[2] for name in entry["author"])
+            fl_names = ", ".join(
+                name[0] + " " + name[2] for name in entry["author"]
+            )
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
@@ -1323,7 +1347,14 @@ def emit_results(entries, query, results_file):
         # if some nodes were matched, PP with citation info reversed
         if "_node_results" in entry:
             print_entry(
-                identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces,
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
             )
             if len(entry["_node_results"]) > 0:
                 results_file.write(f"{spaces}<li>\n")
@@ -1338,14 +1369,31 @@ def emit_results(entries, query, results_file):
             results_file.write(f"{spaces}</li>\n")
         # if my author or title matched, print biblio w/ link to complete entry
         elif "_author_result" in entry:
-            author = f"{entry['_author_result'].get('TEXT')}" f"{entry['date'].year}"
+            author = (
+                f"{entry['_author_result'].get('TEXT')}"
+                f"{entry['date'].year}"
+            )
             print_entry(
-                identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces,
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
             )
         elif "_title_result" in entry:
             title = entry["_title_result"].get("TEXT")
             print_entry(
-                identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces,
+                identifier,
+                author,
+                date,
+                title,
+                url,
+                MM_mm_file,
+                base_mm_file,
+                spaces,
             )
 
 
@@ -1381,7 +1429,10 @@ def parse_names(names):
         first = last = von = jr = ""
         chunks = name.strip().split()
 
-        if "van" in chunks and chunks[chunks.index("van") + 1] in ("den", "der",):
+        if "van" in chunks and chunks[chunks.index("van") + 1] in (
+            "den",
+            "der",
+        ):
             chunks[chunks.index("van") : chunks.index("van") + 2] = [
                 "van " + chunks[chunks.index("van") + 1]
             ]
@@ -1414,7 +1465,10 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)  # break the citation up
         except:
-            print(f"pull_citation error on {entry['author']}: " f"{entry['_mm_file']}")
+            print(
+                f"pull_citation error on {entry['author']}: "
+                f"{entry['_mm_file']}"
+            )
             raise
         entry["identifier"] = get_ident(entry, entries)
         entries[entry["identifier"]] = entry
@@ -1476,7 +1530,9 @@ def walk_freeplane(node, mm_file, entries, links):
 
     for d in node.iter():
         if "LINK" in d.attrib:  # found a local reference link
-            if not d.get("LINK").startswith("http:") and d.get("LINK").endswith(".mm"):
+            if not d.get("LINK").startswith("http:") and d.get(
+                "LINK"
+            ).endswith(".mm"):
                 links.append(unescape_XML(d.get("LINK")))
         # skip nodes that are structure, comment, and empty of text
         if "STYLE_REF" in d.attrib and d.get("TEXT"):
@@ -1497,7 +1553,9 @@ def walk_freeplane(node, mm_file, entries, links):
                 if "LINK" in d.attrib:
                     entry["url"] = d.get("LINK")
                 if args.query:
-                    author_highlighted = query_highlight(author_node, args.query)
+                    author_highlighted = query_highlight(
+                        author_node, args.query
+                    )
                     if author_highlighted is not None:
                         entry["_author_result"] = author_highlighted
                     title_highlighted = query_highlight(d, args.query)
@@ -1511,7 +1569,9 @@ def walk_freeplane(node, mm_file, entries, links):
                 if args.query:
                     node_highlighted = query_highlight(d, args.query)
                     if node_highlighted is not None:
-                        entry.setdefault("_node_results", []).append(node_highlighted)
+                        entry.setdefault("_node_results", []).append(
+                            node_highlighted
+                        )
 
     # commit the last entry as no new titles left
     entries = commit_entry(entry, entries)
@@ -1616,7 +1676,8 @@ def build_bib(file_name, output):
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(
-            "    <title>Pretty Mind Map</title></head>" '<body>\n<ul class="top">\n'
+            "    <title>Pretty Mind Map</title></head>"
+            '<body>\n<ul class="top">\n'
         )
         for entry in list(entries.values()):
             args.query = entry["identifier"]
@@ -1748,7 +1809,11 @@ if __name__ == "__main__":
         help="show biblatex shortcuts, fields, and types used by fe",
     )
     arg_parser.add_argument(
-        "-l", "--long-url", action="store_true", default=False, help="use long URLs",
+        "-l",
+        "--long-url",
+        action="store_true",
+        default=False,
+        help="use long URLs",
     )
     arg_parser.add_argument(
         "-o",
@@ -1758,7 +1823,11 @@ if __name__ == "__main__":
         help="output goes to FILENAME.yaml (BOOLEAN)",
     )
     arg_parser.add_argument(
-        "-p", "--pretty", action="store_true", default=False, help="pretty print",
+        "-p",
+        "--pretty",
+        action="store_true",
+        default=False,
+        help="pretty print",
     )
     arg_parser.add_argument(
         "-q", "--query", nargs="+", help="query the mindmaps", metavar="QUERY"
@@ -1789,7 +1858,9 @@ if __name__ == "__main__":
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
-        "--version", action="version", version=f"1.0 using Python {sys.version}",
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
     )
     arg_parser.add_argument(
         "-L",
@@ -1865,27 +1936,29 @@ if __name__ == "__main__":
 
         doctest.testmod()
     if args.fields:
-        print("\n                           _BIBLATEX_TYPES_ (deprecated)")
-        print("                  http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
+        print("\n                         _BIBLATEX_TYPES_ (deprecated)")
+        print("               http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
         pretty_tabulate_list(list(BIBLATEX_TYPES))
-        print("                             _EXAMPLES_\n")
-        print("         d=2013 in=MIT t=mastersthesis")
-        print("         d=2013 in=MIT t=phdthesis")
+        print("                          _EXAMPLES_\n")
+        print("      d=2013 in=MIT t=mastersthesis")
+        print("      d=2013 in=MIT t=phdthesis")
 
-        print("\n                            _CSL_TYPES_ (preferred)")
-        print("                 http://aurimasv.github.io/z2csl/typeMap.xml\n")
+        print("\n                          _CSL_TYPES_ (preferred)")
+        print("              http://aurimasv.github.io/z2csl/typeMap.xml\n")
         pretty_tabulate_list(list(BIB_TYPES))
-        print("                             _EXAMPLES_\n")
-        print("         d=2014 p=ACM et=Conference on FOO ve=Boston")
-        print("         d=2013 in=MIT t=thesis g=Undergraduate thesis")
-        print("         d=2013 in=MIT t=thesis g=Masters thesis")
-        print("         d=2013 in=MIT t=thesis g=PhD dissertation")
+        print("                          _EXAMPLES_\n")
+        print("      d=2014 p=ACM et=Conference on FOO ve=Boston")
+        print("      d=2013 in=MIT t=thesis g=Undergraduate thesis")
+        print("      d=2013 in=MIT t=thesis g=Masters thesis")
+        print("      d=2013 in=MIT t=thesis g=PhD dissertation")
         print("\n\n")
-        print("\n                               _FIELD_SHORTCUTS_")
+        print("\n                             _FIELD_SHORTCUTS_")
         pretty_tabulate_dict(BIB_SHORTCUTS)
-        print("         t=biblatex/CSL type")
-        print("         ot=organization's subtype (e.g., W3C REC)")
-        print("         pa=section|paragraph|location|chapter|verse|column|line\n\n")
+        print("      t=biblatex/CSL type (e.g., t=thesis)")
+        print("      ot=organization's subtype (e.g., W3C REC)")
+        print(
+            "      pa=section|paragraph|location|chapter|verse|column|line\n\n"
+        )
         sys.exit()
     if args.query:
         args.query = " ".join(args.query)

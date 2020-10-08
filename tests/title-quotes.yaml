@@ -1,0 +1,43 @@
+---
+references:
+- id: Reagle2019qsq
+  type: webpage
+  abstract: "Hopefully this can handle the nesting"
+  author:
+  - family: "Reagle"
+    given: "Joseph"
+  custom2: "title-quotes.mm"
+  issued:
+    year: 2019
+    month: 10
+    day: 08
+  keyword: "test"
+  publisher: "test.org"
+  title-short: "'A quote with 'square quotes''"
+  title: "'A quote with 'square quotes'': Can't believe this ugly title"
+  URL: "https://firstmonday.org/article/view/4291/3381"
+  accessed:
+    year: 2020
+    month: 10
+    day: 08
+- id: Reagle2020qsq
+  type: webpage
+  abstract: "Hopefully this can handle the nesting"
+  author:
+  - family: "Reagle"
+    given: "Joseph"
+  custom2: "title-quotes.mm"
+  issued:
+    year: 2020
+    month: 10
+    day: 08
+  keyword: "test"
+  publisher: "test.org"
+  title-short: "'A quote with 'square quotes''"
+  title: "'A quote with 'square quotes'': Can't believe this ugly title"
+  URL: "https://firstmonday.org/article/view/4291/3381"
+  accessed:
+    year: 2020
+    month: 10
+    day: 08
+...

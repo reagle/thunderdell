@@ -939,7 +939,7 @@ def emit_yaml_csl(entries):
 
     def escape_yaml(s):
         if s:  # faster to just quote than testing for tokens
-            s = s.replace('"', r"''")
+            s = s.replace('"', r"'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             s = s.replace("@", r"\\@")  # single slash caused bugs in past
             s = f'"{s}"'
@@ -1743,6 +1743,9 @@ def _test_results():
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/von.mm > /tmp/von.yaml; \
     diff ~/bin/td/tests/von.yaml /tmp/von.yaml', shell=True)
+    0
+    >>> call('thunderdell.py -i ~/bin/td/tests/title-quotes.mm > /tmp/title-quotes.yaml; \
+    diff ~/bin/td/tests/title-quotes.yaml /tmp/title-quotes.yaml', shell=True)
     0
 
     """

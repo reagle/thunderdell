@@ -463,6 +463,8 @@ def get_ident(entry, entries, delim=""):
         .replace("'", "")  # not permitted in xml name/id attributes
         .replace(".", "")  # punctuation
         .replace("@", "")
+        .replace("[", "")
+        .replace("]", "")
         .replace("<strong>", "")  # '@' citation designator
         .replace("</strong>", "")  # added by walk_freeplane.query_highlight
     )

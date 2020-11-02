@@ -386,7 +386,6 @@ class scrape_default(object):
             dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
             return dt_parse(dmatch.group(0)).strftime("%Y%m%d")
         except (AttributeError, TypeError, ValueError):
-            NOW = time.gmtime()
             date = time.strftime("%Y%m%d", NOW)
             info(f"making date NOW = {date}")
             return date
@@ -728,7 +727,7 @@ class scrape_ENWP(scrape_default):
         return title.replace(" - Wikipedia", "")
 
     def get_permalink(self):
-        if "oldid" not in self.url:
+        if "oldid" not in self.url and "=Special:" not in self.url:
             permalink = self.url.split("/wiki/")[0] + re.search(
                 '''<li id="t-permalink"><a href="(.*?)"''', self.html_u
             ).group(1)
@@ -738,14 +737,17 @@ class scrape_ENWP(scrape_default):
 
     def get_date(self):
         """find date within span"""
-        _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
-        time, day, month, year = re.search(
-            r"""<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) """
-            r"""(\d\d\d\d)</span>""",
-            versioned_HTML_u,
-        ).groups()
-        month = td.MONTH2DIGIT[month[0:3].lower()]
-        return "%d%02d%02d" % (int(year), int(month), int(day))
+        if "oldid" not in self.url and "=Special:" not in self.url:
+            _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
+            _, day, month, year = re.search(
+                r"""<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) """
+                r"""(\d\d\d\d)</span>""",
+                versioned_HTML_u,
+            ).groups()
+            month = td.MONTH2DIGIT[month[0:3].lower()]
+            return "%d%02d%02d" % (int(year), int(month), int(day))
+        else:
+            return time.strftime("%Y%m%d", NOW)
 
     def get_org(self):
         return "Wikipedia"

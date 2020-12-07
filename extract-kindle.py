@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is used with Thunderdell/
+# This file is used with Thunderdell
 # <http://reagle.org/joseph/2009/01/thunderdell>
 # (c) Copyright 2009-2020 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
@@ -76,9 +76,9 @@ def main(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""Format (emailed) GoodRead annotation for use with
-        dictation-extract.py in 
-            https://github.com/reagle/thunderdell
+        description="""Format Kindle annotations (sent via HTML notes shared in
+        *tablet* Kindle app) for use with dictation-extract.py in
+        https://github.com/reagle/thunderdell
         """
     )
 

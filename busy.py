@@ -909,8 +909,12 @@ class scrape_reddit(scrape_default):
             "excerpt": self.get_excerpt(),
             "comment": self.comment,
             "url": self.url,
-            "organization": self.get_org(),
+            # "organization": self.get_org(),
         }
+        container = "c_web"
+        if self.type in ("post", "comment"):
+            container = "c_forum"
+        biblio[container] = self.get_org()
         return biblio
 
     def get_org(self):

@@ -1,9 +1,9 @@
 ---
 references:
-- id: Tosh2012piw
+- id: Gosh2012piw
   type: webpage
   author:
-  - family: "Tosh"
+  - family: "Gosh"
     given: "Daniel"
   custom2: "case.mm"
   issued:
@@ -18,4 +18,21 @@ references:
     year: 2013
     month: 08
     day: 28
+- id: Suitable_Zucchini6742020ahs
+  type: post
+  author:
+  - family: "Suitable_Zucchini674"
+  container-title: "<span class='nocase'>r/AmItheButtface</span>"
+  custom2: "case.mm"
+  issued:
+    year: 2020
+    month: 11
+    day: 07
+  keyword: "test"
+  title: "AITB for having sex with space aliens?"
+  URL: "https://www.reddit.com/r/AmItheButtface/comments/jph4ff/aitb_for_having_sex_with_space_aliens/"
+  accessed:
+    year: 2020
+    month: 12
+    day: 22
 ...

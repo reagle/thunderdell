@@ -1,13 +1,13 @@
-<map version="freeplane 1.5.9">
+<map version="freeplane 1.8.0">
 <!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
 <node TEXT="test" FOLDED="false" ID="ID_469344740"><hook NAME="MapStyle">
-    <properties fit_to_viewport="false;"/>
+    <properties show_note_icons="true" fit_to_viewport="false;"/>
 
 <map_styles>
 <stylenode LOCALIZED_TEXT="styles.root_node" STYLE="oval" UNIFORM_SHAPE="true" VGAP_QUANTITY="24.0 pt">
 <font SIZE="24"/>
 <stylenode LOCALIZED_TEXT="styles.predefined" POSITION="right" STYLE="bubble">
-<stylenode LOCALIZED_TEXT="default" COLOR="#000000" STYLE="fork">
+<stylenode LOCALIZED_TEXT="default" COLOR="#000000" STYLE="fork" MAX_WIDTH="15.0 cm">
 <font NAME="SansSerif" SIZE="10" BOLD="false" ITALIC="false"/>
 </stylenode>
 <stylenode LOCALIZED_TEXT="defaultstyle.details"/>
@@ -21,6 +21,12 @@
 </stylenode>
 </stylenode>
 <stylenode LOCALIZED_TEXT="styles.user-defined" POSITION="right" STYLE="bubble">
+<stylenode TEXT="author" COLOR="#338800"/>
+<stylenode TEXT="title" COLOR="#090f6b"/>
+<stylenode TEXT="cite" COLOR="#ff33b8"/>
+<stylenode TEXT="annotation" COLOR="#999999"/>
+<stylenode TEXT="quote" COLOR="#166799"/>
+<stylenode TEXT="paraphrase" COLOR="#8b12d6"/>
 <stylenode LOCALIZED_TEXT="styles.topic" COLOR="#18898b" STYLE="fork">
 <font NAME="Liberation Sans" SIZE="10" BOLD="true"/>
 </stylenode>
@@ -80,9 +86,14 @@
 </map_styles>
 </hook>
 <node TEXT="pass" POSITION="left" ID="ID_1830378327"/>
-<node TEXT="Daniel Tosh" STYLE_REF="author" POSITION="right" ID="ID_1908602826" COLOR="#338800">
+<node TEXT="Daniel Gosh" STYLE_REF="author" POSITION="right" ID="ID_1908602826" COLOR="#338800">
 <node TEXT="the point i was making before ..." STYLE_REF="title" ID="ID_977321581" LINK="https://twitter.com/danieltosh/status/222796636559130624" COLOR="#090f6b">
 <node TEXT="d=20120710 or=Twitter r=20130828 14:13 UTC kw=comment" STYLE_REF="cite" ID="ID_636776943" COLOR="#ff33b8"/>
+</node>
+</node>
+<node TEXT="Suitable_Zucchini674" STYLE_REF="author" POSITION="right" ID="ID_553041946">
+<node TEXT="AITB for having sex with space aliens?" STYLE_REF="title" ID="ID_185984698" LINK="https://www.reddit.com/r/AmItheButtface/comments/jph4ff/aitb_for_having_sex_with_space_aliens/">
+<node TEXT="d=20201107 cf=r/AmItheButtface  r=20201222 16:57 UTC kw=test" STYLE_REF="cite" ID="ID_82288244"/>
 </node>
 </node>
 </node>

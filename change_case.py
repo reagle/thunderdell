@@ -151,13 +151,15 @@ def safe_lower(text):
 
 
 def is_proper_noun(word):
-    """ A word is a proper noun if it is in that set or doesn't
+    """A word is a proper noun if it is in that set or doesn't
     appear in the wordset dictionary. Recurse on hyphenated words.
 
     >>> is_proper_noun('W3C')
     True
     >>> is_proper_noun('The')
     False
+    >>> is_proper_noun('r/AmItheButtface')
+    True
 
     """
     debug("    word = '%s'" % word)
@@ -187,7 +189,7 @@ def title_case(text):
 
 
 def change_case(text, case_direction="sentence"):
-    """ Convert text to sentence case for APA like citations
+    """Convert text to sentence case for APA like citations
 
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
     'My defamation 2.0 experience: A story of Wikipedia'
@@ -228,10 +230,10 @@ def change_case(text, case_direction="sentence"):
             debug("----------------")
             debug("word = '%s'" % word)
             if is_proper_noun(word):
-                # debug("  word is_proper_noun")
+                debug("  word is_proper_noun")
                 new_word = word
             elif is_proper_noun(word_capitalized):
-                # debug("  word_capitalized is_proper_noun")
+                debug("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
             else:
                 debug("  changing case of '%s'" % word)
@@ -245,10 +247,12 @@ def change_case(text, case_direction="sentence"):
                     debug("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
-                    raise Exception("Unknown case_direction = '%s'" % case_direction)
-            if word and index == 0:  # capitalize first word in a phrase
-                debug("  capitalizing it as first word in phrase")
-                new_word = new_word[0].capitalize() + new_word[1:]
+                    raise Exception(
+                        "Unknown case_direction = '%s'" % case_direction
+                    )
+                if word and index == 0:  # capitalize first word in a phrase
+                    debug("  capitalizing it as first word in phrase")
+                    new_word = new_word[0].capitalize() + new_word[1:]
 
             new_text.append(new_word)
 
@@ -283,6 +287,7 @@ def test(change_case, case_direction):
         "Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed",
         "THIS SENTENCE ABOUT AOL IN AMERICA IS ALL CAPS",
         "Lessons I learned on the road as a Digital Nomad",
+        "r/AmItheButtface",
     )
 
     import doctest
@@ -298,7 +303,8 @@ def main(argv):
     """Process arguments and execute."""
 
     arg_parser = argparse.ArgumentParser(
-        description="Change the case of some text, " "defaulting to sentence case."
+        description="Change the case of some text, "
+        "defaulting to sentence case."
     )
     # positional arguments
     arg_parser.add_argument("text", nargs="*", metavar="TEXT")
@@ -321,7 +327,10 @@ def main(argv):
         "-T", "--test", action="store_true", default=False, help="Test"
     )
     arg_parser.add_argument(
-        "-o", "--out-filename", help="output results to filename", metavar="FILE",
+        "-o",
+        "--out-filename",
+        help="output results to filename",
+        metavar="FILE",
     )
     arg_parser.add_argument(
         "-L",
@@ -338,7 +347,9 @@ def main(argv):
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
-        "--version", action="version", version=f"1.0 using Python {sys.version}",
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 

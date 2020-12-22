@@ -948,13 +948,13 @@ class scrape_reddit(scrape_default):
 
     def get_date(self):
 
-        date = time.strftime("%Y%m%d", NOW)
+        date_init = time.strftime("%Y%m%d", NOW)
+        created = time.mktime(NOW)  # TODO convert to float epock time
         if self.type == "post":
             created = self.json[0]["data"]["children"][0]["data"]["created"]
         if self.type == "comment":
             created = self.json[1]["data"]["children"][0]["data"]["created"]
         date = datetime.fromtimestamp(created).strftime("%Y%m%d")
-        info(f"{date=}")
         return date.strip()
 
     def get_excerpt(self):

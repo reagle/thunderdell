@@ -3,10 +3,6 @@
 # (c) Copyright 2019 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 
-# TODO
-# - default keyword to #misc
-
-
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging
 import re
@@ -90,14 +86,17 @@ def process_files(file_names):
             comment = "\n" + "".join(lines).replace("\n\u200b\n", "").replace(
                 "\n\n", "\n"
             )
+            info(f"{comment=}")
             url = URL_RE.match(first_line).groups()[0]
             info(f"{url=}")
             webbrowser.open(url)
-            params = {"scheme": "c", "tags": None, "url": url, "comment": ""}
+            params = {"scheme": "c", "url": url, "comment": ""}
             scraper = busy.get_scraper(params["url"].strip(), comment)
             biblio = scraper.get_biblio()
-            biblio["tags"] = []
+            biblio["tags"] = "misc"  # default keyword
+            del biblio["excerpt"]  # no need for auto excerpt
             info(f"{biblio=}")
+            # breakpoint()
             busy.log2mm(biblio)
 
 

@@ -34,8 +34,9 @@ def process_html(content):
     """Process text for annotation kind, color, and page number."""
 
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
+
     RE_COLOR_PAGE = re.compile(
-        r"(?P<color>yellow|blue)</span>\) - Page (?P<page>[\dcdilmxv]+)"
+        r"(?P<color>yellow|blue)</span>\) .*? Page (?P<page>[\dcdilmxv]+)",
     )
     color = ""
     page = ""
@@ -158,31 +159,40 @@ TEST_IN = """
 <div class="noteText">
     He and James Madison were the prime movers behind the summoning of the Constitutional Convention and the chief authors of that classic gloss on the national charter, The Federalist, which Hamilton supervised.
 </div>
+
+</div><div class="noteHeading">
+    Highlight(<span class="highlight_yellow">yellow</span>) - 3. The Rise of the Big Black Woman > Page 88 · Location 1536
+</div>
+<div class="noteText">
+    in the context of the Enlightenment, the British preoccupation with the ills of excess feeding were folded into the racial discourse. This helped to make overindulgence evidence of not only slow wit but also barbarism.
+</div>
+
 </html>
 """
 
-TEST_OUT = """author = Ron Chernow title = Alexander Hamilton date = 20050329 publisher = Penguin isbn = 9781101200858 url = https://books.google.com/books?isbn=9781101200858
-1 excerpt. PROLOGUE THE OLDEST REVOLUTIONARY WAR WIDOW
-4 excerpt. He and James Madison were the prime movers behind the summoning of the Constitutional Convention and the chief authors of that classic gloss on the national charter, The Federalist, which Hamilton supervised."""
+TEST_OUT = """author = Ron Chernow title = Alexander Hamilton date = 20050329 publisher = Penguin isbn = 9781101200858 url = https://books.google.com/books?isbn=9781101200858\n1 excerpt. PROLOGUE THE OLDEST REVOLUTIONARY WAR WIDOW\n4 excerpt. He and James Madison were the prime movers behind the summoning of the Constitutional Convention and the chief authors of that classic gloss on the national charter, The Federalist, which Hamilton supervised.\n88 excerpt. in the context of the Enlightenment, the British preoccupation with the ills of excess feeding were folded into the racial discourse. This helped to make overindulgence evidence of not only slow wit but also barbarism."""
 
 # TODO use '--' or some other method to indicate my thoughts (not
 #     paraphrase or quotes.
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    debug(f"==================================")
+    info(f"==================================")
     debug(f"{args=}")
     if args.test:
         TEST_RESULTS = process_html(TEST_IN)
         print("------------------------")
-        print(f"\nSHOULD BE:\n```{repr(TEST_OUT)}```")
-        print(f"\nRESULT IS:\n```{repr(TEST_RESULTS)}```")
-        # debug(f"{type(TEST_OUT)=}", f"{len(TEST_OUT)=}")
-        # debug(f"{type(TEST_RESULTS)=}", f"{len(TEST_RESULTS)=}")
-        for diff in difflib.context_diff(
-            process_html(TEST_IN).split("\n"), TEST_OUT.split("\n")
-        ):
-            print(diff)
+        if repr(TEST_OUT) != repr(TEST_RESULTS):
+            print(f"\nSHOULD BE:\n```{repr(TEST_OUT)}```")
+            print(f"\nRESULT IS:\n```{repr(TEST_RESULTS)}```")
+            # debug(f"{type(TEST_OUT)=}", f"{len(TEST_OUT)=}")
+            # debug(f"{type(TEST_RESULTS)=}", f"{len(TEST_RESULTS)=}")
+            for diff in difflib.context_diff(
+                process_html(TEST_IN).split("\n"), TEST_OUT.split("\n")
+            ):
+                print(diff)
+        else:
+            print("tests pass")
         sys.exit()
 
     file_names = args.file_names
@@ -207,6 +217,8 @@ if __name__ == "__main__":
                             charset, "replace"
                         )
                         new_text = process_html(content)
+                        with open("fixed.html", "w") as fp_html:
+                            fp_html.write(content)
 
             fixed_fd.write(new_text)
             fixed_fd.close()

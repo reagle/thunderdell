@@ -248,9 +248,7 @@ def change_case(text, case_direction="sentence"):
                     debug("  adding '%s' as is" % word)
                     new_word = safe_capwords(word)
                 else:
-                    raise Exception(
-                        "Unknown case_direction = '%s'" % case_direction
-                    )
+                    raise Exception("Unknown case_direction = '%s'" % case_direction)
                 if word and index == 0:  # capitalize first word in a phrase
                     debug("  capitalizing it as first word in phrase")
                     new_word = new_word[0].capitalize() + new_word[1:]
@@ -304,8 +302,7 @@ def main(argv):
     """Process arguments and execute."""
 
     arg_parser = argparse.ArgumentParser(
-        description="Change the case of some text, "
-        "defaulting to sentence case."
+        description="Change the case of some text, " "defaulting to sentence case."
     )
     # positional arguments
     arg_parser.add_argument("text", nargs="*", metavar="TEXT")

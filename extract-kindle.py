@@ -55,9 +55,7 @@ def process_html(content):
         debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, page = (
-                    RE_COLOR_PAGE.search(str(div)).groupdict().values()
-                )
+                color, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
@@ -224,7 +222,5 @@ if __name__ == "__main__":
             fixed_fd.close()
 
         else:
-            print(
-                "Do not recognize file type: {file_name} {splitext(file_name)[1]}."
-            )
+            print("Do not recognize file type: {file_name} {splitext(file_name)[1]}.")
             sys.exit()

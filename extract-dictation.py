@@ -375,7 +375,10 @@ if __name__ == "__main__":
             subprocess.call(
                 ["/usr/bin/X11/catdoc", "-aw", file_name],
                 stdout=open(
-                    "%s.txt" % file_name[0:-4], "w", encoding="utf-8", errors="replace",
+                    "%s.txt" % file_name[0:-4],
+                    "w",
+                    encoding="utf-8",
+                    errors="replace",
                 ),
             )
             file_name = file_name[0:-4] + ".txt"

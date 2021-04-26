@@ -156,7 +156,9 @@ if "__main__" == __name__:
         help="Increase verbosity (specify multiple times for more)",
     )
     arg_parser.add_argument(
-        "--version", action="version", version=f"1.0 using Python {sys.version}",
+        "--version",
+        action="version",
+        version=f"1.0 using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 
@@ -169,7 +171,10 @@ if "__main__" == __name__:
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="isbn_query.log", filemode="w", level=log_level, format=LOG_FORMAT,
+            filename="isbn_query.log",
+            filemode="w",
+            level=log_level,
+            format=LOG_FORMAT,
         )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)

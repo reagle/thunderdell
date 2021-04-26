@@ -1521,7 +1521,7 @@ def walk_freeplane(node, mm_file, entries, links):
             return node.getparent()
 
     def query_highlight(node, query):
-        """ Return a modified node with matches highlighted"""
+        """Return a modified node with matches highlighted"""
         query_lower = query.lower()
         text = node.get("TEXT")
         text_lower = text.lower()
@@ -1538,7 +1538,7 @@ def walk_freeplane(node, mm_file, entries, links):
         return None
 
     def get_author_node(node):
-        """ Return the nearest author node ancestor """
+        """Return the nearest author node ancestor"""
         ancestor = get_parent(node)
         while ancestor.get("STYLE_REF") != "author":
             ancestor = get_parent(ancestor)

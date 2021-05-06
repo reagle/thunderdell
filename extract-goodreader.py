@@ -56,9 +56,9 @@ def process_text(text):
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
     RE_JOIN_LINES = re.compile(r"([a-z] ?)\n\n([a-z])")
     RE_PAGE_NUM = re.compile(r"--- Page (\d+) ---")
-    page_num_parsed = 0  # parsed page number
+    page_num_parsed = 0  # actual/parsed page number
     page_num_adjusted = 0  # page number offset (first page)
-    page_num_print = ""  # page number printed (or not for section/chapters)
+    page_num_result = ""  # page number result (or not for section/chapters)
     kind = ""
     color = ""
     prefix = ""
@@ -82,7 +82,7 @@ def process_text(text):
             break
         info(f"********************\n{line=}")
         info(f"{page_num_parsed=}")
-        info(f"{page_num_print=}")
+        info(f"{page_num_result=}")
         if not line.strip() or ignore_next_line:
             ignore_next_line = False
             continue
@@ -95,26 +95,26 @@ def process_text(text):
             page_num_parsed = RE_PAGE_NUM.match(line).groups(0)[0]
             info(f"{page_num_parsed=} SET")
             info(f"{args.number=}")
-            # 2nd page of paper starting on 151 = 152
-            page_num_adjusted = str(int(page_num_parsed) + args.number)
+            # offset by first page
+            page_num_adjusted = str(int(page_num_parsed) + args.number - 1)
             info(f"{page_num_adjusted=}")
         elif RE_ANNOTATION.match(line):
             debug(f"RE_ANNOTATION match")
-            page_num_print = page_num_adjusted
+            page_num_result = page_num_adjusted
             kind, color = RE_ANNOTATION.match(line).groupdict().values()
             if kind == "Note":
                 prefix = "--"
-                page_num_print = ""
+                page_num_result = ""
             elif kind == "Highlight":
                 if color == "yellow":
                     prefix = "excerpt."
                 if color == "blue":
                     prefix = "section."
-                    page_num_print = ""
+                    page_num_result = ""
         else:
             fixed_line = uncurly(restore_spaces(line))
-            debug(f"{page_num_print} {prefix} {fixed_line}".strip())
-            text_new.append(f"{page_num_print} {prefix} {fixed_line}".strip())
+            debug(f"{page_num_result} {prefix} {fixed_line}".strip())
+            text_new.append(f"{page_num_result} {prefix} {fixed_line}".strip())
 
     return "\n".join(text_new)
 
@@ -136,8 +136,8 @@ def main(argv):
         "-n",
         "--number",
         type=int,
-        default=0,
-        help="sum positive/negative number with pagination; 0 means no change",
+        default=1,
+        help="first page in actual journal/book",
     )
     arg_parser.add_argument(
         "-o",

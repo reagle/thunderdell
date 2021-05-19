@@ -137,7 +137,7 @@ def main(argv):
         "--number",
         type=int,
         default=1,
-        help="first page in actual journal/book",
+        help="first page in actual article/book",
     )
     arg_parser.add_argument(
         "-o",

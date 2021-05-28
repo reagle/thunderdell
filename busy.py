@@ -1556,12 +1556,13 @@ def do_console_annotation(biblio):
         do_publish = False
         from_Instapaper = False  # are following lines Instapaper markdown?
         console_annotations = ""
+        biblio["comment"] = ""
+
         print(("@%s\n" % (tentative_id)))
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
             info(f"{line=}")
             line = line.replace("\u200b", "")  # Instapaper export artifact
-            line = line.strip()
             if line == "":
                 continue
             if line.startswith("# ["):

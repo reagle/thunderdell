@@ -28,8 +28,8 @@ def main(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""Format Instapaper annotations for use with 
-        dictation-extract.py in 
+        description="""Format Instapaper annotations for use with
+        dictation-extract.py in
             https://github.com/reagle/thunderdell
         """
     )
@@ -64,7 +64,7 @@ def main(argv):
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="PROG-TEMPLATE.log",
+            filename="extract-instapaper.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,

@@ -1087,6 +1087,7 @@ def log2mm(biblio):
     ElementTree(mindmap).write(ofile, encoding="utf-8")
 
     if args.publish:
+        info("YASN")
         yasn_publish(abstract, title, subtitle, permalink, tags)
 
 
@@ -1551,7 +1552,7 @@ def do_console_annotation(biblio):
         """Parse the bib assignments"""
 
         # biblio['tags'] and whether to yasn publish are overwritten by
-        # pre-populated and edited console annotation
+        # pre-populated and then edited console annotation
         biblio["tags"] = ""
         do_publish = False
         from_Instapaper = False  # are following lines Instapaper markdown?
@@ -1563,6 +1564,7 @@ def do_console_annotation(biblio):
         for line in edited_text:
             info(f"{line=}")
             line = line.replace("\u200b", "")  # Instapaper export artifact
+            line = line.strip()
             if line == "":
                 continue
             if line.startswith("# ["):
@@ -1571,9 +1573,10 @@ def do_console_annotation(biblio):
                 continue
             if line == "-p":
                 do_publish = True
+                warning(f"{do_publish=}")
             elif line == "?":
                 print_console_msg()
-            elif line.startswith(". "):
+            elif line.startswith("s."):
                 biblio["comment"] = line[2:].strip()
                 info(f"{biblio['comment']=}")
             elif "=" in line[0:3]:  # citation only if near start of line
@@ -1640,6 +1643,7 @@ def do_console_annotation(biblio):
             )
             initial_text.append(tags)
     if args.publish:
+        warning("appending -p to text")
         initial_text.append("-p")
     if "comment" in biblio and biblio["comment"].strip():
         initial_text.append(". " + biblio["comment"])
@@ -1829,7 +1833,6 @@ if __name__ == "__main__":
     )
 
     args = arg_parser.parse_args()
-
     log_level = logging.ERROR  # 40
 
     if args.verbose == 1:

@@ -27,17 +27,16 @@ import re
 import string
 import sys
 import time
-from collections import Counter, namedtuple
+from collections import namedtuple
 from datetime import datetime
 from io import StringIO
 from subprocess import Popen, call
 from xml.etree.ElementTree import Element, ElementTree, SubElement, parse
 
-from dateutil.parser import parse as dt_parse
-from lxml import etree as l_etree
-
 import thunderdell as td
 from change_case import sentence_case, title_case
+from dateutil.parser import parse as dt_parse
+from lxml import etree as l_etree
 
 # personal utilities
 from web_utils import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
@@ -562,7 +561,7 @@ class scrape_ISBN(scrape_default):
         info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
-            date = "%d%02d%02" % (int(year), int(month), int(day))
+            date = "%d%02d%02d" % (int(year), int(month), int(day))
         elif len(date_parts) == 2:
             year, month = date_parts
             date = "%d%02d" % (int(year), int(month))
@@ -952,7 +951,7 @@ class scrape_reddit(scrape_default):
 
     def get_date(self):
 
-        date_init = time.strftime("%Y%m%d", NOW)
+        # date_init = time.strftime("%Y%m%d", NOW)
         created = time.mktime(NOW)  # TODO convert to float epock time
         if self.type == "post":
             created = self.json[0]["data"]["children"][0]["data"]["created"]
@@ -1148,11 +1147,8 @@ def log2work(biblio):
         hashtags = "#misc"
     info(f"hashtags = '{hashtags}'")
     html_comment = (
-        comment
-        + " "
-        + '<a href="%s">%s</a>' % (escape_XML(url), escape_XML(title))
+        f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
     )
-
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]

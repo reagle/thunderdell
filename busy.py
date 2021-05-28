@@ -339,7 +339,9 @@ class scrape_default(object):
             info("checking regexs")
             for regex in AUTHOR_REGEXS:
                 info(f"trying = '{regex}'")
-                dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
+                dmatch = re.search(
+                    regex, self.text, re.IGNORECASE | re.MULTILINE
+                )
                 if dmatch:
                     info(f'matched: "{regex}"')
                     author = dmatch.group(1).strip()
@@ -651,7 +653,9 @@ class scrape_MARC(scrape_default):
 
     def get_author(self):
         try:
-            author = re.search("""From: *<a href=".*?">(.*?)</a>""", self.html_u)
+            author = re.search(
+                """From: *<a href=".*?">(.*?)</a>""", self.html_u
+            )
         except AttributeError:
             author = re.search("""From: *(.*)""", self.html_u)
         author = author.group(1)
@@ -668,12 +672,18 @@ class scrape_MARC(scrape_default):
     def get_title(self):
         subject = re.search("""Subject: *(.*)""", self.html_u).group(1)
         if subject.startswith("<a href"):
-            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(1)
-        subject = subject.replace("[Wikipedia-l] ", "").replace("[WikiEN-l] ", "")
+            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(
+                1
+            )
+        subject = subject.replace("[Wikipedia-l] ", "").replace(
+            "[WikiEN-l] ", ""
+        )
         return subject
 
     def get_date(self):
-        mdate = re.search("""Date: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        mdate = re.search(
+            """Date: *<a href=".*?">(.*?)</a>""", self.html_u
+        ).group(1)
         try:
             date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
         except ValueError:
@@ -681,7 +691,9 @@ class scrape_MARC(scrape_default):
         return time.strftime("%Y%m%d", date)
 
     def get_org(self):
-        return re.search("""List: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        return re.search(
+            """List: *<a href=".*?">(.*?)</a>""", self.html_u
+        ).group(1)
 
     def get_excerpt(self):
         excerpt = ""
@@ -848,7 +860,9 @@ class scrape_twitter(scrape_default):
 
     def get_excerpt(self):
 
-        excerpt = self.HTML_p.xpath("//p[contains(@class,'tweet-text')]/text()")[0]
+        excerpt = self.HTML_p.xpath(
+            "//p[contains(@class,'tweet-text')]/text()"
+        )[0]
         return excerpt
 
 
@@ -930,7 +944,9 @@ class scrape_reddit(scrape_default):
         if self.type == "subreddit":
             title = self.url_dict["root"]
         elif self.type in ["post", "comment"]:
-            title = sentence_case(self.json[0]["data"]["children"][0]["data"]["title"])
+            title = sentence_case(
+                self.json[0]["data"]["children"][0]["data"]["title"]
+            )
         info(f"{title=}")
         return title.strip()
 
@@ -1033,33 +1049,39 @@ def log2mm(biblio):
             year_node, "node", {"TEXT": this_week, "POSITION": "right"}
         )
 
-    author_node = SubElement(week_node, "node", {"TEXT": author, "STYLE_REF": "author"})
+    author_node = SubElement(
+        week_node, "node", {"TEXT": author, "STYLE_REF": "author"}
+    )
     title_node = SubElement(
         author_node,
         "node",
         {"TEXT": title, "STYLE_REF": "title", "LINK": permalink},
     )
-    cite_node = SubElement(title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"})
+    cite_node = SubElement(
+        title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"}
+    )
     if abstract:
         abstract_node = SubElement(
             title_node, "node", {"TEXT": abstract, "STYLE_REF": "annotation"}
         )
     if excerpt:
-        for exc in excerpt.split("\n\n"):
-            info(f"{exc=}")
-            if exc.startswith(", "):
+        for excerpt_chunk in excerpt.split("\n\n"):
+            info(f"{excerpt_chunk=}")
+            if excerpt_chunk.startswith(", "):
                 style_ref = "paraphrase"
-                exc = exc[2:]
-            elif exc.startswith(". "):
+                excerpt_chunk = excerpt_chunk[2:]
+            elif excerpt_chunk.startswith(". "):
                 style_ref = "annotation"
-                exc = exc[2:]
-            elif exc.startswith("-- "):
+                excerpt_chunk = excerpt_chunk[2:]
+            elif excerpt_chunk.startswith("-- "):
                 style_ref = "default"
-                exc = exc[3:]
+                excerpt_chunk = excerpt_chunk[3:]
             else:
                 style_ref = "quote"
             excerpt_node = SubElement(
-                title_node, "node", {"TEXT": exc, "STYLE_REF": style_ref}
+                title_node,
+                "node",
+                {"TEXT": excerpt_chunk, "STYLE_REF": style_ref},
             )
 
     ElementTree(mindmap).write(ofile, encoding="utf-8")
@@ -1082,7 +1104,8 @@ def log2nifty(biblio):
 
     date_token = time.strftime("%y%m%d", NOW)
     log_item = (
-        f'<dt><a href="{url}">{title}</a> ' f"({date_token})</dt><dd>{comment}</dd>"
+        f'<dt><a href="{url}">{title}</a> '
+        f"({date_token})</dt><dd>{comment}</dd>"
     )
 
     fd = open(ofile)
@@ -1124,7 +1147,9 @@ def log2work(biblio):
         hashtags = "#misc"
     info(f"hashtags = '{hashtags}'")
     html_comment = (
-        comment + " " + '<a href="%s">%s</a>' % (escape_XML(url), escape_XML(title))
+        comment
+        + " "
+        + '<a href="%s">%s</a>' % (escape_XML(url), escape_XML(title))
     )
 
     date_token = time.strftime("%y%m%d", NOW)
@@ -1534,12 +1559,14 @@ def do_console_annotation(biblio):
         print(("@%s\n" % (tentative_id)))
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
+            info(f"{line=}")
             line = line.replace("\u200b", "")  # Instapaper export artifact
             line = line.strip()
             if line == "":
                 continue
             if line.startswith("# ["):
                 from_Instapaper = True
+                info(f"{from_Instapaper=}")
                 continue
             if line == "-p":
                 do_publish = True
@@ -1547,6 +1574,7 @@ def do_console_annotation(biblio):
                 print_console_msg()
             elif line.startswith(". "):
                 biblio["comment"] = line[2:].strip()
+                info(f"{biblio['comment']=}")
             elif "=" in line[0:3]:  # citation only if near start of line
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
@@ -1564,8 +1592,8 @@ def do_console_annotation(biblio):
                         biblio[td.BIB_SHORTCUTS[short]] = value.strip()
             else:
                 if from_Instapaper:
-                    if line.startswith("> "):
-                        line = line[2:]  # remove redundant quote mark
+                    if line.startswith(">"):
+                        line = line[1:]  # remove redundant quote mark
                     elif line.startswith("-"):
                         pass  # leave comments alone
                     else:
@@ -1580,7 +1608,11 @@ def do_console_annotation(biblio):
         if (
             "c_web" in biblio
             and len(
-                list(biblio[c] for c in list(td.CSL_SHORTCUTS.values()) if c in biblio)
+                list(
+                    biblio[c]
+                    for c in list(td.CSL_SHORTCUTS.values())
+                    if c in biblio
+                )
             )
             > 1
         ):
@@ -1590,10 +1622,14 @@ def do_console_annotation(biblio):
     # code of do_console_annotation
     info(f"{biblio['author']=}")
     tentative_id = get_tentative_ident(biblio)
-    initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
+    initial_text = [
+        f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"
+    ]
     for key in biblio:
         if key.startswith("c_"):
-            initial_text.append(f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}")
+            initial_text.append(
+                f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}"
+            )
         if key == "tags" and biblio["tags"]:
             tags = " ".join(
                 [
@@ -1674,7 +1710,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
     info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
-            ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
+            [
+                "#" + KEY_SHORTCUTS.get(tag, tag)
+                for tag in tags.strip().split(" ")
+            ]
         )
     comment, title, subtitle, url, tags = [
         v.strip() if isinstance(v, str) else ""
@@ -1718,7 +1757,9 @@ def yasn_publish(comment, title, subtitle, url, tags):
         if photo:
             tweet = shrink_tweet(comment, title, "", tags)
             response = twitter.upload_media(media=photo)
-            twitter.update_status(status=tweet, media_ids=[response["media_id"]])
+            twitter.update_status(
+                status=tweet, media_ids=[response["media_id"]]
+            )
         else:
             tweet = shrink_tweet(comment, title, url, tags)
             twitter.update_status(status=tweet)

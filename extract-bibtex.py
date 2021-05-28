@@ -66,7 +66,8 @@ def process(entries):
             last, first = name.split(", ")
             reordered_names.append(first + " " + last)
         fdo.write(
-            """  <node COLOR="#338800" TEXT="%s">\n""" % ", ".join(reordered_names)
+            """  <node COLOR="#338800" TEXT="%s">\n"""
+            % ", ".join(reordered_names)
         )
 
         if "url" in entry:
@@ -174,7 +175,7 @@ if __name__ == "__main__":
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="PROG-TEMPLATE.log",
+            filename="extract-bibtex.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
@@ -186,7 +187,9 @@ if __name__ == "__main__":
     files = [abspath(file_name) for file_name in args.files]
     for file_name in files:
         try:
-            src = open(file_name, "r", encoding="utf-8", errors="replace").read()
+            src = open(
+                file_name, "r", encoding="utf-8", errors="replace"
+            ).read()
             fileOut = splitext(file_name)[0] + ".mm"
             fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
         except IOError:

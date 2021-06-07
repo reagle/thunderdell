@@ -64,7 +64,14 @@ def process_text(text):
     RE_FIRST = re.compile(r"^First = (\d+)", re.IGNORECASE | re.MULTILINE)
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
     RE_JOIN_LINES = re.compile(r"([a-z] ?)\n\n([a-z])")
-    RE_PAGE_NUM = re.compile(r"--- Page (?:p\. )?\[?(\d+)\]? ---")
+    RE_PAGE_NUM = re.compile(
+        r"""---[ ]Page[ ]
+        (?:p\. )?
+        \[? 
+        (\d+|[A-Z]+)  # digit or (rare) capital letter. TODO: roman numerals
+        \]?[ ]---""",
+        re.VERBOSE,
+    )
     page_num_first_parsed = None  # 1st page number as parsed
     page_num_first_specfied = None  # 1st page number specified in PDF comment
     page_num_offset = None  # page number offset
@@ -105,8 +112,18 @@ def process_text(text):
             continue
 
         if RE_PAGE_NUM.match(line):
-            warning(f"RE_PAGE_NUM match")
-            page_num_parsed = int(RE_PAGE_NUM.match(line).groups(0)[0])
+            warning(f"{RE_PAGE_NUM.match(line)=}")
+            page_num_parsed = RE_PAGE_NUM.match(line).groups(0)[0]
+            if page_num_parsed.isdigit():
+                page_num_parsed = int(page_num_parsed)
+            elif page_num_parsed.isalpha():
+                page_num_parsed = ord(page_num_parsed) - 96
+            # TODO: when letters are used, what happens after page z?
+            # TODO: identify roman numerals
+            else:
+                print(f"unknown {page_num_parsed}")
+                sys.exit()
+
             warning(f"{page_num_parsed=} SET")
             if not page_num_first_parsed:
                 warning(f"SETTING initials")

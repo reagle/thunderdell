@@ -221,7 +221,7 @@ def main(argv):
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="exract-goodreader.log",
+            filename="extract-goodreader.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,

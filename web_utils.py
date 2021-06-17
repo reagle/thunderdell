@@ -105,14 +105,14 @@ def get_JSON(
     """Return [JSON content, response] of a given URL."""
 
     AGENT_HEADERS = {"User-Agent": "Thunderdell/BusySponge"}
-    info(f"{url=}")
+    # info(f"{url=}")
     try:
         r = requests.get(url, headers=AGENT_HEADERS, verify=True)
         r.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise SystemExit(f"{e}")
     returned_content_type = r.headers["content-type"].split(";")[0]
-    info(f"{requested_content_type=} == {returned_content_type=}?")
+    # info(f"{requested_content_type=} == {returned_content_type=}?")
     if requested_content_type == returned_content_type:
         json_content = json.loads(r.content)
         return json_content

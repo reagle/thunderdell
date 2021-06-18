@@ -1124,7 +1124,6 @@ def emit_json_csl(entries):
     # json.dump(yaml_object["references"], json_out)
 
     # OPTION 2: create custom writer below
-    # TODO: remove trailing commas with `jsoncomma` or ",(\s+[}\]])"
 
     def escape_csl(s):
         if s:  # faster to just quote than testing for tokens
@@ -1145,39 +1144,44 @@ def emit_json_csl(entries):
         #      'dropping-particle')
         # debug("person = '%s'" % (' '.join(person)))
         given, particle, family, suffix = person
-        args.outfd.write("        {\n")
-        args.outfd.write(f'      "family": {escape_csl(family)},\n')
+        person_buffer = []
+        person_buffer.append("        {\n")
+        person_buffer.append(f'      "family": {escape_csl(family)},\n')
         if given:
-            args.outfd.write(f'      "given": {escape_csl(given)},\n')
-            # args.outfd.write('    given:\n')
+            person_buffer.append(f'      "given": {escape_csl(given)},\n')
+            # person_buffer.append('    given:\n')
             # for given_part in given.split(' '):
-            #     args.outfd.write('    - %s\n' % escape_csl(given_part))
+            #     person_buffer.append('    - %s\n' % escape_csl(given_part))
         if suffix:
-            args.outfd.write(f'      "suffix": {escape_csl(suffix)},\n')
+            person_buffer.append(f'      "suffix": {escape_csl(suffix)},\n')
         if particle:
-            args.outfd.write(
+            person_buffer.append(
                 f'      "non-dropping-particle": {escape_csl(particle)},\n'
             )
-        args.outfd.write("        },\n")
+        person_buffer.append("        },\n")
+        return person_buffer
 
     def emit_csl_date(date, season=None):
         """csl writer for dates"""
 
-        args.outfd.write("      {\n")
+        date_buffer = []
+        date_buffer.append("      {\n")
         if date.circa:
-            args.outfd.write(f'      "circa": true,\n')
+            date_buffer.append(f'      "circa": true,\n')
         if season:
-            args.outfd.write(f'      "season": "{season}",\n')
+            date_buffer.append(f'      "season": "{season}",\n')
 
-        args.outfd.write('      "date-parts": [ [\n')
+        date_buffer.append('      "date-parts": [ [\n')
         # int() removes leading 0 for json
         if date.year:
-            args.outfd.write(f"        {int(date.year)},\n")
+            date_buffer.append(f"        {int(date.year)},\n")
         if date.month:
-            args.outfd.write(f"        {int(date.month)},\n")
+            date_buffer.append(f"        {int(date.month)},\n")
         if date.day:
-            args.outfd.write(f"        {int(date.day)},\n")
-        args.outfd.write("      ] ] },\n")
+            date_buffer.append(f"        {int(date.day)},\n")
+        date_buffer.append("      ] ] },\n")
+        debug(f"{date_buffer=}")
+        return date_buffer
 
     def csl_protect_case(title):
         """Preserve/bracket proper names/nouns
@@ -1199,16 +1203,19 @@ def emit_json_csl(entries):
         )
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
-    args.outfd.write("[\n")  # start of json file
+    ## start of json file
+    args.outfd.write("[\n")
 
     for key, entry in sorted(entries.items()):
+        # debug(f"{key=}")
+        file_buffer = []
         entry_type, genre, medium = guess_csl_type(entry)
-        args.outfd.write(f'  {{ "id": "{entry["identifier"]}",\n')
-        args.outfd.write(f'    "type": "{entry_type}",\n')
+        file_buffer.append(f'  {{ "id": "{entry["identifier"]}",\n')
+        file_buffer.append(f'    "type": "{entry_type}",\n')
         if genre:
-            args.outfd.write(f'    "genre": "{genre}",\n')
+            file_buffer.append(f'    "genre": "{genre}",\n')
         if medium:
-            args.outfd.write(f'    "medium": "{medium}",\n')
+            file_buffer.append(f'    "medium": "{medium}",\n')
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
@@ -1229,30 +1236,33 @@ def emit_json_csl(entries):
                 # special format fields
                 if field == "title":
                     title = csl_protect_case(escape_csl((value)))
-                    args.outfd.write(f'    "title": {title},\n')
+                    file_buffer.append(f'    "title": {title},\n')
                     continue
                 if field in ("author", "editor", "translator"):
-                    args.outfd.write(f'    "{field}": [\n')
+                    file_buffer.append(f'    "{field}": [\n')
                     for person in value:
-                        emit_csl_person(person)
-                    args.outfd.write("      ],\n")
+                        # debug(f"{person=} in {value=}")
+                        # debug(f"{file_buffer=}")
+                        file_buffer.extend(emit_csl_person(person))
+                    file_buffer.append("      ],\n")
+                    # debug(f"done people")
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # debug(f'field = {field}')
+                    # debug(f"field = {field}")
                     if value == "0000":
                         continue
                     if field == "date":
                         # debug(f"value = '{value}'")
                         season = entry["issue"] if "issue" in entry else None
-                        args.outfd.write('    "issued":\n')
-                        emit_csl_date(value, season)
+                        file_buffer.append('    "issued":\n')
+                        file_buffer.extend(emit_csl_date(value, season))
                     if field == "origdate":
                         # debug(f"value = '{value}'")
-                        args.outfd.write('    "original-date":\n')
-                        emit_csl_date(value)
+                        file_buffer.append('    "original-date":\n')
+                        file_buffer.extend(emit_csl_date(value))
                     if field == "urldate":
-                        args.outfd.write('    "accessed":\n')
-                        emit_csl_date(value)
+                        file_buffer.append('    "accessed":\n')
+                        file_buffer.extend(emit_csl_date(value))
                     continue
 
                 if field == "urldate" and "url" not in entry:
@@ -1272,21 +1282,21 @@ def emit_json_csl(entries):
                             # debug("  skipping url, paginated item")
                             continue
                     # debug(f"  writing url WITHOUT escape_csl")
-                    args.outfd.write(f'    "URL": "{value}",\n')
+                    file_buffer.append(f'    "URL": "{value}",\n')
                     continue
                 if (
                     field == "eventtitle"
                     and "container-title" not in entry
                     and "booktitle" not in entry
                 ):
-                    args.outfd.write(
+                    file_buffer.append(
                         f'    "container-title": "Proceedings of {value}",\n'
                     )
                     continue
                 # 'Blog' is the null value I use in the mindmap
                 if field == "c_blog" and entry[field] == "Blog":
                     # netloc = urllib.parse.urlparse(entry['url']).netloc
-                    # args.outfd.write(
+                    # file_buffer.append(
                     #     f'  container-title: "Personal"\n')
                     continue
 
@@ -1300,8 +1310,12 @@ def emit_json_csl(entries):
                     # debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # debug(f"bib2csl field TO   = {field}")
-                args.outfd.write(f'    "{field}": {escape_csl(value)},\n')
-        args.outfd.write("},\n")
+                file_buffer.append(f'    "{field}": {escape_csl(value)},\n')
+        file_buffer.append("},\n")
+        file_buffer = "".join(file_buffer)
+        COMMA_CLEAN_PAT = re.compile(r""",(?=\s*[}\]])""")
+        file_buffer = COMMA_CLEAN_PAT.sub("", file_buffer)
+        args.outfd.write(file_buffer)
     args.outfd.write("]\n")
 
 

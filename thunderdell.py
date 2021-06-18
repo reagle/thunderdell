@@ -1116,14 +1116,6 @@ def emit_json_csl(entries):
         https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html
 
     """
-    # OPTION 1: simply load YAML and output JSON
-    #   - takes 17s
-    #   - pandoc chokes on json, doesn't say line number
-    # with open("readings.yaml", 'r') as yaml_in, open("readings.json", "w") as json_out:
-    # yaml_object = yaml.safe_load(yaml_in)
-    # json.dump(yaml_object["references"], json_out)
-
-    # OPTION 2: create custom writer below
 
     def escape_csl(s):
         if s:  # faster to just quote than testing for tokens
@@ -1136,7 +1128,7 @@ def emit_json_csl(entries):
         else:
             return s
 
-    def emit_csl_person(person):
+    def do_csl_person(person):
         """csl writer for authors and editors"""
 
         # biblatex ('First Middle', 'von', 'Last', 'Jr.')
@@ -1145,41 +1137,42 @@ def emit_json_csl(entries):
         # debug("person = '%s'" % (' '.join(person)))
         given, particle, family, suffix = person
         person_buffer = []
-        person_buffer.append("        {\n")
-        person_buffer.append(f'      "family": {escape_csl(family)},\n')
+        person_buffer.append("        { ")
+        person_buffer.append(f'"family": {escape_csl(family)}, ')
         if given:
-            person_buffer.append(f'      "given": {escape_csl(given)},\n')
+            person_buffer.append(f'"given": {escape_csl(given)}, ')
             # person_buffer.append('    given:\n')
             # for given_part in given.split(' '):
             #     person_buffer.append('    - %s\n' % escape_csl(given_part))
         if suffix:
-            person_buffer.append(f'      "suffix": {escape_csl(suffix)},\n')
+            person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
         if particle:
             person_buffer.append(
-                f'      "non-dropping-particle": {escape_csl(particle)},\n'
+                f'"non-dropping-particle": {escape_csl(particle)}, '
             )
-        person_buffer.append("        },\n")
+        person_buffer.append("},\n")
         return person_buffer
 
-    def emit_csl_date(date, season=None):
+    def do_csl_date(date, season=None):
         """csl writer for dates"""
 
         date_buffer = []
-        date_buffer.append("      {\n")
-        if date.circa:
-            date_buffer.append(f'      "circa": true,\n')
-        if season:
-            date_buffer.append(f'      "season": "{season}",\n')
-
-        date_buffer.append('      "date-parts": [ [\n')
+        date_buffer.append("{")
+        date_buffer.append('"date-parts": [ [ ')
         # int() removes leading 0 for json
         if date.year:
-            date_buffer.append(f"        {int(date.year)},\n")
+            date_buffer.append(f"{int(date.year)}, ")
         if date.month:
-            date_buffer.append(f"        {int(date.month)},\n")
+            date_buffer.append(f"{int(date.month)}, ")
         if date.day:
-            date_buffer.append(f"        {int(date.day)},\n")
-        date_buffer.append("      ] ] },\n")
+            date_buffer.append(f"{int(date.day)}, ")
+        date_buffer.append("] ],\n")
+        if date.circa:
+            date_buffer.append(f'        "circa": true,\n')
+        if season:
+            date_buffer.append(f'        "season": "{season}",\n')
+        date_buffer.append("    },\n")
+
         debug(f"{date_buffer=}")
         return date_buffer
 
@@ -1203,12 +1196,10 @@ def emit_json_csl(entries):
         )
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
-    ## start of json file
-    args.outfd.write("[\n")
-
+    ## start of json buffer, to be written out after comma cleanup
+    file_buffer = ["[\n"]
     for key, entry in sorted(entries.items()):
         # debug(f"{key=}")
-        file_buffer = []
         entry_type, genre, medium = guess_csl_type(entry)
         file_buffer.append(f'  {{ "id": "{entry["identifier"]}",\n')
         file_buffer.append(f'    "type": "{entry_type}",\n')
@@ -1243,7 +1234,7 @@ def emit_json_csl(entries):
                     for person in value:
                         # debug(f"{person=} in {value=}")
                         # debug(f"{file_buffer=}")
-                        file_buffer.extend(emit_csl_person(person))
+                        file_buffer.extend(do_csl_person(person))
                     file_buffer.append("      ],\n")
                     # debug(f"done people")
                     continue
@@ -1254,15 +1245,15 @@ def emit_json_csl(entries):
                     if field == "date":
                         # debug(f"value = '{value}'")
                         season = entry["issue"] if "issue" in entry else None
-                        file_buffer.append('    "issued":\n')
-                        file_buffer.extend(emit_csl_date(value, season))
+                        file_buffer.append('    "issued": ')
+                        file_buffer.extend(do_csl_date(value, season))
                     if field == "origdate":
                         # debug(f"value = '{value}'")
-                        file_buffer.append('    "original-date":\n')
-                        file_buffer.extend(emit_csl_date(value))
+                        file_buffer.append('    "original-date": ')
+                        file_buffer.extend(do_csl_date(value))
                     if field == "urldate":
-                        file_buffer.append('    "accessed":\n')
-                        file_buffer.extend(emit_csl_date(value))
+                        file_buffer.append('    "accessed": ')
+                        file_buffer.extend(do_csl_date(value))
                     continue
 
                 if field == "urldate" and "url" not in entry:
@@ -1311,12 +1302,12 @@ def emit_json_csl(entries):
                     field = BIBLATEX_CSL_FIELD_MAP[field]
                     # debug(f"bib2csl field TO   = {field}")
                 file_buffer.append(f'    "{field}": {escape_csl(value)},\n')
-        file_buffer.append("},\n")
-        file_buffer = "".join(file_buffer)
-        COMMA_CLEAN_PAT = re.compile(r""",(?=\s*[}\]])""")
-        file_buffer = COMMA_CLEAN_PAT.sub("", file_buffer)
-        args.outfd.write(file_buffer)
-    args.outfd.write("]\n")
+        file_buffer.append("  },\n")
+
+    file_buffer = "".join(file_buffer) + "]\n"
+    # remove trailing commas with a regex
+    file_buffer = re.sub(r""",(?=\s*[}\]])""", "", file_buffer)
+    args.outfd.write(file_buffer)
 
 
 def emit_wp_citation(entries):

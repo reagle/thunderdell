@@ -971,7 +971,6 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
-        # TODO: allow BCE and circa dates, e.g., '-0348~'
 
         if date.year:
             args.outfd.write(f"    year: {date.year}\n")
@@ -1044,7 +1043,6 @@ def emit_yaml_csl(entries):
                     emit_yaml_people(value)
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # TODO: allow BCE and circa dates, e.g., '-0348~'
                     # debug(f'field = {field}')
                     if value == "0000":
                         continue
@@ -1079,7 +1077,7 @@ def emit_yaml_csl(entries):
                             # debug("  skipping url, paginated item")
                             continue
                     # debug(f"  writing url WITHOUT escape_yaml")
-                    args.outfd.write(f"""  URL: "{value}"\n""")
+                    args.outfd.write(f'  URL: "{value}"\n')
                     continue
                 if (
                     field == "eventtitle"
@@ -1109,6 +1107,198 @@ def emit_yaml_csl(entries):
                     # debug(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {escape_yaml(value)}\n")
     args.outfd.write("...\n")
+
+
+def emit_json_csl(entries):
+    """Emit citations in CSL/JSON for input to pandoc
+
+    See: https://reagle.org/joseph/2013/08/bib-mapping.html
+        https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html
+
+    """
+    # OPTION 1: simply load YAML and output JSON
+    #   - takes 17s
+    #   - pandoc chokes on json, doesn't say line number
+    # with open("readings.yaml", 'r') as yaml_in, open("readings.json", "w") as json_out:
+    # yaml_object = yaml.safe_load(yaml_in)
+    # json.dump(yaml_object["references"], json_out)
+
+    # OPTION 2: create custom writer below
+    # TODO: remove trailing commas: ",(\s+[}\]])"
+
+    def escape_csl(s):
+        if s:  # faster to just quote than testing for tokens
+            s = s.replace('"', r"'")
+            # s = s.replace("#", r"\#") # this was introducing slashes in URLs
+            s = s.replace("@", r"\\@")  # single slash caused bugs in past
+            s = f'"{s}"'
+        return s
+
+    def emit_csl_people(people):
+        """csl writer for authors and editors"""
+
+        for person in people:
+            # biblatex ('First Middle', 'von', 'Last', 'Jr.')
+            # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
+            #      'dropping-particle')
+            # debug("person = '%s'" % (' '.join(person)))
+            given, particle, family, suffix = person
+            args.outfd.write("      [ {\n")
+            args.outfd.write(f'      "family": {escape_csl(family)},\n')
+            if given:
+                args.outfd.write(f'      "given": {escape_csl(given)},\n')
+                # args.outfd.write('    given:\n')
+                # for given_part in given.split(' '):
+                #     args.outfd.write('    - %s\n' % escape_csl(given_part))
+            if suffix:
+                args.outfd.write(f'      "suffix": {escape_csl(suffix)},\n')
+            if particle:
+                args.outfd.write(
+                    f'      "non-dropping-particle": {escape_csl(particle)},\n'
+                )
+            args.outfd.write("      } ],\n")
+
+    def emit_csl_date(date, season=None):
+        """csl writer for dates"""
+
+        args.outfd.write("      {\n")
+        if date.circa:
+            args.outfd.write(f'      "circa": true,\n')
+        if season:
+            args.outfd.write(f'      "season": "{season}",\n')
+
+        args.outfd.write('      "date-parts": [ [\n')
+        # int() removes leading 0 for json
+        if date.year:
+            args.outfd.write(f"        {int(date.year)},\n")
+        if date.month:
+            args.outfd.write(f"        {int(date.month)},\n")
+        if date.day:
+            args.outfd.write(f"        {int(date.day)},\n")
+        args.outfd.write("      ] ] },\n")
+
+    def csl_protect_case(title):
+        """Preserve/bracket proper names/nouns
+        https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+        >>> csl_protect_case("The iKettle – a world off its rocker")
+        "The <span class='nocase'>iKettle</span> – a world off its rocker"
+        """
+        PROTECT_PAT = re.compile(
+            r"""
+            \b # empty string at beginning or end of word
+            (
+            [a-z]+ # one or more lower case
+            [A-Z\./] # capital, period, or forward slash
+            \S+ # one or more non-whitespace
+            )
+            \b # empty string at beginning or end of word
+            """,
+            re.VERBOSE,
+        )
+        return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
+
+    args.outfd.write("[\n")  # start of json file
+
+    for key, entry in sorted(entries.items()):
+        entry_type, genre, medium = guess_csl_type(entry)
+        args.outfd.write(f'  {{ "id": "{entry["identifier"]}",\n')
+        args.outfd.write(f'    "type": "{entry_type}",\n')
+        if genre:
+            args.outfd.write(f'    "genre": "{genre}",\n')
+        if medium:
+            args.outfd.write(f'    "medium": "{medium}",\n')
+
+        # if authorless (replicated in container) then delete
+        container_values = [entry[c] for c in CONTAINERS if c in entry]
+        if entry["ori_author"] in container_values:
+            if not args.author_create:
+                del entry["author"]
+            else:
+                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
+
+        for short, field in BIB_SHORTCUTS_ITEMS:
+            if field in entry and entry[field] is not None:
+                value = entry[field]
+                # debug(f"short, field = '{short} , {field}'")
+                # skipped fields
+                if field in ("identifier", "entry_type", "issue"):
+                    continue
+
+                # special format fields
+                if field == "title":
+                    title = csl_protect_case(escape_csl((value)))
+                    args.outfd.write(f'    "title": {title},\n')
+                    continue
+                if field in ("author", "editor", "translator"):
+                    args.outfd.write(f'    "{field}":\n')
+                    emit_csl_people(value)
+                    continue
+                if field in ("date", "origdate", "urldate"):
+                    # debug(f'field = {field}')
+                    if value == "0000":
+                        continue
+                    if field == "date":
+                        # debug(f"value = '{value}'")
+                        season = entry["issue"] if "issue" in entry else None
+                        args.outfd.write('    "issued":\n')
+                        emit_csl_date(value, season)
+                    if field == "origdate":
+                        # debug(f"value = '{value}'")
+                        args.outfd.write('    "original-date":\n')
+                        emit_csl_date(value)
+                    if field == "urldate":
+                        args.outfd.write('    "accessed":\n')
+                        emit_csl_date(value)
+                    continue
+
+                if field == "urldate" and "url" not in entry:
+                    continue  # no url, no 'read on'
+                if field == "url":
+                    # debug(f"url = {value}")
+                    if any(ban for ban in EXCLUDE_URLS if ban in value):
+                        # debug("banned")
+                        continue
+                    # skip articles+URL w/ no pagination & other offline types
+                    if args.urls_online_only:
+                        # debug("urls_online_only TRUE")
+                        if entry_type in {"post", "post-weblog", "webpage"}:
+                            # debug(f"  not skipping online types")
+                            pass
+                        elif "pages" in entry:
+                            # debug("  skipping url, paginated item")
+                            continue
+                    # debug(f"  writing url WITHOUT escape_csl")
+                    args.outfd.write(f'    "URL": "{value}",\n')
+                    continue
+                if (
+                    field == "eventtitle"
+                    and "container-title" not in entry
+                    and "booktitle" not in entry
+                ):
+                    args.outfd.write(
+                        f'    "container-title": "Proceedings of {value}",\n'
+                    )
+                    continue
+                # 'Blog' is the null value I use in the mindmap
+                if field == "c_blog" and entry[field] == "Blog":
+                    # netloc = urllib.parse.urlparse(entry['url']).netloc
+                    # args.outfd.write(
+                    #     f'  container-title: "Personal"\n')
+                    continue
+
+                # debug(f"{field=}")
+                if field in CONTAINERS:
+                    # debug(f"in CONTAINERS")
+                    field = "container-title"
+                    value = csl_protect_case(value)
+                    # debug(f"{value=}")
+                if field in BIBLATEX_CSL_FIELD_MAP:
+                    # debug(f"bib2csl field FROM =  {field}")
+                    field = BIBLATEX_CSL_FIELD_MAP[field]
+                    # debug(f"bib2csl field TO   = {field}")
+                args.outfd.write(f'    "{field}": {escape_csl(value)},\n')
+        args.outfd.write("},\n")
+    args.outfd.write("]\n")
 
 
 def emit_wp_citation(entries):
@@ -1828,6 +2018,13 @@ if __name__ == "__main__":
         help="show biblatex shortcuts, fields, and types used by fe",
     )
     arg_parser.add_argument(
+        "-j",
+        "--JSON-CSL",
+        default=False,
+        action="store_true",
+        help="emit JSON/CSL for use with pandoc",
+    )
+    arg_parser.add_argument(
         "-l",
         "--long-url",
         action="store_true",
@@ -1934,6 +2131,8 @@ if __name__ == "__main__":
         output = emit_wp_citation
     elif args.biblatex:
         output = emit_biblatex
+    elif args.JSON_CSL:
+        output = emit_json_csl
     else:
         args.YAML_CSL = True
         output = emit_yaml_csl
@@ -1943,6 +2142,8 @@ if __name__ == "__main__":
     if args.output_to_file:
         if args.YAML_CSL:
             extension = ".yaml"
+        elif args.JSON_CSL:
+            extension = ".json"
         elif args.biblatex:
             extension = ".bib"
         elif args.WP_citation:

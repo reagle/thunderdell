@@ -971,7 +971,6 @@ def emit_yaml_csl(entries):
 
     def emit_yaml_date(date, season=None):
         """yaml writer for dates"""
-        # TODO: allow BCE and circa dates, e.g., '-0348~'
 
         if date.year:
             args.outfd.write(f"    year: {date.year}\n")
@@ -1044,7 +1043,6 @@ def emit_yaml_csl(entries):
                     emit_yaml_people(value)
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # TODO: allow BCE and circa dates, e.g., '-0348~'
                     # debug(f'field = {field}')
                     if value == "0000":
                         continue

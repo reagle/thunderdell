@@ -1124,7 +1124,7 @@ def emit_json_csl(entries):
     # json.dump(yaml_object["references"], json_out)
 
     # OPTION 2: create custom writer below
-    # TODO: remove trailing commas: ",(\s+[}\]])"
+    # TODO: remove trailing commas with `jsoncomma` or ",(\s+[}\]])"
 
     def escape_csl(s):
         if s:  # faster to just quote than testing for tokens
@@ -1132,31 +1132,33 @@ def emit_json_csl(entries):
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             s = s.replace("@", r"\\@")  # single slash caused bugs in past
             s = f'"{s}"'
-        return s
+        if s.isdigit():
+            return int(s)
+        else:
+            return s
 
-    def emit_csl_people(people):
+    def emit_csl_person(person):
         """csl writer for authors and editors"""
 
-        for person in people:
-            # biblatex ('First Middle', 'von', 'Last', 'Jr.')
-            # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
-            #      'dropping-particle')
-            # debug("person = '%s'" % (' '.join(person)))
-            given, particle, family, suffix = person
-            args.outfd.write("      [ {\n")
-            args.outfd.write(f'      "family": {escape_csl(family)},\n')
-            if given:
-                args.outfd.write(f'      "given": {escape_csl(given)},\n')
-                # args.outfd.write('    given:\n')
-                # for given_part in given.split(' '):
-                #     args.outfd.write('    - %s\n' % escape_csl(given_part))
-            if suffix:
-                args.outfd.write(f'      "suffix": {escape_csl(suffix)},\n')
-            if particle:
-                args.outfd.write(
-                    f'      "non-dropping-particle": {escape_csl(particle)},\n'
-                )
-            args.outfd.write("      } ],\n")
+        # biblatex ('First Middle', 'von', 'Last', 'Jr.')
+        # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
+        #      'dropping-particle')
+        # debug("person = '%s'" % (' '.join(person)))
+        given, particle, family, suffix = person
+        args.outfd.write("        {\n")
+        args.outfd.write(f'      "family": {escape_csl(family)},\n')
+        if given:
+            args.outfd.write(f'      "given": {escape_csl(given)},\n')
+            # args.outfd.write('    given:\n')
+            # for given_part in given.split(' '):
+            #     args.outfd.write('    - %s\n' % escape_csl(given_part))
+        if suffix:
+            args.outfd.write(f'      "suffix": {escape_csl(suffix)},\n')
+        if particle:
+            args.outfd.write(
+                f'      "non-dropping-particle": {escape_csl(particle)},\n'
+            )
+        args.outfd.write("        },\n")
 
     def emit_csl_date(date, season=None):
         """csl writer for dates"""
@@ -1230,8 +1232,10 @@ def emit_json_csl(entries):
                     args.outfd.write(f'    "title": {title},\n')
                     continue
                 if field in ("author", "editor", "translator"):
-                    args.outfd.write(f'    "{field}":\n')
-                    emit_csl_people(value)
+                    args.outfd.write(f'    "{field}": [\n')
+                    for person in value:
+                        emit_csl_person(person)
+                    args.outfd.write("      ],\n")
                     continue
                 if field in ("date", "origdate", "urldate"):
                     # debug(f'field = {field}')

@@ -7,7 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 """ Return CrossRef bibliographic data for a given a DOI.
-    See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
+    See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html # noqa: E501
 """
 
 import json

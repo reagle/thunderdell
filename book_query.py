@@ -76,7 +76,9 @@ def open_query(isbn):
                 elif key == "publish_places":
                     json_bib["address"] = json_details[key][0]
                 elif key == "publish_date":
-                    json_bib["date"] = parse(json_details[key]).strftime("%Y%m%d")
+                    json_bib["date"] = parse(json_details[key]).strftime(
+                        "%Y%m%d"
+                    )
                 elif type(value) == str:
                     json_bib[key] = value.strip()
                     info("  value = '%s'" % json_bib[key])

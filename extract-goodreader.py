@@ -67,7 +67,7 @@ def process_text(text):
     RE_PAGE_NUM = re.compile(
         r"""---[ ]Page[ ]
         (?:p\. )?
-        \[? 
+        \[?
         (\d+|[A-Z]+)  # digit or (rare) capital letter. TODO: roman numerals
         \]?[ ]---""",
         re.VERBOSE,
@@ -266,9 +266,9 @@ In my own view, there is an urgentneed for a sudden surge of
 
 understanding, positive thinking andaltruistic attitudes.
 
-"""
+"""  # noqa: E501
 
-TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\nsection. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""
+TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\nsection. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])

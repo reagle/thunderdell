@@ -1633,7 +1633,7 @@ def parse_names(names):
     >>> parse_names('First van der Last, First van der Last II, van Last')
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
-    """
+    """  # noqa: E501
 
     names_p = []
     # debug(f"names = '{names}'")
@@ -1963,7 +1963,7 @@ def _test_results():
     diff ~/bin/td/tests/title-quotes.yaml /tmp/title-quotes.yaml', shell=True)
     0
 
-    """
+    """  # noqa: E501
 
 
 if __name__ == "__main__":

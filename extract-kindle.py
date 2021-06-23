@@ -16,10 +16,9 @@ from email import policy
 from email.parser import BytesParser
 from os.path import basename, splitext
 
-from bs4 import BeautifulSoup
-
 import busy  # https://github.com/reagle/thunderdell
 import change_case
+from bs4 import BeautifulSoup
 from extract_utils import get_bib_preamble, uncurly
 
 debug = logging.debug
@@ -55,7 +54,9 @@ def process_html(content):
         debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
+                color, page = (
+                    RE_COLOR_PAGE.search(str(div)).groupdict().values()
+                )
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
@@ -89,7 +90,7 @@ def main(argv):
         "--output-to-file",
         action="store_true",
         default=False,
-        help="output to FILE-fixed.EXT",
+        help="output to FILE-fixed.txt",
     )
     arg_parser.add_argument(
         "-L",
@@ -166,9 +167,9 @@ TEST_IN = """
 </div>
 
 </html>
-"""
+"""  # noqa: E501
 
-TEST_OUT = """author = Ron Chernow title = Alexander Hamilton date = 20050329 publisher = Penguin isbn = 9781101200858 url = https://books.google.com/books?isbn=9781101200858\n1 excerpt. PROLOGUE THE OLDEST REVOLUTIONARY WAR WIDOW\n4 excerpt. He and James Madison were the prime movers behind the summoning of the Constitutional Convention and the chief authors of that classic gloss on the national charter, The Federalist, which Hamilton supervised.\n88 excerpt. in the context of the Enlightenment, the British preoccupation with the ills of excess feeding were folded into the racial discourse. This helped to make overindulgence evidence of not only slow wit but also barbarism."""
+TEST_OUT = """author = Ron Chernow title = Alexander Hamilton date = 20050329 publisher = Penguin isbn = 9781101200858 url = https://books.google.com/books?isbn=9781101200858\n1 excerpt. PROLOGUE THE OLDEST REVOLUTIONARY WAR WIDOW\n4 excerpt. He and James Madison were the prime movers behind the summoning of the Constitutional Convention and the chief authors of that classic gloss on the national charter, The Federalist, which Hamilton supervised.\n88 excerpt. in the context of the Enlightenment, the British preoccupation with the ills of excess feeding were folded into the racial discourse. This helped to make overindulgence evidence of not only slow wit but also barbarism."""  # noqa: E501
 
 # TODO use '--' or some other method to indicate my thoughts (not
 #     paraphrase or quotes.
@@ -220,7 +221,12 @@ if __name__ == "__main__":
 
             fixed_fd.write(new_text)
             fixed_fd.close()
+            # open in editor
+            # show extract-dictate.py command
 
         else:
-            print("Do not recognize file type: {file_name} {splitext(file_name)[1]}.")
+            print(
+                "Do not recognize file type: {file_name}"
+                " {splitext(file_name)[1]}."
+            )
             sys.exit()

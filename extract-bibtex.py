@@ -11,8 +11,8 @@
 
 import logging
 import re
-import sys
-from os import chdir, environ, mkdir, rename
+
+# from os import chdir, environ, mkdir, rename
 from os.path import abspath, exists, expanduser, splitext
 
 HOME = expanduser("~")

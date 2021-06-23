@@ -25,8 +25,8 @@ import urllib.parse
 import webbrowser
 from collections import namedtuple
 from html import escape
-from subprocess import call  # needed for testing
-from typing import Dict, List, NamedTuple, Optional, Set, Tuple
+from subprocess import call  # noqa F401 needed for doctests
+from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
 
@@ -58,7 +58,7 @@ if not os.path.isdir(TMP_DIR):
 #################################################################
 # Constants, classes, and mappings
 #################################################################
-# yapf: disable
+# fmt: off
 
 Date = namedtuple('Date', ['year', 'month', 'day', 'circa', 'time'])
 
@@ -149,9 +149,9 @@ BIB_FIELDS = {field: short for (short, field) in BIB_SHORTCUTS.items()}
 CSL_FIELDS = {field: short for (short, field) in CSL_SHORTCUTS.items()}
 
 CONTAINERS = list(CSL_SHORTCUTS.values())
-# 2020-03-23 why append, 
+# 2020-03-23 why append,
 #   leads to duplicate "container-title" errors in YAML parsing
-# CONTAINERS.append('organization') 
+# CONTAINERS.append('organization')
 
 BIBLATEX_TYPES = {
     'article',
@@ -302,7 +302,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
-# yapf: enable
+# fmt: on
 #################################################################
 # Utility functions
 #################################################################
@@ -382,7 +382,7 @@ def identity_add_title(ident, title):
     'Wikipedia 2008npv'
 
     """
-    # dbg(f"title = '{title}'")
+    # debug(f"title = '{title}'")
     suffix = ""
     clean_title = (
         title.replace("Wikipedia:", "")
@@ -423,14 +423,14 @@ def identity_increment(ident, entries):
     """
 
     while ident in entries:  # if it still collides
-        # dbg(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
+        # debug(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
         if ident[-1].isdigit():
             suffix = int(ident[-1])
             suffix += 1
             ident = f"{ident[0:-1]}{suffix}"
         else:
             ident += "1"
-        # dbg(f'\t yielded    {ident}')
+        # debug(f'\t yielded    {ident}')
     return ident
 
 
@@ -476,7 +476,8 @@ def get_ident(entry, entries, delim=""):
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
         warning(
-            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
+            f"collision on {ident}: {entry['title']} &"
+            f" {entries[ident]['title']}"
         )
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
@@ -622,7 +623,7 @@ def create_biblatex_author(names):
     return full_names
 
 
-# yapf: disable
+# fmt: off
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -673,6 +674,7 @@ def guess_biblatex_type(entry):
         elif 'date' not in entry:           e_t = 'unpublished'
 
         return e_t
+
 
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
@@ -738,7 +740,7 @@ def guess_csl_type(entry):
         elif 'doi' in entry:                et = 'article'
         elif 'date' not in entry:           et = 'manuscript'
     return et, genre, medium
-# yapf: enable
+# fmt: on
 
 
 def bibformat_title(title):
@@ -751,7 +753,7 @@ def bibformat_title(title):
     >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
     "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
-    """
+    """  # noqa: E501
     cased_title = quoted_title = []
 
     WORDS2PROTECT = {"vs.", "oldid"}
@@ -828,7 +830,7 @@ ONLINE_JOURNALS = [
 
 def emit_biblatex(entries):
     """Emit a biblatex file"""
-    # dbg(f"entries = '{entries}'")
+    # debug(f"entries = '{entries}'")
 
     for key, entry in sorted(entries.items()):
         entry_type = guess_biblatex_type(entry)
@@ -1196,7 +1198,7 @@ def emit_json_csl(entries):
         )
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
-    ## start of json buffer, to be written out after comma cleanup
+    # # start of json buffer, to be written out after comma cleanup
     file_buffer = ["[\n"]
     for key, entry in sorted(entries.items()):
         # debug(f"{key=}")
@@ -1482,9 +1484,9 @@ def emit_results(entries, query, results_file):
         token = token.replace("<strong>", "").replace("</strong>", "")
         # urllib won't accept unicode
         token = urllib.parse.quote(token.encode("utf-8"))
-        # dbg(f"token = '{token}' type = '{type(token)}'")
+        # debug(f"token = '{token}' type = '{type(token)}'")
         url_query = escape("search.cgi?query=%s") % token
-        # dbg(f"url_query = '{url_query}' type = '{type(url_query)}'")
+        # debug(f"url_query = '{url_query}' type = '{type(url_query)}'")
         return url_query
 
     def get_url_MM(file_name):
@@ -1679,7 +1681,7 @@ def commit_entry(entry, entries):
         # pull the citation, create an identifier, and enter in entries
         try:
             pull_citation(entry)  # break the citation up
-        except:
+        except Exception:
             print(
                 f"pull_citation error on {entry['author']}: "
                 f"{entry['_mm_file']}"
@@ -1826,18 +1828,18 @@ def build_bib(file_name, output):
     mm_files = [
         file_name,
     ]  # list of file encountered (e.g., chase option)
-    # dbg(f"   mm_files = {mm_files}")
+    # debug(f"   mm_files = {mm_files}")
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
-        # dbg(f"   parsing {mm_file}")
+        # debug(f"   parsing {mm_file}")
         try:
             doc = parse(mm_file).getroot()
         except IOError as err:
-            # dbg(f"    failed to parse {mm_file} because of {err}")
+            debug(f"    failed to parse {mm_file} because of {err}")
             continue
-        # dbg(f"    successfully parsed {mm_file}")
+        # debug(f"    successfully parsed {mm_file}")
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
-        # dbg("    done.appending %s" % os.path.abspath(mm_file))
+        # debug("    done.appending %s" % os.path.abspath(mm_file))
         done.append(mm_file)
         if args.chase:
             for link in links:
@@ -1846,7 +1848,7 @@ def build_bib(file_name, output):
                     if not any(
                         [word in link for word in ("syllabus", "readings")]
                     ):  # 'old'
-                        # dbg(f"    mm_files.appending {link}")
+                        # debug(f"    mm_files.appending {link}")
                         mm_files.append(link)
 
     if args.query:

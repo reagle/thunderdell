@@ -90,11 +90,12 @@ def query_sponge(query):
             <form method="get"
                   action="https://reagle.org/joseph/plan/cgi-bin/search.cgi">
             <a href="../2005/06/search.html">Searching</a> :
-            <input value="Go" name="Go" type="submit" /> <input size="25" name="query"
-            maxlength="80" type="text" /> <input name="sitesearch" value="BusySponge"
-            type="radio" /> BS <input name="sitesearch" checked="checked"
-                 value="MindMap"
-            type="radio" /> MM</form>
+            <input value="Go" name="Go" type="submit" />
+              <input size="25" name="query" maxlength="80" type="text" />
+              <input name="sitesearch" value="BusySponge"type="radio" /> BS
+              <input name="sitesearch" checked="checked"value="MindMap"
+               type="radio" /> MM
+            </form>
         </div>%s</body></html>"""
         % out_str
     )

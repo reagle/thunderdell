@@ -31,7 +31,7 @@ from collections import namedtuple
 from datetime import datetime
 from io import StringIO
 from subprocess import Popen, call
-from xml.etree.ElementTree import Element, ElementTree, SubElement, parse
+from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
 import thunderdell as td
 from change_case import sentence_case, title_case
@@ -1516,21 +1516,6 @@ def do_console_annotation(biblio):
             {},
         )
 
-    def print_console_msg():
-        print(
-            """\tHELP: Enter annotations, excerpt is default\n"""
-            """\t '. ' begins summary \n"""
-            """\t '> ' begins excerpt (as does a character) \n"""
-            """\t ', ' begins paraphrase \n"""
-            """\t '-- ' begins note \n"""
-            """\t 'key=value' for metadata; e.g., \n"""
-            """\t\t\tau=John Smith ti=Greatet Book Ever d=2001 et=cb\n"""
-            """\t\tEntry types (et) values must be typed as shortcut:"""
-        )
-        for key, value in list(td.CSL_SHORTCUTS.items()):
-            print(f"\t\t\t{key} = {value}")
-        print("""\n\tEnd with CTRL-D.\n""")
-
     def edit_annotation(initial_text, resume_edit=False):
         """Write initial bib info to a tmp file, edit and return"""
 
@@ -1570,8 +1555,6 @@ def do_console_annotation(biblio):
             if line == "-p":
                 do_publish = True
                 warning(f"{do_publish=}")
-            elif line == "?":
-                print_console_msg()
             elif line.startswith("s."):
                 biblio["comment"] = line[2:].strip()
                 info(f"{biblio['comment']=}")
@@ -1662,6 +1645,7 @@ def do_console_annotation(biblio):
 def shrink_tweet(comment, title, url, tags):
     """Shrink tweet to fit into limit"""
 
+    info(f"{comment=}")
     # TWEET_LIMIT = 280 - 6 # API throws an error for unknown reason
     TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
     SHORTENER_LEN = 23  # twitter uses t.co
@@ -1763,7 +1747,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
             )
         else:
             tweet = shrink_tweet(comment, title, url, tags)
-            twitter.update_status(status=tweet)
+            # twitter.update_status(status=tweet)
     except TwythonError as e:
         print(e)
     finally:
@@ -1772,14 +1756,22 @@ def yasn_publish(comment, title, subtitle, url, tags):
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":
-    DESCRIPTION = """
+
+    DESCRIPTION = f"""
+    blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
+    blog goatee:   b g URL|DOI TITLE. BODY
+    mindmap:       b m TAGS URL|DOI ABSTRACT
     nifty:         b n TAGS URL|DOI COMMENT
     work plan:     b j TAGS URL|DOI COMMENT
-    mindmap:       b m TAGS URL|DOI ABSTRACT
     console:       b c TAGS URL|DOI COMMENT
-    blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
-    blog goatee:   b g URL|DOI TITLE. BODY"""
-
+      's. ' begins summary
+      '> '  begins excerpt (as does a character)
+      ', '  begins paraphrase
+      '-- ' begins note
+      'key=value' for metadata; e.g.,
+        au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
+        Entry types (et=cb) values must be typed as container shortcut.
+"""
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
@@ -1794,11 +1786,18 @@ if __name__ == "__main__":
         help="run doc tests",
     )
     arg_parser.add_argument(
+        "-C",
+        "--container-shortcuts",
+        action="store_true",
+        default=False,
+        help="show container shortcuts (cb, cw, cf, ...)",
+    )
+    arg_parser.add_argument(
         "-K",
         "--keyword-shortcuts",
         action="store_true",
         default=False,
-        help="show keyword shortcuts",
+        help="show keyword shortcuts  (adv, fem, wp, ...)",
     )
     arg_parser.add_argument(
         "-p",
@@ -1858,6 +1857,9 @@ if __name__ == "__main__":
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
             td.pretty_tabulate_dict(dictionary, 3)
+        sys.exit()
+    if args.container_shortcuts:
+        td.pretty_tabulate_dict(td.CSL_SHORTCUTS, 3)
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))

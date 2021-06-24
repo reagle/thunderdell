@@ -1625,7 +1625,7 @@ def do_console_annotation(biblio):
         warning("appending -p to text")
         initial_text.append("-p")
     if "comment" in biblio and biblio["comment"].strip():
-        initial_text.append(". " + biblio["comment"])
+        initial_text.append("s. " + biblio["comment"])
     initial_text = "\n".join(initial_text) + "\n"
     edited_text = edit_annotation(initial_text)
     try:

@@ -18,6 +18,7 @@ import sys
 import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
+from busy import yasn_publish
 from thunderdell import BIB_FIELDS  # dict of field to its shortcut
 from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
 
@@ -92,11 +93,10 @@ def get_date():
 
 
 def build_mm_from_txt(
-    line, started, in_part, in_chapter, in_section, in_subsection
+    line, started, in_part, in_chapter, in_section, in_subsection, entry
 ):
 
     author = title = citation = ""
-    entry = {}
 
     if line not in ("", "\r", "\n"):
         if line.lower().startswith("author ="):
@@ -124,7 +124,12 @@ def build_mm_from_txt(
             # unpacked with '*' and rezipped
             cite_pairs = list(zip(*[iter(cites)] * 2))
             for token, value in cite_pairs:
-                entry[token.lower()] = value.strip()
+                info(f"{token=}, {value=}")
+                if token == "keyword":
+                    info(f"{entry=}")
+                    entry.setdefault("keyword", []).append(value.strip())
+                else:
+                    entry[token.lower()] = value.strip()
 
             if "author" not in entry:
                 entry["author"] = "Unknown"
@@ -138,32 +143,30 @@ def build_mm_from_txt(
                 """<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
                 % ("author", clean(entry["author"].title()))
             )
-            if "url" in entry:
+            if "url" in entry:  # write title with hyperlink
                 file_out.write(
                     """  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
                     % ("title", clean(entry["url"]), clean(entry["title"]))
                 )
             else:
-                file_out.write(
+                file_out.write(  # write plain title
                     """  <node STYLE_REF="%s" TEXT="%s">\n"""
                     % ("title", clean(entry["title"]))
                 )
 
             for token, value in sorted(entry.items()):
-                if token not in ("author", "title", "url"):
+                if token not in ("author", "title", "url", "keyword"):
                     if token in BIB_SHORTCUTS:
                         t, v = token.lower(), value
                     else:
                         if token.lower() in BIB_FIELDS:
                             t, v = BIB_FIELDS[token.lower()], value
                         else:
-                            print(
-                                "* Unknown token '%s' in %s"
-                                % (token, entry["author"])
-                            )
-                            sys.exit()
-                    citation_add = "%s=%s " % (t, v)
-                    citation = citation + citation_add
+                            raise Exception(f"{token=} not in BIB_FIELDS")
+                    citation_add = f"{t}={v}"
+                    citation += citation_add
+                if token == "keyword":
+                    citation += "kw=" + " kw=".join(value)
             if citation != "":
                 clean(citation)
             citation += " r=%s" % get_date()
@@ -174,9 +177,10 @@ def build_mm_from_txt(
 
         elif re.match(r"summary\.(.*)", line, re.I):
             matches = re.match(r"summary\.(.*)", line, re.I)
+            entry["summary"] = matches.groups()[0]
             file_out.write(
                 """  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % ("annotation", clean(matches.groups()[0]))
+                % ("annotation", clean(entry["summary"]))
             )
 
         elif re.match("part.*", line, re.I):
@@ -246,7 +250,6 @@ def build_mm_from_txt(
         else:
             node_color = "paraphrase"
             line_text = line
-            # print(line)
             line_no = ""
             line_split = line.split(" ")
             # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
@@ -255,7 +258,6 @@ def build_mm_from_txt(
             )
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
-                # print(matches.groups())
                 line_no = matches.group(1)
                 if matches.group(2):
                     line_no += matches.group(2)
@@ -276,13 +278,15 @@ def build_mm_from_txt(
                 % (node_color, clean(" ".join((line_no, line_text))))
             )
 
-    return started, in_part, in_chapter, in_section, in_subsection
+    return started, in_part, in_chapter, in_section, in_subsection, entry
 
 
 def create_mm(text, file_out):
 
     import traceback
 
+    entry = {}  # a bibliographic entry for yasn_publish
+    entry["keyword"] = []  # there might not be any
     started = False
     in_part = False
     in_chapter = False
@@ -301,10 +305,18 @@ def create_mm(text, file_out):
                 in_chapter,
                 in_section,
                 in_subsection,
+                entry,
             ) = build_mm_from_txt(
-                line, started, in_part, in_chapter, in_section, in_subsection
+                line,
+                started,
+                in_part,
+                in_chapter,
+                in_section,
+                in_subsection,
+                entry,
             )
-        except KeyError:
+        except KeyError as err:
+            print(err)
             print(
                 traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line
             )
@@ -321,6 +333,15 @@ def create_mm(text, file_out):
         file_out.write("""</node>""")  # close the last part
     file_out.write("""</node>\n</node>\n</node>\n""")  # close the last entry
     file_out.write("""</node>\n</map>\n""")  # close the document
+    info(f"{entry=}")
+    if args.publish:
+        yasn_publish(
+            entry["summary"],
+            entry["title"],
+            None,
+            entry["url"],
+            " ".join(entry["keyword"]),
+        )
 
 
 def main(argv):
@@ -329,12 +350,21 @@ def main(argv):
     arg_parser = argparse.ArgumentParser(
         description="""Convert dictated notes to mindmap in
             https://github.com/reagle/thunderdell
+
+        author must be first in citation pairs, e.g., "author = ...
         """
     )
 
     # positional arguments
     arg_parser.add_argument("file_names", nargs="*", metavar="FILE_NAMES")
     # optional arguments
+    arg_parser.add_argument(
+        "-p",
+        "--publish",
+        action="store_true",
+        default=False,
+        help="publish to social networks",
+    )
     arg_parser.add_argument(
         "-L",
         "--log-to-file",

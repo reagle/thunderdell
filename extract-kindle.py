@@ -221,8 +221,8 @@ if __name__ == "__main__":
 
             fixed_fd.write(new_text)
             fixed_fd.close()
-            # open in editor
-            # show extract-dictate.py command
+            subprocess.call(["open", fixed_fn])
+            # TODO: suggest an extract-dictate.py command on command line
 
         else:
             print(

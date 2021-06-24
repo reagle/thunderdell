@@ -1747,7 +1747,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
             )
         else:
             tweet = shrink_tweet(comment, title, url, tags)
-            # twitter.update_status(status=tweet)
+            twitter.update_status(status=tweet)
     except TwythonError as e:
         print(e)
     finally:

@@ -305,6 +305,8 @@ if __name__ == "__main__":
             fixed_fd = sys.stdout
         fixed_fd.write(new_text)
         fixed_fd.close()
+        subprocess.call(["open", fixed_fn])
+        # TODO: suggest an extract-dictate.py command on command line
 
     if args.test:
         TEST_RESULTS = process_text(TEST_IN)

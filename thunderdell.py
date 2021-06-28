@@ -1119,6 +1119,10 @@ def emit_json_csl(entries):
 
     """
 
+    # NOTE: csljson can NOT be including as md doc yaml metadata
+    # TODO: reduce redundancies with emit_yasn
+    # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>
+
     def escape_csl(s):
         if s:  # faster to just quote than testing for tokens
             s = s.replace('"', r"'")

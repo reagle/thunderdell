@@ -3,7 +3,7 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2017 by Joseph Reagle
+# (c) Copyright 2009-2021 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
@@ -33,13 +33,16 @@ from io import StringIO
 from subprocess import Popen, call
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
-import thunderdell as td
-from change_case import sentence_case, title_case
 from dateutil.parser import parse as dt_parse
 from lxml import etree as l_etree
 
+import biblio_fields as bf
+import thunderdell as td
+import utils_text
+from change_case import sentence_case, title_case
+
 # personal utilities
-from web_utils import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
+from utils_web import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
 
 # function aliases
 critical = logging.critical
@@ -743,7 +746,7 @@ class scrape_ENWP(scrape_default):
                 r"""(\d\d\d\d)</span>""",
                 versioned_HTML_u,
             ).groups()
-            month = td.MONTH2DIGIT[month[0:3].lower()]
+            month = bf.MONTH2DIGIT[month[0:3].lower()]
             return "%d%02d%02d" % (int(year), int(month), int(day))
         else:
             return time.strftime("%Y%m%d", NOW)
@@ -782,7 +785,7 @@ class scrape_WMMeta(scrape_default):
             r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
             cite_HTML_u,
         ).groups()
-        month = td.MONTH2DIGIT[month[0:3].lower()]
+        month = bf.MONTH2DIGIT[month[0:3].lower()]
         return "%d%02d%02d" % (int(year), int(month), int(day))
 
     def get_org(self):
@@ -1010,9 +1013,9 @@ def log2mm(biblio):
             del biblio[token]
     citation = ""
     for key, value in list(biblio.items()):
-        if key in td.BIB_FIELDS:
+        if key in bf.BIB_FIELDS:
             info(f"{key=} {value=}")
-            citation += f"{td.BIB_FIELDS[key]}={value} "
+            citation += f"{bf.BIB_FIELDS[key]}={value} "
     citation += f" r={date_read} "
     if biblio["tags"]:
         tags = biblio["tags"]
@@ -1564,15 +1567,15 @@ def do_console_annotation(biblio):
                 cite_pairs = list(zip(*[iter(cites)] * 2))
                 info(f"{cite_pairs=}")
                 for short, value in cite_pairs:
-                    info(f"{td.BIB_SHORTCUTS=}")
-                    info(f"{td.BIB_TYPES=}")
+                    info(f"{bf.BIB_SHORTCUTS=}")
+                    info(f"{bf.BIB_TYPES=}")
                     info(f"short,value = {short},{value}")
                     # if short == "t":  # 't=phdthesis'
-                    # biblio[td.BIB_SHORTCUTS[value]] = biblio["c_web"]
+                    # biblio[bf.BIB_SHORTCUTS[value]] = biblio["c_web"]
                     if short == "kw":  # 'kw=complicity
                         biblio["tags"] += " " + value.strip()
                     else:
-                        biblio[td.BIB_SHORTCUTS[short]] = value.strip()
+                        biblio[bf.BIB_SHORTCUTS[short]] = value.strip()
             else:
                 if from_Instapaper:
                     if line.startswith(">"):
@@ -1587,13 +1590,13 @@ def do_console_annotation(biblio):
         info(f"console_annotations = '{console_annotations}'")
         biblio["excerpt"] = biblio.get("excerpt", "") + console_annotations
 
-        # See if there is a container/td.CSL_SHORTCUTS redundant with 'c_web'
+        # See if there is a container/bf.CSL_SHORTCUTS redundant with 'c_web'
         if (
             "c_web" in biblio
             and len(
                 list(
                     biblio[c]
-                    for c in list(td.CSL_SHORTCUTS.values())
+                    for c in list(bf.CSL_SHORTCUTS.values())
                     if c in biblio
                 )
             )
@@ -1611,7 +1614,7 @@ def do_console_annotation(biblio):
     for key in biblio:
         if key.startswith("c_"):
             initial_text.append(
-                f"{td.CSL_FIELDS[key]}={title_case(biblio[key])}"
+                f"{bf.CSL_FIELDS[key]}={title_case(biblio[key])}"
             )
         if key == "tags" and biblio["tags"]:
             tags = " ".join(
@@ -1856,10 +1859,10 @@ if __name__ == "__main__":
         sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
-            td.pretty_tabulate_dict(dictionary, 3)
+            utils_text.pretty_tabulate_dict(dictionary, 3)
         sys.exit()
     if args.container_shortcuts:
-        td.pretty_tabulate_dict(td.CSL_SHORTCUTS, 3)
+        utils_text.pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))

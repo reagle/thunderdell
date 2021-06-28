@@ -302,6 +302,20 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 # url not original bibtex standard, but is common,
 # so I include it here and also include it in the note in emit_biblatex.
 
+EXCLUDE_URLS = [
+    "search?q=cache",
+    "proquest",
+    "books.google",
+    "amazon.com",
+    "data/1work/",
+]
+ONLINE_JOURNALS = [
+    "firstmonday.org",
+    "media-culture.org",
+    "salon.com",
+    "slate.com",
+]
+
 # fmt: on
 #################################################################
 # Utility functions
@@ -812,20 +826,6 @@ def bibformat_title(title):
 #################################################################
 # Emitters
 #################################################################
-
-EXCLUDE_URLS = [
-    "search?q=cache",
-    "proquest",
-    "books.google",
-    "amazon.com",
-    "data/1work/",
-]
-ONLINE_JOURNALS = [
-    "firstmonday.org",
-    "media-culture.org",
-    "salon.com",
-    "slate.com",
-]
 
 
 def emit_biblatex(entries):

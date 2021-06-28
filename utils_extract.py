@@ -7,11 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
-"""Utilities used in extract-*.py scripts."""
-
 import logging
-import re
-import sys
 
 import busy  # https://github.com/reagle/thunderdell
 
@@ -21,19 +17,6 @@ warning = logging.warning
 error = logging.error
 critical = logging.critical
 exception = logging.exception
-
-
-def uncurly(text):
-    """Replace curly quotes with straight, and dashes to markdown"""
-    text = (
-        text.replace("“", '"')
-        .replace("”", '"')
-        .replace("‘", "'")
-        .replace("’", "'")
-        .replace("–", "--")
-        .replace("—", "---")
-    )
-    return text
 
 
 def get_bib_preamble(token):
@@ -52,6 +35,6 @@ def get_bib_preamble(token):
         biblio = scrape_token(f"{token}", "").get_biblio()
         biblio["tags"] = ""
         result = [busy.log2console(biblio).strip()]
-    except:
+    except Exception:
         result = []
     return result

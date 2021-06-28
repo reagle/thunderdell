@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of Thunderdell/BusySponge
+# This file is used with Thunderdell
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2017 by Joseph Reagle
+# (c) Copyright 2009-2020 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
 
 """extract a MM from a dictated text file using particular conventions"""
 
@@ -63,7 +62,7 @@ MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
 def clean(text):
     """clean and encode text"""
     # TODO: Maybe make use of b.smart_punctuation_to_ascii() and
-    # web_utils.escape_XML()
+    # utils_web.escape_XML()
 
     text = text.strip(", \f\r\n")
     REPLACEMENTS = [

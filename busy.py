@@ -37,6 +37,7 @@ from dateutil.parser import parse as dt_parse
 from lxml import etree as l_etree
 
 import biblio_fields as bf
+import config
 import thunderdell as td
 import utils_text
 from change_case import sentence_case, title_case
@@ -50,13 +51,6 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
-
-EDITOR = os.environ.get("EDITOR", "nano")
-VISUAL = os.environ.get("VISUAL", "nano")
-HOME = os.path.expanduser("~")
-TMP_DIR = HOME + "/tmp/.td/"
-if not os.path.isdir(TMP_DIR):
-    os.makedirs(TMP_DIR)
 
 # Expansions for common tags/activities
 
@@ -998,7 +992,9 @@ def log2mm(biblio):
     this_year = time.strftime("%Y", NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
-    ofile = HOME + "/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
+    ofile = (
+        f"{config.HOME}/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
+    )
     info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
@@ -1099,7 +1095,7 @@ def log2nifty(biblio):
     """
 
     print("to log2nifty\n")
-    ofile = HOME + "/data/2web/goatee.net/nifty-stuff.html"
+    ofile = f"{config.HOME}/data/2web/goatee.net/nifty-stuff.html"
 
     title = biblio["title"]
     comment = biblio["comment"]
@@ -1135,7 +1131,7 @@ def log2work(biblio):
 
     print("to log2work\n")
     info(f"biblio = '{biblio}'")
-    ofile = HOME + "/data/2web/reagle.org/joseph/plan/plans/index.html"
+    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/plan/plans/index.html"
     info(f"{ofile=}")
     subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
     title = biblio["title"].strip() + subtitle
@@ -1265,7 +1261,7 @@ def blog_at_opencodex(biblio):
     """
 
     blog_title = blog_body = ""
-    CODEX_ROOT = HOME + "/data/2web/reagle.org/joseph/content/"
+    CODEX_ROOT = f"{config.HOME}/data/2web/reagle.org/joseph/content/"
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = " ".join(biblio["title"].split(" ")[0:3])
     entry = biblio["comment"]
@@ -1313,7 +1309,7 @@ def blog_at_opencodex(biblio):
         fd.write("\n\n[%s](%s)\n\n" % (biblio["title"], biblio["url"]))
         fd.write("> %s\n" % biblio["excerpt"])
     fd.close()
-    Popen([VISUAL, filename])
+    Popen([config.VISUAL, filename])
 
 
 def blog_at_goatee(biblio):
@@ -1321,7 +1317,7 @@ def blog_at_goatee(biblio):
     Start at a blog entry at goatee
     """
 
-    GOATEE_ROOT = HOME + "/data/2web/goatee.net/content/"
+    GOATEE_ROOT = f"{config.HOME}/data/2web/goatee.net/content/"
     info(f"{biblio['comment']=}")
     blog_title, sep, blog_body = biblio["comment"].partition(". ")
 
@@ -1383,7 +1379,7 @@ def blog_at_goatee(biblio):
                 f'class="view" src="{url}"/></a></p>'
             )
     fd.close()
-    Popen([VISUAL, filename])
+    Popen([config.VISUAL, filename])
 
 
 #######################################
@@ -1522,14 +1518,14 @@ def do_console_annotation(biblio):
     def edit_annotation(initial_text, resume_edit=False):
         """Write initial bib info to a tmp file, edit and return"""
 
-        annotation_fn = TMP_DIR + "b-annotation.txt"
+        annotation_fn = f"{config.TMP_DIR}b-annotation.txt"
         if not resume_edit:
             rotate_files(annotation_fn)
             if os.path.exists(annotation_fn):
                 os.remove(annotation_fn)
             with open(annotation_fn, "w", encoding="utf-8") as annotation_file:
                 annotation_file.write(initial_text)
-        call([EDITOR, annotation_fn])
+        call([config.EDITOR, annotation_fn])
         return open(annotation_fn, "r", encoding="utf-8").readlines()
 
     def parse_bib(biblio, edited_text):
@@ -1712,7 +1708,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     if "goatee.net/photo" in url and url.endswith(".jpg"):
         title = ""
         tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-        photo = open(HOME + "/f/" + url[19:], "rb")
+        photo = open(f"{config.HOME}/f/{url[19:]}", "rb")
     else:
         photo = None
     total_len = len(comment) + len(tags) + len(title) + len(url)

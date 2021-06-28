@@ -20,3 +20,8 @@ CLIENT_HOME = "/Users/reagle"
 DEFAULT_MAP = f"{HOME}/joseph/readings.mm"
 DEFAULT_PRETTY_MAP = f"{HOME}/joseph/2005/ethno/field-notes.mm"
 TMP_DIR = f"{HOME}/tmp/.td/"
+if not os.path.isdir(TMP_DIR):
+    os.makedirs(TMP_DIR)
+
+EDITOR = os.environ.get("EDITOR", "nano")
+VISUAL = os.environ.get("VISUAL", "nano")

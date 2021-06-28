@@ -27,27 +27,28 @@ from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
 
-from utils_web import unescape_XML
-from utils_text import (
-    strip_accents,
-    pretty_tabulate_dict,
-    pretty_tabulate_list,
-)
-from biblio_fields import BIB_SHORTCUTS, SUFFIXES, PARTICLES
-from emitters import (
-    emit_biblatex,
-    emit_yaml_csl,
-    emit_json_csl,
-    emit_wp_citation,
-    emit_results,
-)
-
+import config
 from biblio_fields import (
-    BORING_WORDS,
+    BIB_SHORTCUTS,
     BIB_TYPES,
     BIBLATEX_TYPES,
+    BORING_WORDS,
+    PARTICLES,
+    SUFFIXES,
 )
-
+from emitters import (
+    emit_biblatex,
+    emit_json_csl,
+    emit_results,
+    emit_wp_citation,
+    emit_yaml_csl,
+)
+from utils_text import (
+    pretty_tabulate_dict,
+    pretty_tabulate_list,
+    strip_accents,
+)
+from utils_web import unescape_XML
 
 log_level = logging.ERROR  # 40 # declared here for when imported
 
@@ -57,20 +58,6 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
-
-useLXML = False
-# HOME for path of mindmaps on webhost
-HOME = os.path.expanduser("~")
-# CLIENT_HOME for path on the client to open mindmaps there
-# as f'file://{CLIENT_HOME}/...'
-CLIENT_HOME = "/Users/reagle"
-DEFAULT_MAP = f"{HOME}/joseph/readings.mm"
-DEFAULT_PRETTY_MAP = f"{HOME}/joseph/2005/ethno/field-notes.mm"
-CGI_DIR = f"{HOME}/joseph/plan/cgi-bin/"  # for local server
-
-TMP_DIR = f"{HOME}/tmp/.td/"
-if not os.path.isdir(TMP_DIR):
-    os.makedirs(TMP_DIR)
 
 Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
@@ -388,16 +375,10 @@ def walk_freeplane(node, mm_file, entries, links):
     author_node = None
     entry = {}
 
-    if useLXML is False:
-        parent_map = {c: p for p in node.iter() for c in p}
+    parent_map = {c: p for p in node.iter() for c in p}
 
-        def get_parent(node):
-            return parent_map[node]
-
-    elif useLXML is True:
-
-        def get_parent(node):
-            return node.getparent()
+    def get_parent(node):
+        return parent_map[node]
 
     def query_highlight(node, query):
         """Return a modified node with matches highlighted"""
@@ -530,7 +511,7 @@ def build_bib(file_name, output):
                         mm_files.append(link)
 
     if args.query:
-        results_file_name = f"{TMP_DIR}query-thunderdell.html"
+        results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
         try:
@@ -545,7 +526,7 @@ def build_bib(file_name, output):
         results_file.close()
         if args.in_main:
             ADDRESS_IN_USE = False
-            os.chdir(CGI_DIR + "/..")
+            os.chdir(config.CGI_DIR + "/..")
             handler = http.server.CGIHTTPRequestHandler
             handler.cgi_directories = ["/cgi-bin"]
             try:
@@ -563,7 +544,7 @@ def build_bib(file_name, output):
             if not ADDRESS_IN_USE:
                 server.serve_forever()
     elif args.pretty:
-        results_file_name = f"{TMP_DIR}pretty-print.html"
+        results_file_name = f"{config.TMP_DIR}pretty-print.html"
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
         except IOError:
@@ -687,7 +668,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "-i",
         "--input-file",
-        default=DEFAULT_MAP,
+        default=config.DEFAULT_MAP,
         metavar="FILENAME",
         help="mindmap to process",
     )
@@ -814,8 +795,8 @@ if __name__ == "__main__":
     args.in_main = True
     args.outfd = sys.stdout
 
-    if args.pretty and file_name == DEFAULT_MAP:
-        file_name = DEFAULT_PRETTY_MAP
+    if args.pretty and file_name == config.DEFAULT_MAP:
+        file_name = config.DEFAULT_PRETTY_MAP
     if args.WP_citation:
         output = emit_wp_citation
     elif args.biblatex:

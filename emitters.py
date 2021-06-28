@@ -17,6 +17,8 @@ import sys
 import urllib
 from html import escape
 
+# from thunderdell import CLIENT_HOME, HOME
+import config
 from biblio_fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_CSL_FIELD_MAP,
@@ -30,8 +32,6 @@ from biblio_fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
-
-# from thunderdell import CLIENT_HOME, HOME
 from utils_text import escape_latex, normalize_whitespace
 from utils_web import escape_XML
 
@@ -943,7 +943,9 @@ def emit_results(entries, query, results_file, args):
         if __name__ == "__main__":
             return file_name
         else:  # CGI
-            client_path = file_name.replace(f"{HOME}", f"{CLIENT_HOME}")
+            client_path = file_name.replace(
+                f"{config.HOME}", f"{config.CLIENT_HOME}"
+            )
             return f"file://{client_path}"
 
     def print_entry(

@@ -1,8 +1,8 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# set shebang locally to
-#!/usr/bin/env python3.8
+# set shebang locally to latest
+#!/usr/bin/env python3
 # set the shebang on a2hosting to
 #!/home/goateene/opt/bin/python3
 
@@ -56,7 +56,6 @@ def cgi_main():
 
         import thunderdell as td
 
-        output = td.emit_results
         td.args.query = query
         td.args.query_c = re.compile(re.escape(query), re.IGNORECASE)
         td.args.chase = True
@@ -69,7 +68,7 @@ def cgi_main():
         td.info = _ignore
         td.dbg = _ignore
 
-        td.build_bib(MINDMAP, output)
+        td.build_bib(MINDMAP, td.emit_results)
 
         fileObj = codecs.open(td.TMP_DIR + "query-thunderdell.html", "r", "utf-8")
         print((fileObj.read()))

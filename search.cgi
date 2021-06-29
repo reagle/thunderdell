@@ -14,7 +14,7 @@ def cgi_main():
     from urllib.parse import quote, unquote
 
     HOME = os.path.expanduser("~")
-
+    TMP_DIR = HOME + "/tmp/.td/"
     # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
@@ -68,9 +68,9 @@ def cgi_main():
         td.info = _ignore
         td.dbg = _ignore
 
-        td.build_bib(MINDMAP, td.emit_results)
+        td.build_bib(MINDMAP, td.emit_results, td.args)
 
-        fileObj = codecs.open(td.TMP_DIR + "query-thunderdell.html", "r", "utf-8")
+        fileObj = codecs.open(TMP_DIR + "query-thunderdell.html", "r", "utf-8")
         print((fileObj.read()))
         fileObj.close()
 

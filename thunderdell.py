@@ -478,7 +478,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 """
 
 
-def build_bib(file_name, output):
+def build_bib(file_name, output, args):
     """Parse and process files, including new ones encountered if chasing"""
 
     links = []  # list of other files encountered in the mind map
@@ -521,7 +521,7 @@ def build_bib(file_name, output):
             sys.exit()
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-        emit_results(entries, args.query, results_file)
+        emit_results(entries, args.query, results_file, args)
         results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
@@ -557,7 +557,7 @@ def build_bib(file_name, output):
         )
         for entry in list(entries.values()):
             args.query = entry["identifier"]
-            emit_results(entries, args.query, results_file)
+            emit_results(entries, args.query, results_file, args)
         results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
@@ -854,7 +854,7 @@ if __name__ == "__main__":
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
         output = emit_results
-    build_bib(file_name, output)
+    build_bib(file_name, output, args)
     args.outfd.close()
 else:
 

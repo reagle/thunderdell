@@ -29,7 +29,6 @@ import sys
 import time
 from collections import namedtuple
 from datetime import datetime
-from io import StringIO
 from subprocess import Popen, call
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
@@ -1157,25 +1156,18 @@ def log2work(biblio):
     )
     info(log_item)
 
-    plan_fd = open(ofile, "r", encoding="utf-8", errors="replace")
-    plan_content = plan_fd.read()
-    plan_fd.close()
-
-    # parsing as XML needs namespaces in XPATH
     plan_tree = l_etree.parse(
-        StringIO(plan_content), l_etree.XMLParser(ns_clean=True, recover=True)
+        ofile, l_etree.XMLParser(ns_clean=True, recover=True)
     )
-    # plan_tree = l_etree.parse(StringIO(plan_content), l_etree.HTMLParser())
     ul_found = plan_tree.xpath(
         """//x:div[@id='Done']/x:ul""",
         namespaces={"x": "http://www.w3.org/1999/xhtml"},
-    )
-    # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
+    )  # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
     info("ul_found = %s" % (ul_found))
     if ul_found:
-        ul_found[0].text = "\n      "
+        ul_found[0].text = "\n              "
         log_item_xml = l_etree.XML(log_item)
-        log_item_xml.tail = "\n\n      "
+        log_item_xml.tail = "\n\n              "
         ul_found[0].insert(0, log_item_xml)
         new_content = l_etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="xml"
@@ -1184,7 +1176,7 @@ def log2work(biblio):
         new_plan_fd.write(new_content)
         new_plan_fd.close()
     else:
-        print_usage("Sorry, not found: div[@id='Done']/x:ul")
+        print_usage("Sorry, not found: //x:div[@id='Done']/x:ul")
 
     if args.publish:
         yasn_publish(comment, title, subtitle, url, hashtags)

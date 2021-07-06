@@ -19,7 +19,7 @@ from html import escape
 
 # from thunderdell import CLIENT_HOME, HOME
 import config
-from biblio_fields import (
+from biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_CSL_FIELD_MAP,
     BIBLATEX_CSL_TYPE_MAP,
@@ -32,8 +32,8 @@ from biblio_fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
-from utils_text import escape_latex, normalize_whitespace
-from utils_web import escape_XML
+from utils.text import escape_latex, normalize_whitespace
+from utils.web import escape_XML
 
 # logger function aliases
 critical = logging.critical

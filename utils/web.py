@@ -15,7 +15,8 @@ import json
 import logging
 import os
 import re
-from xml.sax.saxutils import escape, unescape
+
+from xml.sax.saxutils import escape  # unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
 

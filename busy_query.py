@@ -16,18 +16,16 @@ https://github.com/reagle/thunderdell
 """
 
 
+import codecs
 import os
+import re
 import sys
 import webbrowser
 
+HOME = os.path.expanduser("~")
+
 
 def query_sponge(query):
-
-    import codecs
-    import re
-    from os.path import expanduser
-
-    HOME = os.path.expanduser("~")
 
     in_files = [
         HOME + "/joseph/plan/plans/index.html",
@@ -111,6 +109,6 @@ def query_sponge(query):
 if __name__ == "__main__":
 
     query = "".join(sys.argv[1:])
-    query_result_file = queryBSponge(query)
+    query_result_file = query_sponge(query)
     # call([BROWSER, query_result_file])
     webbrowser.open("file://" + query_result_file)

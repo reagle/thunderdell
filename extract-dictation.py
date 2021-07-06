@@ -18,8 +18,8 @@ import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 from busy import yasn_publish
-from thunderdell import BIB_FIELDS  # dict of field to its shortcut
-from thunderdell import BIB_SHORTCUTS  # dict of shortcuts to a field
+from biblio.fields import BIB_FIELDS  # dict of field to its shortcut
+from biblio.fields import BIB_SHORTCUTS  # dict of shortcuts to a field
 
 HOME = str(Path("~").expanduser())
 
@@ -85,8 +85,8 @@ def clean(text):
 def get_date():
 
     now = time.localtime()
-    year = time.strftime("%Y", now).lower()
-    month = time.strftime("%m", now).lower()
+    # year = time.strftime("%Y", now).lower()
+    # month = time.strftime("%m", now).lower()
     date_token = time.strftime("%Y%m%d", now)
     return date_token
 
@@ -250,7 +250,6 @@ def build_mm_from_txt(
             node_color = "paraphrase"
             line_text = line
             line_no = ""
-            line_split = line.split(" ")
             # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
             PAGE_NUM_PAT = (
                 r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"

@@ -10,18 +10,19 @@
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import difflib
-import email
 import logging
 import re
+import subprocess
 import sys
 from email import policy
 from email.parser import BytesParser
-from os.path import basename, splitext
+from os.path import splitext
 
-import busy  # https://github.com/reagle/thunderdell
-import change_case
 from bs4 import BeautifulSoup
-from extract_utils import get_bib_preamble, uncurly
+from utils.extract import get_bib_preamble
+
+import change_case
+from utils.text import uncurly
 
 debug = logging.debug
 info = logging.info
@@ -223,12 +224,15 @@ if __name__ == "__main__":
 
             fixed_fd.write(new_text)
             fixed_fd.close()
-            subprocess.call(["open", fixed_fn])
-            # TODO: suggest an extract-dictate.py command on command line
-
         else:
             print(
                 "Do not recognize file type: {file_name}"
                 " {splitext(file_name)[1]}."
             )
             sys.exit()
+
+        if args.output_to_file:
+            subprocess.call(["open", fixed_fn])
+            print(f"follow up with:")
+            print(f"extract-dictation.py -p {fixed_fn}")
+            # TODO: suggest an extract-dictate.py command on command line

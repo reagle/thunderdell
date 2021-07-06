@@ -28,7 +28,7 @@ from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
 
 import config
-from biblio_fields import (
+from biblio.fields import (
     BIB_SHORTCUTS,
     BIB_TYPES,
     BIBLATEX_TYPES,
@@ -36,19 +36,19 @@ from biblio_fields import (
     PARTICLES,
     SUFFIXES,
 )
-from emitters import (
+from formats.emitters import (
     emit_biblatex,
     emit_json_csl,
     emit_results,
     emit_wp_citation,
     emit_yaml_csl,
 )
-from utils_text import (
+from utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
     strip_accents,
 )
-from utils_web import unescape_XML
+from utils.web import unescape_XML
 
 log_level = logging.ERROR  # 40 # declared here for when imported
 

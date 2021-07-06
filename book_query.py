@@ -13,7 +13,6 @@ import json
 import logging
 import pprint
 import sys
-from datetime import datetime
 
 import requests
 from dateutil.parser import parse

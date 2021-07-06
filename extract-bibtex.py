@@ -12,7 +12,7 @@ import logging
 import re
 
 # from os import chdir, environ, mkdir, rename
-from os.path import abspath, exists, expanduser, splitext
+from os.path import abspath, expanduser, splitext  # exists
 
 HOME = expanduser("~")
 

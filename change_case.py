@@ -73,7 +73,7 @@ def create_wordset(file_name):
 
 
 # TODO find alternative to hardcoded path that also works with import
-LIST_PATH = HOME + "/bin/td/"
+LIST_PATH = HOME + "/bin/td/biblio/"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 wordset = create_wordset(WORD_LIST_FN)
 wordset_lower = set([word for word in wordset if word[0].islower()])

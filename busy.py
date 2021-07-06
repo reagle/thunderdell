@@ -35,14 +35,14 @@ from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 from dateutil.parser import parse as dt_parse
 from lxml import etree as l_etree
 
-import biblio_fields as bf
+from biblio import fields as bf
 import config
 import thunderdell as td
-import utils_text
+from utils import text
 from change_case import sentence_case, title_case
 
 # personal utilities
-from utils_web import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
+from utils.web import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
 
 # function aliases
 critical = logging.critical
@@ -1847,10 +1847,10 @@ if __name__ == "__main__":
         sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
-            utils_text.pretty_tabulate_dict(dictionary, 3)
+            text.pretty_tabulate_dict(dictionary, 3)
         sys.exit()
     if args.container_shortcuts:
-        utils_text.pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
+        text.pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))

@@ -11,13 +11,15 @@ import argparse  # http://docs.python.org/dev/library/argparse.html
 import difflib
 import logging
 import re
+import subprocess
 import sys
 from email import policy
 from email.parser import BytesParser
 from os.path import splitext
 
 from enchant.checker import SpellChecker  # https://pypi.org/project/pyenchant/
-from extract_utils import get_bib_preamble, uncurly
+from utils.extract import get_bib_preamble
+from utils.text import uncurly
 
 debug = logging.debug
 info = logging.info

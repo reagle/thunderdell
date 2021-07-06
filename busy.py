@@ -1184,7 +1184,7 @@ def log2work(biblio):
         new_plan_fd.write(new_content)
         new_plan_fd.close()
     else:
-        print_usage("Sorry, XML insertion failed.")
+        print_usage("Sorry, not found: div[@id='Done']/x:ul")
 
     if args.publish:
         yasn_publish(comment, title, subtitle, url, hashtags)

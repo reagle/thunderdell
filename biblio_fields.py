@@ -7,7 +7,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
-"""Defines the many data schemes (keys, values, and fields) 
+"""Defines the many data schemes (keys, values, and fields)
 of bibliographic formats"""
 
 from collections import namedtuple

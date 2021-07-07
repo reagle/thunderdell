@@ -235,4 +235,3 @@ if __name__ == "__main__":
             subprocess.call(["open", fixed_fn])
             print(f"follow up with:")
             print(f"extract-dictation.py -p {fixed_fn}")
-            # TODO: suggest an extract-dictate.py command on command line

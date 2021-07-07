@@ -36,13 +36,13 @@ from biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from formats.emitters import (
-    emit_biblatex,
-    emit_json_csl,
-    emit_results,
-    emit_wp_citation,
-    emit_yaml_csl,
-)
+
+from formats.emit_biblatex import emit_biblatex
+from formats.emit_json_csl import emit_json_csl
+from formats.emit_results import emit_results
+from formats.emit_wp import emit_wp
+from formats.emit_yaml_csl import emit_yaml_csl
+
 from utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
@@ -798,7 +798,7 @@ if __name__ == "__main__":
     if args.pretty and file_name == config.DEFAULT_MAP:
         file_name = config.DEFAULT_PRETTY_MAP
     if args.WP_citation:
-        output = emit_wp_citation
+        output = emit_wp
     elif args.biblatex:
         output = emit_biblatex
     elif args.JSON_CSL:

@@ -1287,8 +1287,7 @@ def blog_at_opencodex(biblio):
     filename = f"{CODEX_ROOT}{category}/{this_year}-{filename}.md"
     info(f"{filename=}")
     if os.path.exists(filename):
-        print(("\nfilename '%s' already exists'" % filename))
-        sys.exit()
+        raise FileExistsError(f"\nfilename {filename} already exists")
     fd = open(filename, "w", encoding="utf-8", errors="replace")
     fd.write("---\n")
     fd.write("title: %s\n" % blog_title)
@@ -1338,8 +1337,7 @@ def blog_at_goatee(biblio):
     info(f"{blog_title=}")
     info(f"{filename=}")
     if os.path.exists(filename):
-        print(("\nfilename '%s' already exists'" % filename))
-        sys.exit()
+        raise FileExistsError(f"\nfilename {filename} already exists")
     fd = open(filename, "w", encoding="utf-8", errors="replace")
     fd.write("---\n")
     fd.write("title: %s\n" % blog_title)

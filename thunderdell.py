@@ -516,9 +516,10 @@ def build_bib(file_name, output, args):
             os.remove(results_file_name)
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
-        except IOError:
-            print(("There was an error writing to", results_file_name))
-            sys.exit()
+        except IOError as err:
+            print(f"{err}")
+            print(f"There was an error writing to {results_file_name}")
+            raise
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
         emit_results(entries, args.query, results_file, args)
@@ -547,9 +548,10 @@ def build_bib(file_name, output, args):
         results_file_name = f"{config.TMP_DIR}pretty-print.html"
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
-        except IOError:
-            print(("There was an error writing to", results_file_name))
-            sys.exit()
+        except IOError as err:
+            print(f"{err}")
+            print(f"There was an error writing to {results_file_name}")
+            raise
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(
             "    <title>Pretty Mind Map</title></head>"

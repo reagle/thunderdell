@@ -11,7 +11,6 @@
 
 import logging
 import re
-import sys
 
 from biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
@@ -58,8 +57,8 @@ def guess_csl_type(entry):
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre, medium
         else:
-            print(f"Unknown entry_type = {et}")
-            sys.exit()
+            raise RunTimeError(f"Unknown entry_type = {et}")  # noqa: F821
+
     et = 'no-type'
     # debug(f"looking at containers for {entry}")
     if 'c_web' in entry:                et = 'webpage'

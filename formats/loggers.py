@@ -496,7 +496,7 @@ def do_console_annotation(biblio, args):
         call([config.EDITOR, annotation_fn])
         return open(annotation_fn, "r", encoding="utf-8").readlines()
 
-    def parse_bib(biblio, edited_text):
+    def parse_bib(biblio, edited_text, args):
         """Parse the bib assignments"""
 
         # biblio['tags'] and whether to yasn publish are overwritten by
@@ -596,12 +596,12 @@ def do_console_annotation(biblio, args):
     initial_text = "\n".join(initial_text) + "\n"
     edited_text = edit_annotation(initial_text)
     try:
-        biblio, do_publish = parse_bib(biblio, edited_text)
+        biblio, do_publish = parse_bib(biblio, edited_text, args)
     except (TypeError, KeyError) as e:
         print(("Error parsing biblio assignments: %s\nTry again." % e))
         time.sleep(2)
         edited_text = edit_annotation("", resume_edit=True)
-        biblio, do_publish = parse_bib(biblio, edited_text)
+        biblio, do_publish = parse_bib(biblio, edited_text, args)
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:

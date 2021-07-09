@@ -9,6 +9,7 @@
 
 import logging
 
+# TODO: this is a recursive import, move to logger and scaper specific
 import busy  # https://github.com/reagle/thunderdell
 
 debug = logging.debug
@@ -19,6 +20,10 @@ critical = logging.critical
 exception = logging.exception
 
 
+class args:
+    publish = False  # don't tweet at this level
+
+
 def get_bib_preamble(token):
 
     info(f"{token=}")
@@ -26,15 +31,7 @@ def get_bib_preamble(token):
         scrape_token = busy.scrape_DOI
     else:
         scrape_token = busy.scrape_ISBN
-    params = {
-        "scheme": "c",
-        "tags": "misc",
-        "comment": "",
-    }
-    try:
-        biblio = scrape_token(f"{token}", "").get_biblio()
-        biblio["tags"] = ""
-        result = [busy.log2console(biblio).strip()]
-    except Exception:
-        result = []
+    biblio = scrape_token(f"{token}", "").get_biblio()
+    biblio["tags"] = ""
+    result = [busy.log2console(biblio, args).strip()]
     return result

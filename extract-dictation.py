@@ -17,7 +17,7 @@ import sys
 import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-from busy import yasn_publish
+from utils.web import yasn_publish
 from biblio.fields import BIB_FIELDS  # dict of field to its shortcut
 from biblio.fields import BIB_SHORTCUTS  # dict of shortcuts to a field
 

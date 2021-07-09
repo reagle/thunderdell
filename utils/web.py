@@ -15,10 +15,12 @@ import json
 import logging
 import os
 import re
-
 from xml.sax.saxutils import escape  # unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
+
+import config
+from biblio.keywords import KEY_SHORTCUTS
 
 HOMEDIR = os.path.expanduser("~")
 
@@ -127,3 +129,115 @@ def get_text(url):
     import os
 
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
+
+
+def shrink_tweet(comment, title, url, tags):
+    """Shrink tweet to fit into limit"""
+
+    info(f"{comment=}")
+    # TWEET_LIMIT = 280 - 6 # API throws an error for unknown reason
+    TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
+    SHORTENER_LEN = 23  # twitter uses t.co
+
+    info(f"{TWEET_LIMIT=}")
+    tweet_room = TWEET_LIMIT - len(tags)
+    info(f"tweet_room - len(tags) = {tweet_room}")
+
+    info(f"len(url) = {len(url)}")
+    if len(url) > SHORTENER_LEN:
+        tweet_room = tweet_room - SHORTENER_LEN
+        info(f"  shortened to {SHORTENER_LEN}")
+    else:
+        tweet_room = tweet_room - len(url)
+    info(f"tweet_room after url = {tweet_room}")
+
+    info(f"len(title) = {len(title)}")
+    if len(title) > tweet_room:
+        info("title is too long")
+        title = title[0 : tweet_room - 1] + "…"
+        info(f"  truncated to {len(title)}")
+    tweet_room = tweet_room - len(title)
+    info(f"tweet_room after title = {tweet_room}")
+
+    info(f"len(comment) = {len(comment)}")
+    if len(comment) > tweet_room:
+        info("comment is too long")
+        if tweet_room > 5:
+            info(" truncating")
+            comment = comment[0 : tweet_room - 1] + "…"
+            info(f"  truncated to {len(comment)}")
+            info(f"{comment}")
+        else:
+            info(" skipping")
+            comment = ""
+    tweet_room = tweet_room - len(comment)
+    info(f"tweet_room after comment = {tweet_room}")
+
+    comment_delim = ": " if comment and title else ""
+    title = f"“{title}”" if title else ""
+    tweet = f"{comment}{comment_delim}{title} {url} {tags}"
+    return tweet.strip()
+
+
+def yasn_publish(comment, title, subtitle, url, tags):
+    "Send annotated URL to social networks"
+    info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
+    if tags and tags[0] != "#":  # they've not yet been hashified
+        tags = " ".join(
+            [
+                "#" + KEY_SHORTCUTS.get(tag, tag)
+                for tag in tags.strip().split(" ")
+            ]
+        )
+    comment, title, subtitle, url, tags = [
+        v.strip() if isinstance(v, str) else ""
+        for v in [comment, title, subtitle, url, tags]
+    ]
+    if subtitle:
+        title = f"{title}: {subtitle}"
+    if "goatee.net/photo" in url and url.endswith(".jpg"):
+        title = ""
+        tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
+        photo = open(f"{config.HOME}/f/{url[19:]}", "rb")
+    else:
+        photo = None
+    total_len = len(comment) + len(tags) + len(title) + len(url)
+    info(
+        f"""comment = {len(comment)}: {comment}
+         title = {len(title)}: {title}
+         url = {len(url)}: {url}
+         tags = {len(tags)}: {tags}
+         {total_len=}"""
+    )
+
+    # https://twython.readthedocs.io/en/latest/index.html
+    from twython import Twython, TwythonError
+
+    # load keys, tokens, and secrets from twitter_token.py
+    from .web_api_tokens import (
+        TW_ACCESS_TOKEN,
+        TW_ACCESS_TOKEN_SECRET,
+        TW_CONSUMER_KEY,
+        TW_CONSUMER_SECRET,
+    )
+
+    twitter = Twython(
+        TW_CONSUMER_KEY,
+        TW_CONSUMER_SECRET,
+        TW_ACCESS_TOKEN,
+        TW_ACCESS_TOKEN_SECRET,
+    )
+    try:
+        if photo:
+            tweet = shrink_tweet(comment, title, "", tags)
+            response = twitter.upload_media(media=photo)
+            twitter.update_status(
+                status=tweet, media_ids=[response["media_id"]]
+            )
+        else:
+            tweet = shrink_tweet(comment, title, url, tags)
+            twitter.update_status(status=tweet)
+    except TwythonError as e:
+        print(e)
+    finally:
+        print(f"tweeted {len(tweet)}: {tweet}")

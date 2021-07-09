@@ -37,11 +37,13 @@ from biblio.fields import (
     SUFFIXES,
 )
 
-from formats.emit_biblatex import emit_biblatex
-from formats.emit_json_csl import emit_json_csl
-from formats.emit_results import emit_results
-from formats.emit_wp import emit_wp
-from formats.emit_yaml_csl import emit_yaml_csl
+from formats import (
+    emit_biblatex,
+    emit_json_csl,
+    emit_results,
+    emit_wp,
+    emit_yaml_csl,
+)
 
 from utils.text import (
     pretty_tabulate_dict,

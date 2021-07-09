@@ -225,11 +225,10 @@ if __name__ == "__main__":
             fixed_fd.write(new_text)
             fixed_fd.close()
         else:
-            print(
+            raise IOError(
                 "Do not recognize file type: {file_name}"
                 " {splitext(file_name)[1]}."
             )
-            sys.exit()
 
         if args.output_to_file:
             subprocess.call(["open", fixed_fn])

@@ -63,14 +63,14 @@ def rotate_files(filename, max=5):
 #######################################
 
 
-def log2mm(biblio, args):
+def log2mm(args, biblio):
     """
     Log to bibliographic mindmap, see:
         http://reagle.org/joseph/2009/01/thunderdell.html
     """
 
     print("to log2mm")
-    biblio, args.publish = do_console_annotation(biblio, args)
+    biblio, args.publish = do_console_annotation(args, biblio)
     info(f"{biblio}")
 
     # now = time.gmtime()
@@ -175,7 +175,7 @@ def log2mm(biblio, args):
         yasn_publish(abstract, title, subtitle, permalink, tags)
 
 
-def log2nifty(biblio, args):
+def log2nifty(args, biblio):
     """
     Log to personal blog.
     """
@@ -209,7 +209,7 @@ def log2nifty(biblio, args):
         raise RuntimeError("Sorry, output regexp subsitution failed.")
 
 
-def log2work(biblio, args):
+def log2work(args, biblio):
     """
     Log to work microblog
     """
@@ -269,7 +269,7 @@ def log2work(biblio, args):
         yasn_publish(comment, title, subtitle, url, hashtags)
 
 
-def log2console(biblio, args):
+def log2console(args, biblio):
     """
     Log to console.
     """
@@ -334,7 +334,7 @@ def log2console(biblio, args):
     return bib_in_single_line
 
 
-def blog_at_opencodex(biblio, args):
+def blog_at_opencodex(args, biblio):
     """
     Start at a blog entry at opencodex
     """
@@ -390,7 +390,7 @@ def blog_at_opencodex(biblio, args):
     Popen([config.VISUAL, filename])
 
 
-def blog_at_goatee(biblio, args):
+def blog_at_goatee(args, biblio):
     """
     Start at a blog entry at goatee
     """
@@ -459,7 +459,7 @@ def blog_at_goatee(biblio, args):
     Popen([config.VISUAL, filename])
 
 
-def do_console_annotation(biblio, args):
+def do_console_annotation(args, biblio):
     """Augment biblio with console annotations"""
 
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
@@ -496,7 +496,7 @@ def do_console_annotation(biblio, args):
         call([config.EDITOR, annotation_fn])
         return open(annotation_fn, "r", encoding="utf-8").readlines()
 
-    def parse_bib(biblio, edited_text, args):
+    def parse_bib(args, biblio, edited_text):
         """Parse the bib assignments"""
 
         # biblio['tags'] and whether to yasn publish are overwritten by

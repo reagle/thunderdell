@@ -162,10 +162,10 @@ def build_mm_from_txt(
                             t, v = BIB_FIELDS[token.lower()], value
                         else:
                             raise Exception(f"{token=} not in BIB_FIELDS")
-                    citation_add = f"{t}={v}"
+                    citation_add = f" {t}={v}"
                     citation += citation_add
                 if token == "keyword":
-                    citation += "kw=" + " kw=".join(value)
+                    citation += " kw=" + " kw=".join(value)
             if citation != "":
                 clean(citation)
             citation += " r=%s" % get_date()

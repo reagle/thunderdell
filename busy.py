@@ -26,22 +26,27 @@ import re
 import string
 import sys
 import time
-from collections import namedtuple
 from datetime import datetime
-from subprocess import Popen, call
-from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
 from dateutil.parser import parse as dt_parse
-from lxml import etree as l_etree
 
 from biblio import fields as bf
-import config
-import thunderdell as td
-from utils import text
-from change_case import sentence_case, title_case
+from biblio.fields import SITE_CONTAINER_MAP
+from biblio.keywords import LIST_OF_KEYSHORTCUTS
+from change_case import sentence_case
+from formats.loggers import (
+    blog_at_goatee,
+    blog_at_opencodex,
+    log2console,
+    log2mm,
+    log2nifty,
+    log2work,
+)
+from utils.text import pretty_tabulate_dict, smart_to_markdown
+from utils.web import get_HTML, get_JSON, get_text, unescape_XML
 
-# personal utilities
-from utils.web import escape_XML, get_HTML, get_JSON, get_text, unescape_XML
+# from lxml import etree as l_etree
+
 
 # function aliases
 critical = logging.critical
@@ -50,188 +55,8 @@ warning = logging.warning
 info = logging.info
 debug = logging.debug
 
-# Expansions for common tags/activities
-
-GENERAL_KEY_SHORTCUTS = {
-    "aca": "academia",
-    "add": "addiction",
-    "adv": "advice",
-    "edu": "education",
-    "eth": "ethics",
-    "exi": "exit",
-    "for": "fork",
-    "hum": "humor",
-    "ide": "identity",
-    "lea": "leadership",
-    "leg": "legal",
-    "lit": "literacy",
-    "ope": "open",
-    "nor": "norms",
-    "pat": "patience",
-    "pyt": "python",
-    "pow": "power",
-    "pra": "praxis",
-    "pri": "privacy",
-    "psy": "psychology",
-    "rel": "relationship",
-    "ske": "skepticism",
-    "spe": "speech",
-    "str": "structure",
-    "tea": "teaching",
-    "tec": "technology",
-    "tro": "troll",
-    "zei": "zeitgeist",
-}
-
-TV_KEY_SHORTCUTS = {
-    # Tech Prediction, Vision, and Utopia
-    "dis": "disappointed",
-    "nai": "naive",
-    "opt": "optimistic",
-    "pes": "pessimistic",
-    "pre": "prediction",
-    "sv": "siliconvalley",
-    "uto": "utopia",
-}
-
-GF_KEY_SHORTCUTS = {
-    # Geek Feminism
-    "fem": "feminism",
-    "gen": "gender",
-    "gf": "gfem",
-    "sex": "sexism",
-    "mer": "meritocracy",
-    "prv": "privilege",
-}
-
-LH_KEY_SHORTCUTS = {
-    # Lifehack
-    "adv": "advice",
-    "com": "complicity",
-    "lh": "lifehack",
-    "his": "history",
-    "pro": "productivity",
-    "qs": "quantifiedself",
-    "sh": "selfhelp",
-    "too": "tool",
-    "mea": "meaning",
-    "min": "minimalism",
-    "rati": "rational",
-}
-
-RTC_KEY_SHORTCUTS = {
-    # Comments
-    "ano": "anonymous",
-    "ass": "assessment",
-    "aut": "automated",
-    "cri": "criticism",
-    "est": "esteem",
-    "fak": "fake",
-    "fee": "feedback",
-    "inf": "informed",
-    "man": "manipulation",
-    "mar": "market",
-    "off": "offensive",
-    "qua": "quant",
-    "ran": "ranking",
-    "rat": "rating",
-    "rev": "review",
-    "sel": "self",
-    "soc": "social",
-    "pup": "puppet",
-}
-
-WP_KEY_SHORTCUTS = {
-    # Wikipedia
-    "alt": "alternative",
-    "aut": "authority",
-    "ana": "analysis",
-    "apo": "apologize",
-    "att": "attack",
-    "bia": "bias",
-    "blo": "block",
-    "cab": "cabal",
-    "col": "collaboration",
-    "con": "consensus",
-    "cit": "citation",
-    "coi": "COI",
-    "dep": "deployment",
-    "ecc": "eccentric",
-    "exp": "expertise",
-    "fai": "faith",
-    "fru": "frustration",
-    "gov": "governance",
-    "mot": "motivation",
-    "neu": "neutrality",
-    "not": "notability",
-    "par": "participation",
-    "phi": "philosophy",
-    "pol": "policy",
-    "ver": "verifiability",
-    "wp": "wikipedia",
-}
-
-LIST_OF_KEYSHORTCUTS = (
-    GENERAL_KEY_SHORTCUTS,
-    GF_KEY_SHORTCUTS,
-    RTC_KEY_SHORTCUTS,
-    WP_KEY_SHORTCUTS,
-    LH_KEY_SHORTCUTS,
-    TV_KEY_SHORTCUTS,
-)
-
-KEY_SHORTCUTS = LIST_OF_KEYSHORTCUTS[0].copy()
-for short_dict in LIST_OF_KEYSHORTCUTS[1:]:
-    KEY_SHORTCUTS.update(short_dict)
-
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-
-SITE_CONTAINER_MAP = (
-    ("arstechnica.com", "Ars Technica", "c_newspaper"),
-    ("atlantic.com", "The Atlantic", "c_magazine"),
-    ("boingboing.net", "Boing Boing", "c_blog"),
-    ("dailydot", "The Daily Dot", "c_newspaper"),
-    ("engadget.com", "Engadget", "c_blog"),
-    ("forbes.com", "Forbes", "c_magazine"),
-    ("huffingtonpost", "Huffington Post", "c_newspaper"),
-    ("lifehacker.com", "Lifehacker", "c_newspaper"),
-    ("medium.com", "Medium", "c_blog"),
-    ("newyorker.com", "New Yorker", "c_magazine"),
-    ("nytimes.com", "The New York Times", "c_newspaper"),
-    ("salon.com", "Salon", "c_magazine"),
-    ("slate.com", "Slate", "c_magazine"),
-    ("techcrunch.com", "TechCrunch", "c_newspaper"),
-    ("theguardian", "The Guardian", "c_newspaper"),
-    ("verge.com", "The Verge", "c_newspaper"),
-    ("Wikipedia_Signpost", "Wikipedia Signpost", "c_web"),
-    ("wired.com", "Wired", "c_magazine"),
-    ("wsj.com", "The Wall Street Journal", "c_newspaper"),
-    ("washingtonpost.com", "The Washington Post", "c_newspaper"),
-    ("fourhourworkweek.com", "4-Hour Workweek", "c_blog"),
-    # ('', '',  'c_magazine'),
-)
-
-#######################################
-# Utility functions
-
 NOW = time.localtime()
-
-
-def smart_punctuation_to_ascii(s):
-    """Convert unicode punctuation (i.e., "smart quotes") to simpler form."""
-
-    info(f"old {type(s)} s = '{s}'")
-    punctuation = {
-        0x2018: "'",  # apostrophe
-        0x2019: "'",
-        0x201C: '"',  # quotation
-        0x201D: '"',
-    }
-    if s:
-        s = s.translate(punctuation)
-        s = s.replace("—", "--")
-        info(f"new {type(s)} s = '{s}'")
-    return s
+MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 #######################################
@@ -405,7 +230,7 @@ class scrape_default(object):
                 title = tmatch.group(1).strip()
                 title = unescape_XML(title)
                 title = sentence_case(title)
-                title = smart_punctuation_to_ascii(title)
+                title = smart_to_markdown(title)
         return title
 
     def split_title_org(self):
@@ -476,7 +301,7 @@ class scrape_default(object):
             for line in lines:
                 line = " ".join(line.split())  # removes redundant space
                 if len(line) >= 250:
-                    line = smart_punctuation_to_ascii(line)
+                    line = smart_to_markdown(line)
                     info(f"line = '{line}'")
                     info(f"length = {len(line)}; 2nd_char = '{line[1]}'")
                     if line[1].isalpha():
@@ -971,407 +796,6 @@ class scrape_reddit(scrape_default):
 
 
 #######################################
-# Output loggers
-#######################################
-
-
-def log2mm(biblio):
-    """
-    Log to bibliographic mindmap, see:
-        http://reagle.org/joseph/2009/01/thunderdell.html
-    """
-
-    print("to log2mm")
-    biblio, args.publish = do_console_annotation(biblio)
-    info(f"{biblio}")
-
-    # now = time.gmtime()
-    this_week = time.strftime("%U", NOW)
-    this_year = time.strftime("%Y", NOW)
-    date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
-
-    ofile = (
-        f"{config.HOME}/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
-    )
-    info(f"{biblio=}")
-    author = biblio["author"]
-    title = biblio["title"]
-    subtitle = biblio["subtitle"] if "subtitle" in biblio else ""
-    abstract = biblio["comment"]
-    excerpt = biblio["excerpt"]
-    permalink = biblio["permalink"]
-
-    # Create citation
-    for token in ["author", "title", "url", "permalink", "type"]:
-        if token in biblio:  # not needed in citation
-            del biblio[token]
-    citation = ""
-    for key, value in list(biblio.items()):
-        if key in bf.BIB_FIELDS:
-            info(f"{key=} {value=}")
-            citation += f"{bf.BIB_FIELDS[key]}={value} "
-    citation += f" r={date_read} "
-    if biblio["tags"]:
-        tags = biblio["tags"]
-        for tag in tags.strip().split(" "):
-            keyword = KEY_SHORTCUTS.get(tag, tag)
-            citation += "kw=" + keyword + " "
-        citation = citation.strip()
-    else:
-        tags = ""
-
-    mindmap = parse(ofile).getroot()
-    mm_years = mindmap[0]
-    for mm_year in mm_years:
-        if mm_year.get("TEXT") == this_year:
-            year_node = mm_year
-            break
-    else:
-        print(f"creating {this_year}")
-        year_node = SubElement(
-            mm_years, "node", {"TEXT": this_year, "POSITION": "right"}
-        )
-        week_node = SubElement(
-            year_node, "node", {"TEXT": this_week, "POSITION": "right"}
-        )
-
-    for week_node in year_node:
-        if week_node.get("TEXT") == this_week:
-            print(f"week {this_week}")
-            break
-    else:
-        print(f"creating {this_week}")
-        week_node = SubElement(
-            year_node, "node", {"TEXT": this_week, "POSITION": "right"}
-        )
-
-    author_node = SubElement(
-        week_node, "node", {"TEXT": author, "STYLE_REF": "author"}
-    )
-    title_node = SubElement(
-        author_node,
-        "node",
-        {"TEXT": title, "STYLE_REF": "title", "LINK": permalink},
-    )
-    cite_node = SubElement(
-        title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"}
-    )
-    if abstract:
-        abstract_node = SubElement(
-            title_node, "node", {"TEXT": abstract, "STYLE_REF": "annotation"}
-        )
-    if excerpt:
-        for excerpt_chunk in excerpt.split("\n\n"):
-            info(f"{excerpt_chunk=}")
-            if excerpt_chunk.startswith(", "):
-                style_ref = "paraphrase"
-                excerpt_chunk = excerpt_chunk[2:]
-            elif excerpt_chunk.startswith(". "):
-                style_ref = "annotation"
-                excerpt_chunk = excerpt_chunk[2:]
-            elif excerpt_chunk.startswith("-- "):
-                style_ref = "default"
-                excerpt_chunk = excerpt_chunk[3:]
-            else:
-                style_ref = "quote"
-            excerpt_node = SubElement(
-                title_node,
-                "node",
-                {"TEXT": excerpt_chunk, "STYLE_REF": style_ref},
-            )
-
-    ElementTree(mindmap).write(ofile, encoding="utf-8")
-
-    if args.publish:
-        info("YASN")
-        yasn_publish(abstract, title, subtitle, permalink, tags)
-
-
-def log2nifty(biblio):
-    """
-    Log to personal blog.
-    """
-
-    print("to log2nifty\n")
-    ofile = f"{config.HOME}/data/2web/goatee.net/nifty-stuff.html"
-
-    title = biblio["title"]
-    comment = biblio["comment"]
-    url = biblio["url"]
-
-    date_token = time.strftime("%y%m%d", NOW)
-    log_item = (
-        f'<dt><a href="{url}">{title}</a> '
-        f"({date_token})</dt><dd>{comment}</dd>"
-    )
-
-    fd = open(ofile)
-    content = fd.read()
-    fd.close()
-
-    INSERTION_RE = re.compile('(<dl style="clear: left;">)')
-    newcontent = INSERTION_RE.sub(
-        "\\1 \n  %s" % log_item, content, re.DOTALL | re.IGNORECASE
-    )
-    if newcontent:
-        fd = open(ofile, "w", encoding="utf-8", errors="replace")
-        fd.write(newcontent)
-        fd.close()
-    else:
-        print_usage("Sorry, output regexp subsitution failed.")
-
-
-def log2work(biblio):
-    """
-    Log to work microblog
-    """
-    import hashlib
-
-    print("to log2work\n")
-    info(f"biblio = '{biblio}'")
-    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/plan/plans/index.html"
-    info(f"{ofile=}")
-    subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
-    title = biblio["title"].strip() + subtitle
-    url = biblio["url"].strip()
-    comment = biblio["comment"].strip() if biblio["comment"] else ""
-    if biblio["tags"]:
-        hashtags = ""
-        for tag in biblio["tags"].strip().split(" "):
-            hashtags += "#%s " % KEY_SHORTCUTS.get(tag, tag)
-        hashtags = hashtags.strip()
-    else:
-        hashtags = "#misc"
-    info(f"hashtags = '{hashtags}'")
-    html_comment = (
-        f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
-    )
-    date_token = time.strftime("%y%m%d", NOW)
-    digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
-    uid = "e" + date_token + "-" + digest[:4]
-    log_item = (
-        f'<li class="event" id="{uid}">{date_token}: '
-        f"{hashtags}] {html_comment}</li>"
-    )
-    info(log_item)
-
-    plan_tree = l_etree.parse(
-        ofile, l_etree.XMLParser(ns_clean=True, recover=True)
-    )
-    ul_found = plan_tree.xpath(
-        """//x:div[@id='Done']/x:ul""",
-        namespaces={"x": "http://www.w3.org/1999/xhtml"},
-    )  # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
-    info("ul_found = %s" % (ul_found))
-    if ul_found:
-        ul_found[0].text = "\n              "
-        log_item_xml = l_etree.XML(log_item)
-        log_item_xml.tail = "\n\n              "
-        ul_found[0].insert(0, log_item_xml)
-        new_content = l_etree.tostring(
-            plan_tree, pretty_print=True, encoding="unicode", method="xml"
-        )
-        new_plan_fd = open(ofile, "w", encoding="utf-8", errors="replace")
-        new_plan_fd.write(new_content)
-        new_plan_fd.close()
-    else:
-        print_usage("Sorry, not found: //x:div[@id='Done']/x:ul")
-
-    if args.publish:
-        yasn_publish(comment, title, subtitle, url, hashtags)
-
-
-def log2console(biblio):
-    """
-    Log to console.
-    """
-
-    TOKENS = (
-        "author",
-        "title",
-        "subtitle",
-        "date",
-        "journal",
-        "volume",
-        "number",
-        "publisher",
-        "address",
-        "DOI",
-        "isbn",
-        "tags",
-        "comment",
-        "excerpt",
-        "url",
-    )
-    info(f"biblio = '{biblio}'")
-    if biblio["tags"]:
-        tags = biblio["tags"].strip().split(" ")
-        tags_expanded = ""
-        for tag in tags:
-            tag = KEY_SHORTCUTS.get(tag, tag)
-            tags_expanded += tag + " "
-        # biblio['keywords'] = tags_expanded[0:-1]  # removes last space
-    bib_in_single_line = ""
-    for token in TOKENS:
-        info(f"token = '{token}'")
-        if token not in biblio:
-            if token == "url":  # I want these printed even if don't exist
-                biblio["url"] = ""
-            elif token == "title":
-                biblio["title"] = ""
-            elif token == "subtitle":
-                biblio["subtitle"] = ""
-        if token in biblio and biblio[token]:
-            if token == "tags":
-                for value in tags_expanded.strip().split(" "):
-                    # print('keyword = %s' % value)
-                    bib_in_single_line += "keyword = %s " % value
-            else:
-                # print(('%s = %s' % (token, biblio[token])))
-                bib_in_single_line += "%s = %s " % (token, biblio[token])
-    print(f"{bib_in_single_line}")
-    if "identifiers" in biblio:
-        for identifer, value in list(biblio["identifiers"].items()):
-            if identifer.startswith("isbn"):
-                print(f"{identifer} = {value[0]}")
-
-    if args.publish:
-        yasn_publish(
-            biblio["comment"],
-            biblio["title"],
-            biblio["subtitle"],
-            biblio["url"],
-            biblio["tags"],
-        )
-    return bib_in_single_line
-
-
-def blog_at_opencodex(biblio):
-    """
-    Start at a blog entry at opencodex
-    """
-
-    blog_title = blog_body = ""
-    CODEX_ROOT = f"{config.HOME}/data/2web/reagle.org/joseph/content/"
-    this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
-    blog_title = " ".join(biblio["title"].split(" ")[0:3])
-    entry = biblio["comment"]
-
-    category = "social"
-    tags = ""
-    if biblio["tags"]:
-        tags = biblio["tags"].strip().split(" ")
-        category = KEY_SHORTCUTS.get(tags[0], tags[0])
-        tags_expanded = ""
-        for tag in tags:
-            tag = KEY_SHORTCUTS.get(tag, tag)
-            tags_expanded += tag + ","
-        tags = tags_expanded[0:-1]  # removes last comma
-
-    if entry:
-        blog_title, sep, blog_body = entry.partition(".")
-        info(
-            f"blog_title='{blog_title.strip()}' sep='{sep}' "
-            f"blog_body='{blog_body.strip()}'"
-        )
-    info(f"blog_title='{blog_title}'")
-
-    filename = (
-        blog_title.lower()
-        .replace(":", "")
-        .replace(" ", "-")
-        .replace("'", "")
-        .replace("/", "-")
-    )
-    filename = f"{CODEX_ROOT}{category}/{this_year}-{filename}.md"
-    info(f"{filename=}")
-    if os.path.exists(filename):
-        raise FileExistsError(f"\nfilename {filename} already exists")
-    fd = open(filename, "w", encoding="utf-8", errors="replace")
-    fd.write("---\n")
-    fd.write("title: %s\n" % blog_title)
-    fd.write("date: %s\n" % time.strftime("%Y-%m-%d", NOW))
-    fd.write("tags: %s\n" % tags)
-    fd.write("category: %s\n" % category)
-    fd.write("...\n\n")
-    fd.write(blog_body.strip())
-    if "url" in biblio and "excerpt" in biblio:
-        fd.write("\n\n[%s](%s)\n\n" % (biblio["title"], biblio["url"]))
-        fd.write("> %s\n" % biblio["excerpt"])
-    fd.close()
-    Popen([config.VISUAL, filename])
-
-
-def blog_at_goatee(biblio):
-    """
-    Start at a blog entry at goatee
-    """
-
-    GOATEE_ROOT = f"{config.HOME}/data/2web/goatee.net/content/"
-    info(f"{biblio['comment']=}")
-    blog_title, sep, blog_body = biblio["comment"].partition(". ")
-
-    this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
-    url = biblio.get("url", None)
-    filename = blog_title.lower()
-
-    PHOTO_RE = re.compile(
-        r".*/photo/gallery/(\d\d\d\d/\d\d)" r"/\d\d-\d\d\d\d-(.*)\.jpe?g"
-    )
-    photo_match = False
-    if "goatee.net/photo/" in url:
-        photo_match = re.match(PHOTO_RE, url)
-        if photo_match:
-            # blog_date = re.match(PHOTO_RE, url).group(1).replace("/", "-")
-            blog_title = re.match(PHOTO_RE, url).group(2)
-            filename = blog_title
-            blog_title = blog_title.replace("-", " ")
-    filename = filename.strip().replace(" ", "-").replace("'", "")
-    filename = GOATEE_ROOT + "%s/%s%s-%s.md" % (
-        this_year,
-        this_month,
-        this_day,
-        filename,
-    )
-    info(f"{blog_title=}")
-    info(f"{filename=}")
-    if os.path.exists(filename):
-        raise FileExistsError(f"\nfilename {filename} already exists")
-    fd = open(filename, "w", encoding="utf-8", errors="replace")
-    fd.write("---\n")
-    fd.write("title: %s\n" % blog_title)
-    fd.write("date: %s\n" % time.strftime("%Y-%m-%d", NOW))
-    fd.write("tags: \n")
-    fd.write("category: \n")
-    fd.write("...\n\n")
-    fd.write(blog_body.strip())
-
-    if "url":
-        if biblio.get("excerpt", False):
-            fd.write("\n\n[%s](%s)\n\n" % (biblio["title"], biblio["url"]))
-            fd.write("> %s\n" % biblio["excerpt"])
-        if photo_match:
-            path, jpg = url.rsplit("/", 1)
-            thumb_url = path + "/thumbs/" + jpg
-            alt_text = blog_title.replace("-", " ")
-            fd.write(
-                """<p><a href="%s"><img alt="%s" class="thumb right" """
-                """src="%s"/></a></p>\n\n"""
-                % (
-                    url,
-                    alt_text,
-                    thumb_url,
-                )
-            )
-            fd.write(
-                f'<p><a href="{url}"><img alt="{alt_text}" '
-                f'class="view" src="{url}"/></a></p>'
-            )
-    fd.close()
-    Popen([config.VISUAL, filename])
-
-
-#######################################
 # Dispatchers
 #######################################
 
@@ -1461,305 +885,31 @@ def get_logger(text):
 # Miscellaneous
 #######################################
 
+DESCRIPTION = f"""
+blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
+blog goatee:   b g URL|DOI TITLE. BODY
+mindmap:       b m TAGS URL|DOI ABSTRACT
+nifty:         b n TAGS URL|DOI COMMENT
+work plan:     b j TAGS URL|DOI COMMENT
+console:       b c TAGS URL|DOI COMMENT
+  's. ' begins summary
+  '> '  begins excerpt (as does a character)
+  ', '  begins paraphrase
+  '-- ' begins note
+  'key=value' for metadata; e.g.,
+    au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
+    Entry types (et=cb) values must be typed as container shortcut.
+"""
+
 
 def print_usage(message):
     print(message)
-    print("Usage: b scheme [tags ]?[url ]?[comment ]?")
-
-
-def rotate_files(filename, max=5):
-    f"""create at most {max} rotating files"""
-
-    bare, ext = os.path.splitext(filename)
-    for counter in reversed(range(2, max + 1)):
-        old_filename = f"{bare}{counter-1}{ext}"
-        new_filename = f"{bare}{counter}{ext}"
-        if os.path.exists(old_filename):
-            os.rename(old_filename, new_filename)
-    if os.path.exists(filename):
-        os.rename(filename, f"{bare}1{ext}")
-
-
-def do_console_annotation(biblio):
-    """Augment biblio with console annotations"""
-
-    Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
-
-    def get_tentative_ident(biblio):
-        info(biblio)
-        return td.get_ident(
-            {
-                "author": td.parse_names(biblio["author"]),
-                "title": biblio["title"],
-                # 'date': biblio['date'][0:4],
-                "date": Date(
-                    year=biblio["date"][0:4],
-                    month=None,
-                    day=None,
-                    circa=None,
-                    time=None,
-                ),
-                "_mm_file": "CONSOLE",
-            },
-            {},
-        )
-
-    def edit_annotation(initial_text, resume_edit=False):
-        """Write initial bib info to a tmp file, edit and return"""
-
-        annotation_fn = f"{config.TMP_DIR}b-annotation.txt"
-        if not resume_edit:
-            rotate_files(annotation_fn)
-            if os.path.exists(annotation_fn):
-                os.remove(annotation_fn)
-            with open(annotation_fn, "w", encoding="utf-8") as annotation_file:
-                annotation_file.write(initial_text)
-        call([config.EDITOR, annotation_fn])
-        return open(annotation_fn, "r", encoding="utf-8").readlines()
-
-    def parse_bib(biblio, edited_text):
-        """Parse the bib assignments"""
-
-        # biblio['tags'] and whether to yasn publish are overwritten by
-        # pre-populated and then edited console annotation
-        biblio["tags"] = ""
-        do_publish = False
-        from_Instapaper = False  # are following lines Instapaper markdown?
-        console_annotations = ""
-        biblio["comment"] = ""
-
-        print(("@%s\n" % (tentative_id)))
-        EQUAL_PAT = re.compile(r"(\w{1,3})=")
-        for line in edited_text:
-            info(f"{line=}")
-            line = line.replace("\u200b", "")  # Instapaper export artifact
-            line = line.strip()
-            if line == "":
-                continue
-            if line.startswith("# ["):
-                from_Instapaper = True
-                info(f"{from_Instapaper=}")
-                continue
-            if line == "-p":
-                do_publish = True
-                warning(f"{do_publish=}")
-            elif line.startswith("s."):
-                biblio["comment"] = line[2:].strip()
-                info(f"{biblio['comment']=}")
-            elif "=" in line[0:3]:  # citation only if near start of line
-                cites = EQUAL_PAT.split(line)[1:]
-                # 2 refs to an iterable are '*' unpacked and rezipped
-                cite_pairs = list(zip(*[iter(cites)] * 2))
-                info(f"{cite_pairs=}")
-                for short, value in cite_pairs:
-                    info(f"{bf.BIB_SHORTCUTS=}")
-                    info(f"{bf.BIB_TYPES=}")
-                    info(f"short,value = {short},{value}")
-                    # if short == "t":  # 't=phdthesis'
-                    # biblio[bf.BIB_SHORTCUTS[value]] = biblio["c_web"]
-                    if short == "kw":  # 'kw=complicity
-                        biblio["tags"] += " " + value.strip()
-                    else:
-                        biblio[bf.BIB_SHORTCUTS[short]] = value.strip()
-            else:
-                if from_Instapaper:
-                    if line.startswith(">"):
-                        line = line[1:]  # remove redundant quote mark
-                    elif line.startswith("-"):
-                        pass  # leave comments alone
-                    else:
-                        line = ", " + line  # prepend paraphrase mark
-                console_annotations += "\n\n" + line.strip()
-
-        info("biblio.get('excerpt', '') = '%s'" % (biblio.get("excerpt", "")))
-        info(f"console_annotations = '{console_annotations}'")
-        biblio["excerpt"] = biblio.get("excerpt", "") + console_annotations
-
-        # See if there is a container/bf.CSL_SHORTCUTS redundant with 'c_web'
-        if (
-            "c_web" in biblio
-            and len(
-                list(
-                    biblio[c]
-                    for c in list(bf.CSL_SHORTCUTS.values())
-                    if c in biblio
-                )
-            )
-            > 1
-        ):
-            del biblio["c_web"]
-        return biblio, do_publish
-
-    # code of do_console_annotation
-    info(f"{biblio['author']=}")
-    tentative_id = get_tentative_ident(biblio)
-    initial_text = [
-        f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"
-    ]
-    for key in biblio:
-        if key.startswith("c_"):
-            initial_text.append(
-                f"{bf.CSL_FIELDS[key]}={title_case(biblio[key])}"
-            )
-        if key == "tags" and biblio["tags"]:
-            tags = " ".join(
-                [
-                    "kw=" + KEY_SHORTCUTS.get(tag, tag)
-                    for tag in biblio["tags"].strip().split(" ")
-                ]
-            )
-            initial_text.append(tags)
-    if args.publish:
-        warning("appending -p to text")
-        initial_text.append("-p")
-    if "comment" in biblio and biblio["comment"].strip():
-        initial_text.append("s. " + biblio["comment"])
-    initial_text = "\n".join(initial_text) + "\n"
-    edited_text = edit_annotation(initial_text)
-    try:
-        biblio, do_publish = parse_bib(biblio, edited_text)
-    except (TypeError, KeyError) as e:
-        print(("Error parsing biblio assignments: %s\nTry again." % e))
-        time.sleep(2)
-        edited_text = edit_annotation("", resume_edit=True)
-        biblio, do_publish = parse_bib(biblio, edited_text)
-
-    tweaked_id = get_tentative_ident(biblio)
-    if tweaked_id != tentative_id:
-        print(("logged: %s to" % get_tentative_ident(biblio)), end="\n")
-    return biblio, do_publish
-
-
-def shrink_tweet(comment, title, url, tags):
-    """Shrink tweet to fit into limit"""
-
-    info(f"{comment=}")
-    # TWEET_LIMIT = 280 - 6 # API throws an error for unknown reason
-    TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
-    SHORTENER_LEN = 23  # twitter uses t.co
-
-    info(f"{TWEET_LIMIT=}")
-    tweet_room = TWEET_LIMIT - len(tags)
-    info(f"tweet_room - len(tags) = {tweet_room}")
-
-    info(f"len(url) = {len(url)}")
-    if len(url) > SHORTENER_LEN:
-        tweet_room = tweet_room - SHORTENER_LEN
-        info(f"  shortened to {SHORTENER_LEN}")
-    else:
-        tweet_room = tweet_room - len(url)
-    info(f"tweet_room after url = {tweet_room}")
-
-    info(f"len(title) = {len(title)}")
-    if len(title) > tweet_room:
-        info("title is too long")
-        title = title[0 : tweet_room - 1] + "…"
-        info(f"  truncated to {len(title)}")
-    tweet_room = tweet_room - len(title)
-    info(f"tweet_room after title = {tweet_room}")
-
-    info(f"len(comment) = {len(comment)}")
-    if len(comment) > tweet_room:
-        info("comment is too long")
-        if tweet_room > 5:
-            info(" truncating")
-            comment = comment[0 : tweet_room - 1] + "…"
-            info(f"  truncated to {len(comment)}")
-            info(f"{comment}")
-        else:
-            info(" skipping")
-            comment = ""
-    tweet_room = tweet_room - len(comment)
-    info(f"tweet_room after comment = {tweet_room}")
-
-    comment_delim = ": " if comment and title else ""
-    title = f"“{title}”" if title else ""
-    tweet = f"{comment}{comment_delim}{title} {url} {tags}"
-    return tweet.strip()
-
-
-def yasn_publish(comment, title, subtitle, url, tags):
-    "Send annotated URL to social networks"
-    info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
-    if tags and tags[0] != "#":  # they've not yet been hashified
-        tags = " ".join(
-            [
-                "#" + KEY_SHORTCUTS.get(tag, tag)
-                for tag in tags.strip().split(" ")
-            ]
-        )
-    comment, title, subtitle, url, tags = [
-        v.strip() if isinstance(v, str) else ""
-        for v in [comment, title, subtitle, url, tags]
-    ]
-    if subtitle:
-        title = f"{title}: {subtitle}"
-    if "goatee.net/photo" in url and url.endswith(".jpg"):
-        title = ""
-        tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-        photo = open(f"{config.HOME}/f/{url[19:]}", "rb")
-    else:
-        photo = None
-    total_len = len(comment) + len(tags) + len(title) + len(url)
-    info(
-        f"""comment = {len(comment)}: {comment}
-         title = {len(title)}: {title}
-         url = {len(url)}: {url}
-         tags = {len(tags)}: {tags}
-         {total_len=}"""
-    )
-
-    # https://twython.readthedocs.io/en/latest/index.html
-    from twython import Twython, TwythonError
-
-    # load keys, tokens, and secrets from twitter_token.py
-    from web_api_tokens import (
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
-    )
-
-    twitter = Twython(
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
-    )
-    try:
-        if photo:
-            tweet = shrink_tweet(comment, title, "", tags)
-            response = twitter.upload_media(media=photo)
-            twitter.update_status(
-                status=tweet, media_ids=[response["media_id"]]
-            )
-        else:
-            tweet = shrink_tweet(comment, title, url, tags)
-            twitter.update_status(status=tweet)
-    except TwythonError as e:
-        print(e)
-    finally:
-        print(f"tweeted {len(tweet)}: {tweet}")
+    print(DESCRIPTION)
 
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":
 
-    DESCRIPTION = f"""
-    blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
-    blog goatee:   b g URL|DOI TITLE. BODY
-    mindmap:       b m TAGS URL|DOI ABSTRACT
-    nifty:         b n TAGS URL|DOI COMMENT
-    work plan:     b j TAGS URL|DOI COMMENT
-    console:       b c TAGS URL|DOI COMMENT
-      's. ' begins summary
-      '> '  begins excerpt (as does a character)
-      ', '  begins paraphrase
-      '-- ' begins note
-      'key=value' for metadata; e.g.,
-        au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
-        Entry types (et=cb) values must be typed as container shortcut.
-"""
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
@@ -1844,10 +994,10 @@ if __name__ == "__main__":
         sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
-            text.pretty_tabulate_dict(dictionary, 3)
+            pretty_tabulate_dict(dictionary, 3)
         sys.exit()
     if args.container_shortcuts:
-        text.pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
+        pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))
@@ -1863,7 +1013,7 @@ if __name__ == "__main__":
         biblio = {"title": "", "url": "", "comment": comment}
     biblio["tags"] = params["tags"]
     info(f"{biblio=}")
-    logger(biblio)
+    logger(biblio, args)
 else:  # imported as module
 
     class args:

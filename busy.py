@@ -22,7 +22,6 @@ https://github.com/reagle/thunderdell
 
 import argparse
 import logging
-import os
 import re
 import string
 import sys

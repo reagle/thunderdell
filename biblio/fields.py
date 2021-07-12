@@ -365,3 +365,28 @@ ONLINE_JOURNALS = [
     "salon.com",
     "slate.com",
 ]
+
+SITE_CONTAINER_MAP = (
+    ("arstechnica.com", "Ars Technica", "c_newspaper"),
+    ("atlantic.com", "The Atlantic", "c_magazine"),
+    ("boingboing.net", "Boing Boing", "c_blog"),
+    ("dailydot", "The Daily Dot", "c_newspaper"),
+    ("engadget.com", "Engadget", "c_blog"),
+    ("forbes.com", "Forbes", "c_magazine"),
+    ("huffingtonpost", "Huffington Post", "c_newspaper"),
+    ("lifehacker.com", "Lifehacker", "c_newspaper"),
+    ("medium.com", "Medium", "c_blog"),
+    ("newyorker.com", "New Yorker", "c_magazine"),
+    ("nytimes.com", "The New York Times", "c_newspaper"),
+    ("salon.com", "Salon", "c_magazine"),
+    ("slate.com", "Slate", "c_magazine"),
+    ("techcrunch.com", "TechCrunch", "c_newspaper"),
+    ("theguardian", "The Guardian", "c_newspaper"),
+    ("verge.com", "The Verge", "c_newspaper"),
+    ("Wikipedia_Signpost", "Wikipedia Signpost", "c_web"),
+    ("wired.com", "Wired", "c_magazine"),
+    ("wsj.com", "The Wall Street Journal", "c_newspaper"),
+    ("washingtonpost.com", "The Washington Post", "c_newspaper"),
+    ("fourhourworkweek.com", "4-Hour Workweek", "c_blog"),
+    # ('', '',  'c_magazine'),
+)

@@ -9,7 +9,15 @@
 
 """Textual utilities."""
 
+import logging
 import unicodedata
+
+# function aliases
+critical = logging.critical
+error = logging.error
+warning = logging.warning
+info = logging.info
+debug = logging.debug
 
 
 def escape_latex(text):
@@ -69,8 +77,8 @@ def strip_accents(text):
         return text
 
 
-def uncurly(text):
-    """Replace curly quotes with straight, and dashes to markdown"""
+def smart_to_markdown(text):
+    """Convert unicode punctuation (i.e., "smart quotes") to markdown form."""
     text = (
         text.replace("“", '"')
         .replace("”", '"')

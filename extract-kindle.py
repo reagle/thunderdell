@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 from utils.extract import get_bib_preamble
 
 import change_case
-from utils.text import uncurly
+from utils.text import smart_to_markdown
 
 debug = logging.debug
 info = logging.info
@@ -63,7 +63,7 @@ def process_html(content):
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
-            note = uncurly(str(div)[27:-7])
+            note = smart_to_markdown(str(div)[27:-7])
             if color == "blue":
                 note = change_case.title_case(note)
                 text_new.append(f"section. {note}")

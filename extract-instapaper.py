@@ -42,6 +42,13 @@ def main(argv):
     arg_parser.add_argument("file_names", nargs="+", metavar="FILE_NAMES")
     # optional arguments
     arg_parser.add_argument(
+        "-p",
+        "--publish",
+        action="store_true",
+        default=False,
+        help="publish to social networks",
+    )
+    arg_parser.add_argument(
         "-L",
         "--log-to-file",
         action="store_true",
@@ -79,7 +86,7 @@ def main(argv):
     return args
 
 
-def process_files(file_names):
+def process_files(file_names, args):
     URL_RE = re.compile(r"# \[.*\]\((.*)\)")
     for file_name in file_names:
         info(f"{file_name=}")
@@ -100,12 +107,11 @@ def process_files(file_names):
             biblio["tags"] = "misc"  # default keyword
             del biblio["excerpt"]  # no need for auto excerpt
             info(f"{biblio=}")
-            # breakpoint()
-            busy.log2mm(biblio)
+            busy.log2mm(biblio, args)
 
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
     critical(f"==================================")
     critical(f"{args=}")
-    process_files(args.file_names)
+    process_files(args.file_names, args)

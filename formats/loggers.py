@@ -40,23 +40,6 @@ debug = logging.debug
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
-#######################################
-# Misc utilities
-#######################################
-
-
-def rotate_files(filename, max=5):
-    f"""create at most {max} rotating files"""
-
-    bare, ext = os.path.splitext(filename)
-    for counter in reversed(range(2, max + 1)):
-        old_filename = f"{bare}{counter-1}{ext}"
-        new_filename = f"{bare}{counter}{ext}"
-        if os.path.exists(old_filename):
-            os.rename(old_filename, new_filename)
-    if os.path.exists(filename):
-        os.rename(filename, f"{bare}1{ext}")
-
 
 #######################################
 # Output loggers
@@ -483,6 +466,18 @@ def do_console_annotation(args, biblio):
             {},
         )
 
+    def rotate_files(filename, max=5):
+        """Create at most {max} rotating files"""
+
+        bare, ext = os.path.splitext(filename)
+        for counter in reversed(range(2, max + 1)):
+            old_filename = f"{bare}{counter-1}{ext}"
+            new_filename = f"{bare}{counter}{ext}"
+            if os.path.exists(old_filename):
+                os.rename(old_filename, new_filename)
+        if os.path.exists(filename):
+            os.rename(filename, f"{bare}1{ext}")
+
     def edit_annotation(initial_text, resume_edit=False):
         """Write initial bib info to a tmp file, edit and return"""
 
@@ -596,12 +591,12 @@ def do_console_annotation(args, biblio):
     initial_text = "\n".join(initial_text) + "\n"
     edited_text = edit_annotation(initial_text)
     try:
-        biblio, do_publish = parse_bib(biblio, edited_text, args)
+        biblio, do_publish = parse_bib(args, biblio, edited_text)
     except (TypeError, KeyError) as e:
         print(("Error parsing biblio assignments: %s\nTry again." % e))
         time.sleep(2)
         edited_text = edit_annotation("", resume_edit=True)
-        biblio, do_publish = parse_bib(biblio, edited_text, args)
+        biblio, do_publish = parse_bib(args, biblio, edited_text)
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:

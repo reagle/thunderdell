@@ -40,23 +40,6 @@ debug = logging.debug
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
-#######################################
-# Misc utilities
-#######################################
-
-
-def rotate_files(filename, max=5):
-    f"""create at most {max} rotating files"""
-
-    bare, ext = os.path.splitext(filename)
-    for counter in reversed(range(2, max + 1)):
-        old_filename = f"{bare}{counter-1}{ext}"
-        new_filename = f"{bare}{counter}{ext}"
-        if os.path.exists(old_filename):
-            os.rename(old_filename, new_filename)
-    if os.path.exists(filename):
-        os.rename(filename, f"{bare}1{ext}")
-
 
 #######################################
 # Output loggers
@@ -463,6 +446,18 @@ def do_console_annotation(biblio, args):
     """Augment biblio with console annotations"""
 
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
+
+    def rotate_files(filename, max=5):
+        f"""create at most {max} rotating files"""
+
+        bare, ext = os.path.splitext(filename)
+        for counter in reversed(range(2, max + 1)):
+            old_filename = f"{bare}{counter-1}{ext}"
+            new_filename = f"{bare}{counter}{ext}"
+            if os.path.exists(old_filename):
+                os.rename(old_filename, new_filename)
+        if os.path.exists(filename):
+            os.rename(filename, f"{bare}1{ext}")
 
     def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
         info(biblio)

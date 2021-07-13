@@ -480,7 +480,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 """
 
 
-def build_bib(file_name, output, args):
+def build_bib(args, file_name, output):
     """Parse and process files, including new ones encountered if chasing"""
 
     links = []  # list of other files encountered in the mind map
@@ -524,7 +524,7 @@ def build_bib(file_name, output, args):
             raise
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-        emit_results(entries, args.query, results_file, args)
+        emit_results(args, entries, args.query, results_file)
         results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
@@ -561,14 +561,14 @@ def build_bib(file_name, output, args):
         )
         for entry in list(entries.values()):
             args.query = entry["identifier"]
-            emit_results(entries, args.query, results_file, args)
+            emit_results(args, entries, args.query, results_file)
         results_file.write("</ul></body></html>\n")
         results_file.close()
         if args.in_main:
             webbrowser.open(f"file://{results_file_name}")
 
     else:
-        output(entries, args)
+        output(args, entries)
     return
 
 
@@ -782,7 +782,6 @@ if __name__ == "__main__":
     )
 
     args = arg_parser.parse_args()
-    # print(args)
     file_name = os.path.abspath(args.input_file)
 
     log_level = logging.ERROR  # 40
@@ -863,7 +862,7 @@ if __name__ == "__main__":
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
         output = emit_results
-    build_bib(file_name, output, args)
+    build_bib(args, file_name, output)
     args.outfd.close()
 else:
 

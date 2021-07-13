@@ -26,7 +26,7 @@ info = logging.info
 debug = logging.debug
 
 
-def emit_wp(entries, args):
+def emit_wp(args, entries):
     """Emit citations in Wikipedia's {{citation}} template format for
     use in a List-defined references block.
 

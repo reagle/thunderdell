@@ -86,7 +86,7 @@ def main(argv):
     return args
 
 
-def process_files(file_names, args):
+def process_files(args, file_names):
     URL_RE = re.compile(r"# \[.*\]\((.*)\)")
     for file_name in file_names:
         info(f"{file_name=}")
@@ -107,11 +107,11 @@ def process_files(file_names, args):
             biblio["tags"] = "misc"  # default keyword
             del biblio["excerpt"]  # no need for auto excerpt
             info(f"{biblio=}")
-            busy.log2mm(biblio, args)
+            busy.log2mm(args, biblio)
 
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
     critical(f"==================================")
     critical(f"{args=}")
-    process_files(args.file_names, args)
+    process_files(args, args.file_names)

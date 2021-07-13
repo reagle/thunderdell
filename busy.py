@@ -1013,7 +1013,7 @@ if __name__ == "__main__":
         biblio = {"title": "", "url": "", "comment": comment}
     biblio["tags"] = params["tags"]
     info(f"{biblio=}")
-    logger(args, biblio)
+    logger(biblio, args)
 else:  # imported as module
 
     class args:

@@ -201,7 +201,7 @@ def bibformat_title(title):
 #################################################################
 
 
-def emit_biblatex(args, entries):
+def emit_biblatex(entries, args):
     """Emit a biblatex file"""
     # debug(f"entries = '{entries}'")
 

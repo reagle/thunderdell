@@ -29,7 +29,7 @@ info = logging.info
 debug = logging.debug
 
 
-def emit_json_csl(args, entries):
+def emit_json_csl(entries, args):
     """Emit citations in CSL/JSON for input to pandoc
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html

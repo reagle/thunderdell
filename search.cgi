@@ -68,7 +68,7 @@ def cgi_main():
         td.info = _ignore
         td.dbg = _ignore
 
-        td.build_bib(td.args, MINDMAP, td.emit_results)
+        td.build_bib(MINDMAP, td.emit_results, td.args)
 
         fileObj = codecs.open(TMP_DIR + "query-thunderdell.html", "r", "utf-8")
         print((fileObj.read()))

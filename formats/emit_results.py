@@ -29,7 +29,7 @@ info = logging.info
 debug = logging.debug
 
 
-def emit_results(entries, query, results_file, args):
+def emit_results(args, entries, query, results_file):
     """Emit the results of the query"""
 
     def reverse_print(node, entry, spaces):

@@ -33,5 +33,5 @@ def get_bib_preamble(token):
         scrape_token = busy.scrape_ISBN
     biblio = scrape_token(f"{token}", "").get_biblio()
     biblio["tags"] = ""
-    result = [busy.log2console(biblio, args).strip()]
+    result = [busy.log2console(args, biblio).strip()]
     return result

@@ -98,7 +98,7 @@ def guess_csl_type(entry):
 # fmt: on
 
 
-def emit_yaml_csl(entries, args):
+def emit_yaml_csl(args, entries):
     """Emit citations in YAML/CSL for input to pandoc
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html

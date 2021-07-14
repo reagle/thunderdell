@@ -12,14 +12,13 @@
 import logging
 import re
 
-from formats.emit_yaml_csl import guess_csl_type
-
 from biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_CSL_FIELD_MAP,
     CONTAINERS,
     EXCLUDE_URLS,
 )
+from formats.emit_yaml_csl import guess_csl_type
 
 # logger function aliases
 critical = logging.critical

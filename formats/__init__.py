@@ -11,3 +11,13 @@ from .log2mm import log2mm
 from .log2nifty import log2nifty
 from .log2opencodex import log2opencodex
 from .log2work import log2work
+from .scrapers import (
+    scrape_default,
+    scrape_ISBN,
+    scrape_DOI,
+    scrape_MARC,
+    scrape_ENWP,
+    scrape_WMMeta,
+    scrape_twitter,
+    scrape_reddit,
+)

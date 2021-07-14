@@ -89,9 +89,9 @@ class scrape_default(object):
         """return guess of article author"""
 
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
-        # TODO: find NYT author
         AUTHOR_XPATHS = (
             """//meta[@name='DC.Contributor']/@content""",
+            """//meta[@name='byl']/@content""",  # NYT
             """//meta[@name='author']/@content""",
             """//meta[@name='Author']/@content""",
             """//meta[@name='AUTHOR']/@content""",
@@ -121,6 +121,7 @@ class scrape_default(object):
                     author = string.capwords(" ".join(xpath_result).strip())
                     if author.lower().startswith("by "):
                         author = author[3:]
+                    author = author.replace(" And ", ", ")
                     info(f"{author=}; {path=}")
                     if author != "":
                         return author
@@ -598,7 +599,6 @@ class scrape_WMMeta(scrape_default):
         return unescape_XML(permalink)
 
 
-# TODO: xpath throw an error on Twitte 20210714
 class scrape_twitter(scrape_default):
     def __init__(self, url, comment):
         print(("Scraping twitter"), end="\n")
@@ -619,6 +619,8 @@ class scrape_twitter(scrape_default):
 
     def get_author(self):
 
+        # TODO: 20210714 xpath throw an error on author
+        # twitter return crap if JS not detected
         author = self.HTML_p.xpath("//div[@data-user-id]/@data-name")[0]
         return author.strip()
 

@@ -15,11 +15,11 @@ import re
 import urllib
 from html import escape
 
-from formats.emit_biblatex import create_biblatex_author
-
 # from thunderdell import CLIENT_HOME, HOME
 import config
 from utils.web import escape_XML
+
+from formats.emit_biblatex import create_biblatex_author
 
 # logger function aliases
 critical = logging.critical

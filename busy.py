@@ -34,12 +34,12 @@ from biblio import fields as bf
 from biblio.fields import SITE_CONTAINER_MAP
 from biblio.keywords import LIST_OF_KEYSHORTCUTS
 from change_case import sentence_case
-from formats.loggers import (
-    blog_at_goatee,
-    blog_at_opencodex,
+from formats import (
     log2console,
+    log2goatee,
     log2mm,
     log2nifty,
+    log2opencodex,
     log2work,
 )
 from utils.text import pretty_tabulate_dict, smart_to_markdown
@@ -869,9 +869,9 @@ def get_logger(text):
         elif params["scheme"] == "c":
             function = log2console
         elif params["scheme"] == "o":
-            function = blog_at_opencodex
+            function = log2opencodex
         elif params["scheme"] == "g":
-            function = blog_at_goatee
+            function = log2goatee
         if function:
             return function, params
         else:

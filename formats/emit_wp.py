@@ -13,10 +13,7 @@ import calendar
 import logging
 
 # from thunderdell import CLIENT_HOME, HOME
-from biblio.fields import (
-    BIB_SHORTCUTS_ITEMS,
-    BIBLATEX_WP_FIELD_MAP,
-)
+from biblio.fields import BIB_SHORTCUTS_ITEMS, BIBLATEX_WP_FIELD_MAP
 
 # logger function aliases
 critical = logging.critical

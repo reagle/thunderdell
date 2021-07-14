@@ -604,12 +604,40 @@ class scrape_twitter(scrape_default):
         print(("Scraping twitter"), end="\n")
         scrape_default.__init__(self, url, comment)
 
+        # extract username and id
+        if "://twitter.com/" in self.url:
+            id = url.rsplit("/", 1)[1]
+        else:
+            raise RuntimeError("cannot identify twitter ID in {url}")
+
+        # https://twython.readthedocs.io/en/latest/index.html
+        from twython import Twython, TwythonError
+
+        from utils.web_api_tokens import (
+            TW_ACCESS_TOKEN,
+            TW_ACCESS_TOKEN_SECRET,
+            TW_CONSUMER_KEY,
+            TW_CONSUMER_SECRET,
+        )
+
+        twitter = Twython(
+            TW_CONSUMER_KEY,
+            TW_CONSUMER_SECRET,
+            TW_ACCESS_TOKEN,
+            TW_ACCESS_TOKEN_SECRET,
+        )
+        try:
+            self.status = twitter.show_status(id=id)
+        except TwythonError as err:
+            print(err)
+            raise err
+
     def get_biblio(self):
         biblio = {
             "author": self.get_author(),
             "title": self.get_title(),
             "date": self.get_date(),
-            "permalink": self.get_permalink(),
+            "permalink": self.url,
             "excerpt": self.get_excerpt(),
             "comment": self.comment,
             "url": self.url,
@@ -619,34 +647,23 @@ class scrape_twitter(scrape_default):
 
     def get_author(self):
 
-        # TODO: 20210714 xpath throw an error on author
-        # twitter return crap if JS not detected
-        author = self.HTML_p.xpath("//div[@data-user-id]/@data-name")[0]
-        return author.strip()
+        name = self.status["user"]["name"].strip()
+        screen_name = self.status["user"]["screen_name"].strip()
+        return f"{name} ({screen_name})"
 
     def get_title(self):
 
-        authororg_title = self.HTML_p.xpath("//title/text()")[0]
-        info(f"{authororg_title=}")
-        author_org, title = authororg_title.split(":", 1)
-        # author_org, title = authororg_title.split('|', 1)
-        # author = author_org.split('/', 1)[1]
-        return title.strip()
+        return self.status["text"].strip()
 
     def get_date(self):
 
-        date = self.HTML_p.xpath(
-            "//a[contains(@class,'tweet-timestamp')]/span/@data-time"
-        )[0]
-        date = datetime.fromtimestamp(int(date)).strftime("%Y%m%d")
+        created_at = self.status["created_at"].strip()
+        date = dt_parse(self.status["created_at"]).strftime("%Y%m%d")
         return date
 
     def get_excerpt(self):
 
-        excerpt = self.HTML_p.xpath(
-            "//p[contains(@class,'tweet-text')]/text()"
-        )[0]
-        return excerpt
+        return self.status["text"].strip()
 
 
 class scrape_reddit(scrape_default):

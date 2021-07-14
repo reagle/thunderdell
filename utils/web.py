@@ -213,7 +213,6 @@ def yasn_publish(comment, title, subtitle, url, tags):
     # https://twython.readthedocs.io/en/latest/index.html
     from twython import Twython, TwythonError
 
-    # load keys, tokens, and secrets from twitter_token.py
     from .web_api_tokens import (
         TW_ACCESS_TOKEN,
         TW_ACCESS_TOKEN_SECRET,

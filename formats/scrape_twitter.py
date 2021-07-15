@@ -33,7 +33,7 @@ from utils.web_api_tokens import (
     TW_CONSUMER_SECRET,
 )
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -49,14 +49,16 @@ twitter = Twython(
     TW_ACCESS_TOKEN_SECRET,
 )
 
+test = "bar"
+
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_twitter(scrape_default):
+class ScrapeTwitter(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping twitter"), end="\n")
-        scrape_default.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url, comment)
 
         # extract username and id
         if "://twitter.com/" in self.url:

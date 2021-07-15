@@ -21,7 +21,7 @@ import logging
 import time
 from change_case import sentence_case
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -34,7 +34,7 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_ISBN(scrape_default):
+class ScrapeISBN(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping ISBN;"), end="\n")
         self.url = url

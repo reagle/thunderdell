@@ -28,7 +28,7 @@ def get_bib_preamble(token):
 
     info(f"{token=}")
     if token.startswith("10"):
-        scrape_token = busy.scrape_DOI
+        scrape_token = busy.ScrapeDOI
     else:
         scrape_token = busy.scrape_ISBN
     biblio = scrape_token(f"{token}", "").get_biblio()

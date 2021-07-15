@@ -18,8 +18,8 @@ https://github.com/reagle/thunderdell
 """
 
 import logging
-import time
 
+import doi_query
 from change_case import sentence_case
 
 from .scrape_default import ScrapeDefault
@@ -31,9 +31,6 @@ warning = logging.warning
 info = logging.info
 debug = logging.debug
 
-NOW = time.localtime()
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-
 
 class ScrapeDOI(ScrapeDefault):
     def __init__(self, url, comment):
@@ -42,8 +39,6 @@ class ScrapeDOI(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-
-        import doi_query
 
         info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)

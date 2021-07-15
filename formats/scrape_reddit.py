@@ -35,7 +35,6 @@ info = logging.info
 debug = logging.debug
 
 NOW = time.localtime()
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 class ScrapeReddit(ScrapeDefault):

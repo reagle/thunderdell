@@ -19,13 +19,11 @@ https://github.com/reagle/thunderdell
 
 import logging
 import textwrap
-import time
 
 from dateutil.parser import parse as dt_parse
 
 # https://twython.readthedocs.io/en/latest/index.html
 from twython import Twython, TwythonError
-
 from utils.web_api_tokens import (
     TW_ACCESS_TOKEN,
     TW_ACCESS_TOKEN_SECRET,
@@ -48,11 +46,6 @@ twitter = Twython(
     TW_ACCESS_TOKEN,
     TW_ACCESS_TOKEN_SECRET,
 )
-
-test = "bar"
-
-NOW = time.localtime()
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 class ScrapeTwitter(ScrapeDefault):

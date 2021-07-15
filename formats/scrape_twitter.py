@@ -23,6 +23,16 @@ import time
 
 from dateutil.parser import parse as dt_parse
 
+# https://twython.readthedocs.io/en/latest/index.html
+from twython import Twython, TwythonError
+
+from utils.web_api_tokens import (
+    TW_ACCESS_TOKEN,
+    TW_ACCESS_TOKEN_SECRET,
+    TW_CONSUMER_KEY,
+    TW_CONSUMER_SECRET,
+)
+
 from .scrape_default import scrape_default
 
 # function aliases
@@ -31,6 +41,13 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
+
+twitter = Twython(
+    TW_CONSUMER_KEY,
+    TW_CONSUMER_SECRET,
+    TW_ACCESS_TOKEN,
+    TW_ACCESS_TOKEN_SECRET,
+)
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
@@ -47,21 +64,6 @@ class scrape_twitter(scrape_default):
         else:
             raise RuntimeError("cannot identify twitter ID in {url}")
 
-        # https://twython.readthedocs.io/en/latest/index.html
-        from twython import Twython, TwythonError
-        from utils.web_api_tokens import (
-            TW_ACCESS_TOKEN,
-            TW_ACCESS_TOKEN_SECRET,
-            TW_CONSUMER_KEY,
-            TW_CONSUMER_SECRET,
-        )
-
-        twitter = Twython(
-            TW_CONSUMER_KEY,
-            TW_CONSUMER_SECRET,
-            TW_ACCESS_TOKEN,
-            TW_ACCESS_TOKEN_SECRET,
-        )
         try:
             self.status = twitter.show_status(id=id, tweet_mode="extended")
         except TwythonError as err:
@@ -90,7 +92,9 @@ class scrape_twitter(scrape_default):
     def get_title(self):
 
         title = self.status["full_text"].split("\n")[0]
-        title = textwrap.wrap(title, 136, break_long_words=False)[0] + "..."
+        title = textwrap.shorten(
+            title, 136, break_long_words=False, placeholder="..."
+        )
         return title
 
     def get_date(self):

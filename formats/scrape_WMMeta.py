@@ -24,7 +24,7 @@ import time
 from biblio import fields as bf
 from utils.web import get_HTML, unescape_XML
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -37,16 +37,16 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_WMMeta(scrape_default):
+class ScrapeWMMeta(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping Wikimedia Meta;"), end="\n")
-        scrape_default.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):
         return "Wikimedia"
 
     def get_title(self):
-        title = scrape_default.get_title(self)  # super()?
+        title = ScrapeDefault.get_title(self)  # super()?
         return title.replace(" - Meta", "")
 
     def get_date(self):  # Meta is often foobar because of proxy bugs

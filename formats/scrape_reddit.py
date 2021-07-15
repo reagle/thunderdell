@@ -25,7 +25,7 @@ from datetime import datetime
 from change_case import sentence_case
 from utils.web import get_JSON
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -38,10 +38,10 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_reddit(scrape_default):
+class ScrapeReddit(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping reddit"), end="\n")
-        scrape_default.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url, comment)
 
         RE_REDDIT_URL = re.compile(
             r"""

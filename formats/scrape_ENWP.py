@@ -24,7 +24,7 @@ import time
 from biblio import fields as bf
 from utils.web import get_HTML, unescape_XML
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -37,10 +37,10 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_ENWP(scrape_default):
+class ScrapeENWP(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping en.Wikipedia;"), end="\n")
-        scrape_default.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):
         return "Wikipedia"
@@ -49,7 +49,7 @@ class scrape_ENWP(scrape_default):
         return self.get_title(), self.get_org()
 
     def get_title(self):
-        title = scrape_default.get_title(self)  # use super()?
+        title = ScrapeDefault.get_title(self)  # use super()?
         info(f"title = '{title}'")
         return title.replace(" - Wikipedia", "")
 

@@ -21,7 +21,7 @@ import logging
 import re
 import time
 
-from .scrape_default import scrape_default
+from .scrape_default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -34,10 +34,10 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_MARC(scrape_default):
+class ScrapeMARC(ScrapeDefault):
     def __init__(self, url, comment):
         print(("Scraping MARC;"), end="\n")
-        scrape_default.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):
         try:

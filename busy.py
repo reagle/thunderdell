@@ -37,14 +37,14 @@ from formats import (
     log2work,
 )
 from formats import (
-    scrape_default,
-    scrape_ISBN,
-    scrape_DOI,
-    scrape_MARC,
-    scrape_ENWP,
-    scrape_WMMeta,
-    scrape_twitter,
-    scrape_reddit,
+    ScrapeDefault,
+    ScrapeISBN,
+    ScrapeDOI,
+    ScrapeMARC,
+    ScrapeENWP,
+    ScrapeWMMeta,
+    ScrapeTwitter,
+    ScrapeReddit,
 )
 from utils.text import pretty_tabulate_dict
 
@@ -75,18 +75,18 @@ def get_scraper(url, comment):
     )
     info(f"url = '{url}'")
     if url.lower().startswith("doi:"):
-        return scrape_DOI(url, comment)
+        return ScrapeDOI(url, comment)
     elif url.lower().startswith("isbn:"):
-        return scrape_ISBN(url, comment)
+        return ScrapeISBN(url, comment)
     else:
         host_path = url.split("//")[1]
         dispatch_scraper = (
-            ("en.wikipedia.org/w", scrape_ENWP),
-            ("meta.wikimedia.org/w", scrape_WMMeta),
-            ("marc.info/", scrape_MARC),
-            ("twitter.com/", scrape_twitter),
-            ("www.reddit.com/", scrape_reddit),
-            ("", scrape_default),  # default: make sure last
+            ("en.wikipedia.org/w", ScrapeENWP),
+            ("meta.wikimedia.org/w", ScrapeWMMeta),
+            ("marc.info/", ScrapeMARC),
+            ("twitter.com/", ScrapeTwitter),
+            ("www.reddit.com/", ScrapeReddit),
+            ("", ScrapeDefault),  # default: make sure last
         )
 
         for prefix, scraper in dispatch_scraper:

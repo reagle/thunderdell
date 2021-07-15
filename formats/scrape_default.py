@@ -40,7 +40,7 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class scrape_default(object):
+class ScrapeDefault(object):
     """
     Default and base class scraper.
     """

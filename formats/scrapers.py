@@ -20,6 +20,7 @@ https://github.com/reagle/thunderdell
 import logging
 import re
 import string
+import textwrap
 import time
 from datetime import datetime
 
@@ -30,7 +31,6 @@ from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_JSON, get_text, unescape_XML
-
 
 # function aliases
 critical = logging.critical
@@ -627,7 +627,7 @@ class scrape_twitter(scrape_default):
             TW_ACCESS_TOKEN_SECRET,
         )
         try:
-            self.status = twitter.show_status(id=id)
+            self.status = twitter.show_status(id=id, tweet_mode="extended")
         except TwythonError as err:
             print(err)
             raise err
@@ -653,17 +653,17 @@ class scrape_twitter(scrape_default):
 
     def get_title(self):
 
-        return self.status["text"].strip()
+        title = self.status["full_text"].split("\n")[0]
+        title = textwrap.wrap(title, 136, break_long_words=False)[0] + "..."
+        return title
 
     def get_date(self):
 
-        created_at = self.status["created_at"].strip()
-        date = dt_parse(self.status["created_at"]).strftime("%Y%m%d")
-        return date
+        return dt_parse(self.status["created_at"]).strftime("%Y%m%d")
 
     def get_excerpt(self):
 
-        return self.status["text"].strip()
+        return self.status["full_text"].strip()
 
 
 class scrape_reddit(scrape_default):

@@ -19,7 +19,6 @@ https://github.com/reagle/thunderdell
 
 import logging
 import re
-import time
 
 from biblio import fields as bf
 from utils.web import get_HTML, unescape_XML
@@ -32,9 +31,6 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
-
-NOW = time.localtime()
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 class ScrapeWMMeta(ScrapeDefault):

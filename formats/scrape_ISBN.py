@@ -18,7 +18,7 @@ https://github.com/reagle/thunderdell
 """
 
 import logging
-import time
+
 from change_case import sentence_case
 
 from .scrape_default import ScrapeDefault
@@ -29,9 +29,6 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
-
-NOW = time.localtime()
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 class ScrapeISBN(ScrapeDefault):

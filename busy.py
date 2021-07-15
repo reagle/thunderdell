@@ -65,8 +65,16 @@ MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 def get_scraper(url, comment):
     """
-    Use the URL to specify a screenscraper.
-    """
+    Use the URL to specify a screen scraper, e.g.,
+
+    busy.py c .test https://en.wikipedia.org/wiki/Joseph_M._Reagle_Jr.
+    busy.py c .test https://meta.wikimedia.org/wiki/Steward_requests/Bot_status
+    busy.py c .test https://old.reddit.com/r/Python/comments/ojze8e/lets_write_a_toy_emulator_in_python/
+    busy.py c .test https://twitter.com/moiragweigel/status/1415393653678395393
+    busy.py c .test https://twitter.com/vaurorapub/status/1415394419688181761
+    busy.py c .test doi:10.1177/1097184x15613831
+    busy.py c .test isbn:9780860917137
+    """  # noqa: E501
 
     url = re.sub(  # use canonical reddit domain
         r"(https?://(old|i)\.reddit.com/(.*)(\.compact)?)",

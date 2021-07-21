@@ -9,8 +9,7 @@
 
 import logging
 
-# TODO: this is a recursive import, move to logger and scaper specific
-import busy  # https://github.com/reagle/thunderdell
+import formats
 
 debug = logging.debug
 info = logging.info
@@ -28,10 +27,10 @@ def get_bib_preamble(token):
 
     info(f"{token=}")
     if token.startswith("10"):
-        scrape_token = busy.ScrapeDOI
+        scrape_token = formats.ScrapeDOI
     else:
-        scrape_token = busy.scrape_ISBN
+        scrape_token = formats.ScrapeISBN
     biblio = scrape_token(f"{token}", "").get_biblio()
     biblio["tags"] = ""
-    result = [busy.log2console(args, biblio).strip()]
+    result = [formats.log2console(args, biblio).strip()]
     return result

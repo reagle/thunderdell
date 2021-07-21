@@ -38,18 +38,21 @@ def process_html(content):
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
 
     RE_COLOR_PAGE = re.compile(
-        r"(?P<color>yellow|blue)</span>\) .*? Page (?P<page>[\dcdilmxv]+)",
+        r"(?P<color>yellow|blue)</span>\) .*? (?P<type>Page|Location)"
+        r" (?P<page>[\dcdilmxv]+)",
     )
     color = ""
     page = ""
     text_new = []
-
-    # replace '’' with "'"
+    _, pagination_type, _ = RE_COLOR_PAGE.search(content).groupdict().values()
 
     if RE_ISBN.search(content):
         ISBN = RE_ISBN.search(content).group(0)
         info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
+    text_new.append("edition = Kindle")
+    if pagination_type == "Location":
+        text_new.append("pagination = location")
 
     soup = BeautifulSoup(content, "html.parser")
     divs = soup.findAll("div")
@@ -57,7 +60,7 @@ def process_html(content):
         debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, page = (
+                color, _, page = (
                     RE_COLOR_PAGE.search(str(div)).groupdict().values()
                 )
             except AttributeError:

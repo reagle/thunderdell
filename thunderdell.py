@@ -572,6 +572,7 @@ def build_bib(args, file_name, output):
     return
 
 
+# TODO: replace "~/bin" with HOME
 # TODO: move golden tests to something standard, perhaps:
 # https://pypi.org/project/pytest-golden/
 # https://stackoverflow.com/questions/3942820/how-to-do-unit-testing-of-functions-writing-files-using-pythons-unittest

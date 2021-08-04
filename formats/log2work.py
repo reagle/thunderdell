@@ -15,6 +15,7 @@ https://github.com/reagle/thunderdell
 
 import logging
 import time
+import unicodedata
 
 import config
 from biblio.keywords import KEY_SHORTCUTS
@@ -63,7 +64,7 @@ def log2work(args, biblio):
         f'<li class="event" id="{uid}">{date_token}: '
         f"{hashtags}] {html_comment}</li>"
     )
-    info(log_item)
+    info(f"{log_item=}")
 
     plan_tree = l_etree.parse(
         ofile, l_etree.XMLParser(ns_clean=True, recover=True)
@@ -75,7 +76,15 @@ def log2work(args, biblio):
     info("ul_found = %s" % (ul_found))
     if ul_found:
         ul_found[0].text = "\n              "
-        log_item_xml = l_etree.XML(log_item)
+        try:  # lxml bug https://bugs.launchpad.net/lxml/+bug/1902364
+            log_item_xml = l_etree.XML(log_item)
+        except l_etree.XMLSyntaxError:
+            # if lxml chokes on unicode, convert to ascii
+            log_item_xml = l_etree.XML(
+                unicodedata.normalize("NFKD", log_item).encode(
+                    "ascii", "ignore"
+                )
+            )
         log_item_xml.tail = "\n\n              "
         ul_found[0].insert(0, log_item_xml)
         new_content = l_etree.tostring(

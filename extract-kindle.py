@@ -32,6 +32,23 @@ critical = logging.critical
 exception = logging.exception
 
 
+def process_email(file_name):
+    """Process parts of a MIME message store in file."""
+
+    with open(file_name, "rb") as fp:
+        msg = BytesParser(policy=policy.default).parse(fp)
+        for part in msg.walk():
+            debug(f"{part=}")
+            msg_content_type = part.get_content_subtype()
+            if msg_content_type == "html":
+                debug(f"part is HTML: %s" % msg_content_type)
+                charset = part.get_content_charset(failobj="utf-8")
+                content = part.get_payload(decode=True).decode(
+                    charset, "replace"
+                )
+                return content
+
+
 def process_html(content):
     """Process text for annotation kind, color, and page number."""
 
@@ -203,37 +220,25 @@ if __name__ == "__main__":
     file_names = args.file_names
     for file_name in file_names:
         debug(f"{file_name=}")
-        if args.output_to_file:
-            fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-            fixed_fd = open(fixed_fn, "w")
-        else:
-            fixed_fd = sys.stdout
-
         if file_name.endswith(".eml"):
-            with open(file_name, "rb") as fp:
-                msg = BytesParser(policy=policy.default).parse(fp)
-                for part in msg.walk():
-                    debug(f"{part=}")
-                    msg_content_type = part.get_content_subtype()
-                    if msg_content_type == "html":
-                        debug(f"part is HTML: %s" % msg_content_type)
-                        charset = part.get_content_charset(failobj="utf-8")
-                        content = part.get_payload(decode=True).decode(
-                            charset, "replace"
-                        )
-                        new_text = process_html(content)
-                        with open("fixed.html", "w") as fp_html:
-                            fp_html.write(content)
-
-            fixed_fd.write(new_text)
-            fixed_fd.close()
+            fixed_fn = splitext(file_name)[0] + "-fixed.txt"
+            cmd_extract_dication = ["extract-dictation.py", "-p", fixed_fn]
+            content = process_email(file_name)
+            new_text = process_html(content)
+            if args.output_to_file:
+                with open(fixed_fn, "w") as fixed_fd:
+                    fixed_fd.write(new_text)
+                subprocess.run(["open", fixed_fn])
+                user_input = input(
+                    f"\nfollow up with extract-dicatation.py? 'y' for yes: "
+                )
+                if user_input == "y":
+                    subprocess.run(cmd_extract_dication)
+                print(f"{cmd_extract_dication}")
+            else:
+                print(new_text)
         else:
             raise IOError(
                 "Do not recognize file type: {file_name}"
                 " {splitext(file_name)[1]}."
             )
-
-        if args.output_to_file:
-            subprocess.call(["open", fixed_fn])
-            print(f"follow up with:")
-            print(f"extract-dictation.py -p {fixed_fn}")

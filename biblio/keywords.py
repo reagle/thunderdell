@@ -125,7 +125,6 @@ WP_KEY_SHORTCUTS = {
     "fru": "frustration",
     "gov": "governance",
     "mot": "motivation",
-    "neu": "neutrality",
     "not": "notability",
     "par": "participation",
     "phi": "philosophy",

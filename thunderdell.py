@@ -128,7 +128,7 @@ def identity_increment(ident, entries):
             ident = f"{ident[0:-1]}{suffix}"
         else:
             ident += "1"
-        # debug(f'\t yielded    {ident}')
+        # debug(f"\t yielded    {ident}")
     return ident
 
 
@@ -496,13 +496,14 @@ def build_bib(args, file_name, output):
         try:
             doc = parse(mm_file).getroot()
         except IOError as err:
-            debug(f"    failed to parse {mm_file} because of {err}")
+            # debug(f"    failed to parse {mm_file} because of {err}")
             continue
         # debug(f"    successfully parsed {mm_file}")
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])
         # debug("    done.appending %s" % os.path.abspath(mm_file))
         done.append(mm_file)
         if args.chase:
+            # debug("chasing")
             for link in links:
                 link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
                 if link not in done and link not in mm_files:
@@ -513,6 +514,7 @@ def build_bib(args, file_name, output):
                         mm_files.append(link)
 
     if args.query:
+        # debug("querying")
         results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
         if os.path.exists(results_file_name):
             os.remove(results_file_name)
@@ -527,6 +529,7 @@ def build_bib(args, file_name, output):
         emit_results(args, entries, args.query, results_file)
         results_file.write("</ul></body></html>\n")
         results_file.close()
+        # debug(f"{results_file=}")
         if args.in_main:
             ADDRESS_IN_USE = False
             os.chdir(config.CGI_DIR + "/..")

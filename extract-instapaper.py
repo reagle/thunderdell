@@ -17,7 +17,6 @@ from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 import busy
 
 HOME = str(Path("~").expanduser())
-
 sys.path.insert(0, f"{HOME}/bin/td")
 
 debug = logging.debug

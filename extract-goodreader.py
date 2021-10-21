@@ -316,13 +316,13 @@ if __name__ == "__main__":
         new_text = process_text(text)
 
         fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-        cmd_extract_dication = f"extract-dictation.py -p {fixed_fn}"
+        cmd_extract_dication = ["extract-dictation.py", "-p", fixed_fn]
         if args.output_to_file:
             with open(fixed_fn, "w") as fixed_fd:
                 fixed_fd.write(new_text)
             subprocess.run(["open", fixed_fn])
             user_input = input(
-                f"\nfollow up with extract-dicatation.py? 'y' for yes: "
+                f"\nfollow up with extract-dictation.py? 'y' for yes: "
             )
             if user_input == "y":
                 subprocess.run(cmd_extract_dication)

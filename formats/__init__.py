@@ -11,6 +11,7 @@ from .log2mm import log2mm
 from .log2nifty import log2nifty
 from .log2opencodex import log2opencodex
 from .log2work import log2work
+from .scrape_arxiv import ScrapeArXiv
 from .scrape_default import ScrapeDefault
 from .scrape_ISBN import ScrapeISBN
 from .scrape_DOI import ScrapeDOI

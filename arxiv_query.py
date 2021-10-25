@@ -6,16 +6,20 @@
 # (c) Copyright 2015-2017 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-""" Return CrossRef bibliographic data for a given a DOI.
-    See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html # noqa: E501
+""" Return bibliographic data for a given a arXiv number.
+
+Thank you to arXiv for use of its open access interoperability
+https://arxiv.org/help/api/index
+https://arxiv.org/help/api/basics
+http://export.arxiv.org/api/query?id_list=2001.08293
 """
 
-import json
 import logging
 import pprint
-import sys
-
 import requests
+import sys
+import xmltodict
+
 
 log_level = 100  # default
 critical = logging.critical
@@ -23,18 +27,17 @@ info = logging.info
 debug = logging.debug
 
 ACCEPT_HEADERS = {
-    "json": "application/citeproc+json",
-    "bibtex": "text/bibliography;style=bibtex",
+    "atom": "application/atom+xml",
 }
 
 
-def query(doi, accept="application/citeproc+json"):
-    """Query the DOI Web service; returns string"""
+def query(number, accept="application/atom+xml"):
+    """Query the number Web service; returns string"""
 
     info(f"{accept=}")
-    info(f"{doi=}")
+    info(f"{number=}")
     headers = {"Accept": accept}
-    url = "http://dx.doi.org/%s" % doi
+    url = "http://export.arxiv.org/api/query?id_list=%s" % number
     info(f"{url=}")
     r = requests.get(url, headers=headers)
     requested_content_type = accept.split(";")[0]
@@ -42,8 +45,9 @@ def query(doi, accept="application/citeproc+json"):
     returned_content_type = r.headers["content-type"]
     info("{returned_content_type=}; {requested_content_type=}")
     if requested_content_type in returned_content_type:
-        json_bib = json.loads(r.content)
-        return json_bib
+        xml_bib = r.content
+        return xmltodict.parse(xml_bib)["feed"]["entry"]
+
     else:
         return False
 
@@ -53,10 +57,10 @@ if "__main__" == __name__:
     import argparse
 
     arg_parser = argparse.ArgumentParser(
-        description="Given a doi return bibliographic data."
+        description="Given an arXiv number return bibliographic data."
     )
     # positional arguments
-    arg_parser.add_argument("DOI", nargs="+")
+    arg_parser.add_argument("number", nargs="+")
     # optional arguments
     arg_parser.add_argument("-s", "--style", help="style of bibliography data")
     arg_parser.add_argument(
@@ -89,7 +93,7 @@ if "__main__" == __name__:
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="doi_query.log",
+            filename="arxiv_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
@@ -97,7 +101,7 @@ if "__main__" == __name__:
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    accept = ACCEPT_HEADERS["json"]
+    accept = ACCEPT_HEADERS["atom"]
     if args.style:
         if args.style in ACCEPT_HEADERS:
             accept = ACCEPT_HEADERS[args.style]
@@ -105,4 +109,4 @@ if "__main__" == __name__:
             accept = args.style
     info("accept = %s " % accept)
 
-    pprint.pprint(query(args.DOI[0], accept))
+    pprint.pprint(query(args.number[0], accept))

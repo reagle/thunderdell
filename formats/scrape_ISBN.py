@@ -39,10 +39,10 @@ class ScrapeISBN(ScrapeDefault):
 
     def get_biblio(self):
 
-        import book_query
+        import isbn_query
 
         info(f"url = {self.url}")
-        json_bib = book_query.query(self.url)
+        json_bib = isbn_query.query(self.url)
         info(f"json_bib = '{json_bib}'")
         biblio = {
             "permalink": self.url,

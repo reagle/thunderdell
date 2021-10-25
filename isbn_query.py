@@ -6,7 +6,7 @@
 # (c) Copyright 2015 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-""" Return bibliographic data for a given a ISBN.
+""" Return bibliographic data for a given an ISBN.
 """
 
 import json

@@ -17,9 +17,8 @@ a scraping.
 https://github.com/reagle/thunderdell
 """
 
-import logging
-
 import arxiv_query
+import logging
 
 from change_case import sentence_case
 
@@ -42,37 +41,38 @@ class ScrapeArXiv(ScrapeDefault):
 
     def __init__(self, url, comment):
         print(("Scraping arXiv;"), end="\n")
-        self.url = url
+        self.url = url[6:]
         self.comment = comment
 
     def get_biblio(self):
 
         info(f"url = {self.url}")
-        json_bib = arxiv_query.query(self.url)
+        dict_bib = arxiv_query.query(self.url)
         biblio = {
             "permalink": self.url,
             "excerpt": "",
             "comment": self.comment,
         }
-        for key, value in list(json_bib.items()):
+        for key, value in list(dict_bib.items()):
             info(f"{key=} {value=} {type(value)=}")
             if value in (None, [], ""):
                 pass
             elif key == "author":
-                biblio["author"] = self.get_author(json_bib)
-            elif key == "issued":
-                biblio["date"] = self.get_date(json_bib)
+                biblio["author"] = self.get_author(dict_bib)
+            elif key == "published":
+                biblio["date"] = self.get_date(dict_bib)
+            # TODO: finish the items below
             elif key == "page":
-                biblio["pages"] = json_bib["page"]
+                biblio["pages"] = dict_bib["page"]
             elif key == "container-title":
-                biblio["journal"] = json_bib["container-title"]
+                biblio["journal"] = dict_bib["container-title"]
             elif key == "issue":
-                biblio["number"] = json_bib["issue"]
+                biblio["number"] = dict_bib["issue"]
             elif key == "URL":
-                biblio["permalink"] = biblio["url"] = json_bib["URL"]
+                biblio["permalink"] = biblio["url"] = dict_bib["URL"]
             else:
-                biblio[key] = json_bib[key]
-        if "title" not in json_bib:
+                biblio[key] = dict_bib[key]
+        if "title" not in dict_bib:
             biblio["title"] = "UNKNOWN"
         else:
             biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
@@ -82,28 +82,10 @@ class ScrapeArXiv(ScrapeDefault):
     def get_author(self, bib_dict):
         names = "UNKNOWN"
         if "author" in bib_dict:
-            names = ""
-            for name_dic in bib_dict["author"]:
-                info(f"name_dic = '{name_dic}'")
-                joined_name = f"{name_dic['given']} {name_dic['family']}"
-                info(f"joined_name = '{joined_name}'")
-                names = names + ", " + joined_name
-            names = names[2:]  # remove first comma
-        return names
+            names = [author["name"] for author in bib_dict["author"]]
+        return ", ".join(names)
 
     def get_date(self, bib_dict):
-        # "issued":{"date-parts":[[2007,3]]}
-        date_parts = bib_dict["issued"]["date-parts"][0]
-        info(f"{date_parts=}")
-        if len(date_parts) == 3:
-            year, month, day = date_parts
-            date = "%d%02d%02d" % (int(year), int(month), int(day))
-        elif len(date_parts) == 2:
-            year, month = date_parts
-            date = "%d%02d" % (int(year), int(month))
-        elif len(date_parts) == 1:
-            date = str(date_parts[0])
-        else:
-            date = "0000"
+        date = bib_dict["published"][0:10].replace("-", "")
         info(f"{date=}")
         return date

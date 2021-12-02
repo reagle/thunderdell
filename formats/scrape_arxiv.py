@@ -41,16 +41,21 @@ class ScrapeArXiv(ScrapeDefault):
 
     def __init__(self, url, comment):
         print(("Scraping arXiv;"), end="\n")
-        self.url = url[6:]
+        self.identifier = url[6:]
+        self.url = f"https://arxiv.org/abs/{self.identifier}"
         self.comment = comment
 
     def get_biblio(self):
 
         info(f"url = {self.url}")
-        dict_bib = arxiv_query.query(self.url)
+        dict_bib = arxiv_query.query(self.identifier)
+        info(f"{dict_bib=}")
         biblio = {
+            "entry_type": "report",
             "permalink": self.url,
             "excerpt": "",
+            "organization": "arXiv",
+            "identifier": self.identifier,
             "comment": self.comment,
         }
         for key, value in list(dict_bib.items()):
@@ -61,13 +66,6 @@ class ScrapeArXiv(ScrapeDefault):
                 biblio["author"] = self.get_author(dict_bib)
             elif key == "published":
                 biblio["date"] = self.get_date(dict_bib)
-            # TODO: finish the items below
-            elif key == "page":
-                biblio["pages"] = dict_bib["page"]
-            elif key == "container-title":
-                biblio["journal"] = dict_bib["container-title"]
-            elif key == "issue":
-                biblio["number"] = dict_bib["issue"]
             elif key == "URL":
                 biblio["permalink"] = biblio["url"] = dict_bib["URL"]
             else:

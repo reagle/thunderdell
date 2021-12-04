@@ -37,14 +37,15 @@ from formats import (
     log2work,
 )
 from formats import (
-    ScrapeDefault,
-    ScrapeISBN,
+    ScrapeArXiv,
     ScrapeDOI,
-    ScrapeMARC,
+    ScrapeDefault,
     ScrapeENWP,
-    ScrapeWMMeta,
-    ScrapeTwitter,
+    ScrapeISBN,
+    ScrapeMARC,
     ScrapeReddit,
+    ScrapeTwitter,
+    ScrapeWMMeta,
 )
 from utils.text import pretty_tabulate_dict
 
@@ -74,6 +75,7 @@ def get_scraper(url, comment):
     busy.py c .test https://twitter.com/vaurorapub/status/1415394419688181761
     busy.py c .test doi:10.1177/1097184x15613831
     busy.py c .test isbn:9780860917137
+    busy.py c .test arxiv:2001.08293
     """  # noqa: E501
 
     url = re.sub(  # use canonical reddit domain
@@ -86,6 +88,8 @@ def get_scraper(url, comment):
         return ScrapeDOI(url, comment)
     elif url.lower().startswith("isbn:"):
         return ScrapeISBN(url, comment)
+    elif url.lower().startswith("arxiv:"):
+        return ScrapeArXiv(url, comment)
     else:
         host_path = url.split("//")[1]
         dispatch_scraper = (
@@ -111,7 +115,7 @@ def get_logger(text):
     # tags must be prefixed by dot; URL no longer required
     LOG_REGEX = re.compile(
         r"(?P<scheme>\w) (?P<tags>(\.\w+ )+)?"
-        r"(?P<url>(doi|isbn|http)\S* ?)?(?P<comment>.*)",
+        r"(?P<url>(arxiv|doi|isbn|http)\S* ?)?(?P<comment>.*)",
         re.IGNORECASE,
     )
 

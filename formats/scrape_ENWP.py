@@ -55,7 +55,7 @@ class ScrapeENWP(ScrapeDefault):
     def get_permalink(self):
         if "oldid" not in self.url and "=Special:" not in self.url:
             permalink = self.url.split("/wiki/")[0] + re.search(
-                '''<li id="t-permalink"><a href="(.*?)"''', self.html_u
+                '''<li id="t-permalink".*?><a href="(.*?)"''', self.html_u
             ).group(1)
             return unescape_XML(permalink)
         else:

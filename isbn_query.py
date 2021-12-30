@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
@@ -113,7 +112,7 @@ def google_query(isbn):
         json_result = json.loads(r.content)
         info(f"json_result['totalItems']={json_result['totalItems']}")
         if json_result["totalItems"] == 0:
-            print((f"Google unknown ISBN for {isbn}"))
+            print(f"Google unknown ISBN for {isbn}")
             return False
         json_vol = json_result["items"][0]["volumeInfo"]
         for key, value in list(json_vol.items()):

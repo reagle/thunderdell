@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
 # <https://reagle.org/joseph/2009/01/thunderdell>
@@ -495,7 +494,7 @@ def build_bib(args, file_name, output):
         # debug(f"   parsing {mm_file}")
         try:
             doc = parse(mm_file).getroot()
-        except IOError as err:
+        except OSError as err:
             # debug(f"    failed to parse {mm_file} because of {err}")
             continue
         # debug(f"    successfully parsed {mm_file}")
@@ -520,7 +519,7 @@ def build_bib(args, file_name, output):
             os.remove(results_file_name)
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
-        except IOError as err:
+        except OSError as err:
             print(f"{err}")
             print(f"There was an error writing to {results_file_name}")
             raise
@@ -553,7 +552,7 @@ def build_bib(args, file_name, output):
         results_file_name = f"{config.TMP_DIR}pretty-print.html"
         try:
             results_file = open(results_file_name, "w", encoding="utf-8")
-        except IOError as err:
+        except OSError as err:
             print(f"{err}")
             print(f"There was an error writing to {results_file_name}")
             raise

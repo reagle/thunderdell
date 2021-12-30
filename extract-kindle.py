@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
@@ -238,7 +237,7 @@ if __name__ == "__main__":
             else:
                 print(new_text)
         else:
-            raise IOError(
+            raise OSError(
                 "Do not recognize file type: {file_name}"
                 " {splitext(file_name)[1]}."
             )

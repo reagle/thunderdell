@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
@@ -76,16 +75,16 @@ def create_wordset(file_name):
 LIST_PATH = HOME + "/bin/td/biblio/"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 wordset = create_wordset(WORD_LIST_FN)
-wordset_lower = set([word for word in wordset if word[0].islower()])
-wordset_upper = set([word for word in wordset if word[0].isupper()])
+wordset_lower = {word for word in wordset if word[0].islower()}
+wordset_upper = {word for word in wordset if word[0].isupper()}
 # wordset_nocase used in is_proper_noun()
-wordset_nocase = set([word.lower() for word in wordset])
+wordset_nocase = {word.lower() for word in wordset}
 
 PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
-wordset_proper_nouns = set(
-    [word for word in wordset_upper if word.lower() not in wordset_lower]
-)
+wordset_proper_nouns = {
+    word for word in wordset_upper if word.lower() not in wordset_lower
+}
 # proper_nouns used in safe_lower() and is_proper_noun()
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
@@ -102,7 +101,7 @@ def safe_capwords(text):
 
     """
 
-    debug("  safe_capwords: %s text = '%s'" % (type(text), text))
+    debug(f"  safe_capwords: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
     for word in words:
@@ -129,7 +128,7 @@ def safe_lower(text):
 
     """
 
-    debug("  safe_lower: %s text = '%s'" % (type(text), text))
+    debug(f"  safe_lower: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
     for word in words:
@@ -197,7 +196,7 @@ def change_case(text, case_direction="sentence"):
 
     """
     text = text.strip().replace("  ", " ")
-    debug("** sentence_case: %s text = '%s'" % (type(text), text))
+    debug(f"** sentence_case: {type(text)} text = '{text}'")
 
     # create abbreviation sans BORING words
     debug(set(text.split()).difference(BORING_WORDS))
@@ -295,7 +294,7 @@ def test(change_case, case_direction):
 
     for test in TESTS:
         debug("case_direction = '%s'" % case_direction)
-        print((change_case(test, case_direction)))
+        print(change_case(test, case_direction))
 
 
 def main(argv):

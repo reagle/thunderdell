@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # This file is used with Thunderdell
 # <http://reagle.org/joseph/2009/01/thunderdell>
 # (c) Copyright 2009-2020 by Joseph Reagle
@@ -422,7 +421,7 @@ if __name__ == "__main__":
         try:
             encoding = "UTF-8"
             # encoding = chardet.detect(open(file_name).read())['encoding']
-            fdi = open(file_name, "r", encoding=encoding, errors="replace")
+            fdi = open(file_name, encoding=encoding, errors="replace")
             text = fdi.read()
             if encoding == "UTF-8":
                 if text[0] == str(codecs.BOM_UTF8, "utf8"):
@@ -437,7 +436,7 @@ if __name__ == "__main__":
             )
             # sys.stdout = codecs.getwriter('UTF-8')(
             #     sys.__stdout__, errors='replace')
-        except IOError:
+        except OSError:
             print("    file_name does not exist")
             continue
 

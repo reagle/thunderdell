@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
 # (c) Copyright 2009-2017 by Joseph Reagle
@@ -187,11 +186,11 @@ if __name__ == "__main__":
     for file_name in files:
         try:
             src = open(
-                file_name, "r", encoding="utf-8", errors="replace"
+                file_name, encoding="utf-8", errors="replace"
             ).read()
             fileOut = splitext(file_name)[0] + ".mm"
             fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
-        except IOError:
+        except OSError:
             print("    file does not exist")
             continue
         entries = regexParse(src.split("\n"))

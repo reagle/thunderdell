@@ -495,7 +495,7 @@ def build_bib(args, file_name, output):
         try:
             doc = parse(mm_file).getroot()
         except OSError as err:
-            # debug(f"    failed to parse {mm_file} because of {err}")
+            debug(f"    failed to parse {mm_file} because of {err}")
             continue
         # debug(f"    successfully parsed {mm_file}")
         entries, links = walk_freeplane(doc, mm_file, entries, links=[])

@@ -214,8 +214,8 @@ def yasn_publish(comment, title, subtitle, url, tags):
     from twython import Twython, TwythonError
 
     from .web_api_tokens import (
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
+        TW_OAUTH_TOKEN,
+        TW_OAUTH_TOKEN_SECRET,
         TW_CONSUMER_KEY,
         TW_CONSUMER_SECRET,
     )
@@ -223,8 +223,8 @@ def yasn_publish(comment, title, subtitle, url, tags):
     twitter = Twython(
         TW_CONSUMER_KEY,
         TW_CONSUMER_SECRET,
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
+        TW_OAUTH_TOKEN,
+        TW_OAUTH_TOKEN_SECRET,
     )
     try:
         if photo:

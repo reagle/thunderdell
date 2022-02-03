@@ -21,10 +21,18 @@ critical = logging.critical
 info = logging.info
 debug = logging.debug
 
+# https://citation.crosscite.org/docs.html
+# Types available to output to the CLI
 ACCEPT_HEADERS = {
     "json": "application/citeproc+json",
     "bibtex": "text/bibliography;style=bibtex",
 }
+
+# Types I'm prepared to parse
+ACCEPTABLE_TYPES = (
+    "application/vnd.citationstyles.csl+json",
+    "application/citeproc+json",
+)
 
 
 def query(doi, accept="application/citeproc+json"):
@@ -36,15 +44,20 @@ def query(doi, accept="application/citeproc+json"):
     url = "http://dx.doi.org/%s" % doi
     info(f"{url=}")
     r = requests.get(url, headers=headers)
-    requested_content_type = accept.split(";")[0]
-    debug(f"{r=}")
-    returned_content_type = r.headers["content-type"]
-    info("{returned_content_type=}; {requested_content_type=}")
-    if requested_content_type in returned_content_type:
+    debug(f"{r=} {r.content=}")
+    returned_content_type = r.headers["content-type"].split("; ")[0]
+    if returned_content_type in ACCEPTABLE_TYPES:
         json_bib = json.loads(r.content)
+        info(f"{json_bib=}")
         return json_bib
     else:
-        return False
+        raise RuntimeError(
+            f"DOI service returned unknown type:\n"
+            f"  {returned_content_type=}"
+        )
+        # as part of failure, could return
+        # curl -LH "Accept: text/x-bibliography;"
+        #          " style=apa" https://doi.org/10.26300/spsf-tc23
 
 
 if "__main__" == __name__:

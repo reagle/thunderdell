@@ -42,6 +42,7 @@ class ScrapeDOI(ScrapeDefault):
 
         info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)
+        info(f"{json_bib=}")
         biblio = {
             "permalink": self.url,
             "excerpt": "",
@@ -78,7 +79,11 @@ class ScrapeDOI(ScrapeDefault):
             names = ""
             for name_dic in bib_dict["author"]:
                 info(f"name_dic = '{name_dic}'")
-                joined_name = f"{name_dic['given']} {name_dic['family']}"
+                if "literal" in name_dic:
+                    name_reverse = name_dic["literal"].split(", ")
+                    joined_name = f"{name_reverse[1]} {name_reverse[0]}"
+                else:
+                    joined_name = f"{name_dic['given']} {name_dic['family']}"
                 info(f"joined_name = '{joined_name}'")
                 names = names + ", " + joined_name
             names = names[2:]  # remove first comma

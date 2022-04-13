@@ -198,9 +198,9 @@ def yasn_publish(comment, title, subtitle, url, tags):
     if "goatee.net/photo" in url and url.endswith(".jpg"):
         title = ""
         tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-        photo = open(f"{config.HOME}/f/{url[19:]}", "rb")
+        photo_fn = f"{config.HOME}/f/{url[19:]}"
     else:
-        photo = None
+        photo_fn = None
     total_len = len(comment) + len(tags) + len(title) + len(url)
     info(
         f"""comment = {len(comment)}: {comment}
@@ -211,32 +211,28 @@ def yasn_publish(comment, title, subtitle, url, tags):
     )
 
     # https://twython.readthedocs.io/en/latest/index.html
-    from twython import Twython, TwythonError
+    import tweepy
 
     from .web_api_tokens import (
-        TW_OAUTH_TOKEN,
-        TW_OAUTH_TOKEN_SECRET,
         TW_CONSUMER_KEY,
         TW_CONSUMER_SECRET,
+        TW_ACCESS_TOKEN,
+        TW_ACCESS_TOKEN_SECRET,
     )
 
-    twitter = Twython(
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
-        TW_OAUTH_TOKEN,
-        TW_OAUTH_TOKEN_SECRET,
-    )
+    auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
+    auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
     try:
-        if photo:
+        if photo_fn:
             tweet = shrink_tweet(comment, title, "", tags)
-            response = twitter.upload_media(media=photo)
-            twitter.update_status(
-                status=tweet, media_ids=[response["media_id"]]
-            )
+            response = api.media_upload(photo_fn)
+            api.update_status(status=tweet, media_ids=[media.media_id])
         else:
             tweet = shrink_tweet(comment, title, url, tags)
-            twitter.update_status(status=tweet)
-    except TwythonError as e:
-        print(e)
+            api.update_status(status=tweet)
+    except tweepy.TweepError as err:
+        print(err)
+        print(f"tweet failed {len(tweet)}: {tweet}")
     finally:
-        print(f"tweeted {len(tweet)}: {tweet}")
+        print(f"tweet worked {len(tweet)}: {tweet}")

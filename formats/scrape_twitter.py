@@ -22,14 +22,18 @@ import textwrap
 
 from dateutil.parser import parse as dt_parse
 
-# https://twython.readthedocs.io/en/latest/index.html
-from twython import Twython, TwythonError
+# https://realpython.com/twitter-bot-python-tweepy/
+import tweepy
 from utils.web_api_tokens import (
-    TW_OAUTH_TOKEN,
-    TW_OAUTH_TOKEN_SECRET,
     TW_CONSUMER_KEY,
     TW_CONSUMER_SECRET,
+    TW_ACCESS_TOKEN,
+    TW_ACCESS_TOKEN_SECRET,
 )
+
+auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
+auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth)
 
 from .scrape_default import ScrapeDefault
 
@@ -39,13 +43,6 @@ error = logging.error
 warning = logging.warning
 info = logging.info
 debug = logging.debug
-
-twitter = Twython(
-    TW_CONSUMER_KEY,
-    TW_CONSUMER_SECRET,
-    TW_OAUTH_TOKEN,
-    TW_OAUTH_TOKEN_SECRET,
-)
 
 
 class ScrapeTwitter(ScrapeDefault):
@@ -59,8 +56,8 @@ class ScrapeTwitter(ScrapeDefault):
         else:
             raise RuntimeError("cannot identify twitter ID in {url}")
         try:
-            self.status = twitter.show_status(id=id, tweet_mode="extended")
-        except TwythonError as err:
+            self.status = api.get_status(id=id)._json
+        except tweepy.TweepError as err:
             print(err)
             raise err
 
@@ -81,11 +78,12 @@ class ScrapeTwitter(ScrapeDefault):
 
         name = self.status["user"]["name"].strip()
         screen_name = self.status["user"]["screen_name"].strip()
+        print(f"{name=}")
         return f"{name} ({screen_name})"
 
     def get_title(self):
 
-        title = self.status["full_text"].split("\n")[0]
+        title = self.status["text"].split("\n")[0]
         title = textwrap.shorten(
             title, 136, break_long_words=False, placeholder="..."
         )
@@ -97,4 +95,4 @@ class ScrapeTwitter(ScrapeDefault):
 
     def get_excerpt(self):
 
-        return self.status["full_text"].strip()
+        return self.status["text"].strip()

@@ -456,7 +456,7 @@ def walk_freeplane(node, mm_file, entries, links):
 
 
 RESULT_FILE_HEADER = """<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type"
 content="text/html; charset=UTF-8" />

@@ -190,10 +190,25 @@ def emit_results(args, entries, query, results_file):
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
-            results_file.write(
-                '%s<li class="mdn">[%s]: %s, %s, "%s".</li>\n'
-                % (spaces, identifier, fl_names, date[0], title_mdn)
+            JS_CLICK_TO_COPY = (
+                """<li class="mdn">"""
+                """<a href="javascript:document.addEventListener("""
+                """'click', () => {{navigator.clipboard.writeText('%s');"""
+                """}});">⧉</a> %s\n"""
             )
+            mdn_cite = f"[@{identifier}]"
+            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
+            mdn_footnote = (
+                f"[^{identifier}]:" f"  {fl_names}, {date[0]}, {title_mdn}"
+            )
+            results_file.write(
+                JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote)
+            )
+            mdn_link = (
+                f"""[{identifier}]: {url}"""
+                f"""" {fl_names}, {date[0]}, «{title}»" """
+            )
+            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
             pretty_print(entry["_title_node"], entry, spaces)

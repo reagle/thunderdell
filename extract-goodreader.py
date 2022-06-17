@@ -70,10 +70,11 @@ def process_text(text):
     RE_JOIN_LINES = re.compile(r"([a-z] ?)\n\n([a-z])")
     RE_PAGE_NUM = re.compile(
         r"""---[ ]Page[ ]
-        (?:p\. )?
+        (?:p\.[ ])?
         \[?
-        (\d+|[A-Z]+|[ivxlc]+)  # digit, (rare) capital, or roman
-        \]?[ ]---""",
+        (\d+|[A-Z]+|[ivxlc]+)
+        \]?
+        [ ]---""",
         re.VERBOSE,
     )
     page_num_first_parsed = None  # 1st page number as parsed

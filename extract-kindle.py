@@ -42,9 +42,7 @@ def process_email(file_name):
             if msg_content_type == "html":
                 debug(f"part is HTML: %s" % msg_content_type)
                 charset = part.get_content_charset(failobj="utf-8")
-                content = part.get_payload(decode=True).decode(
-                    charset, "replace"
-                )
+                content = part.get_payload(decode=True).decode(charset, "replace")
                 return content
 
 
@@ -76,9 +74,7 @@ def process_html(content):
         debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, _, page = (
-                    RE_COLOR_PAGE.search(str(div)).groupdict().values()
-                )
+                color, _, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
@@ -238,6 +234,5 @@ if __name__ == "__main__":
                 print(new_text)
         else:
             raise OSError(
-                "Do not recognize file type: {file_name}"
-                " {splitext(file_name)[1]}."
+                "Do not recognize file type: {file_name}" " {splitext(file_name)[1]}."
             )

@@ -143,9 +143,7 @@ def process_text(text):
                 page_num_first_parsed = page_num_parsed
                 debug(f"{page_num_first_parsed=}")
                 if page_num_first_specfied:
-                    page_num_offset = (
-                        page_num_first_specfied - page_num_first_parsed
-                    )
+                    page_num_offset = page_num_first_specfied - page_num_first_parsed
                 else:
                     page_num_offset = 0
                 debug(f"{page_num_offset=}")
@@ -321,9 +319,7 @@ if __name__ == "__main__":
             with open(fixed_fn, "w") as fixed_fd:
                 fixed_fd.write(new_text)
             subprocess.run(["open", fixed_fn])
-            user_input = input(
-                f"\nfollow up with extract-dictation.py? 'y' for yes: "
-            )
+            user_input = input(f"\nfollow up with extract-dictation.py? 'y' for yes: ")
             if user_input == "y":
                 subprocess.run(cmd_extract_dication)
             print(f"{cmd_extract_dication}")

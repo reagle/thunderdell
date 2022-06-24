@@ -64,8 +64,7 @@ def process(entries):
             last, first = name.split(", ")
             reordered_names.append(first + " " + last)
         fdo.write(
-            """  <node COLOR="#338800" TEXT="%s">\n"""
-            % ", ".join(reordered_names)
+            """  <node COLOR="#338800" TEXT="%s">\n""" % ", ".join(reordered_names)
         )
 
         if "url" in entry:
@@ -185,9 +184,7 @@ if __name__ == "__main__":
     files = [abspath(file_name) for file_name in args.files]
     for file_name in files:
         try:
-            src = open(
-                file_name, encoding="utf-8", errors="replace"
-            ).read()
+            src = open(file_name, encoding="utf-8", errors="replace").read()
             fileOut = splitext(file_name)[0] + ".mm"
             fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
         except OSError:

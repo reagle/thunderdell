@@ -169,8 +169,7 @@ def build_mm_from_txt(
                 clean(citation)
             citation += " r=%s" % get_date()
             file_out.write(
-                """  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % ("cite", clean(citation))
+                """  <node STYLE_REF="%s" TEXT="%s"/>\n""" % ("cite", clean(citation))
             )
 
         elif re.match(r"summary\.(.*)", line, re.I):
@@ -195,8 +194,7 @@ def build_mm_from_txt(
                 file_out.write("""  </node>\n""")  # close part
                 in_part = False
             file_out.write(
-                """  <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("quote", clean(line))
+                """  <node STYLE_REF="%s" TEXT="%s">\n""" % ("quote", clean(line))
             )
             in_part = True
 
@@ -211,8 +209,7 @@ def build_mm_from_txt(
                 file_out.write("""    </node>\n""")  # close chapter
                 in_chapter = False
             file_out.write(
-                """    <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("quote", clean(line))
+                """    <node STYLE_REF="%s" TEXT="%s">\n""" % ("quote", clean(line))
             )
             in_chapter = True
 
@@ -250,9 +247,7 @@ def build_mm_from_txt(
             line_text = line
             line_no = ""
             # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
-            PAGE_NUM_PAT = (
-                r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
-            )
+            PAGE_NUM_PAT = r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
             matches = re.match(PAGE_NUM_PAT, line, re.I)
             if matches:
                 line_no = matches.group(1)
@@ -314,9 +309,7 @@ def create_mm(text, file_out):
             )
         except KeyError as err:
             print(err)
-            print(
-                traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line
-            )
+            print(traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line)
             sys.exit()
         line_number += 1
 
@@ -431,9 +424,7 @@ if __name__ == "__main__":
             # utf-8 even though I set to default if no special characters
             # write simple Word txt to UTF-8 encoder
             file_name_out = os.path.splitext(file_name)[0] + ".mm"
-            file_out = open(
-                file_name_out, "w", encoding="utf-8", errors="replace"
-            )
+            file_out = open(file_name_out, "w", encoding="utf-8", errors="replace")
             # sys.stdout = codecs.getwriter('UTF-8')(
             #     sys.__stdout__, errors='replace')
         except OSError:

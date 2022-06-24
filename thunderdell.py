@@ -100,9 +100,7 @@ def identity_add_title(ident, title):
     if len(title_words) == 1:
         suffix = f"{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}"
     else:
-        suffix = "".join(
-            [word[0] for word in title_words if word not in BORING_WORDS]
-        )
+        suffix = "".join([word[0] for word in title_words if word not in BORING_WORDS])
         suffix = suffix[:3]
     ident = f"{ident}{suffix}"
     return ident
@@ -148,9 +146,7 @@ def get_ident(entry, entries, delim=""):
         name_part = f"{last_names[0]}Etal"
 
     if "date" not in entry:
-        entry["date"] = Date(
-            year="0000", month=None, day=None, circa=None, time=None
-        )
+        entry["date"] = Date(year="0000", month=None, day=None, circa=None, time=None)
     year_delim = delim if delim else ""
     # debug(f"2 entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry["date"].year))
@@ -173,8 +169,7 @@ def get_ident(entry, entries, delim=""):
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
         warning(
-            f"collision on {ident}: {entry['title']} &"
-            f" {entries[ident]['title']}"
+            f"collision on {ident}: {entry['title']} &" f" {entries[ident]['title']}"
         )
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
@@ -239,9 +234,7 @@ def pull_citation(entry):
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
-                print(
-                    ("Key error on ", error, entry["title"], entry["_mm_file"])
-                )
+                print(("Key error on ", error, entry["title"], entry["_mm_file"]))
 
     # if 'url' in entry and entry['url'] is not None:
     #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
@@ -348,10 +341,7 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)  # break the citation up
         except Exception:
-            print(
-                f"pull_citation error on {entry['author']}: "
-                f"{entry['_mm_file']}"
-            )
+            print(f"pull_citation error on {entry['author']}: " f"{entry['_mm_file']}")
             raise
         entry["identifier"] = get_ident(entry, entries)
         entries[entry["identifier"]] = entry
@@ -407,9 +397,7 @@ def walk_freeplane(node, mm_file, entries, links):
 
     for d in node.iter():
         if "LINK" in d.attrib:  # found a local reference link
-            if not d.get("LINK").startswith("http:") and d.get(
-                "LINK"
-            ).endswith(".mm"):
+            if not d.get("LINK").startswith("http:") and d.get("LINK").endswith(".mm"):
                 links.append(unescape_XML(d.get("LINK")))
         # skip nodes that are structure, comment, and empty of text
         if "STYLE_REF" in d.attrib and d.get("TEXT"):
@@ -430,9 +418,7 @@ def walk_freeplane(node, mm_file, entries, links):
                 if "LINK" in d.attrib:
                     entry["url"] = d.get("LINK")
                 if args.query:
-                    author_highlighted = query_highlight(
-                        author_node, args.query
-                    )
+                    author_highlighted = query_highlight(author_node, args.query)
                     if author_highlighted is not None:
                         entry["_author_result"] = author_highlighted
                     title_highlighted = query_highlight(d, args.query)
@@ -446,9 +432,7 @@ def walk_freeplane(node, mm_file, entries, links):
                 if args.query:
                     node_highlighted = query_highlight(d, args.query)
                     if node_highlighted is not None:
-                        entry.setdefault("_node_results", []).append(
-                            node_highlighted
-                        )
+                        entry.setdefault("_node_results", []).append(node_highlighted)
 
     # commit the last entry as no new titles left
     entries = commit_entry(entry, entries)
@@ -558,8 +542,7 @@ def build_bib(args, file_name, output):
             raise
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(
-            "    <title>Pretty Mind Map</title></head>"
-            '<body>\n<ul class="top">\n'
+            "    <title>Pretty Mind Map</title></head>" '<body>\n<ul class="top">\n'
         )
         for entry in list(entries.values()):
             args.query = entry["identifier"]
@@ -857,9 +840,7 @@ if __name__ == "__main__":
         pretty_tabulate_dict(BIB_SHORTCUTS)
         print("      t=biblatex/CSL type (e.g., t=thesis)")
         print("      ot=organization's subtype (e.g., W3C REC)")
-        print(
-            "      pa=section|paragraph|location|chapter|verse|column|line\n\n"
-        )
+        print("      pa=section|paragraph|location|chapter|verse|column|line\n\n")
         sys.exit()
     if args.query:
         args.query = " ".join(args.query)

@@ -36,6 +36,7 @@ GENERAL_KEY_SHORTCUTS = {
     "pra": "praxis",
     "pri": "privacy",
     "psy": "psychology",
+    "red": "reddit",
     "rel": "relationship",
     "ske": "skepticism",
     "spe": "speech",

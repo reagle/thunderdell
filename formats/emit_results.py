@@ -46,9 +46,7 @@ def emit_results(args, entries, query, results_file):
             # prefix = ""  # this could remove ">" from short quotes
         else:
             locator = ""
-            LOCATOR_PAT = re.compile(
-                r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)"
-            )
+            LOCATOR_PAT = re.compile(r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)")
             matches = LOCATOR_PAT.match(text)
             if matches:
                 text = matches.group(2)
@@ -132,9 +130,7 @@ def emit_results(args, entries, query, results_file):
         if __name__ == "__main__":
             return file_name
         else:  # CGI
-            client_path = file_name.replace(
-                f"{config.HOME}", f"{config.CLIENT_HOME}"
-            )
+            client_path = file_name.replace(f"{config.HOME}", f"{config.CLIENT_HOME}")
             return f"file://{client_path}"
 
     def print_entry(
@@ -144,18 +140,12 @@ def emit_results(args, entries, query, results_file):
             f'<li class="identifier_html">'
             f'<a href="{get_url_query(identifier)}">{identifier}</a>'
         )
-        title_html = (
-            f'<a class="title_html"'
-            f' href="{get_url_query(title)}">{title}</a>'
-        )
+        title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'
         if url:
             link_html = f'[<a class="link_html" href="{url}">url</a>]'
         else:
             link_html = ""
-        from_html = (
-            f'from <a class="from_html" '
-            f'href="{MM_mm_file}">{base_mm_file}</a>'
-        )
+        from_html = f'from <a class="from_html" href="{MM_mm_file}">{base_mm_file}</a>'
         results_file.write(
             f"{spaces}{identifier_html}, "
             f"<em>{title_html}</em> {link_html} [{from_html}]"
@@ -163,7 +153,7 @@ def emit_results(args, entries, query, results_file):
         results_file.write(f"{spaces}</li><!--identifier_html-->\n")
 
     spaces = " "
-    for key, entry in sorted(entries.items()):
+    for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
         author = create_biblatex_author(entry["author"])
         title = entry["title"]
@@ -174,9 +164,7 @@ def emit_results(args, entries, query, results_file):
 
         # if I am what was queried, print all of me
         if entry["identifier"] == args.query:
-            results_file.write(
-                '%s<li class="li_entry_identifier">\n' % (spaces)
-            )
+            results_file.write('%s<li class="li_entry_identifier">\n' % (spaces))
             spaces = spaces + " "
             results_file.write('%s<ul class="tit_tree">\n' % (spaces))
             spaces = spaces + " "
@@ -184,9 +172,7 @@ def emit_results(args, entries, query, results_file):
                 '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
                 % (spaces, MM_mm_file, base_mm_file),
             )
-            fl_names = ", ".join(
-                name[0] + " " + name[2] for name in entry["author"]
-            )
+            fl_names = ", ".join(name[0] + " " + name[2] for name in entry["author"])
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
@@ -198,16 +184,9 @@ def emit_results(args, entries, query, results_file):
             )
             mdn_cite = f"[@{identifier}]"
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
-            mdn_footnote = (
-                f"[^{identifier}]:" f"  {fl_names}, {date[0]}, {title_mdn}"
-            )
-            results_file.write(
-                JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote)
-            )
-            mdn_link = (
-                f"""[{identifier}]: {url}"""
-                f"""" {fl_names}, {date[0]}, «{title}»" """
-            )
+            mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]}, {title_mdn}"
+            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote))
+            mdn_link = f"""[{identifier}]: {url} {fl_names}, {date[0]}, «{title}»" """
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
@@ -241,10 +220,7 @@ def emit_results(args, entries, query, results_file):
             results_file.write(f"{spaces}</li>\n")
         # if my author or title matched, print biblio w/ link to complete entry
         elif "_author_result" in entry:
-            author = (
-                f"{entry['_author_result'].get('TEXT')}"
-                f"{entry['date'].year}"
-            )
+            author = f"{entry['_author_result'].get('TEXT')} {entry['date'].year}"
             print_entry(
                 identifier,
                 author,

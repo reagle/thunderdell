@@ -234,10 +234,6 @@ def pull_citation(entry):
             except KeyError as error:
                 print(("Key error on ", error, entry["title"], entry["_mm_file"]))
 
-    # if 'url' in entry and entry['url'] is not None:
-    #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
-    #         entry['url'] = entry['url'].split('&')[0]
-
     if "date" in entry:
         entry["date"] = parse_date(entry["date"])
 
@@ -251,6 +247,16 @@ def pull_citation(entry):
     if ": " in entry["title"]:
         if not entry["title"].startswith("Re:"):
             entry["shorttitle"] = entry["title"].split(":")[0].strip()
+
+    # # split off unneeded search parameters
+    # if 'url' in entry and entry['url'] is not None:
+    #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
+    #         entry['url'] = entry['url'].split('&')[0]
+
+    # remove private Reddit message URLs
+    if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):
+        entry.pop("url")
+        entry.pop("urldate", None)
 
     if "url" in entry and "oldid" in entry["url"]:
         url = entry["url"]

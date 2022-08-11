@@ -23,6 +23,7 @@ GENERAL_KEY_SHORTCUTS = {
     "eth": "ethics",
     "exi": "exit",
     "for": "fork",
+    "gra": "gratitude",
     "hum": "humor",
     "ide": "identity",
     "lea": "leadership",

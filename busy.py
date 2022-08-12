@@ -24,6 +24,7 @@ import logging
 import re
 import sys
 import time
+import urllib
 
 from biblio import fields as bf
 from biblio.keywords import LIST_OF_KEYSHORTCUTS
@@ -77,6 +78,7 @@ def get_scraper(url, comment):
     busy.py c .test arxiv:2001.08293
     """  # noqa: E501
 
+    url = urllib.parse.unquote(url)
     url = re.sub(  # use canonical reddit domain
         r"(https?://(old|i)\.reddit.com/(.*)(\.compact)?)",
         r"https://www.reddit.com/\3",

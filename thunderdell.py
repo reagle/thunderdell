@@ -20,6 +20,8 @@ import re
 import sys
 import urllib.parse
 import webbrowser
+import xml.etree.ElementTree as et
+
 from collections import namedtuple
 from subprocess import call  # noqa F401 needed for doctests
 from typing import NamedTuple
@@ -482,7 +484,7 @@ def build_bib(args, file_name, output):
         # debug(f"   parsing {mm_file}")
         try:
             doc = parse(mm_file).getroot()
-        except OSError as err:
+        except (OSError, et.ParseError) as err:
             debug(f"    failed to parse {mm_file} because of {err}")
             continue
         # debug(f"    successfully parsed {mm_file}")
@@ -684,7 +686,7 @@ if __name__ == "__main__":
         "--fields",
         action="store_true",
         default=False,
-        help="show biblatex shortcuts, fields, and types used by fe",
+        help="show biblatex shortcuts, fields, and types used by td",
     )
     arg_parser.add_argument(
         "-j",
@@ -785,7 +787,7 @@ if __name__ == "__main__":
     if args.log_to_file:
         print("logging to file")
         logging.basicConfig(
-            filename="fe.log", filemode="w", level=log_level, format=LOG_FORMAT
+            filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
         )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)

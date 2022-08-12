@@ -43,6 +43,7 @@ def emit_json_csl(args, entries):
 
     def escape_csl(s):
         if s:  # faster to just quote than testing for tokens
+            s = s.replace("\n", "\\n")
             s = s.replace('"', r"'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
             s = s.replace("@", r"\\@")  # single slash caused bugs in past
@@ -71,9 +72,7 @@ def emit_json_csl(args, entries):
         if suffix:
             person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
         if particle:
-            person_buffer.append(
-                f'"non-dropping-particle": {escape_csl(particle)}, '
-            )
+            person_buffer.append(f'"non-dropping-particle": {escape_csl(particle)}, ')
         person_buffer.append("},\n")
         return person_buffer
 
@@ -122,7 +121,7 @@ def emit_json_csl(args, entries):
 
     # # start of json buffer, to be written out after comma cleanup
     file_buffer = ["[\n"]
-    for key, entry in sorted(entries.items()):
+    for _key, entry in sorted(entries.items()):
         # debug(f"{key=}")
         entry_type, genre, medium = guess_csl_type(entry)
         file_buffer.append(f'  {{ "id": "{entry["identifier"]}",\n')
@@ -140,7 +139,7 @@ def emit_json_csl(args, entries):
             else:
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
-        for short, field in BIB_SHORTCUTS_ITEMS:
+        for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 # debug(f"short, field = '{short} , {field}'")

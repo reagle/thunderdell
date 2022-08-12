@@ -54,7 +54,6 @@ class ScrapeReddit(ScrapeDefault):
 
         self.type = "unknown"
         self.json = get_JSON(f"{url}.json")
-        debug(f"{self.json=}")
         if RE_REDDIT_URL.match(url):
             self.url_dict = RE_REDDIT_URL.match(url).groupdict()
             info(f"{self.url_dict=}")
@@ -115,9 +114,7 @@ class ScrapeReddit(ScrapeDefault):
         if self.type == "subreddit":
             title = self.url_dict["root"]
         elif self.type in ["post", "comment"]:
-            title = sentence_case(
-                self.json[0]["data"]["children"][0]["data"]["title"]
-            )
+            title = sentence_case(self.json[0]["data"]["children"][0]["data"]["title"])
         info(f"{title=}")
         return title.strip()
 

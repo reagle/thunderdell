@@ -35,17 +35,17 @@ def main(argv):
             https://github.com/reagle/thunderdell
         """
     )
-
-    # positional arguments
-    arg_parser.add_argument("file_names", nargs="+", metavar="FILE_NAMES")
-    # optional arguments
     arg_parser.add_argument(
         "-p",
         "--publish",
         action="store_true",
         default=False,
-        help="publish to social networks",
+        help="publish to social networks (can also `-p` in editor)",
     )
+
+    # positional arguments
+    arg_parser.add_argument("file_names", nargs="+", metavar="FILE_NAMES")
+    # optional arguments
     arg_parser.add_argument(
         "-L",
         "--log-to-file",
@@ -104,7 +104,6 @@ def process_files(args, file_names):
             biblio = scraper.get_biblio()
             biblio["tags"] = "misc"  # default keyword
             del biblio["excerpt"]  # no need for auto excerpt
-            info(f"{biblio=}")
             busy.log2mm(args, biblio)
 
 

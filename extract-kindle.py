@@ -217,7 +217,12 @@ if __name__ == "__main__":
         debug(f"{file_name=}")
         if file_name.endswith(".eml"):
             fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-            cmd_extract_dication = ["extract-dictation.py", "-p", fixed_fn]
+            user_input = input(f"\npublish to social media? 'y' for yes: ")
+            if user_input == "y":
+                do_publish = "-p"
+            else:
+                do_publish = ""
+            cmd_extract_dication = ["extract-dictation.py", do_publish, fixed_fn]
             content = process_email(file_name)
             new_text = process_html(content)
             if args.output_to_file:

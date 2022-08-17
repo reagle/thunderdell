@@ -314,7 +314,12 @@ if __name__ == "__main__":
         new_text = process_text(text)
 
         fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-        cmd_extract_dication = ["extract-dictation.py", "-p", fixed_fn]
+        user_input = input(f"\npublish to social media? 'y' for yes: ")
+        if user_input == "y":
+            do_publish = "-p"
+        else:
+            do_publish = ""
+        cmd_extract_dication = ["extract-dictation.py", do_publish, fixed_fn]
         if args.output_to_file:
             with open(fixed_fn, "w") as fixed_fd:
                 fixed_fd.write(new_text)

@@ -239,5 +239,5 @@ if __name__ == "__main__":
                 print(new_text)
         else:
             raise OSError(
-                "Do not recognize file type: {file_name}" " {splitext(file_name)[1]}."
+                "Do not recognize file type: {file_name} {splitext(file_name)[1]}."
             )

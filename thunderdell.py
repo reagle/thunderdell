@@ -156,6 +156,7 @@ def get_ident(entry, entries, delim=""):
     ident = (
         ident.replace(":", "")
         .replace("'", "")  # not permitted in xml name/id attributes
+        .replace("’", "")
         .replace(".", "")  # punctuation
         .replace("@", "")
         .replace("[", "")

@@ -205,7 +205,7 @@ def emit_biblatex(args, entries):
     """Emit a biblatex file"""
     # debug(f"entries = '{entries}'")
 
-    for key, entry in sorted(entries.items()):
+    for _key, entry in sorted(entries.items()):
         entry_type = guess_biblatex_type(entry)
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
@@ -248,9 +248,9 @@ def emit_biblatex(args, entries):
 
         args.outfd.write(f'@{entry_type_copy}{{{entry["identifier"]},\n')
 
-        for short, field in BIB_SHORTCUTS_ITEMS:
+        for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
-                # critical(f"short, field = '{short} , {field}'")
+                # critical(f"_short, field = '{_short} , {field}'")
                 # skip these fields
                 value = entry[field]
                 if field in ("identifier", "entry_type", "ori_author"):
@@ -275,9 +275,7 @@ def emit_biblatex(args, entries):
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
-                    date = "-".join(
-                        filter(None, (value.year, value.month, value.day))
-                    )
+                    date = "-".join(filter(None, (value.year, value.month, value.day)))
                     date = date + "~" if value.circa else date
                     value = date
 

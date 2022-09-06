@@ -24,8 +24,10 @@ GENERAL_KEY_SHORTCUTS = {
     "exi": "exit",
     "for": "fork",
     "gra": "gratitude",
+    "his": "history",
     "hum": "humor",
     "ide": "identity",
+    "ics": "politics",
     "lea": "leadership",
     "leg": "legal",
     "lit": "literacy",
@@ -71,10 +73,8 @@ GF_KEY_SHORTCUTS = {
 
 LH_KEY_SHORTCUTS = {
     # Lifehack
-    "adv": "advice",
     "com": "complicity",
     "lh": "lifehack",
-    "his": "history",
     "pro": "productivity",
     "qs": "quantifiedself",
     "sh": "selfhelp",

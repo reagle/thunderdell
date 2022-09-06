@@ -285,7 +285,7 @@ def emit_biblatex(args, entries):
                 #   date is a named_tuple that doesn't need escaping
                 # debug(f"{field}")
                 if field not in (
-                    "author",
+                    # "author",  # but underscores still need escape
                     "url",
                     "howpublished",
                     "date",

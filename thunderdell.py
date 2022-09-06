@@ -161,6 +161,8 @@ def get_ident(entry, entries, delim=""):
         .replace("@", "")
         .replace("[", "")
         .replace("]", "")
+        .replace("(", "")
+        .replace(")", "")
         .replace("<strong>", "")  # '@' citation designator
         .replace("</strong>", "")  # added by walk_freeplane.query_highlight
     )

@@ -279,6 +279,14 @@ def emit_biblatex(args, entries):
                     date = date + "~" if value.circa else date
                     value = date
 
+                    if args.bibtex:
+                        if entry["date"].year:
+                            args.outfd.write(f"   year = {{{entry['date'].year}}},\n")
+                        if entry["date"].month:
+                            args.outfd.write(f"   month = {{{entry['date'].month}}},\n")
+                        if entry["date"].day:
+                            args.outfd.write(f"   day = {{{entry['date'].day}}},\n")
+
                 # escape latex brackets.
                 #   url and howpublished shouldn't be changed
                 #   author may have curly brackets that should not be escaped

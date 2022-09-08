@@ -656,6 +656,12 @@ if __name__ == "__main__":
         help="emit biblatex fields",
     )
     arg_parser.add_argument(
+        "--bibtex",
+        default=False,
+        action="store_true",
+        help="modify biblatex to use bibtex's year/month fields",
+    )
+    arg_parser.add_argument(
         "-c",
         "--chase",
         action="store_true",
@@ -798,6 +804,8 @@ if __name__ == "__main__":
     args.in_main = True
     args.outfd = sys.stdout
 
+    if args.bibtex:
+        args.biblatex = True
     if args.pretty and file_name == config.DEFAULT_MAP:
         file_name = config.DEFAULT_PRETTY_MAP
     if args.WP_citation:

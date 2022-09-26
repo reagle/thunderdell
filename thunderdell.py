@@ -223,6 +223,8 @@ def pull_citation(entry):
 
     """
 
+    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
+
     entry["custom2"] = entry["_mm_file"].split("/")[-1]
 
     if "cite" in entry:

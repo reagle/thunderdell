@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 
 # set shebang locally to latest
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # set the shebang on a2hosting to
-#!/home/goateene/opt/bin/python3
+# !/home/goateene/opt/bin/python3
 
 
 def cgi_main():
     global args
-    import codecs, cgi, os, re, sys
+    import cgi
+    import codecs
     import logging
-    from urllib.parse import quote, unquote
+    import os
+    import re
+    import sys
+    from urllib.parse import unquote
 
     HOME = os.path.expanduser("~")
     TMP_DIR = HOME + "/tmp/.td/"
@@ -26,13 +30,9 @@ def cgi_main():
     LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
     logging.basicConfig(level=logging.ERROR, format=LOG_FORMAT)
 
-    env = os.environ
-
     print("Content-Type: text/html; charset=utf-8\n\n")
 
     form = cgi.FieldStorage()
-    charset = form.getfirst("_charset_", "utf-8")
-
     query = form.getfirst("query", "Wikipedia2008npv")  # Möller2007ecl
     site = form.getvalue("sitesearch", "MindMap")
     # query = form.getfirst('query', 'aux2bib')

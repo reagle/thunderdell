@@ -161,12 +161,12 @@ def get_logger(text):
 #######################################
 
 DESCRIPTION = f"""
-blog codex:    b o [pra|soc|tec] TAGS URL|DOI TITLE. BODY
-blog goatee:   b g URL|DOI TITLE. BODY
-mindmap:       b m TAGS URL|DOI ABSTRACT
-nifty:         b n TAGS URL|DOI COMMENT
-work plan:     b j TAGS URL|DOI COMMENT
-console:       b c TAGS URL|DOI COMMENT
+blog codex:    b o [pra|soc|tec] TAGS URL|DOI|ISBN TITLE. BODY
+blog goatee:   b g URL|DOI|ISBN TITLE. BODY
+mindmap:       b m TAGS URL|DOI|ISBN ABSTRACT
+nifty:         b n TAGS URL|DOI|ISBN COMMENT
+work plan:     b j TAGS URL|DOI|ISBN COMMENT
+console:       b c TAGS URL|DOI|ISBN COMMENT
   's. ' begins summary
   '> '  begins excerpt (as does a character)
   ', '  begins paraphrase

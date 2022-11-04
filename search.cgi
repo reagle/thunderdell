@@ -6,6 +6,8 @@
 # set the shebang on a2hosting to
 # !/home/goateene/opt/bin/python3
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 def cgi_main():
     global args
@@ -32,8 +34,8 @@ def cgi_main():
 
     print("Content-Type: text/html; charset=utf-8\n\n")
 
-    # cgi deprecated in 3.11 https://peps.python.org/pep-0594/#cgi
     # TODO replace cgi with urllib.parse.parse_qsl
+    # cgi deprecated in 3.11 https://peps.python.org/pep-0594/#cgi
     form = cgi.FieldStorage()
     query = form.getfirst("query", "Wikipedia2008npv")  # Möller2007ecl
     site = form.getvalue("sitesearch", "MindMap")

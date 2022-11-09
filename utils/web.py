@@ -226,17 +226,16 @@ def yasn_publish(comment, title, subtitle, url, tags):
     auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     try:
+        tweet = shrink("twitter", comment, title, "", tags)
         if photo_fn:
-            tweet = shrink("twitter", comment, title, "", tags)
             media = api.media_upload(photo_fn)
             api.update_status(status=tweet, media_ids=[media.media_id])
         else:
-            tweet = shrink("twitter", comment, title, url, tags)
             api.update_status(status=tweet)
     except tweepy.TweepError as err:
         print(err)
         print(f"tweet failed {len(tweet)}: {tweet}")
-    finally:
+    else:
         print(f"tweet worked {len(tweet)}: {tweet}")
 
     # Mastodon
@@ -252,10 +251,13 @@ def yasn_publish(comment, title, subtitle, url, tags):
     )
     toot = shrink("octodon", comment, title, url, tags)
     try:
-        octodon.toot(toot)
-        pass
+        if photo_fn:
+            media = octodon.media_post(photo_fn)
+            octodon.status_post(status=toot, media_ids=media)
+        else:
+            octodon.status_post(status=toot)
     except mastodon.MastodonError as err:
         print(err)
         print(f"toot failed {len(toot)}: {toot}")
-    finally:
+    else:
         print(f"toot worked {len(toot)}: {toot}")

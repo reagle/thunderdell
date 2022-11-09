@@ -131,52 +131,56 @@ def get_text(url):
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
 
 
-def shrink_tweet(comment, title, url, tags):
-    """Shrink tweet to fit into limit"""
+def shrink(service, comment, title, url, tags):
+    """Shrink message to fit into limit"""
 
+    if service == "twitter":
+        limit = 280
+    if service == "octodon":
+        limit = 500
     info(f"{comment=}")
-    # TWEET_LIMIT = 280 - 6 # API throws an error for unknown reason
-    TWEET_LIMIT = 279 - 6  # 6 = comment_delim + title quotes + spaces
-    SHORTENER_LEN = 23  # twitter uses t.co
+    PADDING = 7  # = comment_delim + title quotes + spaces
+    TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
+    limit = limit - PADDING
 
-    info(f"{TWEET_LIMIT=}")
-    tweet_room = TWEET_LIMIT - len(tags)
-    info(f"tweet_room - len(tags) = {tweet_room}")
+    info(f"{limit=}")
+    message_room = limit - len(tags)
+    info(f"message_room - len(tags) = {message_room}")
 
     info(f"len(url) = {len(url)}")
-    if len(url) > SHORTENER_LEN:
-        tweet_room = tweet_room - SHORTENER_LEN
-        info(f"  shortened to {SHORTENER_LEN}")
+    if service == "twitter" and len(url) > TWITTER_SHORTENER_LEN:
+        message_room = message_room - TWITTER_SHORTENER_LEN
+        info(f"  shortened to {TWITTER_SHORTENER_LEN}")
     else:
-        tweet_room = tweet_room - len(url)
-    info(f"tweet_room after url = {tweet_room}")
+        message_room = message_room - len(url)
+    info(f"message_room after url = {message_room}")
 
     info(f"len(title) = {len(title)}")
-    if len(title) > tweet_room:
+    if len(title) > message_room:
         info("title is too long")
-        title = title[0 : tweet_room - 1] + "…"
+        title = title[0 : message_room - 1] + "…"
         info(f"  truncated to {len(title)}")
-    tweet_room = tweet_room - len(title)
-    info(f"tweet_room after title = {tweet_room}")
+    message_room = message_room - len(title)
+    info(f"message_room after title = {message_room}")
 
     info(f"len(comment) = {len(comment)}")
-    if len(comment) > tweet_room:
+    if len(comment) > message_room:
         info("comment is too long")
-        if tweet_room > 5:
+        if message_room > 5:
             info(" truncating")
-            comment = comment[0 : tweet_room - 1] + "…"
+            comment = comment[0 : message_room - 1] + "…"
             info(f"  truncated to {len(comment)}")
             info(f"{comment}")
         else:
             info(" skipping")
             comment = ""
-    tweet_room = tweet_room - len(comment)
-    info(f"tweet_room after comment = {tweet_room}")
+    message_room = message_room - len(comment)
+    info(f"message_room after comment = {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
-    tweet = f"{comment}{comment_delim}{title} {url} {tags}"
-    return tweet.strip()
+    message = f"{comment}{comment_delim}{title} {url} {tags}"
+    return message.strip()
 
 
 def yasn_publish(comment, title, subtitle, url, tags):
@@ -223,11 +227,11 @@ def yasn_publish(comment, title, subtitle, url, tags):
     api = tweepy.API(auth)
     try:
         if photo_fn:
-            tweet = shrink_tweet(comment, title, "", tags)
+            tweet = shrink("twitter", comment, title, "", tags)
             media = api.media_upload(photo_fn)
             api.update_status(status=tweet, media_ids=[media.media_id])
         else:
-            tweet = shrink_tweet(comment, title, url, tags)
+            tweet = shrink("twitter", comment, title, url, tags)
             api.update_status(status=tweet)
     except tweepy.TweepError as err:
         print(err)
@@ -236,7 +240,6 @@ def yasn_publish(comment, title, subtitle, url, tags):
         print(f"tweet worked {len(tweet)}: {tweet}")
 
     # Mastodon
-    # https://github.com/halcy/Mastodon.py
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
     from .web_api_tokens import (
@@ -247,6 +250,12 @@ def yasn_publish(comment, title, subtitle, url, tags):
     octodon = mastodon.Mastodon(
         access_token=OCTODON_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
     )
-    toot = f"{comment}: {title}{subtitle} {url} {tags}"
-    print(f"{toot=}")
-    # octodon.toot(toot)
+    toot = shrink("octodon", comment, title, url, tags)
+    try:
+        octodon.toot(toot)
+        pass
+    except mastodon.MastodonError as err:
+        print(err)
+        print(f"toot failed {len(toot)}: {toot}")
+    finally:
+        print(f"toot worked {len(toot)}: {toot}")

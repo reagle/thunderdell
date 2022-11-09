@@ -184,10 +184,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
-            [
-                "#" + KEY_SHORTCUTS.get(tag, tag)
-                for tag in tags.strip().split(" ")
-            ]
+            ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
         )
     comment, title, subtitle, url, tags = [
         v.strip() if isinstance(v, str) else ""
@@ -210,6 +207,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
          {total_len=}"""
     )
 
+    # Twitter
     # https://twython.readthedocs.io/en/latest/index.html
     import tweepy
 
@@ -226,7 +224,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
     try:
         if photo_fn:
             tweet = shrink_tweet(comment, title, "", tags)
-            response = api.media_upload(photo_fn)
+            media = api.media_upload(photo_fn)
             api.update_status(status=tweet, media_ids=[media.media_id])
         else:
             tweet = shrink_tweet(comment, title, url, tags)
@@ -236,3 +234,19 @@ def yasn_publish(comment, title, subtitle, url, tags):
         print(f"tweet failed {len(tweet)}: {tweet}")
     finally:
         print(f"tweet worked {len(tweet)}: {tweet}")
+
+    # Mastodon
+    # https://github.com/halcy/Mastodon.py
+    import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
+
+    from .web_api_tokens import (
+        MASTODON_APP_BASE,
+        OCTODON_ACCESS_TOKEN,
+    )
+
+    octodon = mastodon.Mastodon(
+        access_token=OCTODON_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
+    )
+    toot = f"{comment}: {title}{subtitle} {url} {tags}"
+    print(f"{toot=}")
+    # octodon.toot(toot)

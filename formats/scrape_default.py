@@ -135,9 +135,7 @@ class ScrapeDefault(object):
             info("checking regexs")
             for regex in AUTHOR_REGEXS:
                 info(f"trying = '{regex}'")
-                dmatch = re.search(
-                    regex, self.text, re.IGNORECASE | re.MULTILINE
-                )
+                dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
                 if dmatch:
                     info(f'matched: "{regex}"')
                     author = dmatch.group(1).strip()
@@ -262,7 +260,9 @@ class ScrapeDefault(object):
         from urllib.parse import urlparse
 
         org_chunks = urlparse(self.url)[1].split(".")
-        if org_chunks[0] in ("www"):
+        if org_chunks == [""]:
+            org = ""
+        elif org_chunks[0] in ("www"):
             org = org_chunks[1]
         elif org_chunks[-2] in ("wordpress", "blogspot", "wikia"):
             org = org_chunks[-3]

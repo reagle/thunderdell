@@ -196,12 +196,21 @@ def yasn_publish(comment, title, subtitle, url, tags):
     ]
     if subtitle:
         title = f"{title}: {subtitle}"
-    if "goatee.net/photo" in url and url.endswith(".jpg"):
-        title = ""
-        tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-        photo_fn = f"{config.HOME}/f/{url[19:]}"
+    if url[-4:] in (".jpg", ".png"):
+        if "goatee.net/photo" in url:
+            title = ""
+            tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
+            photo_fn = f"{config.HOME}/f/{url[19:]}"
+        if url.startswith("file://"):
+            title = ""
+            tags = "#image"
+            photo_fn = url[7:]
+            if not os.path.exists(photo_fn):
+                raise IOError(f"{{photo_fn}} doesn't exist.")
     else:
         photo_fn = None
+    if url.startswith("file://"):
+        url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
     info(
         f"""comment = {len(comment)}: {comment}

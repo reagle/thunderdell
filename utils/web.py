@@ -235,11 +235,12 @@ def yasn_publish(comment, title, subtitle, url, tags):
     auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     try:
-        tweet = shrink("twitter", comment, title, "", tags)
         if photo_fn:
+            tweet = shrink("twitter", comment, title, "", tags)
             media = api.media_upload(photo_fn)
             api.update_status(status=tweet, media_ids=[media.media_id])
         else:
+            tweet = shrink("twitter", comment, title, url, tags)
             api.update_status(status=tweet)
     except tweepy.TweepError as err:
         print(err)

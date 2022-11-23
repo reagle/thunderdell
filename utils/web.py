@@ -265,8 +265,8 @@ def yasn_publish(comment, title, subtitle, url, tags):
             photo_desc = " ".join(
                 [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
             )
-            media = octodon.media_post(photo_path)
-            octodon.status_post(status=toot, media_ids=media, desription=photo_desc)
+            media = octodon.media_post(str(photo_path), description=photo_desc)
+            octodon.status_post(status=toot, media_ids=media)
         else:
             octodon.status_post(status=toot)
     except mastodon.MastodonError as err:

@@ -16,13 +16,12 @@ import logging
 import os
 import re
 from xml.sax.saxutils import escape  # unescape
+from pathlib import Path
 
 import requests  # http://docs.python-requests.org/en/latest/
 
 import config
 from biblio.keywords import KEY_SHORTCUTS
-
-HOMEDIR = os.path.expanduser("~")
 
 log = logging.getLogger("utils_web")
 critical = logging.critical
@@ -200,15 +199,15 @@ def yasn_publish(comment, title, subtitle, url, tags):
         if "goatee.net/photo" in url:
             title = ""
             tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-            photo_fn = f"{config.HOME}/f/{url[19:]}"
+            photo_path = Path(f"{config.HOME}/f/{url[19:]}")
         if url.startswith("file://"):
             title = ""
             tags = "#image"
-            photo_fn = url[7:]
-            if not os.path.exists(photo_fn):
-                raise IOError(f"{{photo_fn}} doesn't exist.")
+            photo_path = Path(url[7:])
+            if not photo_path.exists():
+                raise IOError(f"{{photo_path}} doesn't exist.")
     else:
-        photo_fn = None
+        photo_path = None
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
@@ -235,9 +234,9 @@ def yasn_publish(comment, title, subtitle, url, tags):
     auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     try:
-        if photo_fn:
+        if photo_path:
             tweet = shrink("twitter", comment, title, "", tags)
-            media = api.media_upload(photo_fn)
+            media = api.media_upload(photo_path)
             api.update_status(status=tweet, media_ids=[media.media_id])
         else:
             tweet = shrink("twitter", comment, title, url, tags)
@@ -261,9 +260,13 @@ def yasn_publish(comment, title, subtitle, url, tags):
     )
     toot = shrink("octodon", comment, title, url, tags)
     try:
-        if photo_fn:
-            media = octodon.media_post(photo_fn)
-            octodon.status_post(status=toot, media_ids=media)
+        if photo_path:
+            photo_fn = Path(photo_path).stem
+            photo_desc = " ".join(
+                [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
+            )
+            media = octodon.media_post(photo_path)
+            octodon.status_post(status=toot, media_ids=media, desription=photo_desc)
         else:
             octodon.status_post(status=toot)
     except mastodon.MastodonError as err:

@@ -135,7 +135,7 @@ def shrink(service, comment, title, url, tags):
 
     if service == "twitter":
         limit = 280
-    if service == "octodon":
+    if service == "ohai":
         limit = 500
     info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
@@ -252,23 +252,23 @@ def yasn_publish(comment, title, subtitle, url, tags):
 
     from .web_api_tokens import (
         MASTODON_APP_BASE,
-        OCTODON_ACCESS_TOKEN,
+        OHAI_ACCESS_TOKEN,
     )
 
-    octodon = mastodon.Mastodon(
-        access_token=OCTODON_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
+    ohai = mastodon.Mastodon(
+        access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
     )
-    toot = shrink("octodon", comment, title, url, tags)
+    toot = shrink("ohai", comment, title, url, tags)
     try:
         if photo_path:
             photo_fn = Path(photo_path).stem
             photo_desc = " ".join(
                 [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
             )
-            media = octodon.media_post(str(photo_path), description=photo_desc)
-            octodon.status_post(status=toot, media_ids=media)
+            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
+            ohai.status_post(status=toot, media_ids=media)
         else:
-            octodon.status_post(status=toot)
+            ohai.status_post(status=toot)
     except mastodon.MastodonError as err:
         print(err)
         print(f"toot failed {len(toot)}: {toot}")

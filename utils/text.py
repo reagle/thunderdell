@@ -10,6 +10,7 @@
 """Textual utilities."""
 
 import logging
+import re
 import unicodedata
 
 # function aliases
@@ -88,3 +89,24 @@ def smart_to_markdown(text):
         .replace("—", "---")
     )
     return text
+
+
+def html_to_text(text: str) -> str:
+
+    import xml.etree.ElementTree
+
+    return "".join(xml.etree.ElementTree.fromstring(text).itertext())
+
+
+def truncate_text(text: str, length: int) -> str:
+
+    fragments = re.split("([.!?])", text.strip())
+    result = fragments.pop(0)
+    for fragment in fragments:
+        print(f"{result=}")
+        print(f"{fragment=}")
+        if len(result) + len(fragment) >= length:
+            if len(result) >= length:
+                result = result[0 : length - 1] + "…"
+            return result
+        result = result + fragment

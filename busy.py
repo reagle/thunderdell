@@ -43,6 +43,7 @@ from formats import (
     ScrapeENWP,
     ScrapeISBN,
     ScrapeMARC,
+    ScrapeMastodon,
     ScrapeReddit,
     ScrapeTwitter,
     ScrapeWMMeta,
@@ -73,6 +74,7 @@ def get_scraper(url, comment):
     busy.py c .test https://old.reddit.com/r/Python/comments/ojze8e/lets_write_a_toy_emulator_in_python/
     busy.py c .test https://twitter.com/moiragweigel/status/1415393653678395393
     busy.py c .test https://twitter.com/vaurorapub/status/1415394419688181761
+    busy.py c .test https://ohai.social/@0xadada@freeradical.zone/109473390214845816
     busy.py c .test doi:10.1177/1097184x15613831
     busy.py c .test isbn:9780860917137
     busy.py c .test arxiv:2001.08293
@@ -98,6 +100,7 @@ def get_scraper(url, comment):
             ("meta.wikimedia.org/w", ScrapeWMMeta),
             ("marc.info/", ScrapeMARC),
             ("twitter.com/", ScrapeTwitter),
+            ("ohai.social/", ScrapeMastodon),
             ("www.reddit.com/", ScrapeReddit),
             ("", ScrapeDefault),  # default: make sure last
         )

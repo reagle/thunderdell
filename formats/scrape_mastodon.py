@@ -44,11 +44,11 @@ class ScrapeMastodon(ScrapeDefault):
         print(("Scraping mastodon"), end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
-        # extract username and id
+        # extract id
         if "://ohai.social/" in self.url:
             id = url.rsplit("/", 1)[1]
         else:
-            raise RuntimeError("cannot identify twitter ID in {url}")
+            raise RuntimeError("cannot identify message ID in {url}")
         try:
             self.status = api.status(id=id)
         except mastodon.MastodonError as err:

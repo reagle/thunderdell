@@ -13,7 +13,6 @@ Web functionality I frequently make use of.
 import html.entities
 import json
 import logging
-import os
 import re
 from xml.sax.saxutils import escape  # unescape
 from pathlib import Path
@@ -130,6 +129,18 @@ def get_text(url):
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
 
 
+def len_twitter(text: str) -> int:
+    """
+    Twitter counts code units not code points as part of its
+    character limit.
+
+    https://developer.twitter.com/en/docs/counting-characters
+
+    """
+
+    return len(text.encode("utf-16-le")) // 2
+
+
 def shrink(service, comment, title, url, tags):
     """Shrink message to fit into limit"""
 
@@ -143,43 +154,44 @@ def shrink(service, comment, title, url, tags):
     limit = limit - PADDING
 
     info(f"{limit=}")
-    message_room = limit - len(tags)
+    message_room = limit - len_twitter(tags)
     info(f"message_room - len(tags) = {message_room}")
 
-    info(f"len(url) = {len(url)}")
-    if service == "twitter" and len(url) > TWITTER_SHORTENER_LEN:
+    info(f"{len_twitter(url)=}")
+    if service == "twitter" and len_twitter(url) > TWITTER_SHORTENER_LEN:
         message_room = message_room - TWITTER_SHORTENER_LEN
         info(f"  shortened to {TWITTER_SHORTENER_LEN}")
     else:
-        message_room = message_room - len(url)
+        message_room = message_room - len_twitter(url)
     info(f"message_room after url = {message_room}")
 
-    info(f"len(title) = {len(title)}")
-    if len(title) > message_room:
+    info(f"{len_twitter(title)=}")
+    if len_twitter(title) > message_room:
         info("title is too long")
         title = title[0 : message_room - 1] + "…"
-        info(f"  truncated to {len(title)}")
-    message_room = message_room - len(title)
-    info(f"message_room after title = {message_room}")
+        info(f"  truncated to {len_twitter(title)}")
+    message_room = message_room - len_twitter(title)
+    info(f"{message_room=} after title = ")
 
-    info(f"len(comment) = {len(comment)}")
-    if len(comment) > message_room:
+    info(f"{len_twitter(comment)=}")
+    if len_twitter(comment) > message_room:
         info("comment is too long")
         if message_room > 5:
             info(" truncating")
             comment = comment[0 : message_room - 1] + "…"
-            info(f"  truncated to {len(comment)}")
+            info(f"  truncated to {len_twitter(comment)}")
             info(f"{comment}")
         else:
             info(" skipping")
             comment = ""
-    message_room = message_room - len(comment)
+    message_room = message_room - len_twitter(comment)
     info(f"message_room after comment = {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
-    message = f"{comment}{comment_delim}{title} {url} {tags}"
-    return message.strip()
+    message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
+    critical(f"{len_twitter(message)=}: {message=}")
+    return message
 
 
 def yasn_publish(comment, title, subtitle, url, tags):
@@ -241,7 +253,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
         else:
             tweet = shrink("twitter", comment, title, url, tags)
             api.update_status(status=tweet)
-    except tweepy.TweepError as err:
+    except tweepy.errors.TweepyException as err:
         print(err)
         print(f"tweet failed {len(tweet)}: {tweet}")
     else:

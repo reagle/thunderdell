@@ -259,6 +259,8 @@ class ScrapeDefault(object):
     def get_org(self):
         from urllib.parse import urlparse
 
+        if self.url.startswith("file:"):
+            return "local file"
         org_chunks = urlparse(self.url)[1].split(".")
         if org_chunks == [""]:
             org = ""

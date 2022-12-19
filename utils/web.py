@@ -213,11 +213,12 @@ def yasn_publish(comment, title, subtitle, url, tags):
             tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
             photo_path = Path(f"{config.HOME}/f/{url[19:]}")
         if url.startswith("file://"):
+            url.replace("file:///", "file://")
             title = ""
             tags = "#image"
-            photo_path = Path(url[7:])
+            photo_path = Path(url.split("//", 1)[1])
             if not photo_path.exists():
-                raise IOError(f"{{photo_path}} doesn't exist.")
+                raise IOError(f"{photo_path} doesn't exist.")
     else:
         photo_path = None
     if url.startswith("file://"):

@@ -188,7 +188,7 @@ def emit_yaml_csl(args, entries):
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        if entry["ori_author"] in container_values:
+        if entry.get("ori_author") in container_values:
             if not args.author_create:
                 del entry["author"]
             else:
@@ -253,9 +253,7 @@ def emit_yaml_csl(args, entries):
                     and "container-title" not in entry
                     and "booktitle" not in entry
                 ):
-                    args.outfd.write(
-                        f'  container-title: "Proceedings of {value}"\n'
-                    )
+                    args.outfd.write(f'  container-title: "Proceedings of {value}"\n')
                     continue
                 # 'Blog' is the null value I use in the mindmap
                 if field == "c_blog" and entry[field] == "Blog":

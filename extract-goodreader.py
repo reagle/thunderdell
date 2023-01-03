@@ -160,7 +160,7 @@ def process_text(text):
             elif kind == "Highlight":
                 if color == "yellow":
                     prefix = "excerpt."
-                if color == "blue":
+                if color == "cyan":
                     prefix = "section."
                     page_num_result = ""
         else:

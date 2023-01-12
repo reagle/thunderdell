@@ -344,6 +344,7 @@ def commit_entry(entry, entries):
     with default values if need be"""
     if entry != {}:
         entry.setdefault("author", [("", "John", "Doe", "")])
+        entry.setdefault("ori_author", [("", "John", "Doe", "")])
         entry.setdefault("title", "Unknown")
         entry.setdefault("0000")
         entry.setdefault("_mm_file", "")

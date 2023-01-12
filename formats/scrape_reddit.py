@@ -52,7 +52,10 @@ class ScrapeReddit(ScrapeDefault):
             re.VERBOSE,
         )
 
+        # https://www.reddit.com/r/Professors/comments/104xivl/comment/j38d68q/?context=3
+
         self.type = "unknown"
+        url = url.split("/?")[0]  # remove parameters from url
         self.json = get_JSON(f"{url}.json")
         if RE_REDDIT_URL.match(url):
             self.url_dict = RE_REDDIT_URL.match(url).groupdict()

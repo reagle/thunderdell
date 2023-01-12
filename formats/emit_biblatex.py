@@ -210,6 +210,7 @@ def emit_biblatex(args, entries):
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
+        info(f"{entry=}")
         if entry["ori_author"] in container_values:
             if not args.author_create:
                 del entry["author"]

@@ -395,7 +395,7 @@ def main(argv):
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    critical(f"==================================")
+    critical("==================================")
     critical(f"{args=}")
     file_names = args.file_names
     file_names = [os.path.abspath(file_name) for file_name in file_names]

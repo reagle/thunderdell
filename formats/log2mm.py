@@ -116,7 +116,7 @@ def log2mm(args, biblio):
         title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"}
     )
     if abstract:
-        abstract_node = SubElement(  # noqa: F84
+        SubElement(  # noqa: F84
             title_node, "node", {"TEXT": abstract, "STYLE_REF": "annotation"}
         )
     if excerpt:
@@ -133,7 +133,7 @@ def log2mm(args, biblio):
                 excerpt_chunk = excerpt_chunk[3:]
             else:
                 style_ref = "quote"
-            excerpt_node = SubElement(  # noqa: F84
+            SubElement(  # noqa: F84
                 title_node,
                 "node",
                 {"TEXT": excerpt_chunk, "STYLE_REF": style_ref},

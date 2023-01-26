@@ -56,7 +56,7 @@ def emit_wp(args, entries):
         wp_ident = key
         # debug(f"{wp_ident=}")
         args.outfd.write(f"<ref name={wp_ident}>\n")
-        args.outfd.write(f"{{{{citation\n")
+        args.outfd.write("{{{{citation\n")
 
         for short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:

@@ -40,7 +40,7 @@ def process_email(file_name):
             debug(f"{part=}")
             msg_content_type = part.get_content_subtype()
             if msg_content_type == "html":
-                debug(f"part is HTML: %s" % msg_content_type)
+                debug("part is HTML: %s" % msg_content_type)
                 charset = part.get_content_charset(failobj="utf-8")
                 content = part.get_payload(decode=True).decode(charset, "replace")
                 return content
@@ -194,7 +194,7 @@ TEST_OUT = """author = Ron Chernow title = Alexander Hamilton date = 20050329 pu
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    info(f"==================================")
+    info("==================================")
     debug(f"{args=}")
     if args.test:
         TEST_RESULTS = process_html(TEST_IN)
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         debug(f"{file_name=}")
         if file_name.endswith(".eml"):
             fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-            user_input = input(f"\npublish to social media? 'y' for yes: ")
+            user_input = input("\npublish to social media? 'y' for yes: ")
             if user_input == "y":
                 do_publish = "-p"
             else:
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     fixed_fd.write(new_text)
                 subprocess.run(["open", fixed_fn])
                 user_input = input(
-                    f"\nfollow up with extract-dictation.py? 'y' for yes: "
+                    "\nfollow up with extract-dictation.py? 'y' for yes: "
                 )
                 if user_input == "y":
                     subprocess.run(cmd_extract_dication)

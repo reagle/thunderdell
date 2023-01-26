@@ -148,7 +148,7 @@ def emit_yaml_csl(args, entries):
         if date.day:
             args.outfd.write(f"    day: {date.day}\n")
         if date.circa:
-            args.outfd.write(f"    circa: true\n")
+            args.outfd.write("    circa: true\n")
         if season:
             args.outfd.write(f"    season: {season}\n")
 

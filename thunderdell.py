@@ -719,7 +719,7 @@ if __name__ == "__main__":
         "--output-to-file",
         default=False,
         action="store_true",
-        help="output goes to FILENAME.yaml (BOOLEAN)",
+        help="output goes to FILENAME.ext (BOOLEAN)",
     )
     arg_parser.add_argument(
         "-p",

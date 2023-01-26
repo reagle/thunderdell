@@ -163,7 +163,7 @@ def get_logger(text):
 # Miscellaneous
 #######################################
 
-DESCRIPTION = f"""
+DESCRIPTION = """
 blog codex:    b o [pra|soc|tec] TAGS URL|DOI|ISBN TITLE. BODY
 blog goatee:   b g URL|DOI|ISBN TITLE. BODY
 mindmap:       b m TAGS URL|DOI|ISBN ABSTRACT

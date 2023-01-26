@@ -109,6 +109,6 @@ def process_files(args, file_names):
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    critical(f"==================================")
+    critical("==================================")
     critical(f"{args=}")
     process_files(args, args.file_names)

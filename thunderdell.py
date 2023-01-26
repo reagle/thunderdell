@@ -535,7 +535,7 @@ def build_bib(args, file_name, output):
             except OSError as error:
                 if error.errno == errno.EADDRINUSE:
                     ADDRESS_IN_USE = True
-                    print(f"address in use")
+                    print("address in use")
                 else:
                     raise
             # below runs the query twice I think, but still fast

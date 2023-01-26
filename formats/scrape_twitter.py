@@ -34,8 +34,8 @@ from utils.web_api_tokens import (
 auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
 auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
-
 from .scrape_default import ScrapeDefault
+
 
 # function aliases
 critical = logging.critical
@@ -84,9 +84,7 @@ class ScrapeTwitter(ScrapeDefault):
     def get_title(self):
 
         title = self.status["text"].split("\n")[0]
-        title = textwrap.shorten(
-            title, 136, break_long_words=False, placeholder="..."
-        )
+        title = textwrap.shorten(title, 136, break_long_words=False, placeholder="...")
         return title
 
     def get_date(self):

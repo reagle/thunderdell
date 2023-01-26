@@ -56,8 +56,8 @@ def create_biblatex_author(names):
         first, von, last, jr = name[0:4]
 
         if all(s.islower() for s in (first, last)):  # {{hooks}, {bell}}
-            first = f"{{first}}"
-            last = f"{{last}}"
+            first = "{{first}}"
+            last = "{{last}}"
 
         if von != "":
             full_name += von + " "
@@ -172,7 +172,7 @@ def bibformat_title(title):
                 cased_title.append(word)
             elif word in WORDS2PROTECT:
                 # debug(f"protecting lower '{word}'")
-                cased_title.append(f"{{word}}")
+                cased_title.append("{{word}}")
             elif word[0].isupper():
                 # debug(f"protecting title '{word}'")
                 cased_title.append(f"{{{my_title(word)}}}")

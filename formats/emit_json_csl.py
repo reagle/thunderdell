@@ -91,7 +91,7 @@ def emit_json_csl(args, entries):
             date_buffer.append(f"{int(date.day)}, ")
         date_buffer.append("] ],\n")
         if date.circa:
-            date_buffer.append(f'        "circa": true,\n')
+            date_buffer.append('        "circa": true,\n')
         if season:
             date_buffer.append(f'        "season": "{season}",\n')
         date_buffer.append("    },\n")

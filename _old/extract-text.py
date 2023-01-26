@@ -282,7 +282,7 @@ def parse(line):
                     % value
                 )
             else:
-                if value != None:
+                if value is not None:
                     bib = bib + "%s=%s " % (
                         terms_reverse[term],
                         value.strip(),

@@ -102,7 +102,7 @@ def process_text(text):
         info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
     else:
-        info(f"NO DOI or ISBN")
+        info("NO DOI or ISBN")
         text_new = []
 
     is_roman = False
@@ -139,7 +139,7 @@ def process_text(text):
 
             debug(f"{page_num_parsed=} SET")
             if not page_num_first_parsed:
-                debug(f"SETTING initials")
+                debug("SETTING initials")
                 page_num_first_parsed = page_num_parsed
                 debug(f"{page_num_first_parsed=}")
                 if page_num_first_specfied:
@@ -148,7 +148,7 @@ def process_text(text):
                     page_num_offset = 0
                 debug(f"{page_num_offset=}")
         elif RE_ANNOTATION.match(line):
-            debug(f"RE_ANNOTATION match")
+            debug("RE_ANNOTATION match")
             debug(f"{page_num_parsed=}")
             debug(f"{page_num_offset=}")
             page_num_result = page_num_parsed + page_num_offset
@@ -287,7 +287,7 @@ TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    critical(f"==================================")
+    critical("==================================")
     critical(f"{args=}")
     file_names = args.file_names
 
@@ -300,7 +300,7 @@ if __name__ == "__main__":
                     msg_content_type = part.get_content_subtype()
                     debug(f"{msg_content_type=}")
                     if msg_content_type == "plain":
-                        debug(f"part is plain: %s" % msg_content_type)
+                        debug("part is plain: %s" % msg_content_type)
                         charset = part.get_content_charset(failobj="utf-8")
                         content = part.get_payload(decode=True).decode(
                             charset, "replace"
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         new_text = process_text(text)
 
         fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-        user_input = input(f"\npublish to social media? 'y' for yes: ")
+        user_input = input("\npublish to social media? 'y' for yes: ")
         if user_input == "y":
             do_publish = "-p"
         else:
@@ -324,7 +324,7 @@ if __name__ == "__main__":
             with open(fixed_fn, "w") as fixed_fd:
                 fixed_fd.write(new_text)
             subprocess.run(["open", fixed_fn])
-            user_input = input(f"\nfollow up with extract-dictation.py? 'y' for yes: ")
+            user_input = input("\nfollow up with extract-dictation.py? 'y' for yes: ")
             if user_input == "y":
                 subprocess.run(cmd_extract_dication)
             print(f"{cmd_extract_dication}")
@@ -339,9 +339,9 @@ if __name__ == "__main__":
         # debug(f"{type(TEST_OUT)=}", f"{len(TEST_OUT)=}")
         # debug(f"{type(TEST_RESULTS)=}", f"{len(TEST_RESULTS)=}")
         if TEST_OUT == TEST_RESULTS:
-            print(f"\nPASS\n")
+            print("\nPASS\n")
         else:
-            print(f"\nFAIL: DIFF IS:\n")
+            print("\nFAIL: DIFF IS:\n")
             for diff in difflib.context_diff(
                 TEST_RESULTS.split("\n"),
                 TEST_OUT.split("\n"),

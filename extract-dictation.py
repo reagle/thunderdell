@@ -94,7 +94,7 @@ def build_mm_from_txt(
     line, started, in_part, in_chapter, in_section, in_subsection, entry
 ):
 
-    author = title = citation = ""
+    citation = ""
 
     if line not in ("", "\r", "\n"):
         if line.lower().startswith("author ="):

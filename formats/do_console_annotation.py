@@ -147,11 +147,7 @@ def do_console_annotation(args, biblio):
         if (
             "c_web" in biblio
             and len(
-                list(
-                    biblio[c]
-                    for c in list(bf.CSL_SHORTCUTS.values())
-                    if c in biblio
-                )
+                list(biblio[c] for c in list(bf.CSL_SHORTCUTS.values()) if c in biblio)
             )
             > 1
         ):
@@ -161,14 +157,10 @@ def do_console_annotation(args, biblio):
     # code of do_console_annotation
     info(f"{biblio['author']=}")
     tentative_id = get_tentative_ident(biblio)
-    initial_text = [
-        f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"
-    ]
+    initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
     for key in biblio:
         if key.startswith("c_"):
-            initial_text.append(
-                f"{bf.CSL_FIELDS[key]}={title_case(biblio[key])}"
-            )
+            initial_text.append(f"{bf.CSL_FIELDS[key]}={title_case(biblio[key])}")
         if key == "tags" and biblio["tags"]:
             tags = " ".join(
                 [

@@ -73,22 +73,18 @@ class ScrapeTwitter(ScrapeDefault):
         return biblio
 
     def get_author(self):
-
         name = self.status["user"]["name"].strip()
         screen_name = self.status["user"]["screen_name"].strip()
         print(f"{name=}")
         return f"{name} ({screen_name})"
 
     def get_title(self):
-
         title = self.status["text"].split("\n")[0]
         title = textwrap.shorten(title, 136, break_long_words=False, placeholder="...")
         return title
 
     def get_date(self):
-
         return dt_parse(self.status["created_at"]).strftime("%Y%m%d")
 
     def get_excerpt(self):
-
         return self.status["text"].strip()

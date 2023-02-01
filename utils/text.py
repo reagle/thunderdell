@@ -92,14 +92,12 @@ def smart_to_markdown(text):
 
 
 def html_to_text(text: str) -> str:
-
     import xml.etree.ElementTree
 
     return "".join(xml.etree.ElementTree.fromstring(text).itertext())
 
 
 def truncate_text(text: str, length: int) -> str:
-
     fragments = re.split("([.!?])", text.strip())
     result = fragments.pop(0)
     for fragment in fragments:

@@ -43,8 +43,7 @@ def log2nifty(args, biblio):
 
     date_token = time.strftime("%y%m%d", NOW)
     log_item = (
-        f'<dt><a href="{url}">{title}</a> '
-        f"({date_token})</dt><dd>{comment}</dd>"
+        f'<dt><a href="{url}">{title}</a> ' f"({date_token})</dt><dd>{comment}</dd>"
     )
 
     fd = open(ofile)

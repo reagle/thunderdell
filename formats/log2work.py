@@ -54,9 +54,7 @@ def log2work(args, biblio):
     else:
         hashtags = "#misc"
     info(f"hashtags = '{hashtags}'")
-    html_comment = (
-        f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
-    )
+    html_comment = f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
@@ -66,9 +64,7 @@ def log2work(args, biblio):
     )
     info(f"{log_item=}")
 
-    plan_tree = l_etree.parse(
-        ofile, l_etree.XMLParser(ns_clean=True, recover=True)
-    )
+    plan_tree = l_etree.parse(ofile, l_etree.XMLParser(ns_clean=True, recover=True))
     ul_found = plan_tree.xpath(
         """//x:div[@id='Done']/x:ul""",
         namespaces={"x": "http://www.w3.org/1999/xhtml"},
@@ -81,9 +77,7 @@ def log2work(args, biblio):
         except l_etree.XMLSyntaxError:
             # if lxml chokes on unicode, convert to ascii
             log_item_xml = l_etree.XML(
-                unicodedata.normalize("NFKD", log_item).encode(
-                    "ascii", "ignore"
-                )
+                unicodedata.normalize("NFKD", log_item).encode("ascii", "ignore")
             )
         log_item_xml.tail = "\n\n              "
         ul_found[0].insert(0, log_item_xml)

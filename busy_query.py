@@ -25,7 +25,6 @@ HOME = os.path.expanduser("~")
 
 
 def query_sponge(query):
-
     in_files = [
         HOME + "/joseph/plan/plans/index.html",
         HOME + "/joseph/plan/plans/20.html",
@@ -107,7 +106,6 @@ def query_sponge(query):
 
 # If the script is from console (main) then open browser.
 if __name__ == "__main__":
-
     query = "".join(sys.argv[1:])
     query_result_file = query_sponge(query)
     # call([BROWSER, query_result_file])

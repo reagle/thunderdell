@@ -49,9 +49,7 @@ def log2mm(args, biblio):
     this_year = time.strftime("%Y", NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
-    ofile = (
-        f"{config.HOME}/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
-    )
+    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
     info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
@@ -104,9 +102,7 @@ def log2mm(args, biblio):
             year_node, "node", {"TEXT": this_week, "POSITION": "right"}
         )
 
-    author_node = SubElement(
-        week_node, "node", {"TEXT": author, "STYLE_REF": "author"}
-    )
+    author_node = SubElement(week_node, "node", {"TEXT": author, "STYLE_REF": "author"})
     title_node = SubElement(
         author_node,
         "node",

@@ -25,7 +25,6 @@ excpt = logging.exception
 
 
 def regexParse(text):
-
     entries = {}
     key_pat = re.compile(r"@\w+{(.*),")
     value_pat = re.compile(r"\s+(\w+) ?= ?{(.*)},?")
@@ -51,7 +50,6 @@ def xml_escape(text):
 
 
 def process(entries):
-
     fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
 
     for entry in list(entries.values()):
@@ -131,7 +129,6 @@ def process(entries):
 
 
 if __name__ == "__main__":
-
     import argparse  # http://docs.python.org/dev/library/argparse.html
 
     arg_parser = argparse.ArgumentParser(description="TBD")

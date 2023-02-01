@@ -91,7 +91,6 @@ class ScrapeReddit(ScrapeDefault):
         return biblio
 
     def get_org(self):
-
         info("GETTING ORG")
         organization = "Reddit"
         info(f"{self.type=}")
@@ -101,7 +100,6 @@ class ScrapeReddit(ScrapeDefault):
         return organization.strip()
 
     def get_author(self):
-
         author = "Reddit"
         if self.type == "post":
             author = self.json[0]["data"]["children"][0]["data"]["author"]
@@ -112,7 +110,6 @@ class ScrapeReddit(ScrapeDefault):
         return author.strip()
 
     def get_title(self):
-
         title = "UNKNOWN"
         if self.type == "subreddit":
             title = self.url_dict["root"]
@@ -122,7 +119,6 @@ class ScrapeReddit(ScrapeDefault):
         return title.strip()
 
     def get_date(self):
-
         # date_init = time.strftime("%Y%m%d", NOW)
         created = time.mktime(NOW)  # TODO convert to float epock time
         if self.type == "post":
@@ -133,7 +129,6 @@ class ScrapeReddit(ScrapeDefault):
         return date.strip()
 
     def get_excerpt(self):
-
         excerpt = ""
         if self.type == "post":
             post_data = self.json[0]["data"]["children"][0]["data"]

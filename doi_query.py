@@ -61,7 +61,6 @@ def query(doi, accept="application/citeproc+json"):
 
 
 if "__main__" == __name__:
-
     import argparse
 
     arg_parser = argparse.ArgumentParser(

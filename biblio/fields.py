@@ -291,9 +291,7 @@ BIBLATEX_WP_FIELD_MAP = dict([
 
 # fmt: on
 
-WP_BIBLATEX_FIELD_MAP = dict(
-    (v, k) for k, v in list(BIBLATEX_WP_FIELD_MAP.items())
-)
+WP_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in list(BIBLATEX_WP_FIELD_MAP.items()))
 
 BIBTEX_FIELDS = {
     "address",

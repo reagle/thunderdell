@@ -185,7 +185,6 @@ class ScrapeDefault(object):
             return date
 
     def get_title(self):
-
         title_regexps = (
             ("http://lists.w3.org/.*", '<!-- subject="(.*?)" -->'),
             ("http://lists.kde.org/.*", r"<title>MARC: msg '(.*?)'</title>"),

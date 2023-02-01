@@ -42,7 +42,6 @@ if file[-4:] == ".doc":
     file = "/tmp/tmp-%s" % file
 fd = open(file, "rb")
 for line in fd:
-
     # print "***", line[0:50]
 
     # Textual: Tom McArthur's (1986ftw:67)

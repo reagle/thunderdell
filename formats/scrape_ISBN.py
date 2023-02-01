@@ -38,7 +38,6 @@ class ScrapeISBN(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-
         import isbn_query
 
         info(f"url = {self.url}")

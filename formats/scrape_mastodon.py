@@ -69,14 +69,12 @@ class ScrapeMastodon(ScrapeDefault):
         return biblio
 
     def get_author(self):
-
         user_name = self.status["account"]["username"].strip()
         acct_name = self.status["account"]["acct"].strip()
         print(f"{acct_name=}")
         return f"{user_name} ({acct_name})"
 
     def get_title(self) -> str:
-
         # wrap multiple `p` elements in a single parent for parsing
         html = "<div>" + self.status["content"] + "</div>"
         text = ut.html_to_text("<div>" + html + "</div>")
@@ -85,7 +83,6 @@ class ScrapeMastodon(ScrapeDefault):
         return title
 
     def get_date(self):
-
         return self.status["created_at"].strftime("%Y%m%d")
 
     def get_excerpt(self):
@@ -97,5 +94,4 @@ class ScrapeMastodon(ScrapeDefault):
         return text
 
     def get_url(self):
-
         return self.status["url"]

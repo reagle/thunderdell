@@ -82,7 +82,6 @@ def clean(text):
 
 
 def get_date():
-
     now = time.localtime()
     # year = time.strftime("%Y", now).lower()
     # month = time.strftime("%m", now).lower()
@@ -93,7 +92,6 @@ def get_date():
 def build_mm_from_txt(
     line, started, in_part, in_chapter, in_section, in_subsection, entry
 ):
-
     citation = ""
 
     if line not in ("", "\r", "\n"):
@@ -274,7 +272,6 @@ def build_mm_from_txt(
 
 
 def create_mm(text, file_out):
-
     import traceback
 
     entry = {}  # a bibliographic entry for yasn_publish

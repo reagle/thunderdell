@@ -38,9 +38,7 @@ class ScrapeMARC(ScrapeDefault):
 
     def get_author(self):
         try:
-            author = re.search(
-                """From: *<a href=".*?">(.*?)</a>""", self.html_u
-            )
+            author = re.search("""From: *<a href=".*?">(.*?)</a>""", self.html_u)
         except AttributeError:
             author = re.search("""From: *(.*)""", self.html_u)
         author = author.group(1)
@@ -57,18 +55,12 @@ class ScrapeMARC(ScrapeDefault):
     def get_title(self):
         subject = re.search("""Subject: *(.*)""", self.html_u).group(1)
         if subject.startswith("<a href"):
-            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(
-                1
-            )
-        subject = subject.replace("[Wikipedia-l] ", "").replace(
-            "[WikiEN-l] ", ""
-        )
+            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(1)
+        subject = subject.replace("[Wikipedia-l] ", "").replace("[WikiEN-l] ", "")
         return subject
 
     def get_date(self):
-        mdate = re.search(
-            """Date: *<a href=".*?">(.*?)</a>""", self.html_u
-        ).group(1)
+        mdate = re.search("""Date: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
         try:
             date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
         except ValueError:
@@ -76,9 +68,7 @@ class ScrapeMARC(ScrapeDefault):
         return time.strftime("%Y%m%d", date)
 
     def get_org(self):
-        return re.search(
-            """List: *<a href=".*?">(.*?)</a>""", self.html_u
-        ).group(1)
+        return re.search("""List: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
 
     def get_excerpt(self):
         excerpt = ""

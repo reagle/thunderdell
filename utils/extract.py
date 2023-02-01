@@ -24,7 +24,6 @@ class args:
 
 
 def get_bib_preamble(token):
-
     info(f"{token=}")
     if token.startswith("10"):
         scrape_token = formats.ScrapeDOI

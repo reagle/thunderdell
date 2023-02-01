@@ -48,9 +48,7 @@ def emit_wp(args, entries):
                 prefix = f"editor{str(name_num)}-"
                 suffix = ""
             args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
-            args.outfd.write(
-                f'| {prefix}last{suffix} = {" ".join(name[1:])}\n'
-            )
+            args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
 
     for key, entry in sorted(entries.items()):
         wp_ident = key
@@ -82,9 +80,7 @@ def emit_wp(args, entries):
                 elif field in ("date", "origdate", "urldate"):
                     date = value.year
                     if value.month:
-                        date = (
-                            f"{calendar.month_name[int(value.month)]} {date}"
-                        )
+                        date = f"{calendar.month_name[int(value.month)]} {date}"
                     if value.day:
                         date = f"{value.day.lstrip('0')} {date}"
                     # date = "-".join(

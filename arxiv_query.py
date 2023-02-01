@@ -52,7 +52,6 @@ def query(number, accept="application/atom+xml"):
 
 
 if "__main__" == __name__:
-
     import argparse
 
     arg_parser = argparse.ArgumentParser(

@@ -46,7 +46,6 @@ class ScrapeArXiv(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-
         info(f"url = {self.url}")
         dict_bib = arxiv_query.query(self.identifier)
         info(f"{dict_bib=}")

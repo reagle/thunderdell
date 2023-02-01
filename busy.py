@@ -187,7 +187,6 @@ def print_usage(message):
 
 # Check to see if the script is executing as main.
 if __name__ == "__main__":
-
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",

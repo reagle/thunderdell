@@ -19,11 +19,7 @@ def clean_xml(text):
     """Remove entities and remove spurious whitespace"""
 
     if text is not None:
-        text = (
-            text.replace("&", "&amp;")
-            .replace('"', "&quot;")
-            .replace("'", "&apos;")
-        )
+        text = text.replace("&", "&amp;").replace('"', "&quot;").replace("'", "&apos;")
         text = text.strip()
     return text
 
@@ -41,7 +37,6 @@ def fix_authors(authors):
 
 
 def parse(line):
-
     import re
     from td import terms_reverse  # a dict of a term yielding its token
 
@@ -273,13 +268,11 @@ def parse(line):
                 authors = value
                 authors = fix_authors(value)
                 sys.stdout.write(
-                    """<node COLOR="#338800" TEXT="%s" POSITION="left">\n"""
-                    % authors
+                    """<node COLOR="#338800" TEXT="%s" POSITION="left">\n""" % authors
                 )
             elif term == "title":
                 sys.stdout.write(
-                    """<node COLOR="#090f6b" TEXT="%s" POSITION="left">\n"""
-                    % value
+                    """<node COLOR="#090f6b" TEXT="%s" POSITION="left">\n""" % value
                 )
             else:
                 if value is not None:
@@ -305,7 +298,6 @@ def check(fd):
 
 
 if __name__ == "__main__":
-
     # Parse the command line arguments for optional message and files.
 
     sys.stdout = codecs.getwriter("UTF-8")(sys.__stdout__, errors="replace")

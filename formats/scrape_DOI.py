@@ -39,7 +39,6 @@ class ScrapeDOI(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-
         info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)
         info(f"{json_bib=}")

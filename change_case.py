@@ -301,7 +301,7 @@ def main(argv):
     """Process arguments and execute."""
 
     arg_parser = argparse.ArgumentParser(
-        description="Change the case of some text, " "defaulting to sentence case."
+        description="Change the case of some text, defaulting to sentence case."
     )
     # positional arguments
     arg_parser.add_argument("text", nargs="*", metavar="TEXT")

@@ -353,7 +353,7 @@ def commit_entry(entry, entries):
         try:
             pull_citation(entry)  # break the citation up
         except Exception:
-            print(f"pull_citation error on {entry['author']}: " f"{entry['_mm_file']}")
+            print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
             raise
         entry["identifier"] = get_ident(entry, entries)
         entries[entry["identifier"]] = entry
@@ -554,7 +554,7 @@ def build_bib(args, file_name, output):
             raise
         results_file.write(RESULT_FILE_HEADER)
         results_file.write(
-            "    <title>Pretty Mind Map</title></head>" '<body>\n<ul class="top">\n'
+            '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
         )
         for entry in list(entries.values()):
             args.query = entry["identifier"]
@@ -773,9 +773,11 @@ if __name__ == "__main__":
         "--WP-citation",
         default=False,
         action="store_true",
-        help="emit Wikipedia {{citation}} format which can be "
-        "cited via {{sfn|Author2004|loc=p. 45}}. "
-        "See: http://en.wikipedia.org/wiki/Template:Cite",
+        help=(
+            "emit Wikipedia {{citation}} format which can be "
+            "cited via {{sfn|Author2004|loc=p. 45}}. "
+            "See: http://en.wikipedia.org/wiki/Template:Cite"
+        ),
     )
     arg_parser.add_argument(
         "-y",

@@ -29,17 +29,9 @@ import urllib
 from biblio import fields as bf
 from biblio.keywords import LIST_OF_KEYSHORTCUTS
 from formats import (
-    log2console,
-    log2goatee,
-    log2mm,
-    log2nifty,
-    log2opencodex,
-    log2work,
-)
-from formats import (
     ScrapeArXiv,
-    ScrapeDOI,
     ScrapeDefault,
+    ScrapeDOI,
     ScrapeENWP,
     ScrapeISBN,
     ScrapeMARC,
@@ -47,6 +39,12 @@ from formats import (
     ScrapeReddit,
     ScrapeTwitter,
     ScrapeWMMeta,
+    log2console,
+    log2goatee,
+    log2mm,
+    log2nifty,
+    log2opencodex,
+    log2work,
 )
 from utils.text import pretty_tabulate_dict
 

@@ -15,10 +15,10 @@ http://export.arxiv.org/api/query?id_list=2001.08293
 
 import logging
 import pprint
-import requests
 import sys
-import xmltodict
 
+import requests
+import xmltodict
 
 log_level = 100  # default
 critical = logging.critical

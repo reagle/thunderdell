@@ -23,12 +23,12 @@ import string
 import time
 from urllib.parse import urlparse
 
+from dateutil.parser import parse as dt_parse
+
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
-from dateutil.parser import parse as dt_parse
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
-
 
 # function aliases
 critical = logging.critical

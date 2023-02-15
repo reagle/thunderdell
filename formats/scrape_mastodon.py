@@ -20,8 +20,8 @@ https://github.com/reagle/thunderdell
 import logging
 
 # import textwrap
-
 import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
+
 import utils.text as ut
 import utils.web_api_tokens as wat
 

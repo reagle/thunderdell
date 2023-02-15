@@ -12,7 +12,6 @@ of bibliographic formats"""
 
 from collections import namedtuple
 
-
 Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
 #################################################################

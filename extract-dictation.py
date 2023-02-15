@@ -10,15 +10,17 @@ import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
 import logging
 import os
-import subprocess
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
+from biblio.fields import (
+    BIB_FIELDS,  # dict of field to its shortcut
+    BIB_SHORTCUTS,  # dict of shortcuts to a field
+)
 from utils.web import yasn_publish
-from biblio.fields import BIB_FIELDS  # dict of field to its shortcut
-from biblio.fields import BIB_SHORTCUTS  # dict of shortcuts to a field
 
 HOME = str(Path("~").expanduser())
 

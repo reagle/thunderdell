@@ -18,7 +18,6 @@ from biblio.fields import (
     CONTAINERS,
     EXCLUDE_URLS,
 )
-
 from formats.emit_yaml_csl import guess_csl_type
 
 # logger function aliases

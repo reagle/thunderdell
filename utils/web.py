@@ -14,8 +14,8 @@ import html.entities
 import json
 import logging
 import re
-from xml.sax.saxutils import escape  # unescape
 from pathlib import Path
+from xml.sax.saxutils import escape  # unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
 
@@ -237,10 +237,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
     import tweepy
 
     from .web_api_tokens import (
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
         TW_ACCESS_TOKEN,
         TW_ACCESS_TOKEN_SECRET,
+        TW_CONSUMER_KEY,
+        TW_CONSUMER_SECRET,
     )
 
     auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)

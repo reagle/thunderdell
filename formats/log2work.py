@@ -17,9 +17,10 @@ import logging
 import time
 import unicodedata
 
+from lxml import etree as l_etree
+
 import config
 from biblio.keywords import KEY_SHORTCUTS
-from lxml import etree as l_etree
 from utils.web import escape_XML, yasn_publish
 
 # function aliases

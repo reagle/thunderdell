@@ -53,7 +53,7 @@ def log2goatee(args, biblio):
             filename = blog_title
             blog_title = blog_title.replace("-", " ")
     filename = filename.strip().replace(" ", "-").replace("'", "")
-    filename = GOATEE_ROOT + "%s/%s%s-%s.md" % (
+    filename = GOATEE_ROOT + "{}/{}{}-{}.md".format(
         this_year,
         this_month,
         this_day,
@@ -74,7 +74,7 @@ def log2goatee(args, biblio):
 
     if "url":
         if biblio.get("excerpt", False):
-            fd.write("\n\n[%s](%s)\n\n" % (biblio["title"], biblio["url"]))
+            fd.write("\n\n[{}]({})\n\n".format(biblio["title"], biblio["url"]))
             fd.write("> %s\n" % biblio["excerpt"])
         if photo_match:
             path, jpg = url.rsplit("/", 1)

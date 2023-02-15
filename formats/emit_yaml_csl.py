@@ -203,7 +203,7 @@ def emit_yaml_csl(args, entries):
 
                 # special format fields
                 if field == "title":
-                    title = yaml_protect_case(escape_yaml((value)))
+                    title = yaml_protect_case(escape_yaml(value))
                     args.outfd.write(f"  title: {title}\n")
                     continue
                 if field in ("author", "editor", "translator"):

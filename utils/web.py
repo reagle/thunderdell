@@ -81,7 +81,7 @@ def get_HTML(
     if "html" in r.headers["content-type"]:
         HTML_bytes = r.content
     else:
-        raise IOError("URL content is not HTML.")
+        raise OSError("URL content is not HTML.")
 
     parser_html = etree.HTMLParser()
     doc = etree.fromstring(HTML_bytes, parser_html)
@@ -117,7 +117,7 @@ def get_JSON(
         json_content = json.loads(r.content)
         return json_content
     else:
-        raise IOError("URL content is not JSON.")
+        raise OSError("URL content is not JSON.")
 
 
 def get_text(url):
@@ -200,10 +200,10 @@ def yasn_publish(comment, title, subtitle, url, tags):
         tags = " ".join(
             ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
         )
-    comment, title, subtitle, url, tags = [
+    comment, title, subtitle, url, tags = (
         v.strip() if isinstance(v, str) else ""
         for v in [comment, title, subtitle, url, tags]
-    ]
+    )
     if subtitle:
         title = f"{title}: {subtitle}"
     if url[-4:] in (".jpg", ".png"):
@@ -217,7 +217,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
             tags = "#image"
             photo_path = Path(url.split("//", 1)[1])
             if not photo_path.exists():
-                raise IOError(f"{photo_path} doesn't exist.")
+                raise OSError(f"{photo_path} doesn't exist.")
     else:
         photo_path = None
     if url.startswith("file://"):

@@ -75,7 +75,7 @@ def log2console(args, biblio):
                     bib_in_single_line += "keyword = %s " % value
             else:
                 # print(('%s = %s' % (token, biblio[token])))
-                bib_in_single_line += "%s = %s " % (token, biblio[token])
+                bib_in_single_line += f"{token} = {biblio[token]} "
     print(f"{bib_in_single_line}")
     if "identifiers" in biblio:
         for identifer, value in list(biblio["identifiers"].items()):

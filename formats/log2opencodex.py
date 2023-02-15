@@ -80,7 +80,7 @@ def log2opencodex(args, biblio):
     fd.write("...\n\n")
     fd.write(blog_body.strip())
     if "url" in biblio and "excerpt" in biblio:
-        fd.write("\n\n[%s](%s)\n\n" % (biblio["title"], biblio["url"]))
+        fd.write("\n\n[{}]({})\n\n".format(biblio["title"], biblio["url"]))
         fd.write("> %s\n" % biblio["excerpt"])
     fd.close()
     Popen([config.VISUAL, filename])

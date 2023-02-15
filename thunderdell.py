@@ -480,7 +480,7 @@ def build_bib(args, file_name, output):
 
     links = []  # list of other files encountered in the mind map
     done = []  # list of files processed, kept to prevent loops
-    entries = dict()  # dict of {id : {entry}}, by insertion order
+    entries = {}  # dict of {id : {entry}}, by insertion order
     mm_files = [
         file_name,
     ]  # list of file encountered (e.g., chase option)

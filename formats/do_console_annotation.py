@@ -147,7 +147,7 @@ def do_console_annotation(args, biblio):
         if (
             "c_web" in biblio
             and len(
-                list(biblio[c] for c in list(bf.CSL_SHORTCUTS.values()) if c in biblio)
+                [biblio[c] for c in list(bf.CSL_SHORTCUTS.values()) if c in biblio]
             )
             > 1
         ):

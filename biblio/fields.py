@@ -80,71 +80,65 @@ DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
 
 # happy to keep using biblatex:address alias of biblatex:location
 # keep t, ot, and et straight
-BIBLATEX_SHORTCUTS = dict(
-    [
-        ("id", "identifier"),
-        ("a", "address"),
-        ("ad", "addendum"),
-        ("an", "annotation"),
-        ("au", "author"),
-        ("bt", "booktitle"),
-        ("ch", "chapter"),
-        ("doi", "doi"),
-        ("e", "editor"),
-        ("ed", "edition"),
-        ("et", "eventtitle"),
-        ("g", "genre"),
-        ("hp", "howpublished"),
-        ("in", "institution"),
-        ("i", "isbn"),
-        ("j", "journal"),
-        ("kw", "keyword"),
-        ("mm", "custom2"),  # mindmap file name
-        ("nt", "note"),
-        ("or", "organization"),
-        ("ol", "origlanguage"),
-        ("od", "origdate"),
-        ("op", "origpublisher"),
-        ("ot", "type"),  # org's manual or report subtype, eg W3C REC
-        ("ps", "pubstate"),  # in press, submitted
-        ("pp", "pages"),
-        ("pa", "pagination"),
-        ("p", "publisher"),
-        ("r", "custom1"),  # read date
-        ("sc", "school"),
-        ("se", "series"),
-        ("t", "entry_type"),  # biblatex type
-        ("tr", "translator"),
-        ("ti", "title"),
-        ("st", "shorttitle"),
-        ("rt", "retype"),
-        ("v", "volume"),
-        ("is", "issue"),
-        ("n", "number"),
-        ("d", "date"),
-        ("url", "url"),
-        ("urld", "urldate"),
-        ("ve", "venue"),
-        ("c3", "catalog"),
-        ("c4", "custom4"),
-        ("c5", "custom5"),
-    ]
-)
+BIBLATEX_SHORTCUTS = {
+    "id": "identifier",
+    "a": "address",
+    "ad": "addendum",
+    "an": "annotation",
+    "au": "author",
+    "bt": "booktitle",
+    "ch": "chapter",
+    "doi": "doi",
+    "e": "editor",
+    "ed": "edition",
+    "et": "eventtitle",
+    "g": "genre",
+    "hp": "howpublished",
+    "in": "institution",
+    "i": "isbn",
+    "j": "journal",
+    "kw": "keyword",
+    "mm": "custom2",  # mindmap file name
+    "nt": "note",
+    "or": "organization",
+    "ol": "origlanguage",
+    "od": "origdate",
+    "op": "origpublisher",
+    "ot": "type",  # org's manual or report subtype, eg W3C REC
+    "ps": "pubstate",  # in press, submitted
+    "pp": "pages",
+    "pa": "pagination",
+    "p": "publisher",
+    "r": "custom1",  # read date
+    "sc": "school",
+    "se": "series",
+    "t": "entry_type",  # biblatex type
+    "tr": "translator",
+    "ti": "title",
+    "st": "shorttitle",
+    "rt": "retype",
+    "v": "volume",
+    "is": "issue",
+    "n": "number",
+    "d": "date",
+    "url": "url",
+    "urld": "urldate",
+    "ve": "venue",
+    "c3": "catalog",
+    "c4": "custom4",
+    "c5": "custom5",
+}
 
-CSL_SHORTCUTS = dict(
-    [
-        # title (csl:container) fields that also give type
-        # hints towards the richer csl:types
-        ("cj", "c_journal"),  # containing_journal
-        ("cm", "c_magazine"),
-        ("cn", "c_newspaper"),
-        ("cd", "c_dictionary"),
-        ("cy", "c_encyclopedia"),
-        ("cf", "c_forum"),  # for post
-        ("cb", "c_blog"),
-        ("cw", "c_web"),
-    ]
-)
+CSL_SHORTCUTS = {
+    "cj": "c_journal",  # containing_journal
+    "cm": "c_magazine",
+    "cn": "c_newspaper",
+    "cd": "c_dictionary",
+    "cy": "c_encyclopedia",
+    "cf": "c_forum",  # for post
+    "cb": "c_blog",
+    "cw": "c_web",
+}
 
 BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
 BIB_SHORTCUTS.update(CSL_SHORTCUTS)
@@ -222,76 +216,73 @@ BIB_TYPES = BIBLATEX_TYPES | CSL_TYPES
 
 # fmt: off
 # https://reagle.org/joseph/2013/08/bib-mapping.html
-CSL_BIBLATEX_TYPE_MAP = dict([
-    # ordering is important so in the reverse mapping online => webpage
-    ('article-journal',         'article'),
-    ('article-magazine',        'article'),
-    ('article-newspaper',       'article'),
-    ('chapter',                 'incollection'),
-    ('entry',                   'incollection'),
-    ('entry-dictionary',        'inreference'),
-    ('entry-encyclopedia',      'inreference'),
-    ('legal_case',              'misc'),
-    ('manuscript',              'unpublished'),
-    ('thesis',                  'phdthesis'),  # TODO: duplicate key
-    ('thesis',                  'mastersthesis'),
-    ('pamphlet',                'booklet'),
-    ('paper-conference',        'inproceedings'),
-    ('personal_communication',  'letter'),
-    ('post',                    'online'),
-    ('post-weblog',             'online'),
-    ('webpage',                 'online'),
-])
+CSL_BIBLATEX_TYPE_MAP = {
+    "article-journal":          "article",
+    "article-magazine":         "article",
+    "article-newspaper":        "article",
+    "chapter":                  "incollection",
+    "entry":                    "incollection",
+    "entry-dictionary":         "inreference",
+    "entry-encyclopedia":       "inreference",
+    "legal_case":               "misc",
+    "manuscript":               "unpublished",
+    "thesis":                   "phdthesis",  
+    # "thesis":                   "mastersthesis", # TODO: duplicate key
+    "pamphlet":                 "booklet",
+    "paper-conference":         "inproceedings",
+    "personal_communication":   "letter",
+    "post":                     "online",
+    "post-weblog":              "online",
+    "webpage":                  "online"
+}
 
-BIBLATEX_CSL_TYPE_MAP = dict((v, k) for k, v in
-                             list(CSL_BIBLATEX_TYPE_MAP.items()))
+BIBLATEX_CSL_TYPE_MAP = {v: k for k, v in list(CSL_BIBLATEX_TYPE_MAP.items())}
 
-BIBLATEX_CSL_FIELD_MAP = dict([
-    ('address',        'publisher-place'),
-    ('annotation',     'abstract'),
-    ('booktitle',      'container-title'),
-    ('chapter',        'chapter-number'),
-    ('doi',            'DOI'),
-    ('eventtitle',     'event'),
-    ('institution',    'publisher'),
-    ('isbn',           'ISBN'),
-    ('journal',        'container-title'),
-    ('organization',   'publisher'),
-    ('number',         'issue'),
-    ('type',           'genre'),
-    ('pages',          'page'),
-    ('pagination',     'locators'),
-    ('school',         'publisher'),
-    ('series',         'collection-title'),
-    ('shorttitle',     'title-short'),
-    ('url',            'URL'),
-    ('urldate',        'accessed'),
-    ('venue',          'event-place'),
-    ('catalog',        'call-number'),
-])
+BIBLATEX_CSL_FIELD_MAP = {
+    "address":              "publisher-place",
+    "annotation":           "abstract",
+    "booktitle":            "container-title",
+    "chapter":              "chapter-number",
+    "doi":                  "DOI",
+    "eventtitle":           "event",
+    "institution":          "publisher",
+    "isbn":                 "ISBN",
+    "journal":              "container-title",
+    "organization":         "publisher",
+    "number":               "issue",
+    "type":                 "genre",
+    "pages":                "page",
+    "pagination":           "locators",
+    "school":               "publisher",
+    "series":               "collection-title",
+    "shorttitle":           "title-short",
+    "url":                  "URL",
+    "urldate":              "accessed",
+    "venue":                "event-place",
+    "catalog":              "call-number",
+}
 
-CSL_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in
-                              list(BIBLATEX_CSL_FIELD_MAP.items()))
+CSL_BIBLATEX_FIELD_MAP = {v: k for k, v in list(BIBLATEX_CSL_FIELD_MAP.items())}
 
 # https://en.wikipedia.org/wiki/Template:Citation
-BIBLATEX_WP_FIELD_MAP = dict([
-    ('c_journal',       'journal'),
-    ('c_magazine',      'magazine'),
-    ('c_newspaper',     'newspaper'),
-    ('c_dictionary',    'work'),
-    ('c_encyclopedia',  'work'),
-    ('c_forum',         'work'),
-    ('c_blog',          'work'),
-    ('c_web',           'work'),
-    ('urldate',         'accessdate'),
-    ('address',         'publication-place'),
-    ('booktitle',       'title'),
-    ('origdate',        'orig-year'),
-])
+BIBLATEX_WP_FIELD_MAP = {
+    "c_journal":        "journal",
+    "c_magazine":       "magazine",
+    "c_newspaper":      "newspaper",
+    "c_dictionary":     "work",
+    "c_encyclopedia":   "work",
+    "c_forum":          "work",
+    "c_blog":           "work",
+    "c_web":            "work",
+    "urldate":          "accessdate",
+    "address":          "publication-place",
+    "booktitle":        "title",
+    "origdate":         "orig-year",
+}
 
 # fmt: on
 
-WP_BIBLATEX_FIELD_MAP = dict((v, k) for k, v in list(BIBLATEX_WP_FIELD_MAP.items()))
+WP_BIBLATEX_FIELD_MAP = {v: k for k, v in list(BIBLATEX_WP_FIELD_MAP.items())}
 
 BIBTEX_FIELDS = {
     "address",
@@ -336,7 +327,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
     "keyword",
     "origdate",
     "origlanguage",
-    "origpublisher" "origyear",
+    "origpublisherorigyear",
     "pagination",
     "pubstate",
     "retype",

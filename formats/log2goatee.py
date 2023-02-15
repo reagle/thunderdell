@@ -44,9 +44,7 @@ def log2goatee(args, biblio):
     url = biblio.get("url", None)
     filename = blog_title.lower()
 
-    PHOTO_RE = re.compile(
-        r".*/photo/gallery/(\d\d\d\d/\d\d)" r"/\d\d-\d\d\d\d-(.*)\.jpe?g"
-    )
+    PHOTO_RE = re.compile(r".*/photo/gallery/(\d\d\d\d/\d\d)/\d\d-\d\d\d\d-(.*)\.jpe?g")
     photo_match = False
     if "goatee.net/photo/" in url:
         photo_match = re.match(PHOTO_RE, url)

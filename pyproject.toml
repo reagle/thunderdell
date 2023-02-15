@@ -5,7 +5,11 @@ preview = true
 
 [tool.ruff]
 
-select = ["A", "B", "C4", "E", "F", "I"]
+select = ["A", "B", "BLE", "C4", "E", "F", "I", "ISC", "PIE", "Q", "RSE"]
+# ["SIM", "PTH"] # good, but hard on old code
+# ["PLR"] need to understand more
+# ["RUF"] warns about ambiguous Unicode for curly quotes
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",

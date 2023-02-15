@@ -82,7 +82,7 @@ def do_console_annotation(args, biblio):
             with open(annotation_fn, "w", encoding="utf-8") as annotation_file:
                 annotation_file.write(initial_text)
         call([config.EDITOR, annotation_fn])
-        return open(annotation_fn, "r", encoding="utf-8").readlines()
+        return open(annotation_fn, encoding="utf-8").readlines()
 
     def parse_bib(args, biblio, edited_text):
         """Parse the bib assignments"""
@@ -95,7 +95,7 @@ def do_console_annotation(args, biblio):
         console_annotations = ""
         biblio["comment"] = ""
 
-        print(("@%s\n" % (tentative_id)))
+        print("@%s\n" % (tentative_id))
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
             info(f"{line=}")
@@ -178,7 +178,7 @@ def do_console_annotation(args, biblio):
     try:
         biblio, do_publish = parse_bib(args, biblio, edited_text)
     except (TypeError, KeyError) as e:
-        print(("Error parsing biblio assignments: %s\nTry again." % e))
+        print("Error parsing biblio assignments: %s\nTry again." % e)
         time.sleep(2)
         edited_text = edit_annotation("", resume_edit=True)
         biblio, do_publish = parse_bib(args, biblio, edited_text)

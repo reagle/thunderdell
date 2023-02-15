@@ -51,7 +51,7 @@ def pretty_tabulate_list(mylist, cols=3):
         "\t".join(["%20s" % j for j in mylist[i : i + cols]])
         for i in range(0, len(mylist), cols)
     ]
-    print(("\n".join(pairs)))
+    print("\n".join(pairs))
     print("\n")
 
 

@@ -147,7 +147,7 @@ def emit_json_csl(args, entries):
 
                 # special format fields
                 if field == "title":
-                    title = csl_protect_case(escape_csl((value)))
+                    title = csl_protect_case(escape_csl(value))
                     file_buffer.append(f'    "title": {title},\n')
                     continue
                 if field in ("author", "editor", "translator"):

@@ -40,7 +40,7 @@ NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
-class ScrapeDefault(object):
+class ScrapeDefault:
     """
     Default and base class scraper.
     """
@@ -53,7 +53,7 @@ class ScrapeDefault(object):
             self.html_b, self.HTML_p, self.html_u, self.resp = get_HTML(
                 url, cache_control="no-cache"
             )
-        except IOError:
+        except OSError:
             self.html_b, self.HTML_p, self.html_u, self.resp = (
                 None,
                 None,

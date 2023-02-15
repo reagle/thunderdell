@@ -168,9 +168,7 @@ def build_mm_from_txt(
             if citation != "":
                 clean(citation)
             citation += " r=%s" % get_date()
-            file_out.write(
-                """  <node STYLE_REF="%s" TEXT="%s"/>\n""" % ("cite", clean(citation))
-            )
+            file_out.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
 
         elif re.match(r"summary\.(.*)", line, re.I):
             matches = re.match(r"summary\.(.*)", line, re.I)
@@ -194,7 +192,7 @@ def build_mm_from_txt(
                 file_out.write("""  </node>\n""")  # close part
                 in_part = False
             file_out.write(
-                """  <node STYLE_REF="%s" TEXT="%s">\n""" % ("quote", clean(line))
+                """  <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
             )
             in_part = True
 
@@ -209,7 +207,7 @@ def build_mm_from_txt(
                 file_out.write("""    </node>\n""")  # close chapter
                 in_chapter = False
             file_out.write(
-                """    <node STYLE_REF="%s" TEXT="%s">\n""" % ("quote", clean(line))
+                """    <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
             )
             in_chapter = True
 

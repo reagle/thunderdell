@@ -135,7 +135,7 @@ def emit_yaml_csl(args, entries):
                 args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
             if particle:
                 args.outfd.write(
-                    f"    non-dropping-particle: " f"{escape_yaml(particle)}\n"
+                    f"    non-dropping-particle: {escape_yaml(particle)}\n"
                 )
 
     def emit_yaml_date(date, season=None):
@@ -177,7 +177,7 @@ def emit_yaml_csl(args, entries):
     args.outfd.write("---\n")
     args.outfd.write("references:\n")
 
-    for key, entry in sorted(entries.items()):
+    for _key, entry in sorted(entries.items()):
         entry_type, genre, medium = guess_csl_type(entry)
         args.outfd.write(f'- id: {entry["identifier"]}\n')
         args.outfd.write(f"  type: {entry_type}\n")
@@ -194,7 +194,7 @@ def emit_yaml_csl(args, entries):
             else:
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
-        for short, field in BIB_SHORTCUTS_ITEMS:
+        for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
                 # debug(f"short, field = '{short} , {field}'")

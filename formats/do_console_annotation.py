@@ -41,11 +41,11 @@ def do_console_annotation(args, biblio):
 
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
-    def rotate_files(filename, max=5):
-        f"""create at most {max} rotating files"""
+    def rotate_files(filename, maximum=5):
+        """create at most {maximum} rotating files"""
 
         bare, ext = os.path.splitext(filename)
-        for counter in reversed(range(2, max + 1)):
+        for counter in reversed(range(2, maximum + 1)):
             old_filename = f"{bare}{counter-1}{ext}"
             new_filename = f"{bare}{counter}{ext}"
             if os.path.exists(old_filename):
@@ -117,7 +117,7 @@ def do_console_annotation(args, biblio):
             elif "=" in line[0:3]:  # citation only if near start of line
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
-                cite_pairs = list(zip(*[iter(cites)] * 2))
+                cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))
                 info(f"{cite_pairs=}")
                 for short, value in cite_pairs:
                     info(f"{bf.BIB_SHORTCUTS=}")

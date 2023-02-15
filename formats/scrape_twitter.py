@@ -45,16 +45,16 @@ debug = logging.debug
 
 class ScrapeTwitter(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping twitter"), end="\n")
+        print("Scraping twitter", end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
         # extract username and id
         if "://twitter.com/" in self.url:
-            id = url.rsplit("/", 1)[1]
+            identity = url.rsplit("/", 1)[1]
         else:
             raise RuntimeError("cannot identify twitter ID in {url}")
         try:
-            self.status = api.get_status(id=id)._json
+            self.status = api.get_status(id=identity)._json
         except tweepy.TweepError as err:
             print(err)
             raise err

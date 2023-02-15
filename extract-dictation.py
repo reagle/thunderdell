@@ -118,7 +118,7 @@ def build_mm_from_txt(
             cites = re.split(r"(\w+) =", line)[1:]
             # 2 references to an iterable object that are
             # unpacked with '*' and rezipped
-            cite_pairs = list(zip(*[iter(cites)] * 2))
+            cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))
             for token, value in cite_pairs:
                 info(f"{token=}, {value=}")
                 if token == "keyword":

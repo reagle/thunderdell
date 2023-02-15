@@ -110,8 +110,8 @@ def get_JSON(
     try:
         r = requests.get(url, headers=AGENT_HEADERS, verify=True)
         r.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        raise SystemExit(f"{e}")
+    except requests.exceptions.RequestException as exc:
+        raise SystemExit(f"{exc}") from exc
     returned_content_type = r.headers["content-type"].split(";")[0]
     # info(f"{requested_content_type=} == {returned_content_type=}?")
     if requested_content_type == returned_content_type:

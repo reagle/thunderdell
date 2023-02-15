@@ -21,12 +21,14 @@ import logging
 import re
 import string
 import time
+from urllib.parse import urlparse
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
 from dateutil.parser import parse as dt_parse
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
+
 
 # function aliases
 critical = logging.critical
@@ -45,7 +47,7 @@ class ScrapeDefault(object):
     """
 
     def __init__(self, url, comment):
-        print(("Scraping default Web page;"), end="\n")
+        print("Scraping default Web page;", end="\n")
         self.url = url
         self.comment = comment
         try:
@@ -185,18 +187,15 @@ class ScrapeDefault(object):
             return date
 
     def get_title(self):
-        title_regexps = (
-            ("http://lists.w3.org/.*", '<!-- subject="(.*?)" -->'),
-            ("http://lists.kde.org/.*", r"<title>MARC: msg '(.*?)'</title>"),
-            ("https://www.youtube.com", r'''"title":"(.*?)"'''),
-            ("", r"<title[^>]*>([^<]+)</title>"),  # default: make sure last
-        )
+        title_regexps = {
+            "lists.w3.org": '<!-- subject="(.*?)" -->',
+            "lists.kde.org": r"<title>MARC: msg '(.*?)'</title>",
+            "www.youtube.com": r'''"title":"(.*?)"''',
+            "DEFAULT": r"<title[^>]*>([^<]+)</title>",
+        }
 
-        for prefix, regexp in title_regexps:
-            if self.url.startswith(prefix):
-                info(f"{prefix=}")
-                break
-
+        url = urlparse(self.url)
+        regexp = title_regexps.get(url.netloc, title_regexps["DEFAULT"])
         title = "UNKNOWN TITLE"
         if self.html_u:
             tmatch = re.search(regexp, self.html_u, re.DOTALL | re.IGNORECASE)
@@ -256,11 +255,9 @@ class ScrapeDefault(object):
         return title, org
 
     def get_org(self):
-        from urllib.parse import urlparse
-
         if self.url.startswith("file:"):
             return "local file"
-        org_chunks = urlparse(self.url)[1].split(".")
+        org_chunks = urlparse(self.url).netloc.split(".")
         if org_chunks == [""]:
             org = ""
         elif org_chunks[0] in ("www"):

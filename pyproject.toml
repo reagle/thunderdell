@@ -5,6 +5,7 @@ preview = true
 
 [tool.ruff]
 
+select = ["A", "B", "E", "F"]
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",

@@ -41,16 +41,16 @@ api = mastodon.Mastodon(
 
 class ScrapeMastodon(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping mastodon"), end="\n")
+        print("Scraping mastodon", end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
         # extract id
         if "://ohai.social/" in self.url:
-            id = url.rsplit("/", 1)[1]
+            identity = url.rsplit("/", 1)[1]
         else:
             raise RuntimeError("cannot identify message ID in {url}")
         try:
-            self.status = api.status(id=id)
+            self.status = api.status(id=identity)
         except mastodon.MastodonError as err:
             print(err)
             raise err

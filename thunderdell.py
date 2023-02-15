@@ -136,7 +136,7 @@ def get_ident(entry, entries, delim=""):
 
     # debug(f"1 {entry=}")
     last_names = []
-    for first, von, last, jr in entry["author"]:
+    for _first, von, last, _jr in entry["author"]:
         last_names.append(f"{von}{last}".replace(" ", ""))
     if len(last_names) == 1:
         name_part = last_names[0]
@@ -234,7 +234,7 @@ def pull_citation(entry):
         # get rid of first empty string of results
         cites = EQUAL_PAT.split(citation)[1:]
         # 2 refs to an iterable are '*' unpacked and rezipped
-        cite_pairs = zip(*[iter(cites)] * 2)
+        cite_pairs = zip(*[iter(cites)] * 2, strict=True)
         for short, value in cite_pairs:
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()

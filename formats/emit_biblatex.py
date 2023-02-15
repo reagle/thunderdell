@@ -74,7 +74,7 @@ def create_biblatex_author(names):
     return full_names
 
 
-# fmt: off
+# fmt: off flake8: noqa
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -87,8 +87,8 @@ def guess_biblatex_type(entry):
     'inproceedings'
 
     """
-    if 'entry_type' in entry:         # already has a type
-        e_t = entry['entry_type']
+    if "entry_type" in entry:  # already has a type
+        e_t = entry["entry_type"]
         if e_t in BIBLATEX_TYPES:
             pass
         elif e_t in CSL_TYPES:
@@ -97,32 +97,43 @@ def guess_biblatex_type(entry):
             print(f"Unknown entry_type = {e_t}")
             sys.exit()
         return e_t
-    if 'entry_type' in entry:         # already has a type
-        return entry['entry_type']
+    if "entry_type" in entry:  # already has a type
+        return entry["entry_type"]
     else:
-        e_t = 'misc'
-        if 'eventtitle' in entry:
-            if 'author' in entry:           e_t = 'inproceedings'
-            else:                           e_t = 'proceedings'
-        elif 'booktitle' in entry:
-            if 'editor' not in entry:       e_t = 'inbook'
+        e_t = "misc"
+        if "eventtitle" in entry:
+            if "author" in entry:
+                e_t = "inproceedings"
             else:
-                if 'author' in entry or \
-                    'chapter' in entry:      e_t = 'incollection'
-                else:                        e_t = 'collection'
-        elif 'journal' in entry:             e_t = 'article'
+                e_t = "proceedings"
+        elif "booktitle" in entry:
+            if "editor" not in entry:
+                e_t = "inbook"
+            else:
+                if "author" in entry or "chapter" in entry:
+                    e_t = "incollection"
+                else:
+                    e_t = "collection"
+        elif "journal" in entry:
+            e_t = "article"
 
-        elif 'author' in entry and 'title' in entry and 'publisher' in entry:
-            e_t = 'book'
-        elif 'institution' in entry:
-            e_t = 'report'
-            if 'type' in entry:
-                if 'report' in entry['type'].lower(): e_t = 'report'
-                if 'thesis' in entry['type'].lower(): e_t = 'mastersthesis'
-                if 'dissertation' in entry['type'].lower(): e_t = 'phdthesis'
-        elif 'url' in entry:                e_t = 'online'
-        elif 'doi' in entry:                e_t = 'online'
-        elif 'date' not in entry:           e_t = 'unpublished'
+        elif "author" in entry and "title" in entry and "publisher" in entry:
+            e_t = "book"
+        elif "institution" in entry:
+            e_t = "report"
+            if "type" in entry:
+                if "report" in entry["type"].lower():
+                    e_t = "report"
+                if "thesis" in entry["type"].lower():
+                    e_t = "mastersthesis"
+                if "dissertation" in entry["type"].lower():
+                    e_t = "phdthesis"
+        elif "url" in entry:
+            e_t = "online"
+        elif "doi" in entry:
+            e_t = "online"
+        elif "date" not in entry:
+            e_t = "unpublished"
 
         return e_t
 

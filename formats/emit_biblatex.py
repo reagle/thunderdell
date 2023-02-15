@@ -151,7 +151,7 @@ def bibformat_title(title):
     >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
     "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
-    """  # noqa: E501
+    """
     cased_title = quoted_title = []
 
     WORDS2PROTECT = {"vs.", "oldid"}

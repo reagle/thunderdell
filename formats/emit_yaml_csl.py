@@ -30,7 +30,6 @@ info = logging.info
 debug = logging.debug
 
 
-# fmt: off
 def guess_csl_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -45,57 +44,58 @@ def guess_csl_type(entry):
     """
     genre = None
     medium = None
-    if 'entry_type' in entry:         # already has a type
-        et = entry['entry_type']
+    if "entry_type" in entry:  # already has a type
+        et = entry["entry_type"]
         if et in CSL_TYPES:
             return et, genre, medium
         elif et in BIBLATEX_TYPES:
-            if et == 'mastersthesis':
-                return 'thesis', "Master's thesis", medium
-            elif et == 'phdthesis':
-                return 'thesis', "PhD thesis", medium
+            if et == "mastersthesis":
+                return "thesis", "Master's thesis", medium
+            elif et == "phdthesis":
+                return "thesis", "PhD thesis", medium
             else:
                 return BIBLATEX_CSL_TYPE_MAP[et], genre, medium
         else:
-            raise RuntimeError(f"Unknown entry_type = {et}")  # noqa: F821
+            raise RuntimeError(f"Unknown entry_type = {et}")
 
-    et = 'no-type'
+    # fmt: off
+    et = "no-type"
     # debug(f"looking at containers for {entry}")
-    if 'c_web' in entry:                et = 'webpage'
-    elif 'c_blog' in entry:             et = 'post-weblog'
-    elif 'c_newspaper' in entry:        et = 'article-newspaper'
-    elif 'c_magazine' in entry:         et = 'article-magazine'
-    elif 'c_journal' in entry:          et = 'article-journal'
-    elif 'c_dictionary' in entry:       et = 'entry-dictionary'
-    elif 'c_encyclopedia' in entry:     et = 'entry-encyclopedia'
-    elif 'c_forum' in entry:            et = 'post'
+    if "c_web" in entry:                et = "webpage"
+    elif "c_blog" in entry:             et = "post-weblog"
+    elif "c_newspaper" in entry:        et = "article-newspaper"
+    elif "c_magazine" in entry:         et = "article-magazine"
+    elif "c_journal" in entry:          et = "article-journal"
+    elif "c_dictionary" in entry:       et = "entry-dictionary"
+    elif "c_encyclopedia" in entry:     et = "entry-encyclopedia"
+    elif "c_forum" in entry:            et = "post"
     else:
-        if 'eventtitle' in entry:           et = 'paper-conference'
-        elif 'booktitle' in entry:
-            if 'editor' in entry:           # collection or incollection
-                if 'chapter' in entry:      et = 'chapter'
-                else:                       et = 'book'   # ? collection
-            elif 'organization' in entry:   et = 'paper-conference'
-            else:                           et = 'chapter'
-        elif 'journal' in entry:            et = 'article-journal'
+        if "eventtitle" in entry:           et = "paper-conference"
+        elif "booktitle" in entry:
+            if "editor" in entry:           # collection or incollection
+                if "chapter" in entry:      et = "chapter"
+                else:                       et = "book"   # ? collection
+            elif "organization" in entry:   et = "paper-conference"
+            else:                           et = "chapter"
+        elif "journal" in entry:            et = "article-journal"
 
-        elif 'author' in entry and 'title' in entry and 'publisher' in entry:
-            et = 'book'
-        elif 'author' not in entry:
-            if 'venue' in entry:            et = 'book'         # ? proceedings
-            if 'editor' in entry:           et = 'book'         # ? collection
-        elif 'institution' in entry:
-            et = 'report'
-            if 'type' in entry:
-                org_subtype = entry['type'].lower()
-                if 'report' in org_subtype: et = 'report'
-                if 'thesis' in org_subtype or 'dissertation' in org_subtype:
-                    et = 'thesis'
-        elif 'url' in entry:                et = 'webpage'
-        elif 'doi' in entry:                et = 'article'
-        elif 'date' not in entry:           et = 'manuscript'
+        elif "author" in entry and "title" in entry and "publisher" in entry:
+            et = "book"
+        elif "author" not in entry:
+            if "venue" in entry:            et = "book"         # ? proceedings
+            if "editor" in entry:           et = "book"         # ? collection
+        elif "institution" in entry:
+            et = "report"
+            if "type" in entry:
+                org_subtype = entry["type"].lower()
+                if "report" in org_subtype: et = "report"
+                if "thesis" in org_subtype or "dissertation" in org_subtype:
+                    et = "thesis"
+        elif "url" in entry:                et = "webpage"
+        elif "doi" in entry:                et = "article"
+        elif "date" not in entry:           et = "manuscript"
+    # fmt: on
     return et, genre, medium
-# fmt: on
 
 
 def emit_yaml_csl(args, entries):

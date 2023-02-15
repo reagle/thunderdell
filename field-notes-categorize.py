@@ -15,9 +15,10 @@ import re
 import lxml.etree as et
 
 arg_parser = argparse.ArgumentParser(
-    description="""Transform mindmap organized by weeks into """
-    + """one organized by categories, which are populated using """
-    + """the first `kw=foo` bibliography field of each entry."""
+    description=(
+        "Transform mindmap organized by weeks into one organized by categories, which"
+        " are populated using the first `kw=foo` bibliography field of each entry."
+    )
 )
 arg_parser.add_argument(
     "filename",

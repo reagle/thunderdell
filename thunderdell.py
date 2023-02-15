@@ -21,7 +21,6 @@ import sys
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as et
-
 from collections import namedtuple
 from subprocess import call  # noqa F401 needed for doctests
 from typing import NamedTuple
@@ -37,7 +36,6 @@ from biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-
 from formats import (
     emit_biblatex,
     emit_json_csl,
@@ -45,7 +43,6 @@ from formats import (
     emit_wp,
     emit_yaml_csl,
 )
-
 from utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,

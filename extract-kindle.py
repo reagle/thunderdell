@@ -18,9 +18,9 @@ from email.parser import BytesParser
 from os.path import splitext
 
 from bs4 import BeautifulSoup
-from utils.extract import get_bib_preamble
 
 import change_case
+from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
 debug = logging.debug

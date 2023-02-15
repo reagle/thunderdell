@@ -23,12 +23,14 @@ import textwrap
 # https://realpython.com/twitter-bot-python-tweepy/
 import tweepy
 from dateutil.parser import parse as dt_parse
+
 from utils.web_api_tokens import (
     TW_ACCESS_TOKEN,
     TW_ACCESS_TOKEN_SECRET,
     TW_CONSUMER_KEY,
     TW_CONSUMER_SECRET,
 )
+
 from .scrape_default import ScrapeDefault
 
 auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)

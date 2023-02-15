@@ -17,9 +17,9 @@ a scraping.
 https://github.com/reagle/thunderdell
 """
 
-import arxiv_query
 import logging
 
+import arxiv_query
 from change_case import sentence_case
 
 from .scrape_default import ScrapeDefault

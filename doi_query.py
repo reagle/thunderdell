@@ -53,7 +53,9 @@ def query(doi, accept="application/citeproc+json"):
         return json_bib
     else:
         raise RuntimeError(
-            f"DOI service returned unknown type:\n  {returned_content_type=}"
+            "DOI service returned unknown type:\n"
+            + f"{returned_content_type=}"
+            + f"{r.content.splitlines()[0:10]}"
         )
         # as part of failure, could return
         # curl -LH "Accept: text/x-bibliography;"

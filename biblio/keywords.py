@@ -95,6 +95,7 @@ RTC_KEY_SHORTCUTS = {
     "inf": "informed",
     "man": "manipulation",
     "mar": "market",
+    "mod": "moderation",
     "off": "offensive",
     "qua": "quant",
     "ran": "ranking",

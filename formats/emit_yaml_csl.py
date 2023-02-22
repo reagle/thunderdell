@@ -57,6 +57,7 @@ def guess_csl_type(entry):
         else:
             raise RuntimeError(f"Unknown entry_type = {et}")
 
+    # TODO cleanup https://old.reddit.com/r/learnpython/comments/1192nnj/abusing_python_style_to_make_it_more_legible/
     # fmt: off
     et = "no-type"
     # debug(f"looking at containers for {entry}")

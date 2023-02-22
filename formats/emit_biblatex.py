@@ -73,7 +73,6 @@ def create_biblatex_author(names):
     return full_names
 
 
-# fmt: off flake8: noqa
 def guess_biblatex_type(entry):
     """Guess whether the type of this entry is book, article, etc.
 
@@ -95,9 +94,6 @@ def guess_biblatex_type(entry):
         else:
             print(f"Unknown entry_type = {e_t}")
             sys.exit()
-        return e_t
-    if "entry_type" in entry:  # already has a type
-        return entry["entry_type"]
     else:
         e_t = "misc"
         if "eventtitle" in entry:
@@ -134,10 +130,7 @@ def guess_biblatex_type(entry):
         elif "date" not in entry:
             e_t = "unpublished"
 
-        return e_t
-
-
-# fmt: on
+    return e_t
 
 
 def bibformat_title(title):

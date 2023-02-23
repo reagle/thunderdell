@@ -2,7 +2,7 @@
 references:
 - id: A00d1991to
   type: no-type
-  abstract: "misc"
+  abstract: "no-type (misc)"
   author:
   - family: "A00d"
   custom2: "csl.mm"
@@ -12,7 +12,7 @@ references:
 - id: A01d1990ct
   type: chapter
   publisher-place: "Address"
-  abstract: "inbook: chapter in single author work"
+  abstract: "chapter (inbook) in single author work"
   author:
   - family: "A01d"
   container-title: "Book Title"
@@ -25,7 +25,7 @@ references:
 - id: A02d1998ct
   type: book
   publisher-place: "Address"
-  abstract: "incollection: Chapter in multi-author work"
+  abstract: "chapter (incollection) in multi-author work"
   author:
   - family: "A02d"
   container-title: "Collection Title"
@@ -41,7 +41,7 @@ references:
 - id: A03d1990ct
   type: paper-conference
   publisher-place: "Address"
-  abstract: "inproceedings"
+  abstract: "paper-conference (inproceedings)"
   author:
   - family: "A03d"
   custom2: "csl.mm"

@@ -1,5 +1,5 @@
-<map version="freeplane 1.9.0">
-<!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
+<map version="freeplane 1.9.13">
+<!--To view this file, download free mind mapping software Freeplane from https://www.freeplane.org -->
 <node TEXT="test" FOLDED="false" ID="ID_677537544"><hook NAME="MapStyle">
     <properties fit_to_viewport="false;"/>
 
@@ -20,7 +20,7 @@
 <edge STYLE="hide_edge"/>
 <cloud COLOR="#f0f0f0" SHAPE="ROUND_RECT"/>
 </stylenode>
-<stylenode LOCALIZED_TEXT="defaultstyle.selection" BACKGROUND_COLOR="#ccffff" STYLE="bubble" BORDER_COLOR_LIKE_EDGE="false" BORDER_COLOR="#002080"/>
+<stylenode LOCALIZED_TEXT="defaultstyle.selection" BACKGROUND_COLOR="#ccffff" BORDER_COLOR_LIKE_EDGE="false" BORDER_COLOR="#002080"/>
 </stylenode>
 <stylenode LOCALIZED_TEXT="styles.user-defined" POSITION="right" STYLE="bubble">
 <stylenode TEXT="author" COLOR="#338800"/>
@@ -91,20 +91,20 @@
 <node TEXT="A00d" STYLE_REF="author" POSITION="right" ID="ID_1718011580" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_1725616057" COLOR="#090f6b">
 <node TEXT="d=1991" STYLE_REF="cite" ID="ID_1637929545" COLOR="#ff33b8"/>
-<node TEXT="misc" STYLE_REF="annotation" ID="ID_1570572560" COLOR="#999999"/>
+<node TEXT="no-type (misc)" STYLE_REF="annotation" ID="ID_1570572560" COLOR="#999999"/>
 </node>
 </node>
 <node TEXT="books" POSITION="right" ID="ID_1840585902">
 <node TEXT="A01d" STYLE_REF="author" ID="ID_383176788" COLOR="#338800">
 <node TEXT="Chapter title" STYLE_REF="title" ID="ID_1723116273" LINK="http://example.com/1" COLOR="#090f6b">
 <node TEXT="d=1990 bt=Book Title p=Publisher a=Address" STYLE_REF="cite" ID="ID_482220487" COLOR="#ff33b8"/>
-<node TEXT="inbook: chapter in single author work" STYLE_REF="annotation" ID="ID_1074515690" COLOR="#999999"/>
+<node TEXT="chapter (inbook) in single author work" STYLE_REF="annotation" ID="ID_1074515690" COLOR="#999999"/>
 </node>
 </node>
 <node TEXT="A02d" STYLE_REF="author" ID="Freemind_Link_1283606024" COLOR="#338800">
 <node TEXT="Chapter Title" STYLE_REF="title" ID="ID_1679952330" LINK="http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html" COLOR="#090f6b">
 <node TEXT="d=199808 bt=Collection Title p=Publisher e=Editor a=Address" STYLE_REF="cite" ID="ID_1633609103" COLOR="#ff33b8"/>
-<node TEXT="incollection: Chapter in multi-author work" STYLE_REF="annotation" ID="ID_1339364362" COLOR="#999999"/>
+<node TEXT="chapter (incollection) in multi-author work" STYLE_REF="annotation" ID="ID_1339364362" COLOR="#999999"/>
 </node>
 </node>
 </node>
@@ -112,7 +112,7 @@
 <node TEXT="A03d" STYLE_REF="author" ID="ID_916542790" COLOR="#338800">
 <node TEXT="Chapter title" STYLE_REF="title" ID="ID_749319773" LINK="http://example.com/1" COLOR="#090f6b">
 <node TEXT="d=1990 et=Event Title p=Publisher a=Address" STYLE_REF="cite" ID="ID_458750257" COLOR="#ff33b8"/>
-<node TEXT="inproceedings" STYLE_REF="annotation" ID="ID_1377009834" COLOR="#999999"/>
+<node TEXT="paper-conference (inproceedings)" STYLE_REF="annotation" ID="ID_1377009834" COLOR="#999999"/>
 </node>
 </node>
 </node>

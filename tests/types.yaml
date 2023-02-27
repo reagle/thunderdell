@@ -5,7 +5,7 @@ references:
   abstract: "no-type (misc)"
   author:
   - family: "A00d"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1991
   title: "Title one"
@@ -16,27 +16,27 @@ references:
   author:
   - family: "A01d"
   container-title: "Book Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1990
   publisher: "Publisher"
   title: "Chapter title"
   URL: "http://example.com/1"
 - id: A02d1998ct
-  type: book
+  type: chapter
   publisher-place: "Address"
   abstract: "chapter (incollection) in multi-author work"
   author:
   - family: "A02d"
   container-title: "Collection Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1998
     month: 08
   editor:
   - family: "Editor"
   publisher: "Publisher"
-  title: "Chapter Title"
+  title: "Chapter title"
   URL: "http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html"
 - id: A03d1990ct
   type: paper-conference
@@ -44,7 +44,8 @@ references:
   abstract: "paper-conference (inproceedings)"
   author:
   - family: "A03d"
-  custom2: "csl.mm"
+  chapter-number: "5"
+  custom2: "types.mm"
   issued:
     year: 1990
   container-title: "Proceedings of Event Title"
@@ -56,7 +57,7 @@ references:
   author:
   - family: "A10d"
   container-title: "Journal Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1992
   title: "Title"
@@ -66,7 +67,7 @@ references:
   author:
   - family: "A11d"
   container-title: "Magazine Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1993
   title: "Title"
@@ -76,7 +77,7 @@ references:
   author:
   - family: "A12d"
   container-title: "Newspaper Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1994
   title: "Title"
@@ -86,7 +87,7 @@ references:
   author:
   - family: "A13d"
   container-title: "Dictionary Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1996
   title: "Title"
@@ -96,7 +97,7 @@ references:
   author:
   - family: "A14d"
   container-title: "Encylcopedia Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1997
   title: "Title"
@@ -106,7 +107,7 @@ references:
   author:
   - family: "A15d"
   container-title: "Blog Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 1999
   title: "Title"
@@ -116,7 +117,7 @@ references:
   author:
   - family: "A16d"
   container-title: "Website Title"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 2000
   title: "Title"
@@ -125,7 +126,7 @@ references:
   type: legal_case
   author:
   - family: "A30d"
-  custom2: "csl.mm"
+  custom2: "types.mm"
   issued:
     year: 2012
   issue: "4:11cv45"

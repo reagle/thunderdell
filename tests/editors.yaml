@@ -1,7 +1,7 @@
 ---
 references:
 - id: A11991to
-  type: book
+  type: chapter
   author:
   - family: "A1"
   container-title: "Book One"
@@ -15,7 +15,7 @@ references:
     given: "Sally"
   title: "Title one"
 - id: A21992tt
-  type: book
+  type: chapter
   author:
   - family: "A2"
   container-title: "Book Two"

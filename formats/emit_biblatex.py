@@ -85,50 +85,57 @@ def guess_biblatex_type(entry):
     'inproceedings'
 
     """
+    # info(f"{entry=}")
+    e_t = "misc"
+
+    ## Validate exiting entry_type using CSL or BibLaTeX types
     if "entry_type" in entry:  # already has a type
+        # breakpoint()
         e_t = entry["entry_type"]
         if e_t in BIBLATEX_TYPES:
-            pass
+            return e_t
         elif e_t in CSL_TYPES:
-            e_t = CSL_BIBLATEX_TYPE_MAP[e_t]
+            return CSL_BIBLATEX_TYPE_MAP[e_t]
         else:
-            print(f"Unknown entry_type = {e_t}")
-            sys.exit()
-    else:
-        e_t = "misc"
-        if "eventtitle" in entry:
-            if "author" in entry:
-                e_t = "inproceedings"
-            else:
-                e_t = "proceedings"
-        elif "booktitle" in entry:
-            if "editor" not in entry:
-                e_t = "inbook"
-            else:
-                if "author" in entry or "chapter" in entry:
-                    e_t = "incollection"
-                else:
-                    e_t = "collection"
-        elif "journal" in entry:
-            e_t = "article"
+            raise RuntimeError(f"Unknown entry_type = {et}")
 
-        elif "author" in entry and "title" in entry and "publisher" in entry:
-            e_t = "book"
-        elif "institution" in entry:
-            e_t = "report"
-            if "type" in entry:
-                if "report" in entry["type"].lower():
-                    e_t = "report"
-                if "thesis" in entry["type"].lower():
-                    e_t = "mastersthesis"
-                if "dissertation" in entry["type"].lower():
-                    e_t = "phdthesis"
-        elif "url" in entry:
-            e_t = "online"
-        elif "doi" in entry:
-            e_t = "online"
-        elif "date" not in entry:
-            e_t = "unpublished"
+    ## https://mirror.las.iastate.edu/tex-archive/macros/latex/contrib/biblatex/doc/biblatex.pdf
+    ## Guess unknown entry_type based on existence of bibliographic fields
+    types_from_fields = [
+        # CONTAINER BASED TYPES
+        ("article", ["c_journal"]),
+        ("periodical", ["c_magazine"]),
+        ("periodical", ["c_newspaper"]),
+        ("inreference", ["c_dictionary"]),
+        ("inreference", ["c_encyclopedia"]),
+        ("online", ["c_forum"]),
+        ("online", ["c_blog"]),
+        ("online", ["c_web"]),
+        # PAPERS
+        ("article", ["doi"]),
+        ("article", ["journal"]),
+        ("inproceedings", ["author", "eventtitle"]),
+        ("proceedings", ["eventtitle"]),
+        ("proceedings", ["booktitle", "editor", "organization"]),
+        ("proceedings", ["venue"]),
+        # BOOKS: inbook = chapter in single-author; incollection = multi-author
+        ("incollection", ["editor", "chapter"]),
+        ("incollection", ["title", "booktitle"]),
+        ("book", ["author", "title", "publisher"]),
+        ("incollection", ["editor"]),
+        ("book", ["isbn"]),
+        # REPORTS
+        ("report", ["institution"]),
+        # OTHER
+        ("online", ["url"]),
+    ]
+
+    for bib_type, fields in types_from_fields:
+        # info(f"testing {bib_type=:15} which needs {fields=} ")
+        if all(field in entry for field in fields):
+            # info("FOUND IT: {bib_type=")
+            e_t = bib_type
+            break
 
     return e_t
 

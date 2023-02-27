@@ -598,9 +598,9 @@ def _test_results():
     /tmp/case.yaml; \
     diff ~/bin/td/tests/case.yaml /tmp/case.yaml', shell=True)
     0
-    >>> call('thunderdell.py -i ~/bin/td/tests/csl.mm > \
-    /tmp/csl.yaml; \
-    diff ~/bin/td/tests/csl.yaml /tmp/csl.yaml', shell=True)
+    >>> call('thunderdell.py -i ~/bin/td/tests/types.mm > \
+    /tmp/types.yaml; \
+    diff ~/bin/td/tests/types.yaml /tmp/types.yaml', shell=True)
     0
     >>> call('thunderdell.py -i ~/bin/td/tests/date.mm > /tmp/date.yaml; \
     diff ~/bin/td/tests/date.yaml /tmp/date.yaml', shell=True)

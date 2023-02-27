@@ -102,7 +102,7 @@
 </node>
 </node>
 <node TEXT="A02d" STYLE_REF="author" ID="Freemind_Link_1283606024" COLOR="#338800">
-<node TEXT="Chapter Title" STYLE_REF="title" ID="ID_1679952330" LINK="http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html" COLOR="#090f6b">
+<node TEXT="Chapter title" STYLE_REF="title" ID="ID_1679952330" LINK="http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html" COLOR="#090f6b">
 <node TEXT="d=199808 bt=Collection Title p=Publisher e=Editor a=Address" STYLE_REF="cite" ID="ID_1633609103" COLOR="#ff33b8"/>
 <node TEXT="chapter (incollection) in multi-author work" STYLE_REF="annotation" ID="ID_1339364362" COLOR="#999999"/>
 </node>
@@ -111,7 +111,7 @@
 <node TEXT="proceedings" POSITION="right" ID="ID_1126921982">
 <node TEXT="A03d" STYLE_REF="author" ID="ID_916542790" COLOR="#338800">
 <node TEXT="Chapter title" STYLE_REF="title" ID="ID_749319773" LINK="http://example.com/1" COLOR="#090f6b">
-<node TEXT="d=1990 et=Event Title p=Publisher a=Address" STYLE_REF="cite" ID="ID_458750257" COLOR="#ff33b8"/>
+<node TEXT="d=1990 ch=5 et=Event Title p=Publisher a=Address" STYLE_REF="cite" ID="ID_458750257" COLOR="#ff33b8"/>
 <node TEXT="paper-conference (inproceedings)" STYLE_REF="annotation" ID="ID_1377009834" COLOR="#999999"/>
 </node>
 </node>

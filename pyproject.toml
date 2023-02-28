@@ -5,10 +5,11 @@ preview = true
 
 [tool.ruff]
 
-select = ["A", "B", "BLE", "C4", "E", "F", "I", "PIE", "Q", "RSE", "UP", "YTT"]
-# ["SIM", "PTH"] # good, but hard on old code
-# ["PLR"] need to understand more
-# ["RUF"] warns about ambiguous Unicode for curly quotes
+select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "UP", "YTT"]
+# "SIM", "PTH"] # good, but hard on old code
+# "PLR" need to understand more
+# "RUF" warns about ambiguous Unicode for curly quotes
+# "C90" McCabe complexity 
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -39,3 +40,6 @@ line-length = 88
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.mccabe] # enabled via "C90" above
+max-complexity = 10

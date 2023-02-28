@@ -213,7 +213,7 @@ def parse_date(when: str) -> NamedTuple:
     return Date(year, month, day, circa, time)
 
 
-def pull_citation(entry):
+def pull_citation(entry: dict) -> dict:
     """Modifies entry with parsed citation
 
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
@@ -238,30 +238,28 @@ def pull_citation(entry):
             except KeyError as error:
                 print(("Key error on ", error, entry["title"], entry["_mm_file"]))
 
-    if "date" in entry:
-        entry["date"] = parse_date(entry["date"])
+    # Reformat date fields
+    for date_field in ["date", "custom1", "origdate"]:
+        if date_field in entry:
+            entry[date_field] = parse_date(entry[date_field])
+    entry["urldate"] = entry.pop("custom1", None)
 
-    if "custom1" in entry and "url" in entry:  # read/accessed date for URLs
-        entry["urldate"] = parse_date(entry["custom1"])
-        del entry["custom1"]
+    # Reformat other names
+    for name_field in ["editor", "translator"]:
+        if name_field in entry:
+            entry[name_field] = parse_names(entry[name_field])
 
-    if "origdate" in entry:  # original date of publication
-        entry["origdate"] = parse_date(entry["origdate"])
-
-    if ": " in entry["title"]:
+    # Detach subtitle from shorttitle
+    if ": " in entry["title"][4:]:
         if not entry["title"].startswith("Re:"):
             entry["shorttitle"] = entry["title"].split(":")[0].strip()
 
-    # # split off unneeded search parameters
-    # if 'url' in entry and entry['url'] is not None:
-    #     if any([site in entry['url'] for site in ('books.google', 'jstor')]):
-    #         entry['url'] = entry['url'].split('&')[0]
-
-    # remove private Reddit message URLs
+    # Remove private Reddit message URLs
     if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):
         entry.pop("url")
         entry.pop("urldate", None)
 
+    # Process Wipedia perma/oldid
     if "url" in entry and "oldid" in entry["url"]:
         url = entry["url"]
         url = url.rsplit("#", 1)[0]  # remove fragment
@@ -275,10 +273,7 @@ def pull_citation(entry):
             diff = f"&diff={queries['diff'][0]}" if "diff" in queries else ""
             entry["url"] = f"{base}{oldid}{diff}"
 
-    if "editor" in entry:
-        entry["editor"] = parse_names(entry["editor"])
-    if "translator" in entry:
-        entry["translator"] = parse_names(entry["translator"])
+    return entry
 
 
 #################################################################
@@ -348,7 +343,7 @@ def commit_entry(entry, entries):
 
         # pull the citation, create an identifier, and enter in entries
         try:
-            pull_citation(entry)  # break the citation up
+            entry = pull_citation(entry)  # parse a=b c=d syntax
         except Exception:
             print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
             raise

@@ -7,13 +7,16 @@ references:
   - family: "Krogh"
     given: "George"
     non-dropping-particle: "Von"
-  custom1: "20060504"
-  custom2: "von.mm"
+  custom2: "/Users/reagle/bin/td/tests/von.mm"
   issued:
     year: 1998
     season: Spring
   container-title: "California Management Review"
   issue: "3"
   title: "Care in knowledge creation"
+  accessed:
+    year: 2006
+    month: 05
+    day: 04
   volume: "40"
 ...

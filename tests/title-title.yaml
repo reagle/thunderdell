@@ -4,7 +4,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1995
   title: "Title one"
@@ -12,7 +12,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1996
   title: "Title silly"
@@ -20,7 +20,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1996
   title: "Title sad"
@@ -28,7 +28,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1996
   title: "Title two"
@@ -36,7 +36,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1997
   title: "The title's apostrophes"
@@ -44,7 +44,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1997
   title: "Title sextet"
@@ -52,7 +52,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "title-title.mm"
+  custom2: "/Users/reagle/bin/td/tests/title-title.mm"
   issued:
     year: 1998
   title: "The title with a great-hypen"

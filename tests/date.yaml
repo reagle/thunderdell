@@ -4,7 +4,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: -5
   title: "T5"
@@ -12,7 +12,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: -6
     circa: true
@@ -21,7 +21,7 @@ references:
   type: webpage
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: 2001
     month: 07
@@ -36,7 +36,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: 2002
     month: 02
@@ -45,7 +45,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: 2003
   title: "T3"
@@ -53,7 +53,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "date.mm"
+  custom2: "/Users/reagle/bin/td/tests/date.mm"
   issued:
     year: 2004
     circa: true

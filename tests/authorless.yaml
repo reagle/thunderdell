@@ -5,7 +5,7 @@ references:
   author:
   - family: "Org"
     given: "Some"
-  custom2: "authorless.mm"
+  custom2: "/Users/reagle/bin/td/tests/authorless.mm"
   issued:
     year: 1995
   publisher: "Some Org"
@@ -15,7 +15,7 @@ references:
   author:
   - family: "Turner"
     given: "Bob"
-  custom2: "authorless.mm"
+  custom2: "/Users/reagle/bin/td/tests/authorless.mm"
   issued:
     year: 1996
   publisher: "A6"

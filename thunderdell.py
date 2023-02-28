@@ -213,14 +213,8 @@ def parse_date(when: str) -> NamedTuple:
     return Date(year, month, day, circa, time)
 
 
-def pull_citation(entry: dict) -> dict:
-    """Modifies entry with parsed citation
-
-    Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
-
-    """
-
-    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
+def parse_pairs(entry: dict) -> dict:
+    """Parse pairs of the form: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"""
 
     if "cite" in entry:
         citation = entry["cite"]
@@ -235,6 +229,19 @@ def pull_citation(entry: dict) -> dict:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
                 print(("Key error on ", error, entry["title"], entry["_mm_file"]))
+    return entry
+
+
+def pull_citation(entry: dict) -> dict:
+    """Modifies entry with parsed citation and field-specific heuristics
+
+    Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
+
+    """
+
+    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
+
+    entry = parse_pairs(entry)
 
     # Reformat date fields
     for date_field in ["date", "custom1", "origdate"]:
@@ -248,9 +255,8 @@ def pull_citation(entry: dict) -> dict:
             entry[name_field] = parse_names(entry[name_field])
 
     # Detach subtitle from shorttitle
-    if ": " in entry["title"][4:]:
-        if not entry["title"].startswith("Re:"):
-            entry["shorttitle"] = entry["title"].split(":")[0].strip()
+    if ": " in entry["title"] and not entry["title"].startswith("Re:"):
+        entry["shorttitle"] = entry["title"].split(":")[0].strip()
 
     # Include full path to MM file
     entry["custom2"] = entry["_mm_file"]  # .split("/")[-1]

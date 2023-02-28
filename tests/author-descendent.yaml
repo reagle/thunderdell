@@ -4,7 +4,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "author-descendent.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-descendent.mm"
   issued:
     year: 1991
   title: "Title one"
@@ -12,7 +12,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "author-descendent.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-descendent.mm"
   issued:
     year: 1992
   title: "Title two"
@@ -20,7 +20,7 @@ references:
   type: no-type
   author:
   - family: "A1"
-  custom2: "author-descendent.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-descendent.mm"
   issued:
     year: 1994
   title: "Title four"
@@ -28,7 +28,7 @@ references:
   type: no-type
   author:
   - family: "A2"
-  custom2: "author-descendent.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-descendent.mm"
   issued:
     year: 1993
   title: "Title three"

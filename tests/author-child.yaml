@@ -4,7 +4,7 @@ references:
   type: no-type
   author:
   - family: "A5"
-  custom2: "author-child.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-child.mm"
   issued:
     year: 1995
   title: "Title five"
@@ -12,7 +12,7 @@ references:
   type: no-type
   author:
   - family: "A6"
-  custom2: "author-child.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-child.mm"
   issued:
     year: 1996
   title: "Title six"
@@ -20,7 +20,7 @@ references:
   type: no-type
   author:
   - family: "A7"
-  custom2: "author-child.mm"
+  custom2: "/Users/reagle/bin/td/tests/author-child.mm"
   issued:
     year: 1997
   title: "Title seven"

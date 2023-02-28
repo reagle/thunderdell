@@ -5,7 +5,7 @@ references:
   author:
   - family: "A5"
   - family: "A6"
-  custom2: "authors.mm"
+  custom2: "/Users/reagle/bin/td/tests/authors.mm"
   issued:
     year: 1995
   title: "Title five+six"

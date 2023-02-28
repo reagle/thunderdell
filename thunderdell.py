@@ -222,8 +222,6 @@ def pull_citation(entry: dict) -> dict:
 
     # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
 
-    entry["custom2"] = entry["_mm_file"].split("/")[-1]
-
     if "cite" in entry:
         citation = entry["cite"]
         # split around tokens of length 1-3 and
@@ -254,12 +252,15 @@ def pull_citation(entry: dict) -> dict:
         if not entry["title"].startswith("Re:"):
             entry["shorttitle"] = entry["title"].split(":")[0].strip()
 
+    # Include full path to MM file
+    entry["custom2"] = entry["_mm_file"]  # .split("/")[-1]
+
     # Remove private Reddit message URLs
     if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):
         entry.pop("url")
         entry.pop("urldate", None)
 
-    # Process Wipedia perma/oldid
+    # Process Wikipedia perma/oldid
     if "url" in entry and "oldid" in entry["url"]:
         url = entry["url"]
         url = url.rsplit("#", 1)[0]  # remove fragment

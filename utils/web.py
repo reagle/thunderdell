@@ -41,7 +41,7 @@ def unescape_XML(text):  # .0937s 4.11%
 
     """
 
-    def fixup(m):
+    def fixup_chars(m):
         text = m.group(0)
         if text[:2] == "&#":
             # character reference
@@ -60,7 +60,7 @@ def unescape_XML(text):  # .0937s 4.11%
                 pass
         return text  # leave as is
 
-    return re.sub(r"&#?\w+;", fixup, text)
+    return re.sub(r"&#?\w+;", fixup_chars, text)
 
 
 def get_HTML(
@@ -119,7 +119,7 @@ def get_JSON(
         raise OSError("URL content is not JSON.")
 
 
-def get_text(url):
+def get_text(url: str) -> str:
     """Textual version of url"""
 
     import os
@@ -139,10 +139,10 @@ def len_twitter(text: str) -> int:
     return len(text.encode("utf-16-le")) // 2
 
 
-def shrink(service, comment, title, url, tags):
+def shrink_message(service, comment, title, url, tags):
     """Shrink message to fit into limit"""
 
-    if service == "ohai":
+    if service == "ohai":  # mastodon instance
         limit = 500
     elif service == "twitter":
         limit = 280
@@ -192,6 +192,67 @@ def shrink(service, comment, title, url, tags):
     return message
 
 
+def twitter_update(
+    comment: str, title: str, url: str, tags: str, photo_path: Path
+) -> None:
+    import tweepy  # https://twython.readthedocs.io/en/latest/index.html
+
+    from .web_api_tokens import (
+        TW_ACCESS_TOKEN,
+        TW_ACCESS_TOKEN_SECRET,
+        TW_CONSUMER_KEY,
+        TW_CONSUMER_SECRET,
+    )
+
+    auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
+    auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    try:
+        if photo_path:
+            tweet = shrink_message("twitter", comment, title, "", tags)
+            media = api.media_upload(photo_path)
+            api.update_status(status=tweet, media_ids=[media.media_id])
+        else:
+            tweet = shrink_message("twitter", comment, title, url, tags)
+            api.update_status(status=tweet)
+    except tweepy.errors.TweepyException as err:
+        print(err)
+        print(f"tweet failed {len(tweet)}: {tweet}")
+    else:
+        print(f"tweet worked {len(tweet)}: {tweet}")
+
+
+def mastodon_update(
+    comment: str, title: str, url: str, tags: str, photo_path: Path
+) -> None:
+    import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
+
+    from .web_api_tokens import (
+        MASTODON_APP_BASE,
+        OHAI_ACCESS_TOKEN,
+    )
+
+    ohai = mastodon.Mastodon(
+        access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
+    )
+    toot = shrink_message("ohai", comment, title, url, tags)
+    try:
+        if photo_path:
+            photo_fn = Path(photo_path).stem
+            photo_desc = " ".join(
+                [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
+            )
+            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
+            ohai.status_post(status=toot, media_ids=media)
+        else:
+            ohai.status_post(status=toot)
+    except mastodon.MastodonError as err:
+        print(err)
+        print(f"toot failed {len(toot)}: {toot}")
+    else:
+        print(f"toot worked {len(toot)}: {toot}")
+
+
 def yasn_publish(comment, title, subtitle, url, tags):
     "Send annotated URL to social networks"
     info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
@@ -230,58 +291,5 @@ def yasn_publish(comment, title, subtitle, url, tags):
          {total_len=}"""
     )
 
-    # Twitter
-    # https://twython.readthedocs.io/en/latest/index.html
-    import tweepy
-
-    from .web_api_tokens import (
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
-    )
-
-    auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
-    auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-    try:
-        if photo_path:
-            tweet = shrink("twitter", comment, title, "", tags)
-            media = api.media_upload(photo_path)
-            api.update_status(status=tweet, media_ids=[media.media_id])
-        else:
-            tweet = shrink("twitter", comment, title, url, tags)
-            api.update_status(status=tweet)
-    except tweepy.errors.TweepyException as err:
-        print(err)
-        print(f"tweet failed {len(tweet)}: {tweet}")
-    else:
-        print(f"tweet worked {len(tweet)}: {tweet}")
-
-    # Mastodon
-    import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
-
-    from .web_api_tokens import (
-        MASTODON_APP_BASE,
-        OHAI_ACCESS_TOKEN,
-    )
-
-    ohai = mastodon.Mastodon(
-        access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
-    )
-    toot = shrink("ohai", comment, title, url, tags)
-    try:
-        if photo_path:
-            photo_fn = Path(photo_path).stem
-            photo_desc = " ".join(
-                [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
-            )
-            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
-            ohai.status_post(status=toot, media_ids=media)
-        else:
-            ohai.status_post(status=toot)
-    except mastodon.MastodonError as err:
-        print(err)
-        print(f"toot failed {len(toot)}: {toot}")
-    else:
-        print(f"toot worked {len(toot)}: {toot}")
+    twitter_update(comment, title, url, tags, photo_path)
+    mastodon_update(comment, title, url, tags, photo_path)

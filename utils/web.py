@@ -114,8 +114,7 @@ def get_JSON(
     returned_content_type = r.headers["content-type"].split(";")[0]
     # info(f"{requested_content_type=} == {returned_content_type=}?")
     if requested_content_type == returned_content_type:
-        json_content = json.loads(r.content)
-        return json_content
+        return json.loads(r.content)
     else:
         raise OSError("URL content is not JSON.")
 
@@ -143,10 +142,10 @@ def len_twitter(text: str) -> int:
 def shrink(service, comment, title, url, tags):
     """Shrink message to fit into limit"""
 
-    if service == "twitter":
-        limit = 280
     if service == "ohai":
         limit = 500
+    elif service == "twitter":
+        limit = 280
     info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
     TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
@@ -167,7 +166,7 @@ def shrink(service, comment, title, url, tags):
     info(f"{len_twitter(title)=}")
     if len_twitter(title) > message_room:
         info("title is too long")
-        title = title[0 : message_room - 1] + "…"
+        title = f"{title[:message_room - 1]}…"
         info(f"  truncated to {len_twitter(title)}")
     message_room = message_room - len_twitter(title)
     info(f"{message_room=} after title = ")
@@ -177,7 +176,7 @@ def shrink(service, comment, title, url, tags):
         info("comment is too long")
         if message_room > 5:
             info(" truncating")
-            comment = comment[0 : message_room - 1] + "…"
+            comment = f"{comment[:message_room - 1]}…"
             info(f"  truncated to {len_twitter(comment)}")
             info(f"{comment}")
         else:

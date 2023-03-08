@@ -43,3 +43,12 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.mccabe] # enabled via "C90" above
 max-complexity = 10
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-r a -q --doctest-modules"
+testpaths = [
+    "tests",
+]
+filterwarnings = "ignore::DeprecationWarning"
+# pytest_plugins = ["pytest_golden.plugin",]

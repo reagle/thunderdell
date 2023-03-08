@@ -10,8 +10,6 @@
 
 Extract a bibliography from a Freeplane mindmap"""
 
-# TODO
-
 import errno
 import http.server
 import logging
@@ -59,11 +57,316 @@ warning = logging.warning
 info = logging.info
 debug = logging.debug
 
-Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
+#################################################################
+# Mindmap parsing, bib building, and query emitting
+#################################################################
+
+
+RESULT_FILE_HEADER = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=UTF-8" />
+<link href="https://reagle.org/joseph/2005/01/mm-print.css"
+rel="stylesheet" type="text/css" />
+"""
+
+RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
+</head>
+<body>
+<div>
+    <form method="get" action="search.cgi">
+    <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
+    name="query" maxlength="80" /> <input type="radio" name="sitesearch"
+    value="BusySponge" /> BS <input type="radio" name="sitesearch"
+    checked="checked" value="MindMap" /> MM</form>
+</div>
+<h2>Results for '%s'</h2>
+<ul class="RESULT_FILE_QUERY_BOX">
+"""
+
+
+def build_bib(args, file_name, output):
+    """Parse and process files, including new ones encountered if chasing"""
+
+    links = []  # list of other files encountered in the mind map
+    done = []  # list of files processed, kept to prevent loops
+    entries = {}  # dict of {id : {entry}}, by insertion order
+    mm_files = [
+        file_name,
+    ]  # list of file encountered (e.g., chase option)
+    # debug(f"   mm_files = {mm_files}")
+    while mm_files:
+        mm_file = os.path.abspath(mm_files.pop())
+        # debug(f"   parsing {mm_file}")
+        try:
+            doc = parse(mm_file).getroot()
+        except (OSError, et.ParseError) as err:
+            debug(f"    failed to parse {mm_file} because of {err}")
+            continue
+        # debug(f"    successfully parsed {mm_file}")
+        entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+        # debug("    done.appending %s" % os.path.abspath(mm_file))
+        done.append(mm_file)
+        if args.chase:
+            # debug("chasing")
+            for link in links:
+                link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
+                if link not in done and link not in mm_files:
+                    if not any(
+                        [word in link for word in ("syllabus", "readings")]
+                    ):  # 'old'
+                        # debug(f"    mm_files.appending {link}")
+                        mm_files.append(link)
+
+    if args.query:
+        # debug("querying")
+        results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
+        if os.path.exists(results_file_name):
+            os.remove(results_file_name)
+        try:
+            results_file = open(results_file_name, "w", encoding="utf-8")
+        except OSError as err:
+            print(f"{err}")
+            print(f"There was an error writing to {results_file_name}")
+            raise
+        results_file.write(RESULT_FILE_HEADER)
+        results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+        emit_results(args, entries, args.query, results_file)
+        results_file.write("</ul></body></html>\n")
+        results_file.close()
+        # debug(f"{results_file=}")
+        if args.in_main:
+            ADDRESS_IN_USE = False
+            os.chdir(config.CGI_DIR + "/..")
+            handler = http.server.CGIHTTPRequestHandler
+            handler.cgi_directories = ["/cgi-bin"]
+            try:
+                server = http.server.HTTPServer(("localhost", 8000), handler)
+            except OSError as error:
+                if error.errno == errno.EADDRINUSE:
+                    ADDRESS_IN_USE = True
+                    print("address in use")
+                else:
+                    raise
+            # below runs the query twice I think, but still fast
+            webbrowser.open(
+                f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}"
+            )
+            if not ADDRESS_IN_USE:
+                server.serve_forever()
+    elif args.pretty:
+        results_file_name = f"{config.TMP_DIR}pretty-print.html"
+        try:
+            results_file = open(results_file_name, "w", encoding="utf-8")
+        except OSError as err:
+            print(f"{err}")
+            print(f"There was an error writing to {results_file_name}")
+            raise
+        results_file.write(RESULT_FILE_HEADER)
+        results_file.write(
+            '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
+        )
+        for entry in list(entries.values()):
+            args.query = entry["identifier"]
+            emit_results(args, entries, args.query, results_file)
+        results_file.write("</ul></body></html>\n")
+        results_file.close()
+        if args.in_main:
+            webbrowser.open(f"file://{results_file_name}")
+
+    else:
+        output(args, entries)
+    return
+
+
+def walk_freeplane(node, mm_file, entries, links):
+    """Walk the freeplane XML tree and build:
+    1. a dictionary of bibliographic entries.
+    2. (optionally) for any given entry, lists of author, title, or
+        other nodes that match a query.
+
+    This function had originally been implemented recursively, but now
+    iterates over a depth-first order list of tree nodes in order to
+    satisfy the two requirements:
+    1. a single author may have more than one title, and
+    2. references without a year should end up in entries with year='0000'.
+    Consequently, an entry is only committed when a new title
+    is encountered or it is the last entry.
+
+    """
+    author_node = None
+    entry = {}
+
+    parent_map = {c: p for p in node.iter() for c in p}
+
+    def get_parent(node):
+        return parent_map[node]
+
+    def query_highlight(node, query):
+        """Return a modified node with matches highlighted"""
+        query_lower = query.lower()
+        text = node.get("TEXT")
+        text_lower = text.lower()
+        if query_lower in text_lower:
+            start_index = text_lower.find(query_lower)
+            end_index = start_index + len(query_lower)
+            result = (
+                f"{text[0:start_index]}"
+                f"<strong>{text[start_index: end_index]}</strong>"
+                f"{text[end_index:]}"
+            )
+            node.set("TEXT", result)
+            return node
+        return None
+
+    def get_author_node(node):
+        """Return the nearest author node ancestor"""
+        ancestor = get_parent(node)
+        while ancestor.get("STYLE_REF") != "author":
+            ancestor = get_parent(ancestor)
+        return ancestor
+
+    for d in node.iter():
+        if "LINK" in d.attrib:  # found a local reference link
+            if not d.get("LINK").startswith("http:") and d.get("LINK").endswith(".mm"):
+                links.append(unescape_XML(d.get("LINK")))
+        # skip nodes that are structure, comment, and empty of text
+        if "STYLE_REF" in d.attrib and d.get("TEXT"):
+            if d.get("STYLE_REF") == "author":
+                # pass author as it will be fetched upon new title
+                pass
+            elif d.get("STYLE_REF") == "title":
+                commit_entry(entry, entries)  # new entry, so store previous
+                entry = {}  # and create new one
+                # because entries are based on unique titles, author processing
+                # is deferred until now when a new title is found
+                author_node = get_author_node(d)
+                entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
+                entry["author"] = parse_names(entry["ori_author"])
+                entry["title"] = unescape_XML(d.get("TEXT"))
+                entry["_mm_file"] = mm_file
+                entry["_title_node"] = d
+                if "LINK" in d.attrib:
+                    entry["url"] = d.get("LINK")
+                if args.query:
+                    author_highlighted = query_highlight(author_node, args.query)
+                    if author_highlighted is not None:
+                        entry["_author_result"] = author_highlighted
+                    title_highlighted = query_highlight(d, args.query)
+                    if title_highlighted is not None:
+                        entry["_title_result"] = title_highlighted
+            else:
+                if d.get("STYLE_REF") == "cite":
+                    entry["cite"] = unescape_XML(d.get("TEXT"))
+                elif d.get("STYLE_REF") == "annotation":
+                    entry["annotation"] = unescape_XML(d.get("TEXT").strip())
+                if args.query:
+                    node_highlighted = query_highlight(d, args.query)
+                    if node_highlighted is not None:
+                        entry.setdefault("_node_results", []).append(node_highlighted)
+
+    # commit the last entry as no new titles left
+    entries = commit_entry(entry, entries)
+    return entries, links
+
+
+def commit_entry(entry, entries):
+    """Place an entry in the entries dictionary
+    with default values if need be"""
+    if entry != {}:
+        entry.setdefault("author", [("", "John", "Doe", "")])
+        entry.setdefault("ori_author", [("", "John", "Doe", "")])
+        entry.setdefault("title", "Unknown")
+        entry.setdefault("0000")
+        entry.setdefault("_mm_file", "")
+
+        # pull the citation, create an identifier, and enter in entries
+        try:
+            entry = pull_citation(entry)  # parse a=b c=d syntax
+        except Exception:
+            print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
+            raise
+        entry["identifier"] = get_ident(entry, entries)
+        entries[entry["identifier"]] = entry
+    return entries
+
 
 #################################################################
 # Entry construction
 #################################################################
+
+Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
+
+
+def pull_citation(entry: dict) -> dict:
+    """Modifies entry with parsed citation and field-specific heuristics
+
+    Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
+
+    """
+
+    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
+
+    entry = parse_pairs(entry)
+
+    # Reformat date fields
+    for date_field in ["date", "custom1", "origdate"]:
+        if date_field in entry:
+            entry[date_field] = parse_date(entry[date_field])
+    entry["urldate"] = entry.pop("custom1", None)
+
+    # Reformat other names
+    for name_field in ["editor", "translator"]:
+        if name_field in entry:
+            entry[name_field] = parse_names(entry[name_field])
+
+    # Detach subtitle from shorttitle
+    if ": " in entry["title"] and not entry["title"].startswith("Re:"):
+        entry["shorttitle"] = entry["title"].split(":")[0].strip()
+
+    # Include full path to MM file
+    entry["custom2"] = entry["_mm_file"]  # .split("/")[-1]
+
+    # Remove private Reddit message URLs
+    if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):
+        entry.pop("url")
+        entry.pop("urldate", None)
+
+    # Process Wikipedia perma/oldid
+    if "url" in entry and "oldid" in entry["url"]:
+        url = entry["url"]
+        url = url.rsplit("#", 1)[0]  # remove fragment
+        query = url.split("?", 1)[1]
+        queries = parse_qs(query)
+        oldid = queries["oldid"][0]
+        entry["shorttitle"] = f'{entry["title"]} (oldid={oldid})'
+        if not args.long_url:  # short URLs
+            base = f'http://{url.split("/")[2]}'
+            oldid = f"/?oldid={oldid}"
+            diff = f"&diff={queries['diff'][0]}" if "diff" in queries else ""
+            entry["url"] = f"{base}{oldid}{diff}"
+
+    return entry
+
+
+def parse_pairs(entry: dict) -> dict:
+    """Parse pairs of the form: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"""
+
+    if "cite" in entry:
+        citation = entry["cite"]
+        # split around tokens of length 1-3 and
+        EQUAL_PAT = re.compile(r"(\w{1,3})=")
+        # get rid of first empty string of results
+        cites = EQUAL_PAT.split(citation)[1:]
+        # 2 refs to an iterable are '*' unpacked and rezipped
+        cite_pairs = zip(*[iter(cites)] * 2, strict=True)
+        for short, value in cite_pairs:
+            try:
+                entry[BIB_SHORTCUTS[short]] = value.strip()
+            except KeyError as error:
+                print(("Key error on ", error, entry["title"], entry["_mm_file"]))
+    return entry
 
 
 def identity_add_title(ident, title):
@@ -213,81 +516,6 @@ def parse_date(when: str) -> NamedTuple:
     return Date(year, month, day, circa, time)
 
 
-def parse_pairs(entry: dict) -> dict:
-    """Parse pairs of the form: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"""
-
-    if "cite" in entry:
-        citation = entry["cite"]
-        # split around tokens of length 1-3 and
-        EQUAL_PAT = re.compile(r"(\w{1,3})=")
-        # get rid of first empty string of results
-        cites = EQUAL_PAT.split(citation)[1:]
-        # 2 refs to an iterable are '*' unpacked and rezipped
-        cite_pairs = zip(*[iter(cites)] * 2, strict=True)
-        for short, value in cite_pairs:
-            try:
-                entry[BIB_SHORTCUTS[short]] = value.strip()
-            except KeyError as error:
-                print(("Key error on ", error, entry["title"], entry["_mm_file"]))
-    return entry
-
-
-def pull_citation(entry: dict) -> dict:
-    """Modifies entry with parsed citation and field-specific heuristics
-
-    Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
-
-    """
-
-    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
-
-    entry = parse_pairs(entry)
-
-    # Reformat date fields
-    for date_field in ["date", "custom1", "origdate"]:
-        if date_field in entry:
-            entry[date_field] = parse_date(entry[date_field])
-    entry["urldate"] = entry.pop("custom1", None)
-
-    # Reformat other names
-    for name_field in ["editor", "translator"]:
-        if name_field in entry:
-            entry[name_field] = parse_names(entry[name_field])
-
-    # Detach subtitle from shorttitle
-    if ": " in entry["title"] and not entry["title"].startswith("Re:"):
-        entry["shorttitle"] = entry["title"].split(":")[0].strip()
-
-    # Include full path to MM file
-    entry["custom2"] = entry["_mm_file"]  # .split("/")[-1]
-
-    # Remove private Reddit message URLs
-    if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):
-        entry.pop("url")
-        entry.pop("urldate", None)
-
-    # Process Wikipedia perma/oldid
-    if "url" in entry and "oldid" in entry["url"]:
-        url = entry["url"]
-        url = url.rsplit("#", 1)[0]  # remove fragment
-        query = url.split("?", 1)[1]
-        queries = parse_qs(query)
-        oldid = queries["oldid"][0]
-        entry["shorttitle"] = f'{entry["title"]} (oldid={oldid})'
-        if not args.long_url:  # short URLs
-            base = f'http://{url.split("/")[2]}'
-            oldid = f"/?oldid={oldid}"
-            diff = f"&diff={queries['diff'][0]}" if "diff" in queries else ""
-            entry["url"] = f"{base}{oldid}{diff}"
-
-    return entry
-
-
-#################################################################
-# Mindmap parsing and bib building
-#################################################################
-
-
 def parse_names(names):
     """Do author parsing magic to figure out name components.
 
@@ -338,235 +566,9 @@ def parse_names(names):
     return names_p
 
 
-def commit_entry(entry, entries):
-    """Place an entry in the entries dictionary
-    with default values if need be"""
-    if entry != {}:
-        entry.setdefault("author", [("", "John", "Doe", "")])
-        entry.setdefault("ori_author", [("", "John", "Doe", "")])
-        entry.setdefault("title", "Unknown")
-        entry.setdefault("0000")
-        entry.setdefault("_mm_file", "")
-
-        # pull the citation, create an identifier, and enter in entries
-        try:
-            entry = pull_citation(entry)  # parse a=b c=d syntax
-        except Exception:
-            print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
-            raise
-        entry["identifier"] = get_ident(entry, entries)
-        entries[entry["identifier"]] = entry
-    return entries
-
-
-def walk_freeplane(node, mm_file, entries, links):
-    """Walk the freeplane XML tree and build:
-    1. a dictionary of bibliographic entries.
-    2. (optionally) for any given entry, lists of author, title, or
-        other nodes that match a query.
-
-    This function had originally been implemented recursively, but now
-    iterates over a depth-first order list of tree nodes in order to
-    satisfy the two requirements:
-    1. a single author may have more than one title, and
-    2. references without a year should end up in entries with year='0000'.
-    Consequently, an entry is only committed when a new title
-    is encountered or it is the last entry.
-
-    """
-    author_node = None
-    entry = {}
-
-    parent_map = {c: p for p in node.iter() for c in p}
-
-    def get_parent(node):
-        return parent_map[node]
-
-    def query_highlight(node, query):
-        """Return a modified node with matches highlighted"""
-        query_lower = query.lower()
-        text = node.get("TEXT")
-        text_lower = text.lower()
-        if query_lower in text_lower:
-            start_index = text_lower.find(query_lower)
-            end_index = start_index + len(query_lower)
-            result = (
-                f"{text[0:start_index]}"
-                f"<strong>{text[start_index: end_index]}</strong>"
-                f"{text[end_index:]}"
-            )
-            node.set("TEXT", result)
-            return node
-        return None
-
-    def get_author_node(node):
-        """Return the nearest author node ancestor"""
-        ancestor = get_parent(node)
-        while ancestor.get("STYLE_REF") != "author":
-            ancestor = get_parent(ancestor)
-        return ancestor
-
-    for d in node.iter():
-        if "LINK" in d.attrib:  # found a local reference link
-            if not d.get("LINK").startswith("http:") and d.get("LINK").endswith(".mm"):
-                links.append(unescape_XML(d.get("LINK")))
-        # skip nodes that are structure, comment, and empty of text
-        if "STYLE_REF" in d.attrib and d.get("TEXT"):
-            if d.get("STYLE_REF") == "author":
-                # pass author as it will be fetched upon new title
-                pass
-            elif d.get("STYLE_REF") == "title":
-                commit_entry(entry, entries)  # new entry, so store previous
-                entry = {}  # and create new one
-                # because entries are based on unique titles, author processing
-                # is deferred until now when a new title is found
-                author_node = get_author_node(d)
-                entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
-                entry["author"] = parse_names(entry["ori_author"])
-                entry["title"] = unescape_XML(d.get("TEXT"))
-                entry["_mm_file"] = mm_file
-                entry["_title_node"] = d
-                if "LINK" in d.attrib:
-                    entry["url"] = d.get("LINK")
-                if args.query:
-                    author_highlighted = query_highlight(author_node, args.query)
-                    if author_highlighted is not None:
-                        entry["_author_result"] = author_highlighted
-                    title_highlighted = query_highlight(d, args.query)
-                    if title_highlighted is not None:
-                        entry["_title_result"] = title_highlighted
-            else:
-                if d.get("STYLE_REF") == "cite":
-                    entry["cite"] = unescape_XML(d.get("TEXT"))
-                elif d.get("STYLE_REF") == "annotation":
-                    entry["annotation"] = unescape_XML(d.get("TEXT").strip())
-                if args.query:
-                    node_highlighted = query_highlight(d, args.query)
-                    if node_highlighted is not None:
-                        entry.setdefault("_node_results", []).append(node_highlighted)
-
-    # commit the last entry as no new titles left
-    entries = commit_entry(entry, entries)
-    return entries, links
-
-
-RESULT_FILE_HEADER = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta http-equiv="Content-Type"
-content="text/html; charset=UTF-8" />
-<link href="https://reagle.org/joseph/2005/01/mm-print.css"
-rel="stylesheet" type="text/css" />
-"""
-
-RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
-</head>
-<body>
-<div>
-    <form method="get" action="search.cgi">
-    <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
-    name="query" maxlength="80" /> <input type="radio" name="sitesearch"
-    value="BusySponge" /> BS <input type="radio" name="sitesearch"
-    checked="checked" value="MindMap" /> MM</form>
-</div>
-<h2>Results for '%s'</h2>
-<ul class="RESULT_FILE_QUERY_BOX">
-"""
-
-
-def build_bib(args, file_name, output):
-    """Parse and process files, including new ones encountered if chasing"""
-
-    links = []  # list of other files encountered in the mind map
-    done = []  # list of files processed, kept to prevent loops
-    entries = {}  # dict of {id : {entry}}, by insertion order
-    mm_files = [
-        file_name,
-    ]  # list of file encountered (e.g., chase option)
-    # debug(f"   mm_files = {mm_files}")
-    while mm_files:
-        mm_file = os.path.abspath(mm_files.pop())
-        # debug(f"   parsing {mm_file}")
-        try:
-            doc = parse(mm_file).getroot()
-        except (OSError, et.ParseError) as err:
-            debug(f"    failed to parse {mm_file} because of {err}")
-            continue
-        # debug(f"    successfully parsed {mm_file}")
-        entries, links = walk_freeplane(doc, mm_file, entries, links=[])
-        # debug("    done.appending %s" % os.path.abspath(mm_file))
-        done.append(mm_file)
-        if args.chase:
-            # debug("chasing")
-            for link in links:
-                link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
-                if link not in done and link not in mm_files:
-                    if not any(
-                        [word in link for word in ("syllabus", "readings")]
-                    ):  # 'old'
-                        # debug(f"    mm_files.appending {link}")
-                        mm_files.append(link)
-
-    if args.query:
-        # debug("querying")
-        results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
-        if os.path.exists(results_file_name):
-            os.remove(results_file_name)
-        try:
-            results_file = open(results_file_name, "w", encoding="utf-8")
-        except OSError as err:
-            print(f"{err}")
-            print(f"There was an error writing to {results_file_name}")
-            raise
-        results_file.write(RESULT_FILE_HEADER)
-        results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-        emit_results(args, entries, args.query, results_file)
-        results_file.write("</ul></body></html>\n")
-        results_file.close()
-        # debug(f"{results_file=}")
-        if args.in_main:
-            ADDRESS_IN_USE = False
-            os.chdir(config.CGI_DIR + "/..")
-            handler = http.server.CGIHTTPRequestHandler
-            handler.cgi_directories = ["/cgi-bin"]
-            try:
-                server = http.server.HTTPServer(("localhost", 8000), handler)
-            except OSError as error:
-                if error.errno == errno.EADDRINUSE:
-                    ADDRESS_IN_USE = True
-                    print("address in use")
-                else:
-                    raise
-            # below runs the query twice I think, but still fast
-            webbrowser.open(
-                f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}"
-            )
-            if not ADDRESS_IN_USE:
-                server.serve_forever()
-    elif args.pretty:
-        results_file_name = f"{config.TMP_DIR}pretty-print.html"
-        try:
-            results_file = open(results_file_name, "w", encoding="utf-8")
-        except OSError as err:
-            print(f"{err}")
-            print(f"There was an error writing to {results_file_name}")
-            raise
-        results_file.write(RESULT_FILE_HEADER)
-        results_file.write(
-            '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
-        )
-        for entry in list(entries.values()):
-            args.query = entry["identifier"]
-            emit_results(args, entries, args.query, results_file)
-        results_file.write("</ul></body></html>\n")
-        results_file.close()
-        if args.in_main:
-            webbrowser.open(f"file://{results_file_name}")
-
-    else:
-        output(args, entries)
-    return
-
+#################################################################
+# Tests
+#################################################################
 
 # TODO: replace "~/bin" with HOME
 # TODO: move golden tests to something standard, perhaps:

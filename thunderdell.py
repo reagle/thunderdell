@@ -2,7 +2,7 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <https://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2017 by Joseph Reagle
+# (c) Copyright 2009-2023 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 
@@ -20,7 +20,6 @@ import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
-from subprocess import call  # noqa F401 needed for doctests
 from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
@@ -34,18 +33,8 @@ from biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from formats import (
-    emit_biblatex,
-    emit_json_csl,
-    emit_results,
-    emit_wp,
-    emit_yaml_csl,
-)
-from utils.text import (
-    pretty_tabulate_dict,
-    pretty_tabulate_list,
-    strip_accents,
-)
+from formats import emit_biblatex, emit_json_csl, emit_results, emit_wp, emit_yaml_csl
+from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
 from utils.web import unescape_XML
 
 log_level = logging.ERROR  # 40 # declared here for when imported
@@ -566,75 +555,6 @@ def parse_names(names):
     return names_p
 
 
-#################################################################
-# Tests
-#################################################################
-
-# TODO: replace "~/bin" with HOME
-# TODO: move golden tests to something standard, perhaps:
-# https://pypi.org/project/pytest-golden/
-# https://stackoverflow.com/questions/3942820/how-to-do-unit-testing-of-functions-writing-files-using-pythons-unittest
-
-
-def _test_results():
-    """
-    Tests the overall parsing of Mindmap XML and the relationships between
-    authors with multiple titles and nested authors.
-
-    >>> call('thunderdell.py -i ~/bin/td/tests/author-child.mm > \
-    /tmp/author-child.yaml; \
-    diff ~/bin/td/tests/author-child.yaml /tmp/author-child.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/author-descendent.mm > \
-    /tmp/author-descendent.yaml; \
-    diff ~/bin/td/tests/author-descendent.yaml /tmp/author-descendent.yaml', \
-    shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/authorless.mm > \
-    /tmp/authorless.yaml; \
-    diff ~/bin/td/tests/authorless.yaml /tmp/authorless.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/authors.mm > \
-    /tmp/authors.yaml; \
-    diff ~/bin/td/tests/authors.yaml /tmp/authors.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/case.mm > \
-    /tmp/case.yaml; \
-    diff ~/bin/td/tests/case.yaml /tmp/case.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/types.mm > \
-    /tmp/types.yaml; \
-    diff ~/bin/td/tests/types.yaml /tmp/types.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/date.mm > /tmp/date.yaml; \
-    diff ~/bin/td/tests/date.yaml /tmp/date.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/editors.mm > \
-    /tmp/editors.yaml; \
-    diff ~/bin/td/tests/editors.yaml /tmp/editors.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/online.mm > /tmp/online.yaml; \
-    diff ~/bin/td/tests/online.yaml /tmp/online.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/title-escapes.mm > \
-    /tmp/title-escapes.yaml; \
-    diff ~/bin/td/tests/title-escapes.yaml /tmp/title-escapes.yaml', \
-    shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/title-title.mm > \
-    /tmp/title-title.yaml; \
-    diff ~/bin/td/tests/title-title.yaml /tmp/title-title.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/von.mm > /tmp/von.yaml; \
-    diff ~/bin/td/tests/von.yaml /tmp/von.yaml', shell=True)
-    0
-    >>> call('thunderdell.py -i ~/bin/td/tests/title-quotes.mm > /tmp/title-quotes.yaml; \
-    diff ~/bin/td/tests/title-quotes.yaml /tmp/title-quotes.yaml', shell=True)
-    0
-
-    """  # noqa: E501
-
-
 if __name__ == "__main__":
     import argparse  # http://docs.python.org/dev/library/argparse.html
 
@@ -838,10 +758,14 @@ if __name__ == "__main__":
         output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
-        print("Running doctests")
+        import test
         import doctest
 
+        print("Running test")
         doctest.testmod()
+        test.test_results()
+        sys.exit()
+
     if args.fields:
         print("\n                         _BIBLATEX_TYPES_ (deprecated)")
         print("               http://intelligent.pe.kr/LaTex/bibtex2.htm\n")

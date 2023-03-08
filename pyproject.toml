@@ -51,4 +51,5 @@ testpaths = [
     "tests",
 ]
 filterwarnings = "ignore::DeprecationWarning"
+enable_assertion_pass_hook = true
 # pytest_plugins = ["pytest_golden.plugin",]

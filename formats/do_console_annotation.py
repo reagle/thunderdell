@@ -145,9 +145,7 @@ def do_console_annotation(args, biblio):
         # See if there is a container/bf.CSL_SHORTCUTS redundant with 'c_web'
         if (
             "c_web" in biblio
-            and len(
-                [biblio[c] for c in list(bf.CSL_SHORTCUTS.values()) if c in biblio]
-            )
+            and len([biblio[c] for c in list(bf.CSL_SHORTCUTS.values()) if c in biblio])
             > 1
         ):
             del biblio["c_web"]

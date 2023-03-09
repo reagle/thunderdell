@@ -32,7 +32,7 @@ debug = logging.debug
 
 class ScrapeMARC(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping MARC;"), end="\n")
+        print("Scraping MARC;", end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):

@@ -33,7 +33,7 @@ debug = logging.debug
 
 class ScrapeDOI(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping DOI;"), end="\n")
+        print("Scraping DOI;", end="\n")
         self.url = url
         self.comment = comment
 

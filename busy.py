@@ -178,7 +178,7 @@ console:       b c TAGS URL|DOI|ISBN COMMENT
 """
 
 
-def print_usage(message):
+def print_usage(message) -> None:
     print(message)
     print(DESCRIPTION)
 

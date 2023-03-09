@@ -37,7 +37,7 @@ NOW = time.localtime()
 
 class ScrapeENWP(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping en.Wikipedia;"), end="\n")
+        print("Scraping en.Wikipedia;", end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):

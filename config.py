@@ -10,14 +10,14 @@
 
 import os
 
-# HOME for path of mindmaps on webhost
 HOME = os.path.expanduser("~")
-# CLIENT_HOME for path on the client to open mindmaps there
-# as f'file://{CLIENT_HOME}/...'
 CGI_DIR = f"{HOME}/joseph/plan/cgi-bin/"  # for local server
-CLIENT_HOME = "/Users/reagle"
 DEFAULT_MAP = f"{HOME}/joseph/readings.mm"
 DEFAULT_PRETTY_MAP = f"{HOME}/joseph/2005/ethno/field-notes.mm"
+TESTS_FOLDER = Path(f"{HOME}/bin/td/tests/")
+THUNDERDELL_EXE = f"{HOME}/bin/td/thunderdell.py"
+
+
 TMP_DIR = f"{HOME}/tmp/.td/"
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)

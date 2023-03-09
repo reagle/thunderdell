@@ -12,8 +12,6 @@ import logging
 import re
 import sys
 
-# from thunderdell import CLIENT_HOME, HOME
-# import config
 from biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_TYPES,

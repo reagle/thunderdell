@@ -14,7 +14,6 @@ import re
 import urllib
 from html import escape
 
-# from thunderdell import CLIENT_HOME, HOME
 import config
 from formats.emit_biblatex import create_biblatex_author
 from utils.web import escape_XML
@@ -135,7 +134,7 @@ def emit_results(args, entries, query, results_file):
         identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces
     ):
         identifier_html = (
-            f'<li class="identifier_html">'
+            '<li class="identifier_html">'
             f'<a href="{get_url_query(identifier)}">{identifier}</a>'
         )
         title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'

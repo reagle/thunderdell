@@ -10,11 +10,8 @@ Run tests against golden YAML results;
 useful for detecting inadvertent changes.
 """
 import subprocess
-from config import HOME
+from config import HOME, EXE, TESTS_FOLDER
 from pathlib import Path
-
-THUNDERDELL_EXE = f"{HOME}/bin/td/thunderdell.py"
-TESTS_FOLDER = Path(f"{HOME}/bin/td/tests/")
 
 
 def test_results():
@@ -26,7 +23,7 @@ def test_results():
     for test_fn in sorted(TESTS_FOLDER.glob("*.mm")):
         print(f"{test_fn=}")
         output = subprocess.run(
-            [THUNDERDELL_EXE, "-i", test_fn],
+            [EXE, "-i", test_fn],
             capture_output=True,
         )
         result = output.stdout.decode("utf-8")

@@ -13,6 +13,7 @@ from pathlib import Path
 
 HOME = os.path.expanduser("~")
 CGI_DIR = f"{HOME}/joseph/plan/cgi-bin/"  # for local server
+CLIENT_HOME = "/Users/reagle"  # for opening local results pages
 DEFAULT_MAP = f"{HOME}/joseph/readings.mm"
 DEFAULT_PRETTY_MAP = f"{HOME}/joseph/2005/ethno/field-notes.mm"
 TESTS_FOLDER = Path(f"{HOME}/bin/td/tests/")

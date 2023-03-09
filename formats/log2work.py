@@ -59,8 +59,7 @@ def log2work(args, biblio):
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
     uid = "e" + date_token + "-" + digest[:4]
     log_item = (
-        f'<li class="event" id="{uid}">{date_token}: '
-        f"{hashtags}] {html_comment}</li>"
+        f'<li class="event" id="{uid}">{date_token}: {hashtags}] {html_comment}</li>'
     )
     info(f"{log_item=}")
 

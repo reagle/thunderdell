@@ -39,7 +39,7 @@ class ScrapeArXiv(ScrapeDefault):
     """
 
     def __init__(self, url, comment):
-        print(("Scraping arXiv;"), end="\n")
+        print("Scraping arXiv;", end="\n")
         self.identifier = url[6:]
         self.url = f"https://arxiv.org/abs/{self.identifier}"
         self.comment = comment

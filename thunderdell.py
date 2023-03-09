@@ -103,7 +103,7 @@ def build_bib(args, file_name, output):
                 link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
                 if link not in done and link not in mm_files:
                     if not any(
-                        [word in link for word in ("syllabus", "readings")]
+                        word in link for word in ("syllabus", "readings")
                     ):  # 'old'
                         # debug(f"    mm_files.appending {link}")
                         mm_files.append(link)
@@ -420,7 +420,7 @@ def identity_increment(ident, entries):
     return ident
 
 
-def get_ident(entry, entries, delim=""):
+def get_ident(entry, entries, delim: str = ""):
     """Create an identifier (key) for the entry"""
 
     # debug(f"1 {entry=}")
@@ -758,8 +758,8 @@ if __name__ == "__main__":
         output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
-        import test
         import doctest
+        import test
 
         print("Running test")
         doctest.testmod()

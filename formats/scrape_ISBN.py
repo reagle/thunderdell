@@ -32,7 +32,7 @@ debug = logging.debug
 
 class ScrapeISBN(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping ISBN;"), end="\n")
+        print("Scraping ISBN;", end="\n")
         self.url = url
         self.comment = comment
 

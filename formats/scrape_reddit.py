@@ -38,7 +38,7 @@ NOW = time.localtime()
 
 class ScrapeReddit(ScrapeDefault):
     def __init__(self, url, comment):
-        print(("Scraping reddit"), end="\n")
+        print("Scraping reddit", end="\n")
         ScrapeDefault.__init__(self, url, comment)
 
         RE_REDDIT_URL = re.compile(

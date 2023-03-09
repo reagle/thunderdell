@@ -9,6 +9,7 @@
 """Sets some user configuration values."""
 
 import os
+from pathlib import Path
 
 HOME = os.path.expanduser("~")
 CGI_DIR = f"{HOME}/joseph/plan/cgi-bin/"  # for local server

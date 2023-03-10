@@ -88,7 +88,7 @@ class ScrapeDefault:
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
             """//meta[@name='DC.Contributor']/@content""",
-            """//meta[@name='byl']/@content""",  # NYT
+            """//meta[@name='byl']/@content""",  # for NYT, but requires JS now
             """//meta[@name='author']/@content""",
             """//meta[@name='Author']/@content""",
             """//meta[@name='AUTHOR']/@content""",
@@ -114,7 +114,6 @@ class ScrapeDefault:
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
                     info(f"{xpath_result=}; {path=}")
-                    # 20171204 added space to join below
                     author = string.capwords(" ".join(xpath_result).strip())
                     if author.lower().startswith("by "):
                         author = author[3:]

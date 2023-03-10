@@ -16,6 +16,7 @@ import logging
 import os
 import re
 import sys
+import textwrap
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as et
@@ -767,28 +768,37 @@ if __name__ == "__main__":
         sys.exit()
 
     if args.fields:
-        print("\n                         _BIBLATEX_TYPES_ (deprecated)")
-        print("               http://intelligent.pe.kr/LaTex/bibtex2.htm\n")
-        pretty_tabulate_list(list(BIBLATEX_TYPES))
-        print("                          _EXAMPLES_\n")
-        print("      d=2013 in=MIT t=mastersthesis")
-        print("      d=2013 in=MIT t=phdthesis")
+        print(
+            textwrap.dedent(
+                f"""
+                ================ BIBLATEX_TYPES_ (deprecated) =========
+                http://intelligent.pe.kr/LaTex/bibtex2.htm\n
+                {pretty_tabulate_list(list(BIBLATEX_TYPES))}
 
-        print("\n                          _CSL_TYPES_ (preferred)")
-        print("              http://aurimasv.github.io/z2csl/typeMap.xml\n")
-        pretty_tabulate_list(list(BIB_TYPES))
-        print("                          _EXAMPLES_\n")
-        print("      d=2014 p=ACM et=Conference on FOO ve=Boston")
-        print("      d=2013 in=MIT t=thesis g=Undergraduate thesis")
-        print("      d=2013 in=MIT t=thesis g=Masters thesis")
-        print("      d=2013 in=MIT t=thesis g=PhD dissertation")
-        print("\n\n")
-        print("\n                             _FIELD_SHORTCUTS_")
-        pretty_tabulate_dict(BIB_SHORTCUTS)
-        print("      t=biblatex/CSL type (e.g., t=thesis)")
-        print("      ot=organization's subtype (e.g., W3C REC)")
-        print("      pa=section|paragraph|location|chapter|verse|column|line\n\n")
+                    d=2013 in=MIT t=mastersthesis
+                    d=2013 in=MIT t=phdthesis
+
+                ================  CSL_TYPES (preferred) ================ 
+                http://aurimasv.github.io/z2csl/typeMap.xml\n
+                {pretty_tabulate_list(list(BIB_TYPES))}
+
+                    d=2014 p=ACM et=Conference on FOO ve=Boston
+                    d=2013 in=MIT t=thesis g=Undergraduate thesis
+                    d=2013 in=MIT t=thesis g=Masters thesis
+                    d=2013 in=MIT t=thesis g=PhD dissertation
+                
+                ================  FIELD_SHORTCUTS ================
+                 
+                {pretty_tabulate_dict(BIB_SHORTCUTS)}
+
+                    t=biblatex/CSL type (e.g., t=thesis)
+                    ot=organization's subtype (e.g., W3C REC)
+                    pa=section|paragraph|location|chapter|verse|column|line\n\n
+        """
+            )
+        )
         sys.exit()
+
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)

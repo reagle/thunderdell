@@ -46,18 +46,18 @@ def normalize_whitespace(text):
     return text
 
 
-def pretty_tabulate_list(mylist, cols=3):
+def pretty_tabulate_list(mylist, cols=4):
+    mylist.sort()
     pairs = [
-        "\t".join(["%20s" % j for j in mylist[i : i + cols]])
+        "".join(["%20s" % j for j in mylist[i : i + cols]])
         for i in range(0, len(mylist), cols)
     ]
-    print("\n".join(pairs))
-    print("\n")
+    return "\n" + "\n".join(pairs)
 
 
-def pretty_tabulate_dict(mydict, cols=3):
-    pretty_tabulate_list(
-        sorted([f"{key}:{value}" for key, value in list(mydict.items())]), cols
+def pretty_tabulate_dict(mydict, cols=4):
+    return pretty_tabulate_list(
+        [f"{key}:{value}" for key, value in mydict.items()], cols
     )
 
 

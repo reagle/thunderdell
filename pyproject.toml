@@ -48,8 +48,7 @@ max-complexity = 10
 minversion = "6.0"
 addopts = "-r a -q --doctest-modules"
 testpaths = [
-    "tests",
+    "biblio", "formats", "tests"
 ]
 filterwarnings = "ignore::DeprecationWarning"
 enable_assertion_pass_hook = true
-# pytest_plugins = ["pytest_golden.plugin",]

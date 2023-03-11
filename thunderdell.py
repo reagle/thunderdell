@@ -760,11 +760,12 @@ if __name__ == "__main__":
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
         import doctest
-        import test
+
+        from tests import test_thunderdell
 
         print("Running test")
         doctest.testmod()
-        test.test_results()
+        test_thunderdell.test_results()
         sys.exit()
 
     if args.fields:

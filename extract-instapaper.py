@@ -2,9 +2,14 @@
 #
 # This file is part of Thunderdell/BusySponge
 # <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2021 by Joseph Reagle
+# (c) Copyright 2009-2023 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
+"""
+The InstaPaper app can export highlights and notes to a file.
+This script processes this format and transforms it into
+the (ad-hoc) format accepted by `extract-dictation.py`.
+"""
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging

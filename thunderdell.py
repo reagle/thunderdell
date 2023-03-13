@@ -22,6 +22,7 @@ import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
+from collections.abc import Callable
 from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
@@ -76,7 +77,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 """
 
 
-def build_bib(args, file_name, output_format):
+def build_bib(args: argparse.Namespace, file_name: str, emitter_func: Callable):
     """Parse and process files, including new ones encountered if chasing"""
 
     links = []  # list of other files encountered in the mind map
@@ -115,7 +116,7 @@ def build_bib(args, file_name, output_format):
     elif args.pretty:
         show_pretty(args, entries)
     else:
-        output_format(args, entries)
+        emitter_func(args, entries)
 
 
 def walk_freeplane(node, mm_file, entries, links):
@@ -209,7 +210,7 @@ def walk_freeplane(node, mm_file, entries, links):
     return entries, links
 
 
-def serve_query(args: argparse.Namespace, entries: dict):
+def serve_query(args: argparse.Namespace, entries: dict) -> None:
     """
     Given the entries resulting from a query and crawl of the mindmaps,
     create a web server and open browser.
@@ -250,7 +251,7 @@ def serve_query(args: argparse.Namespace, entries: dict):
             server.serve_forever()
 
 
-def show_pretty(args: argparse.Namespace, entries: dict):
+def show_pretty(args: argparse.Namespace, entries: dict) -> None:
     """
     Given the entries resulting from a crawl of the mindmaps,
     create a local web page and open browser.
@@ -748,14 +749,14 @@ if __name__ == "__main__":
     if args.pretty and file_name == config.DEFAULT_MAP:
         file_name = config.DEFAULT_PRETTY_MAP
     if args.WP_citation:
-        output = emit_wp
+        emitter_func = emit_wp
     elif args.biblatex:
-        output = emit_biblatex
+        emitter_func = emit_biblatex
     elif args.JSON_CSL:
-        output = emit_json_csl
+        emitter_func = emit_json_csl
     else:
         args.YAML_CSL = True
-        output = emit_yaml_csl
+        emitter_func = emit_yaml_csl
     if args.defaults:
         args.chase = True
         args.output_to_file = True
@@ -815,8 +816,8 @@ if __name__ == "__main__":
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
-        output = emit_results
-    build_bib(args, file_name, output)
+        emitter_func = emit_results
+    build_bib(args, file_name, emitter_func)
     args.outfd.close()
 else:
 

@@ -31,6 +31,7 @@ GENERAL_KEY_SHORTCUTS = {
     "leg": "legal",
     "lit": "literacy",
     "ope": "open",
+    "mon": "money",
     "nor": "norms",
     "pat": "patience",
     "pyt": "python",

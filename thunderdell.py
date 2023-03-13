@@ -10,6 +10,7 @@
 
 Extract a bibliography from a Freeplane mindmap"""
 
+import argparse  # http://docs.python.org/dev/library/argparse.html
 import errno
 import http.server
 import logging
@@ -51,7 +52,6 @@ debug = logging.debug
 # Mindmap parsing, bib building, and query emitting
 #################################################################
 
-
 RESULT_FILE_HEADER = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 """
 
 
-def build_bib(args, file_name, output):
+def build_bib(args, file_name, output_format):
     """Parse and process files, including new ones encountered if chasing"""
 
     links = []  # list of other files encountered in the mind map
@@ -84,7 +84,8 @@ def build_bib(args, file_name, output):
     entries = {}  # dict of {id : {entry}}, by insertion order
     mm_files = [
         file_name,
-    ]  # list of file encountered (e.g., chase option)
+    ]  # list of file encountered (e.g. chase option)
+
     # debug(f"   mm_files = {mm_files}")
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
@@ -110,64 +111,11 @@ def build_bib(args, file_name, output):
                         mm_files.append(link)
 
     if args.query:
-        # debug("querying")
-        results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
-        if os.path.exists(results_file_name):
-            os.remove(results_file_name)
-        try:
-            results_file = open(results_file_name, "w", encoding="utf-8")
-        except OSError as err:
-            print(f"{err}")
-            print(f"There was an error writing to {results_file_name}")
-            raise
-        results_file.write(RESULT_FILE_HEADER)
-        results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-        emit_results(args, entries, args.query, results_file)
-        results_file.write("</ul></body></html>\n")
-        results_file.close()
-        # debug(f"{results_file=}")
-        if args.in_main:
-            ADDRESS_IN_USE = False
-            os.chdir(config.CGI_DIR + "/..")
-            handler = http.server.CGIHTTPRequestHandler
-            handler.cgi_directories = ["/cgi-bin"]
-            try:
-                server = http.server.HTTPServer(("localhost", 8000), handler)
-            except OSError as error:
-                if error.errno == errno.EADDRINUSE:
-                    ADDRESS_IN_USE = True
-                    print("address in use")
-                else:
-                    raise
-            # below runs the query twice I think, but still fast
-            webbrowser.open(
-                f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}"
-            )
-            if not ADDRESS_IN_USE:
-                server.serve_forever()
+        serve_query(args, entries)
     elif args.pretty:
-        results_file_name = f"{config.TMP_DIR}pretty-print.html"
-        try:
-            results_file = open(results_file_name, "w", encoding="utf-8")
-        except OSError as err:
-            print(f"{err}")
-            print(f"There was an error writing to {results_file_name}")
-            raise
-        results_file.write(RESULT_FILE_HEADER)
-        results_file.write(
-            '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
-        )
-        for entry in list(entries.values()):
-            args.query = entry["identifier"]
-            emit_results(args, entries, args.query, results_file)
-        results_file.write("</ul></body></html>\n")
-        results_file.close()
-        if args.in_main:
-            webbrowser.open(f"file://{results_file_name}")
-
+        show_pretty(args, entries)
     else:
-        output(args, entries)
-    return
+        output_format(args, entries)
 
 
 def walk_freeplane(node, mm_file, entries, links):
@@ -259,6 +207,72 @@ def walk_freeplane(node, mm_file, entries, links):
     # commit the last entry as no new titles left
     entries = commit_entry(entry, entries)
     return entries, links
+
+
+def serve_query(args: argparse.Namespace, entries: dict):
+    """
+    Given the entries resulting from a query and crawl of the mindmaps,
+    create a web server and open browser.
+    """
+
+    # debug("querying")
+    results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
+    if os.path.exists(results_file_name):
+        os.remove(results_file_name)
+    try:
+        results_file = open(results_file_name, "w", encoding="utf-8")
+    except OSError as err:
+        print(f"{err}")
+        print(f"There was an error writing to {results_file_name}")
+        raise
+    results_file.write(RESULT_FILE_HEADER)
+    results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+    emit_results(args, entries, args.query, results_file)
+    results_file.write("</ul></body></html>\n")
+    results_file.close()
+    # debug(f"{results_file=}")
+    if args.in_main:
+        ADDRESS_IN_USE = False
+        os.chdir(config.CGI_DIR + "/..")
+        handler = http.server.CGIHTTPRequestHandler
+        handler.cgi_directories = ["/cgi-bin"]
+        try:
+            server = http.server.HTTPServer(("localhost", 8000), handler)
+        except OSError as error:
+            if error.errno == errno.EADDRINUSE:
+                ADDRESS_IN_USE = True
+                print("address in use")
+            else:
+                raise
+        # below runs the query twice I think, but still fast
+        webbrowser.open(f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}")
+        if not ADDRESS_IN_USE:
+            server.serve_forever()
+
+
+def show_pretty(args: argparse.Namespace, entries: dict):
+    """
+    Given the entries resulting from a crawl of the mindmaps,
+    create a local web page and open browser.
+    """
+    results_file_name = f"{config.TMP_DIR}pretty-print.html"
+    try:
+        results_file = open(results_file_name, "w", encoding="utf-8")
+    except OSError as err:
+        print(f"{err}")
+        print(f"There was an error writing to {results_file_name}")
+        raise
+    results_file.write(RESULT_FILE_HEADER)
+    results_file.write(
+        '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
+    )
+    for entry in list(entries.values()):
+        args.query = entry["identifier"]
+        emit_results(args, entries, args.query, results_file)
+    results_file.write("</ul></body></html>\n")
+    results_file.close()
+    if args.in_main:
+        webbrowser.open(f"file://{results_file_name}")
 
 
 def commit_entry(entry, entries):
@@ -557,8 +571,6 @@ def parse_names(names):
 
 
 if __name__ == "__main__":
-    import argparse  # http://docs.python.org/dev/library/argparse.html
-
     arg_parser = argparse.ArgumentParser(
         description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first

@@ -123,9 +123,9 @@ def get_logger(text):
 
     if LOG_REGEX.match(text):
         params = LOG_REGEX.match(text).groupdict()
-        if "tags" in params and params["tags"]:
+        if params.get("tags"):
             params["tags"] = params["tags"].replace(".", "")
-        if "url" in params and params["url"]:
+        if params.get("url"):
             # unescape zshell safe pasting/bracketing
             params["url"] = (
                 params["url"]
@@ -134,24 +134,22 @@ def get_logger(text):
                 .replace(r"\?", "?")
                 .replace(r"\=", "=")
             )
+
         info(f"params = '{params}'")
-        function = None
-        if params["scheme"] == "n":
-            function = log2nifty
-        elif params["scheme"] == "j":
-            function = log2work
-        elif params["scheme"] == "m":
-            function = log2mm
-        elif params["scheme"] == "c":
-            function = log2console
-        elif params["scheme"] == "o":
-            function = log2opencodex
-        elif params["scheme"] == "g":
-            function = log2goatee
+        function_map = {
+            "n": log2nifty,
+            "j": log2work,
+            "m": log2mm,
+            "c": log2console,
+            "o": log2opencodex,
+            "g": log2goatee,
+        }
+        function = function_map.get(params["scheme"], None)
+
         if function:
             return function, params
         else:
-            print_usage("Sorry, unknown scheme: '%s'." % params["scheme"])
+            print_usage(f"""Sorry, unknown scheme: '{params["scheme"]}'.""")
     else:
         print_usage(f"Sorry, I can't parse the argument: '{text}'.")
     sys.exit()

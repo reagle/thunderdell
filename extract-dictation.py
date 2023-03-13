@@ -4,7 +4,7 @@
 # (c) Copyright 2009-2020 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 
-"""extract a MM from a dictated text file using particular conventions"""
+"""Extract a mindmap from a dictated text file using ad-hoc conventions."""
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs

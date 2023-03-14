@@ -24,7 +24,7 @@ import webbrowser
 HOME = os.path.expanduser("~")
 
 
-def query_sponge(query):
+def query_sponge(query: str) -> str:
     in_files = [
         HOME + "/joseph/plan/plans/index.html",
         HOME + "/joseph/plan/plans/20.html",

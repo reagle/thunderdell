@@ -77,12 +77,16 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 """
 
 
-def build_bib(args: argparse.Namespace, file_name: str, emitter_func: Callable):
+def build_bib(
+    args: argparse.Namespace,
+    file_name: str,
+    emitter_func: Callable[[argparse.Namespace, dict], None],
+) -> None:
     """Parse and process files, including new ones encountered if chasing"""
 
     links = []  # list of other files encountered in the mind map
     done = []  # list of files processed, kept to prevent loops
-    entries = {}  # dict of {id : {entry}}, by insertion order
+    entries: dict[str, dict] = {}  # dict of {id : {entry}}, by insertion order
     mm_files = [
         file_name,
     ]  # list of file encountered (e.g. chase option)
@@ -441,6 +445,7 @@ def get_ident(entry, entries, delim: str = ""):
 
     # debug(f"1 {entry=}")
     last_names = []
+    name_part = ""
     for _first, von, last, _jr in entry["author"]:
         last_names.append(f"{von}{last}".replace(" ", ""))
     if len(last_names) == 1:

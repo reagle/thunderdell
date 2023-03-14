@@ -21,7 +21,7 @@ from biblio import fields as bf
 from biblio.keywords import KEY_SHORTCUTS
 from utils.web import yasn_publish
 
-from .do_console_annotation import do_console_annotation
+from .annotate import do_console_annotation
 
 # function aliases
 critical = logging.critical

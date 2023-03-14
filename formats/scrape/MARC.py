@@ -20,7 +20,7 @@ import logging
 import re
 import time
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical

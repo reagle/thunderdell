@@ -24,7 +24,7 @@ error = logging.error
 excpt = logging.exception
 
 
-def regexParse(text):
+def regexParse(text: str):
     entries = {}
     key_pat = re.compile(r"@\w+{(.*),")
     value_pat = re.compile(r"\s+(\w+) ?= ?{(.*)},?")
@@ -41,7 +41,7 @@ def regexParse(text):
     return entries
 
 
-def xml_escape(text):
+def xml_escape(text: str) -> str:
     """Remove entities and spurious whitespace"""
     import cgi
 
@@ -49,7 +49,7 @@ def xml_escape(text):
     return escaped_text
 
 
-def process(entries):
+def process(entries: dict):
     fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
 
     for entry in list(entries.values()):

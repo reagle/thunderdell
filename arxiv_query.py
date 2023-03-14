@@ -29,8 +29,7 @@ ACCEPT_HEADERS = {
     "atom": "application/atom+xml",
 }
 
-
-def query(number, accept="application/atom+xml"):
+def query(number: int, accept: str="application/atom+xml"):
     """Query the number Web service; returns string"""
 
     info(f"{accept=}")

@@ -20,7 +20,9 @@ info = logging.info
 debug = logging.debug
 
 
-def escape_latex(text):
+def escape_latex(text: str) -> str:
+    """Escape common characters for Latex"""
+
     text = (
         text.replace("$", r"\$")
         .replace("&", r"\&")
@@ -35,7 +37,7 @@ def escape_latex(text):
     return text
 
 
-def normalize_whitespace(text):
+def normalize_whitespace(text: str) -> str:
     """Remove redundant whitespace from a string, including before comma
     >>> normalize_whitespace('sally, joe , john')
     'sally, joe, john'
@@ -46,7 +48,7 @@ def normalize_whitespace(text):
     return text
 
 
-def pretty_tabulate_list(mylist, cols=4):
+def pretty_tabulate_list(mylist: list, cols: int = 4) -> str:
     mylist.sort()
     pairs = [
         "".join(["%20s" % j for j in mylist[i : i + cols]])
@@ -55,13 +57,13 @@ def pretty_tabulate_list(mylist, cols=4):
     return "\n" + "\n".join(pairs)
 
 
-def pretty_tabulate_dict(mydict, cols=4):
+def pretty_tabulate_dict(mydict: dict, cols: int = 4) -> str:
     return pretty_tabulate_list(
         [f"{key}:{value}" for key, value in mydict.items()], cols
     )
 
 
-def strip_accents(text):
+def strip_accents(text: str) -> str:
     """strip accents and those chars that can't be stripped"""
     # >>> strip_accents(u'nôn-åscîî')
     # ^ fails because of doctest bug u'non-ascii'
@@ -77,7 +79,7 @@ def strip_accents(text):
         return text
 
 
-def smart_to_markdown(text):
+def smart_to_markdown(text: str) -> str:
     """Convert unicode punctuation (i.e., "smart quotes") to markdown form."""
     text = (
         text.replace("“", '"')
@@ -107,3 +109,4 @@ def truncate_text(text: str, length: int) -> str:
                 result = result[0 : length - 1] + "…"
             return result
         result = result + fragment
+    return result

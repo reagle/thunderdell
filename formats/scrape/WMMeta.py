@@ -22,7 +22,7 @@ import re
 from biblio import fields as bf
 from utils.web import get_HTML, unescape_XML
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical

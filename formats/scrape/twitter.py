@@ -30,7 +30,7 @@ from utils.web_api_tokens import (
     TW_CONSUMER_SECRET,
 )
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
 auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)

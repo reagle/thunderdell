@@ -21,7 +21,7 @@ import logging
 import arxiv_query
 from change_case import sentence_case
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical

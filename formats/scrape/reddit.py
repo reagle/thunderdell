@@ -24,7 +24,7 @@ from datetime import datetime
 from change_case import sentence_case
 from utils.web import get_JSON
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical

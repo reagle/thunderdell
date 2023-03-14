@@ -15,7 +15,7 @@ import urllib
 from html import escape
 
 import config
-from formats.emit_biblatex import create_biblatex_author
+from formats.emit.biblatex import create_biblatex_author
 from utils.web import escape_XML
 
 # logger function aliases

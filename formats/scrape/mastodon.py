@@ -24,7 +24,7 @@ import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 import utils.text as ut
 import utils.web_api_tokens as wat
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical

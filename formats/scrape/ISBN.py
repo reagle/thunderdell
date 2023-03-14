@@ -18,10 +18,9 @@ https://github.com/reagle/thunderdell
 
 import logging
 
-import doi_query
 from change_case import sentence_case
 
-from .scrape_default import ScrapeDefault
+from .default import ScrapeDefault
 
 # function aliases
 critical = logging.critical
@@ -31,60 +30,65 @@ info = logging.info
 debug = logging.debug
 
 
-class ScrapeDOI(ScrapeDefault):
+class ScrapeISBN(ScrapeDefault):
     def __init__(self, url, comment):
-        print("Scraping DOI;", end="\n")
+        print("Scraping ISBN;", end="\n")
         self.url = url
         self.comment = comment
 
     def get_biblio(self):
+        import isbn_query
+
         info(f"url = {self.url}")
-        json_bib = doi_query.query(self.url)
-        info(f"{json_bib=}")
+        json_bib = isbn_query.query(self.url)
+        info(f"json_bib = '{json_bib}'")
         biblio = {
             "permalink": self.url,
             "excerpt": "",
             "comment": self.comment,
         }
+        info("### json_bib.items()")
         for key, value in list(json_bib.items()):
-            info(f"{key=} {value=} {type(value)=}")
+            info(f"key = '{key}'")
+            if key.startswith("subject"):
+                continue
+            info(
+                "key = '%s' value = '%s' type(value) = '%s'\n"
+                % (key, value, type(value))
+            )
             if value in (None, [], ""):
                 pass
             elif key == "author":
                 biblio["author"] = self.get_author(json_bib)
-            elif key == "issued":
-                biblio["date"] = self.get_date(json_bib)
-            elif key == "page":
-                biblio["pages"] = json_bib["page"]
-            elif key == "container-title":
-                biblio["journal"] = json_bib["container-title"]
-            elif key == "issue":
-                biblio["number"] = json_bib["issue"]
-            elif key == "URL":
-                biblio["permalink"] = biblio["url"] = json_bib["URL"]
+            elif key == "year":
+                biblio["date"] = json_bib["year"]
+            elif key == "isbn":
+                biblio["isbn"] = json_bib["isbn"]
+            elif key == "pageCount":
+                biblio["pages"] = json_bib["pageCount"]
+            elif key == "publisher":
+                biblio["publisher"] = json_bib["publisher"]
+            elif key == "city":
+                biblio["address"] = json_bib["city"]
+            elif key == "url":
+                biblio["url"] = json_bib["url"]
+                biblio["permalink"] = json_bib["url"]
             else:
                 biblio[key] = json_bib[key]
-        if "title" not in json_bib:
-            biblio["title"] = "UNKNOWN"
+        if "title" in json_bib:
+            title = biblio["title"].replace(": ", ": ")
+            biblio["title"] = sentence_case(title)
+            if "subtitle" in json_bib:
+                biblio["subtitle"] = sentence_case(json_bib["subtitle"])
         else:
-            biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
-        info(f"{biblio=}")
+            biblio["title"] = "UNKNOWN"
         return biblio
 
     def get_author(self, bib_dict):
         names = "UNKNOWN"
         if "author" in bib_dict:
-            names = ""
-            for name_dic in bib_dict["author"]:
-                info(f"name_dic = '{name_dic}'")
-                if "literal" in name_dic:
-                    name_reverse = name_dic["literal"].split(", ")
-                    joined_name = f"{name_reverse[1]} {name_reverse[0]}"
-                else:
-                    joined_name = f"{name_dic['given']} {name_dic['family']}"
-                info(f"joined_name = '{joined_name}'")
-                names = names + ", " + joined_name
-            names = names[2:]  # remove first comma
+            info(f"{bib_dict['author']=}")
+            names = bib_dict["author"]
         return names
 
     def get_date(self, bib_dict):

@@ -38,126 +38,6 @@ def emit_results(
 ) -> None:
     """Emit the results of the query"""
 
-    def reverse_print(node: et._Element, entry: dict, spaces: str):
-        """Move locator number to the end of the text with the biblatex key"""
-        style_ref = node.get("STYLE_REF", "default")
-        text = escape_XML(node.get("TEXT"))
-        text = text.replace(  # restore my query_highlight strongs
-            "&lt;strong&gt;", "<strong>"
-        ).replace("&lt;/strong&gt;", "</strong>")
-        prefix = "&gt; " if style_ref == "quote" else ""
-        # don't reverse short texts and certain style refs
-        if len(text) < 50 or style_ref in ["author", "title", "cite"]:
-            cite = ""
-            # prefix = ""  # this could remove ">" from short quotes
-        else:
-            locator = ""
-            LOCATOR_PAT = re.compile(r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)")
-            matches = LOCATOR_PAT.match(text)
-            if matches:
-                text = matches.group(2)
-                locator = matches.group(1)
-                # http://mirrors.ibiblio.org/CTAN/macros/latex/exptl/biblatex/doc/biblatex.pdf
-                # biblatex: page, column, line, verse, section, paragraph
-                # kindle: location
-                if "pagination" in entry:
-                    if entry["pagination"] == "section":
-                        locator = f", sec. {locator}"
-                    elif entry["pagination"] == "paragraph":
-                        locator = f", para. {locator}"
-                    elif entry["pagination"] == "location":
-                        locator = f", loc. {locator}"
-                    elif entry["pagination"] == "chapter":
-                        locator = f", ch. {locator}"
-                    elif entry["pagination"] == "verse":
-                        locator = f", vers. {locator}"
-                    elif entry["pagination"] == "column":
-                        locator = f", col. {locator}"
-                    elif entry["pagination"] == "line":
-                        locator = f", line {locator}"
-                    else:
-                        raise Exception(
-                            f"unknown locator '{entry['pagination']}' "
-                            f"for '{entry['title']}' in '{entry['custom2']}'"
-                        )
-                else:
-                    if "-" in locator:
-                        locator = f", pp. {locator}"
-                    else:
-                        locator = f", p. {locator}"
-            cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
-
-        hypertext = text
-
-        # if node has first child <font BOLD="true"/> then embolden
-        style = ""
-        if len(node) > 0:
-            if node[0].tag == "font" and node[0].get("BOLD") == "true":
-                style = "font-weight: bold"
-
-        if "LINK" in node.attrib:
-            link = escape(node.get("LINK", ""))
-            hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
-
-        results_file.write(
-            f'{spaces}<li style="{style}" class="{style_ref}">'
-            f"{prefix}{hypertext}{cite}</li>\n"
-        )
-
-    def pretty_print(node, entry, spaces):
-        """Pretty print a node and descendants into indented HTML"""
-        # bug: nested titles are printed twice. 101217
-        if node.get("TEXT") is not None:
-            reverse_print(node, entry, spaces)
-        # I should clean all of this up to use simpleHTMLwriter,
-        # markup.py, or yattag
-        if len(node) > 0:
-            results_file.write(f'{spaces}<li><ul class="pprint_recurse">\n')
-            spaces = spaces + " "
-            for child in node:
-                if child.get("STYLE_REF") == "author":
-                    break
-                pretty_print(child, entry, spaces)
-            spaces = spaces[0:-1]
-            results_file.write(f"{spaces}</ul></li><!--pprint_recurse-->\n")
-
-    def get_url_query(token):
-        """Return the URL for an HTML link to the actual title"""
-        token = token.replace("<strong>", "").replace("</strong>", "")
-        # urllib won't accept unicode
-        token = urllib.parse.quote(token.encode("utf-8"))
-        # debug(f"token = '{token}' type = '{type(token)}'")
-        url_query = escape("search.cgi?query=%s") % token
-        # debug(f"url_query = '{url_query}' type = '{type(url_query)}'")
-        return url_query
-
-    def get_url_MM(file_name):
-        """Return URL for the source MindMap based on whether CGI or cmdline"""
-        if __name__ == "__main__":
-            return file_name
-        else:  # CGI
-            client_path = file_name.replace(f"{config.HOME}", f"{config.CLIENT_HOME}")
-            return f"file://{client_path}"
-
-    def print_entry(
-        identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces
-    ):
-        identifier_html = (
-            '<li class="identifier_html">'
-            f'<a href="{get_url_query(identifier)}">{identifier}</a>'
-        )
-        title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'
-        if url:
-            link_html = f'[<a class="link_html" href="{url}">url</a>]'
-        else:
-            link_html = ""
-        from_html = f'from <a class="from_html" href="{MM_mm_file}">{base_mm_file}</a>'
-        results_file.write(
-            f"{spaces}{identifier_html}, "
-            f"<em>{title_html}</em> {link_html} [{from_html}]"
-        )
-        results_file.write(f"{spaces}</li><!--identifier_html-->\n")
-
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
@@ -196,7 +76,7 @@ def emit_results(
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
-            pretty_print(entry["_title_node"], entry, spaces)
+            pretty_print(entry["_title_node"], entry, spaces, results_file)
             # results_file.write(f'{spaces}</li><!--pretty_print-->')
             results_file.write(f"{spaces}</ul><!--tit_tree-->\n"),
             results_file.write(f"{spaces}</li>\n"),
@@ -212,6 +92,7 @@ def emit_results(
                 MM_mm_file,
                 base_mm_file,
                 spaces,
+                results_file,
             )
             if len(entry["_node_results"]) > 0:
                 results_file.write(f"{spaces}<li>\n")
@@ -219,7 +100,7 @@ def emit_results(
                 results_file.write(f'{spaces}<ul class="li_node_results">\n')
                 spaces = spaces + " "
                 for node in entry["_node_results"]:
-                    reverse_print(node, entry, spaces)
+                    reverse_print(node, entry, spaces, results_file)
                 spaces = spaces[0:-1]
             results_file.write(f"{spaces}</ul><!--li_node_results-->\n")
             spaces = spaces[0:-1]
@@ -236,6 +117,7 @@ def emit_results(
                 MM_mm_file,
                 base_mm_file,
                 spaces,
+                results_file,
             )
         elif "_title_result" in entry:
             title = entry["_title_result"].get("TEXT")
@@ -248,4 +130,127 @@ def emit_results(
                 MM_mm_file,
                 base_mm_file,
                 spaces,
+                results_file,
             )
+
+
+LOCATOR_PREFIX_MAP = {
+    "section": ", sec.",
+    "paragraph": ", para.",
+    "location": ", loc.",
+    "chapter": ", ch.",
+    "verse": ", vers.",
+    "column": ", col.",
+    "line": ", line",
+}
+
+
+def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
+    """Move locator number to the end of the text with the biblatex key"""
+    style_ref = node.get("STYLE_REF", "default")
+    text = escape_XML(node.get("TEXT"))
+    text = text.replace(  # restore my query_highlight strongs
+        "&lt;strong&gt;", "<strong>"
+    ).replace("&lt;/strong&gt;", "</strong>")
+    prefix = "&gt; " if style_ref == "quote" else ""
+    # don't reverse short texts and certain style refs
+    if len(text) < 50 or style_ref in ["author", "title", "cite"]:
+        cite = ""
+    else:
+        locator = ""
+        LOCATOR_PAT = re.compile(r"^(?:<strong>)?(\d+(?:-\d+)?)(?:</strong>)? (.*)")
+        matches = LOCATOR_PAT.match(text)
+        if matches:
+            text = matches.group(2)
+            locator = matches.group(1)
+            # http://mirrors.ibiblio.org/CTAN/macros/latex/exptl/biblatex/doc/biblatex.pdf
+            # biblatex: page, column, line, verse, section, paragraph
+            # kindle: location
+            if "pagination" in entry:
+                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"])
+                if prefix is None:
+                    raise Exception(
+                        f"unknown locator '{entry['pagination']}' "
+                        f"for '{entry['title']}' in '{entry['custom2']}'"
+                    )
+                locator = f"{prefix} {locator}"
+            else:
+                if "-" in locator:
+                    locator = f", pp. {locator}"
+                else:
+                    locator = f", p. {locator}"
+        cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
+
+    hypertext = text
+
+    # if node has first child <font BOLD="true"/> then embolden
+    style = ""
+    if len(node) > 0:
+        if node[0].tag == "font" and node[0].get("BOLD") == "true":
+            style = "font-weight: bold"
+
+    if "LINK" in node.attrib:
+        link = escape(node.get("LINK", ""))
+        hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
+
+    results_file.write(
+        f'{spaces}<li style="{style}" class="{style_ref}">'
+        f"{prefix}{hypertext}{cite}</li>\n"
+    )
+
+
+def pretty_print(node, entry, spaces, results_file):
+    """Pretty print a node and descendants into indented HTML"""
+    # bug: nested titles are printed twice. 101217
+    if node.get("TEXT") is not None:
+        reverse_print(node, entry, spaces, results_file)
+    # I should clean all of this up to use simpleHTMLwriter,
+    # markup.py, or yattag
+    if len(node) > 0:
+        results_file.write(f'{spaces}<li><ul class="pprint_recurse">\n')
+        spaces = spaces + " "
+        for child in node:
+            if child.get("STYLE_REF") == "author":
+                break
+            pretty_print(child, entry, spaces, results_file)
+        spaces = spaces[0:-1]
+        results_file.write(f"{spaces}</ul></li><!--pprint_recurse-->\n")
+
+
+def print_entry(
+    identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces, results_file
+):
+    identifier_html = (
+        '<li class="identifier_html">'
+        f'<a href="{get_url_query(identifier)}">{identifier}</a>'
+    )
+    title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'
+    if url:
+        link_html = f'[<a class="link_html" href="{url}">url</a>]'
+    else:
+        link_html = ""
+    from_html = f'from <a class="from_html" href="{MM_mm_file}">{base_mm_file}</a>'
+    results_file.write(
+        f"{spaces}{identifier_html}, <em>{title_html}</em> {link_html} [{from_html}]"
+    )
+    results_file.write(f"{spaces}</li><!--identifier_html-->\n")
+
+
+def get_url_query(token):
+    """Return the URL for an HTML link to the actual title"""
+    token = token.replace("<strong>", "").replace("</strong>", "")
+    # urllib won't accept unicode
+    token = urllib.parse.quote(token.encode("utf-8"))
+    # debug(f"token = '{token}' type = '{type(token)}'")
+    url_query = escape("search.cgi?query=%s") % token
+    # debug(f"url_query = '{url_query}' type = '{type(url_query)}'")
+    return url_query
+
+
+def get_url_MM(file_name):
+    """Return URL for the source MindMap based on whether CGI or cmdline"""
+    if __name__ == "__main__":
+        return file_name
+    else:  # CGI
+        client_path = file_name.replace(f"{config.HOME}", f"{config.CLIENT_HOME}")
+        return f"file://{client_path}"

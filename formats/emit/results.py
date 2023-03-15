@@ -12,10 +12,10 @@ import argparse
 import logging
 import os
 import re
-import urllib
+import urllib.parse
 from html import escape
 
-import lxml.etree as et
+import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
 import config
 from formats.emit.biblatex import create_biblatex_author
@@ -76,8 +76,8 @@ def emit_results(
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
             pretty_print(entry["_title_node"], entry, spaces, results_file)
             # results_file.write(f'{spaces}</li><!--pretty_print-->')
-            results_file.write(f"{spaces}</ul><!--tit_tree-->\n"),
-            results_file.write(f"{spaces}</li>\n"),
+            results_file.write(f"{spaces}</ul><!--tit_tree-->\n")
+            results_file.write(f"{spaces}</li>\n")
 
         # if some nodes were matched, PP with citation info reversed
         if "_node_results" in entry:
@@ -169,7 +169,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
                 if prefix is None:
                     raise Exception(
                         f"unknown locator '{entry['pagination']}' "
-                        f"for '{entry['title']}' in '{entry['custom2']}'"
+                        + f"for '{entry['title']}' in '{entry['custom2']}'"
                     )
                 locator = f"{prefix} {locator}"
             else:
@@ -193,7 +193,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
 
     results_file.write(
         f'{spaces}<li style="{style}" class="{style_ref}">'
-        f"{prefix}{hypertext}{cite}</li>\n"
+        + f"{prefix}{hypertext}{cite}</li>\n"
     )
 
 

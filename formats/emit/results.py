@@ -93,7 +93,7 @@ def emit_results(
                 style = "font-weight: bold"
 
         if "LINK" in node.attrib:
-            link = escape(node.get("LINK"))
+            link = escape(node.get("LINK", ""))
             hypertext = f'<a class="reverse_print" href="{link}">{text}</a>'
 
         results_file.write(

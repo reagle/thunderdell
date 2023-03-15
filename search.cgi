@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # set shebang locally to latest
 # !/usr/bin/env python3
 # set the shebang on a2hosting to
 # !/home/goateene/opt/bin/python3
 
+import argparse
+import traceback
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
-def cgi_main():
-    global args
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
+def cgi_main(args):
     import cgi
     import codecs
     import logging
@@ -53,17 +55,17 @@ def cgi_main():
 
         query_result_file = busy_query.query_sponge(query)
         fileObj = codecs.open(query_result_file, "r", "utf-8", "replace")
-        print((fileObj.read()))
+        print(fileObj.read())
         fileObj.close()
     else:
         MINDMAP = HOME + "/joseph/readings.mm"
 
         import thunderdell as td
 
-        td.args.query = query
-        td.args.query_c = re.compile(re.escape(query), re.IGNORECASE)
-        td.args.chase = True
-        td.args.cgi = True
+        args.query = query
+        args.query_c = re.compile(re.escape(query), re.IGNORECASE)
+        args.chase = True
+        args.cgi = True
 
         def _ignore(_):
             pass  # this overrides td's logging
@@ -72,33 +74,38 @@ def cgi_main():
         td.info = _ignore
         td.dbg = _ignore
 
-        td.build_bib(td.args, MINDMAP, td.emit_results)
+        td.build_bib(args, MINDMAP, td.emit_results)
 
         fileObj = codecs.open(TMP_DIR + "query-thunderdell.html", "r", "utf-8")
-        print((fileObj.read()))
+        print(fileObj.read())
         fileObj.close()
 
 
 def print_error(msg):
-    import sys
-
     print(
-        (
-            """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+        f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         <html>
         <head><title>Error</title></head>
         <body>
-        <p>%s</p>
+        <p>{msg}</p>
         </body>
         </html>"""
-            % msg
-        )
     )
-    sys.exit()
 
 
 if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--in_main", action="store_true", default=False)
+    arg_parser.add_argument("-c", "--chase", action="store_true", default=True)
+    arg_parser.add_argument("-l", "--long_url", action="store_true", default=False)
+    arg_parser.add_argument("-p", "--pretty", action="store_true", default=False)
+    arg_parser.add_argument("-q", "--query", action="store_true", default=None)
+    args = arg_parser.parse_args()
+
     try:
-        cgi_main()
-    except Exception as e:
-        print_error(e)
+        cgi_main(args)
+    except Exception as e:  # noqa: BLE001
+        error_message = f"{type(e).__name__}: {str(e)}"
+        full_traceback = traceback.format_exc()
+        print_error(f"{error_message=}")
+        print_error(f"{full_traceback=}")

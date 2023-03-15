@@ -23,7 +23,6 @@ import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
 from collections.abc import Callable
-from io import TextIOBase
 from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
@@ -226,16 +225,16 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
     if os.path.exists(results_file_name):
         os.remove(results_file_name)
     try:
-        results_file = open(results_file_name, "w", encoding="utf-8")
+        args.results_file = open(results_file_name, "w", encoding="utf-8")
     except OSError as err:
         print(f"{err}")
         print(f"There was an error writing to {results_file_name}")
         raise
-    results_file.write(RESULT_FILE_HEADER)
-    results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-    emit_results(args, entries, args.query, results_file)
-    results_file.write("</ul></body></html>\n")
-    results_file.close()
+    args.results_file.write(RESULT_FILE_HEADER)
+    args.results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+    emit_results(args, entries)
+    args.results_file.write("</ul></body></html>\n")
+    args.results_file.close()
     # debug(f"{results_file=}")
     if args.in_main:
         ADDRESS_IN_USE = False
@@ -263,20 +262,20 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
     """
     results_file_name = f"{config.TMP_DIR}pretty-print.html"
     try:
-        results_file = open(results_file_name, "w", encoding="utf-8")
+        args.results_file = open(results_file_name, "w", encoding="utf-8")
     except OSError as err:
         print(f"{err}")
         print(f"There was an error writing to {results_file_name}")
         raise
-    results_file.write(RESULT_FILE_HEADER)
-    results_file.write(
+    args.results_file.write(RESULT_FILE_HEADER)
+    args.results_file.write(
         '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
     )
     for entry in list(entries.values()):
         args.query = entry["identifier"]
-        emit_results(args, entries, args.query, results_file)
-    results_file.write("</ul></body></html>\n")
-    results_file.close()
+        emit_results(args, entries)
+    args.results_file.write("</ul></body></html>\n")
+    args.results_file.close()
     if args.in_main:
         webbrowser.open(f"file://{results_file_name}")
 
@@ -822,7 +821,6 @@ if __name__ == "__main__":
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
-        # emitter_func: Callable[argparse.Namespace, dict[str, dict], str, TextIOBase]
         emitter_func = emit_results
     build_bib(args, file_name, emitter_func)
     args.outfd.close()

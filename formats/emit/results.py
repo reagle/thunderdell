@@ -14,7 +14,6 @@ import os
 import re
 import urllib
 from html import escape
-from io import TextIOBase
 
 import lxml.etree as et
 
@@ -33,11 +32,10 @@ debug = logging.debug
 def emit_results(
     args: argparse.Namespace,
     entries: dict[str, dict],
-    query: str,
-    results_file: TextIOBase,
 ) -> None:
     """Emit the results of the query"""
 
+    results_file = args.results_file
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
@@ -167,7 +165,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
             # biblatex: page, column, line, verse, section, paragraph
             # kindle: location
             if "pagination" in entry:
-                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"])
+                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"], "")
                 if prefix is None:
                     raise Exception(
                         f"unknown locator '{entry['pagination']}' "

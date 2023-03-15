@@ -10,8 +10,8 @@ Run tests against golden YAML results;
 useful for detecting inadvertent changes.
 """
 import subprocess
-from config import HOME, THUNDERDELL_EXE, TESTS_FOLDER
-from pathlib import Path
+
+from config import TESTS_FOLDER, THUNDERDELL_EXE
 
 
 def test_results():

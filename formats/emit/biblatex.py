@@ -10,7 +10,6 @@
 
 import logging
 import re
-import sys
 
 from biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
@@ -95,9 +94,9 @@ def guess_biblatex_type(entry):
         elif e_t in CSL_TYPES:
             return CSL_BIBLATEX_TYPE_MAP[e_t]
         else:
-            raise RuntimeError(f"Unknown entry_type = {et}")
+            raise RuntimeError(f"Unknown entry_type = {e_t}")
 
-    ## https://mirror.las.iastate.edu/tex-archive/macros/latex/contrib/biblatex/doc/biblatex.pdf
+    ## https://mirrors.ibiblio.org/CTAN/macros/latex/contrib/biblatex/doc/biblatex.pdf
     ## Guess unknown entry_type based on existence of bibliographic fields
     types_from_fields = [
         # CONTAINER BASED TYPES

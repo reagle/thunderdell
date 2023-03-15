@@ -23,6 +23,7 @@ import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
 from collections.abc import Callable
+from io import TextIOBase
 from typing import NamedTuple
 from urllib.parse import parse_qs
 from xml.etree.ElementTree import parse
@@ -101,7 +102,7 @@ def build_bib(
             debug(f"    failed to parse {mm_file} because of {err}")
             continue
         # debug(f"    successfully parsed {mm_file}")
-        entries, links = walk_freeplane(doc, mm_file, entries, links=[])
+        entries, links = walk_freeplane(args, doc, mm_file, entries, links=[])
         # debug("    done.appending %s" % os.path.abspath(mm_file))
         done.append(mm_file)
         if args.chase:
@@ -123,7 +124,7 @@ def build_bib(
         emitter_func(args, entries)
 
 
-def walk_freeplane(node, mm_file, entries, links):
+def walk_freeplane(args, node, mm_file, entries, links):
     """Walk the freeplane XML tree and build:
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
@@ -180,7 +181,7 @@ def walk_freeplane(node, mm_file, entries, links):
                 # pass author as it will be fetched upon new title
                 pass
             elif d.get("STYLE_REF") == "title":
-                commit_entry(entry, entries)  # new entry, so store previous
+                commit_entry(args, entry, entries)  # new entry, so store previous
                 entry = {}  # and create new one
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
@@ -210,7 +211,7 @@ def walk_freeplane(node, mm_file, entries, links):
                         entry.setdefault("_node_results", []).append(node_highlighted)
 
     # commit the last entry as no new titles left
-    entries = commit_entry(entry, entries)
+    entries = commit_entry(args, entry, entries)
     return entries, links
 
 
@@ -280,7 +281,7 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
         webbrowser.open(f"file://{results_file_name}")
 
 
-def commit_entry(entry, entries):
+def commit_entry(args, entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
     if entry != {}:
@@ -292,7 +293,7 @@ def commit_entry(entry, entries):
 
         # pull the citation, create an identifier, and enter in entries
         try:
-            entry = pull_citation(entry)  # parse a=b c=d syntax
+            entry = pull_citation(args, entry)  # parse a=b c=d syntax
         except Exception:
             print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
             raise
@@ -308,7 +309,7 @@ def commit_entry(entry, entries):
 Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
 
-def pull_citation(entry: dict) -> dict:
+def pull_citation(args, entry: dict) -> dict:
     """Modifies entry with parsed citation and field-specific heuristics
 
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
@@ -821,15 +822,7 @@ if __name__ == "__main__":
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
+        # emitter_func: Callable[argparse.Namespace, dict[str, dict], str, TextIOBase]
         emitter_func = emit_results
     build_bib(args, file_name, emitter_func)
     args.outfd.close()
-else:  # this file is being imported as a module
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("in_main", action="store_true", default=False)
-    arg_parser.add_argument("chase", action="store_true", default=True)
-    arg_parser.add_argument("long_url", action="store_true", default=False)
-    arg_parser.add_argument("urls_online_only", action="store_true", default=False)
-    arg_parser.add_argument("pretty", action="store_true", default=False)
-    arg_parser.add_argument("query", action="store_true", default=None)
-    args = arg_parser.parse_args()

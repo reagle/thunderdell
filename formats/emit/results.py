@@ -31,7 +31,10 @@ debug = logging.debug
 
 
 def emit_results(
-    args: argparse.Namespace, entries: dict, query: str, results_file: TextIOBase
+    args: argparse.Namespace,
+    entries: dict[str, dict],
+    query: str,
+    results_file: TextIOBase,
 ) -> None:
     """Emit the results of the query"""
 

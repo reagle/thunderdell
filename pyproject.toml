@@ -52,3 +52,12 @@ testpaths = [
 ]
 filterwarnings = "ignore::DeprecationWarning"
 enable_assertion_pass_hook = true
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = [
+    "tweepy",
+    "mastodon"
+]
+ignore_missing_imports = true

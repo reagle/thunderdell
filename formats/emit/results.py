@@ -8,11 +8,15 @@
 
 """Functions for emitting bibliographic entries to a file format."""
 
+import argparse
 import logging
 import os
 import re
 import urllib
 from html import escape
+from io import TextIOBase
+
+import lxml.etree as et
 
 import config
 from formats.emit.biblatex import create_biblatex_author
@@ -26,10 +30,12 @@ info = logging.info
 debug = logging.debug
 
 
-def emit_results(args, entries, query, results_file):
+def emit_results(
+    args: argparse.Namespace, entries: dict, query: str, results_file: TextIOBase
+) -> None:
     """Emit the results of the query"""
 
-    def reverse_print(node, entry, spaces):
+    def reverse_print(node: et._Element, entry: dict, spaces: str):
         """Move locator number to the end of the text with the biblatex key"""
         style_ref = node.get("STYLE_REF", "default")
         text = escape_XML(node.get("TEXT"))

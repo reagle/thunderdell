@@ -824,12 +824,11 @@ if __name__ == "__main__":
         emitter_func = emit_results
     build_bib(args, file_name, emitter_func)
     args.outfd.close()
-else:
-
-    class args:
-        in_main = False  # imported or called from cgi
-        chase = True  # Follow freeplane links to other local maps
-        long_url = False  # Use short 'oldid' URLs for mediawikis
-        urls_online_only = False  # Emit urls for @online only
-        pretty = False  # Print as HTML with citation at end
-        query = None  # Query the bibliographies
+else:  # this file is being imported as a module
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("in_main", action="store_true", default=False)
+    arg_parser.add_argument("chase", action="store_true", default=True)
+    arg_parser.add_argument("long_url", action="store_true", default=False)
+    arg_parser.add_argument("urls_online_only", action="store_true", default=False)
+    arg_parser.add_argument("pretty", action="store_true", default=False)
+    arg_parser.add_argument("query", action="store_true", default=None)

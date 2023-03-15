@@ -832,3 +832,4 @@ else:  # this file is being imported as a module
     arg_parser.add_argument("urls_online_only", action="store_true", default=False)
     arg_parser.add_argument("pretty", action="store_true", default=False)
     arg_parser.add_argument("query", action="store_true", default=None)
+    args = arg_parser.parse_args()

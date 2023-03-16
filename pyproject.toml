@@ -58,6 +58,10 @@ enable_assertion_pass_hook = true
 [[tool.mypy.overrides]]
 module = [
     "tweepy",
-    "mastodon"
+    "mastodon",
 ]
 ignore_missing_imports = true
+
+[tool.pyright]
+reportMissingImports = false
+reportMissingTypeStubs = false

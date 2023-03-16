@@ -35,7 +35,7 @@ critical = logging.critical
 exception = logging.exception
 
 
-def restore_spaces(text):
+def restore_spaces(text) -> str:
     """Restore spaces to OCR text using pyenchant, taken from
     https://stackoverflow.com/questions/23314834/tokenizing-unsplit-words-from-ocr-using-nltk
     """
@@ -55,7 +55,7 @@ def restore_spaces(text):
     return checker.get_text()
 
 
-def process_text(text):
+def process_text(text: str) -> str:
     """Process text for annotation kind, color, and page number, joining
     lines as needed"""
 

@@ -249,7 +249,6 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
                 print("address in use")
             else:
                 raise
-        # below runs the query twice I think, but still fast
         webbrowser.open(f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}")
         if not ADDRESS_IN_USE:
             server.serve_forever()

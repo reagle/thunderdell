@@ -123,7 +123,7 @@ def build_bib(
         emitter_func(args, entries)
 
 
-def walk_freeplane(args, node, mm_file, entries, links):
+def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
     """Walk the freeplane XML tree and build:
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
@@ -143,10 +143,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
 
     parent_map = {c: p for p in node.iter() for c in p}
 
-    def get_parent(node):
-        return parent_map[node]
-
-    def query_highlight(node, query):
+    def _query_highlight(node, query):
         """Return a modified node with matches highlighted"""
         query_lower = query.lower()
         text = node.get("TEXT")
@@ -163,12 +160,15 @@ def walk_freeplane(args, node, mm_file, entries, links):
             return node
         return None
 
-    def get_author_node(node):
+    def _get_author_node(node):
         """Return the nearest author node ancestor"""
-        ancestor = get_parent(node)
+        ancestor = _get_parent(node)
         while ancestor.get("STYLE_REF") != "author":
-            ancestor = get_parent(ancestor)
+            ancestor = _get_parent(ancestor)
         return ancestor
+
+    def _get_parent(node):
+        return parent_map[node]
 
     for d in node.iter():
         if "LINK" in d.attrib:  # found a local reference link
@@ -184,7 +184,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
                 entry = {}  # and create new one
                 # because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found
-                author_node = get_author_node(d)
+                author_node = _get_author_node(d)
                 entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
                 entry["author"] = parse_names(entry["ori_author"])
                 entry["title"] = unescape_XML(d.get("TEXT"))
@@ -193,10 +193,10 @@ def walk_freeplane(args, node, mm_file, entries, links):
                 if "LINK" in d.attrib:
                     entry["url"] = d.get("LINK")
                 if args.query:
-                    author_highlighted = query_highlight(author_node, args.query)
+                    author_highlighted = _query_highlight(author_node, args.query)
                     if author_highlighted is not None:
                         entry["_author_result"] = author_highlighted
-                    title_highlighted = query_highlight(d, args.query)
+                    title_highlighted = _query_highlight(d, args.query)
                     if title_highlighted is not None:
                         entry["_title_result"] = title_highlighted
             else:
@@ -205,7 +205,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
                 elif d.get("STYLE_REF") == "annotation":
                     entry["annotation"] = unescape_XML(d.get("TEXT").strip())
                 if args.query:
-                    node_highlighted = query_highlight(d, args.query)
+                    node_highlighted = _query_highlight(d, args.query)
                     if node_highlighted is not None:
                         entry.setdefault("_node_results", []).append(node_highlighted)
 
@@ -251,7 +251,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
                 raise
         webbrowser.open(f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}")
         if not ADDRESS_IN_USE:
-            server.serve_forever()
+            server.serve_forever()  # type: ignore[unbound]
 
 
 def show_pretty(args: argparse.Namespace, entries: dict) -> None:
@@ -369,7 +369,7 @@ def parse_pairs(entry: dict) -> dict:
         cites = EQUAL_PAT.split(citation)[1:]
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = zip(*[iter(cites)] * 2, strict=True)
-        for short, value in cite_pairs:
+        for short, value in cite_pairs:  # pyright: ignore
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()
             except KeyError as error:
@@ -440,13 +440,18 @@ def identity_increment(ident, entries):
 
 
 def get_ident(entry, entries, delim: str = ""):
-    """Create an identifier (key) for the entry"""
+    """
+    Create an identifier (key) for the entry based on last names, year, and title"""
 
     # debug(f"1 {entry=}")
     last_names = []
     name_part = ""
-    for _first, von, last, _jr in entry["author"]:
+
+    # Unpack first, von, late, and jr
+    for _, von, last, _ in entry["author"]:
         last_names.append(f"{von}{last}".replace(" ", ""))
+
+    # Join the last names depending on how many there are: > 3 is "et al."
     if len(last_names) == 1:
         name_part = last_names[0]
     elif len(last_names) == 2:
@@ -773,6 +778,9 @@ if __name__ == "__main__":
             extension = ".bib"
         elif args.WP_citation:
             extension = ".wiki"
+        else:
+            extension = ".unknown"
+            raise Exception(f"unknown {extension}")
         output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:

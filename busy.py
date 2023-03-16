@@ -117,7 +117,7 @@ def get_logger(text):
     # tags must be prefixed by dot; URL no longer required
     LOG_REGEX = re.compile(
         r"(?P<scheme>\w) (?P<tags>(\.\w+ )+)?"
-        r"(?P<url>(arxiv|doi|isbn|http|file)\S* ?)?(?P<comment>.*)",
+        + r"(?P<url>(arxiv|doi|isbn|http|file)\S* ?)?(?P<comment>.*)",
         re.IGNORECASE,
     )
 

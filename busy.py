@@ -24,7 +24,8 @@ import logging
 import re
 import sys
 import time
-import urllib
+import urllib.parse
+from collections.abc import Callable
 
 from biblio import fields as bf
 from biblio.keywords import LIST_OF_KEYSHORTCUTS
@@ -63,7 +64,7 @@ MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 #######################################
 
 
-def get_scraper(url, comment):
+def get_scraper(url: str, comment: str) -> ScrapeDefault:
     """
     Use the URL to specify a screen scraper, e.g.,
 
@@ -100,7 +101,6 @@ def get_scraper(url, comment):
             ("twitter.com/", ScrapeTwitter),
             ("ohai.social/", ScrapeMastodon),
             ("www.reddit.com/", ScrapeReddit),
-            ("", ScrapeDefault),  # default: make sure last
         )
 
         for prefix, scraper in dispatch_scraper:
@@ -108,8 +108,11 @@ def get_scraper(url, comment):
                 info(f"scrape = {scraper} ")
                 return scraper(url, comment)  # creates instance
 
+    # Return the default scraper if no other scraper is matched
+    return ScrapeDefault(url, comment)
 
-def get_logger(text):
+
+def get_logger(text: str) -> tuple[Callable, dict]:
     """
     Given the argument return a function and parameters.
     """
@@ -122,7 +125,9 @@ def get_logger(text):
     )
 
     if LOG_REGEX.match(text):
-        params = LOG_REGEX.match(text).groupdict()
+        params = {}
+        if (match := LOG_REGEX.match(text)) is not None:
+            params = match.groupdict()
         if params.get("tags"):
             params["tags"] = params["tags"].replace(".", "")
         if params.get("url"):
@@ -176,7 +181,7 @@ console:       b c TAGS URL|DOI|ISBN COMMENT
 """
 
 
-def print_usage(message) -> None:
+def print_usage(message: str) -> None:
     print(message)
     print(DESCRIPTION)
 
@@ -186,7 +191,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
-        description=DESCRIPTION,
+        description="""Given a URL, tag, scrape, and log it.""",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     arg_parser.add_argument(
@@ -237,7 +242,6 @@ if __name__ == "__main__":
         action="version",
         version=f"1.0 using Python {sys.version}",
     )
-
     args = arg_parser.parse_args()
     log_level = logging.ERROR  # 40
 
@@ -287,7 +291,3 @@ if __name__ == "__main__":
     biblio["tags"] = params["tags"]
     info(f"{biblio=}")
     logger(args, biblio)
-else:  # imported as module
-
-    class args:
-        publish = False

@@ -101,7 +101,10 @@ def process_files(args, file_names):
                 "\n\n", "\n"
             )
             info(f"{comment=}")
-            url = URL_RE.match(first_line).groups()[0]
+            if match := URL_RE.match(first_line):
+                url = match.groups()[0]
+            else:
+                raise ValueError(f"No match found in {first_line}")
             info(f"{url=}")
             webbrowser.open(url)
             params = {"scheme": "c", "url": url, "comment": ""}

@@ -494,7 +494,7 @@ def get_ident(entry, entries, delim: str = ""):
 
 
 def parse_date(when: str) -> NamedTuple:
-    """parse dates that starts with 'YYYY' and returns named tuple.
+    """Parse dates that starts with 'YYYY' and returns named tuple.
     Without hyphens, strings such as '101210' are ambiguous: years
     have precedence.
 

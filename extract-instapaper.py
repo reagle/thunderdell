@@ -31,7 +31,7 @@ critical = logging.critical
 exception = logging.exception
 
 
-def main(argv):
+def main(argv: list[str]) -> argparse.Namespace:
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
@@ -89,7 +89,7 @@ def main(argv):
     return args
 
 
-def process_files(args, file_names):
+def process_files(args: argparse.Namespace, file_names: list[str]):
     URL_RE = re.compile(r"# \[.*\]\((.*)\)")
     for file_name in file_names:
         info(f"{file_name=}")

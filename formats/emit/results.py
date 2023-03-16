@@ -18,7 +18,8 @@ from html import escape
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
 import config
-from formats.emit.biblatex import create_biblatex_author
+
+# from formats.emit.biblatex import create_biblatex_author
 from utils.web import escape_XML
 
 # logger function aliases
@@ -39,7 +40,7 @@ def emit_results(
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
-        author = create_biblatex_author(entry["author"])
+        # author = create_biblatex_author(entry["author"])
         title = entry["title"]
         date = entry["date"]
         url = entry.get("url", "")
@@ -83,8 +84,8 @@ def emit_results(
         if "_node_results" in entry:
             print_entry(
                 identifier,
-                author,
-                date,
+                # author,
+                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -105,11 +106,11 @@ def emit_results(
             results_file.write(f"{spaces}</li>\n")
         # if my author or title matched, print biblio w/ link to complete entry
         elif "_author_result" in entry:
-            author = f"{entry['_author_result'].get('TEXT')} {entry['date'].year}"
+            # author = f"{entry['_author_result'].get('TEXT')} {entry['date'].year}"
             print_entry(
                 identifier,
-                author,
-                date,
+                # author,
+                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -121,8 +122,8 @@ def emit_results(
             title = entry["_title_result"].get("TEXT")
             print_entry(
                 identifier,
-                author,
-                date,
+                # author,
+                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -216,7 +217,15 @@ def pretty_print(node, entry, spaces, results_file):
 
 
 def print_entry(
-    identifier, author, date, title, url, MM_mm_file, base_mm_file, spaces, results_file
+    identifier,
+    # author,
+    # date,
+    title,
+    url,
+    MM_mm_file,
+    base_mm_file,
+    spaces,
+    results_file,
 ):
     identifier_html = (
         '<li class="identifier_html">'

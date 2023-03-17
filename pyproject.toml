@@ -65,3 +65,4 @@ ignore_missing_imports = true
 [tool.pyright]
 reportMissingImports = false
 reportMissingTypeStubs = false
+pythonVersion = '3.11'

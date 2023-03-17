@@ -368,7 +368,7 @@ def parse_pairs(entry: dict) -> dict:
         # get rid of first empty string of results
         cites = EQUAL_PAT.split(citation)[1:]
         # 2 refs to an iterable are '*' unpacked and rezipped
-        cite_pairs = zip(*[iter(cites)] * 2, strict=True)
+        cite_pairs = zip(*[iter(cites)] * 2, strict=True)  # pyright: ignore
         for short, value in cite_pairs:  # pyright: ignore
             try:
                 entry[BIB_SHORTCUTS[short]] = value.strip()

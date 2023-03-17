@@ -91,20 +91,22 @@ def process_text(text: str) -> str:
     color = kind = prefix = ""
     ignore_next_line = False
 
+    def _get_group_0(regex: re.Pattern, text: str) -> str | None:
+        """Type friendly matching function"""
+        match = regex.search(text)
+        return match.group(0) if match else None
+
     text_joined = RE_JOIN_LINES.sub(r"\1\2", text)  # remove spurious \n
-    if RE_FIRST.search(text_joined):
-        page_num_first_specfied = int(RE_FIRST.search(text_joined).group(1))
-        print(f"{page_num_first_specfied=}")
+    if match := _get_group_0(RE_FIRST, text_joined):
+        page_num_first_specfied = int(match)
         debug(f"{page_num_first_specfied=}")
     if args.first:
         page_num_first_specfied = args.first
 
-    if RE_DOI.search(text_joined):
-        DOI = RE_DOI.search(text_joined).group(0)
+    if DOI := _get_group_0(RE_DOI, text_joined):
         info(f"{DOI=}")
         text_new = get_bib_preamble(DOI)
-    elif RE_ISBN.search(text_joined):
-        ISBN = RE_ISBN.search(text_joined).group(0)
+    if ISBN := _get_group_0(RE_ISBN, text_joined):
         info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
     else:
@@ -124,9 +126,9 @@ def process_text(text: str) -> str:
             ignore_next_line = True
             continue
 
-        if RE_PAGE_NUM.match(line):
-            debug(f"{RE_PAGE_NUM.match(line)=}")
-            page_num_parsed = RE_PAGE_NUM.match(line).groups(0)[0]
+        if page_num_parsed := _get_group_0(RE_PAGE_NUM, line):
+            debug(f"{page_num_parsed=}")
+            page_num_parsed = page_num_parsed[0]
             if page_num_parsed.isdigit():
                 page_num_parsed = int(page_num_parsed)
                 is_roman = False

@@ -83,8 +83,10 @@ def process_text(text: str) -> str:
         [ ]---""",
         re.VERBOSE,
     )
+
+    # 1st page number specified in PDF comment
+    page_num_first_specfied = args.first if args.first else None
     page_num_first_parsed = None  # 1st page number as parsed
-    page_num_first_specfied = None  # 1st page number specified in PDF comment
     page_num_offset = None  # page number offset
     page_num_parsed = None  # actual/parsed page number
     page_num_result = None  # page number result
@@ -100,8 +102,6 @@ def process_text(text: str) -> str:
     if match := _get_group_0(RE_FIRST, text_joined):
         page_num_first_specfied = int(match)
         debug(f"{page_num_first_specfied=}")
-    if args.first:
-        page_num_first_specfied = args.first
 
     if DOI := _get_group_0(RE_DOI, text_joined):
         info(f"{DOI=}")
@@ -291,7 +291,7 @@ understanding, positive thinking andaltruistic attitudes.
 
 """  # noqa: E501
 
-TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\nsection. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
+TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\n129 excerpt. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])

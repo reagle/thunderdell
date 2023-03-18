@@ -9,9 +9,12 @@
 Run tests against golden YAML results; 
 useful for detecting inadvertent changes.
 """
+import os
 import subprocess
 
 from config import TESTS_FOLDER, THUNDERDELL_EXE
+
+HOME = os.path.expanduser("~")
 
 
 def test_results():

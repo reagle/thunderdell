@@ -262,8 +262,9 @@ def change_case(text, case_direction="sentence"):
     )
 
 
-def test(change_case, case_direction):
+def demonstrate_changes(change_case, case_direction):
     """Prints out sentence case (default) for a number of test strings"""
+    ## TODO: convert this to pytest with actual comparison.
     TESTS = (
         "My Defamation 2.0 Experience: A Story of Wikipedia and a Boy",
         "My defamation 2.0 experience: a story of Wikipedia and a boy",
@@ -375,7 +376,7 @@ def main(argv):
     debug("case_direction = %s" % case_direction)
 
     if args.test:
-        test(change_case, case_direction)
+        demonstrate_changes(change_case, case_direction)
     else:
         text = " ".join(args.text)
         result = change_case(text, case_direction)

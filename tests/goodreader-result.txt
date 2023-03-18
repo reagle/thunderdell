@@ -1,0 +1,4 @@
+Scraping DOI;
+author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041 
+
+publish to social media? 'y' for yes: 

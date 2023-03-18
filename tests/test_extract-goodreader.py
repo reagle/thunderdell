@@ -13,6 +13,8 @@ import subprocess
 
 from config import BIN_DIR, TESTS_FOLDER
 
+# TODO: currently, extract-goodreader.py fails this test
+
 
 def test_process_text():
     """

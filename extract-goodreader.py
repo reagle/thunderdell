@@ -11,6 +11,8 @@ This script processes this format and transforms it into
 the (ad-hoc) format accepted by `extract-dictation.py`.
 """
 
+# TODO: fix testing error
+
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import difflib
 import logging
@@ -128,7 +130,7 @@ def process_text(text: str) -> str:
 
         if page_num_match := RE_PAGE_NUM.match(line):
             info(f"{page_num_match=}")
-            assert page_num_match is not None  # pyright needs for following group(1)
+            assert page_num_match is not None  # pyright needs for group(1) below
             page_num_parsed = page_num_match.group(1)
             if page_num_parsed.isdigit():
                 page_num_parsed = int(page_num_parsed)
@@ -156,14 +158,13 @@ def process_text(text: str) -> str:
                 else:
                     page_num_offset = 0
                 debug(f"{page_num_offset=}")
-        elif RE_ANNOTATION.match(line):
+        elif annotation_match := RE_ANNOTATION.match(line):
             debug("RE_ANNOTATION match")
             debug(f"{page_num_parsed=}")
             debug(f"{page_num_offset=}")
-            breakpoint()
             page_num_result = page_num_parsed + page_num_offset
             debug(f"{page_num_result=}")
-            kind, color = RE_ANNOTATION.match(line).groupdict().values()
+            kind, color = annotation_match.groupdict().values()
             if kind == "Note":
                 prefix = "--"
                 page_num_result = ""

@@ -93,20 +93,20 @@ def process_text(text: str) -> str:
     color = kind = prefix = ""
     ignore_next_line = False
 
-    def _get_group_0(regex: re.Pattern, text: str) -> str | None:
+    def _get_group_n(regex: re.Pattern, text: str, number: int) -> str | None:
         """Type friendly matching function"""
         match = regex.search(text)
-        return match.group(0) if match else None
+        return match.group(number) if match else None
 
     text_joined = RE_JOIN_LINES.sub(r"\1\2", text)  # remove spurious \n
-    if match := _get_group_0(RE_FIRST, text_joined):
+    if match := _get_group_n(RE_FIRST, text_joined, 1):
         page_num_first_specfied = int(match)
         debug(f"{page_num_first_specfied=}")
 
-    if DOI := _get_group_0(RE_DOI, text_joined):
+    if DOI := _get_group_n(RE_DOI, text_joined, 0):
         info(f"{DOI=}")
         text_new = get_bib_preamble(DOI)
-    if ISBN := _get_group_0(RE_ISBN, text_joined):
+    elif ISBN := _get_group_n(RE_ISBN, text_joined, 0):
         info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
     else:
@@ -126,9 +126,10 @@ def process_text(text: str) -> str:
             ignore_next_line = True
             continue
 
-        if page_num_parsed := _get_group_0(RE_PAGE_NUM, line):
-            debug(f"{page_num_parsed=}")
-            page_num_parsed = page_num_parsed[0]
+        if page_num_match := RE_PAGE_NUM.match(line):
+            info(f"{page_num_match=}")
+            assert page_num_match is not None  # pyright needs for following group(1)
+            page_num_parsed = page_num_match.group(1)
             if page_num_parsed.isdigit():
                 page_num_parsed = int(page_num_parsed)
                 is_roman = False
@@ -159,6 +160,7 @@ def process_text(text: str) -> str:
             debug("RE_ANNOTATION match")
             debug(f"{page_num_parsed=}")
             debug(f"{page_num_offset=}")
+            breakpoint()
             page_num_result = page_num_parsed + page_num_offset
             debug(f"{page_num_result=}")
             kind, color = RE_ANNOTATION.match(line).groupdict().values()

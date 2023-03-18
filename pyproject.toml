@@ -48,10 +48,13 @@ max-complexity = 10
 minversion = "6.0"
 addopts = "-r a -q --doctest-modules"
 testpaths = [
-    "biblio", "formats", "tests"
+    # "biblio", "formats", "tests"
 ]
 filterwarnings = "ignore::DeprecationWarning"
 enable_assertion_pass_hook = true
+python_files = [
+    "*.py",
+    ]
 
 [tool.mypy]
 

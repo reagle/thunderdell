@@ -11,6 +11,8 @@ This script processes this format and transforms it into
 the (ad-hoc) format accepted by `extract-dictation.py`.
 """
 
+# TODO: fix testing error
+
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import difflib
 import logging
@@ -83,28 +85,30 @@ def process_text(text: str) -> str:
         [ ]---""",
         re.VERBOSE,
     )
+
+    # 1st page number specified in PDF comment
+    page_num_first_specfied = args.first if args.first else None
     page_num_first_parsed = None  # 1st page number as parsed
-    page_num_first_specfied = None  # 1st page number specified in PDF comment
     page_num_offset = None  # page number offset
     page_num_parsed = None  # actual/parsed page number
     page_num_result = None  # page number result
     color = kind = prefix = ""
     ignore_next_line = False
 
-    text_joined = RE_JOIN_LINES.sub(r"\1\2", text)  # remove spurious \n
-    if RE_FIRST.search(text_joined):
-        page_num_first_specfied = int(RE_FIRST.search(text_joined).group(1))
-        print(f"{page_num_first_specfied=}")
-        debug(f"{page_num_first_specfied=}")
-    if args.first:
-        page_num_first_specfied = args.first
+    def _get_group_n(regex: re.Pattern, text: str, number: int) -> str | None:
+        """Type friendly matching function"""
+        match = regex.search(text)
+        return match.group(number) if match else None
 
-    if RE_DOI.search(text_joined):
-        DOI = RE_DOI.search(text_joined).group(0)
+    text_joined = RE_JOIN_LINES.sub(r"\1\2", text)  # remove spurious \n
+    if match := _get_group_n(RE_FIRST, text_joined, 1):
+        page_num_first_specfied = int(match)
+        debug(f"{page_num_first_specfied=}")
+
+    if DOI := _get_group_n(RE_DOI, text_joined, 0):
         info(f"{DOI=}")
         text_new = get_bib_preamble(DOI)
-    elif RE_ISBN.search(text_joined):
-        ISBN = RE_ISBN.search(text_joined).group(0)
+    elif ISBN := _get_group_n(RE_ISBN, text_joined, 0):
         info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
     else:
@@ -124,9 +128,10 @@ def process_text(text: str) -> str:
             ignore_next_line = True
             continue
 
-        if RE_PAGE_NUM.match(line):
-            debug(f"{RE_PAGE_NUM.match(line)=}")
-            page_num_parsed = RE_PAGE_NUM.match(line).groups(0)[0]
+        if page_num_match := RE_PAGE_NUM.match(line):
+            info(f"{page_num_match=}")
+            assert page_num_match is not None  # pyright needs for group(1) below
+            page_num_parsed = page_num_match.group(1)
             if page_num_parsed.isdigit():
                 page_num_parsed = int(page_num_parsed)
                 is_roman = False
@@ -153,13 +158,13 @@ def process_text(text: str) -> str:
                 else:
                     page_num_offset = 0
                 debug(f"{page_num_offset=}")
-        elif RE_ANNOTATION.match(line):
+        elif annotation_match := RE_ANNOTATION.match(line):
             debug("RE_ANNOTATION match")
             debug(f"{page_num_parsed=}")
             debug(f"{page_num_offset=}")
             page_num_result = page_num_parsed + page_num_offset
             debug(f"{page_num_result=}")
-            kind, color = RE_ANNOTATION.match(line).groupdict().values()
+            kind, color = annotation_match.groupdict().values()
             if kind == "Note":
                 prefix = "--"
                 page_num_result = ""
@@ -289,7 +294,7 @@ understanding, positive thinking andaltruistic attitudes.
 
 """  # noqa: E501
 
-TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\nsection. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
+TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\n129 excerpt. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])

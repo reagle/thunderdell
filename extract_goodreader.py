@@ -57,7 +57,7 @@ def restore_spaces(text) -> str:
     return checker.get_text()
 
 
-def process_text(text: str) -> str:
+def process_text(args: argparse.Namespace(), text: str) -> str:
     """Process text for annotation kind, color, and page number, joining
     lines as needed"""
 
@@ -87,7 +87,7 @@ def process_text(text: str) -> str:
     )
 
     # 1st page number specified in PDF comment
-    page_num_first_specfied = args.first if args.first else None
+    page_num_first_specfied = args.first  # 1st page specified
     page_num_first_parsed = None  # 1st page number as parsed
     page_num_offset = None  # page number offset
     page_num_parsed = None  # actual/parsed page number
@@ -185,7 +185,7 @@ def process_text(text: str) -> str:
     return "\n".join(text_new)
 
 
-def main(argv):
+def parse_args(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
@@ -202,7 +202,7 @@ def main(argv):
         "-f",
         "--first",
         type=int,
-        default=None,
+        default=0,
         help=r"""first page in actual PDF pagination,
             can also be specified as annotation within PDF: `first = \d+`""",
     )
@@ -252,7 +252,9 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    args = main(sys.argv[1:])
+    args = parse_args(sys.argv[1:])
+    text: str = ""
+
     critical("==================================")
     critical(f"{args=}")
     file_names = args.file_names
@@ -277,7 +279,7 @@ if __name__ == "__main__":
             with open(file_name) as f:
                 text = f.read()
 
-        new_text = process_text(text)
+        new_text = process_text(args, text)
 
         fixed_fn = splitext(file_name)[0] + "-fixed.txt"
         user_input = input("\npublish to social media? 'y' for yes: ")

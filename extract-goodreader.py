@@ -221,13 +221,6 @@ def main(argv):
         help="log to file %(prog)s.log",
     )
     arg_parser.add_argument(
-        "-T",
-        "--test",
-        action="store_true",
-        default=False,
-        help="run doc tests",
-    )
-    arg_parser.add_argument(
         "-V",
         "--verbose",
         action="count",
@@ -257,44 +250,6 @@ def main(argv):
 
     return args
 
-
-TEST_IN = """
---- Page 2 ---
-
-Note (yellow), reagle:
-First = 92
-
-Highlight (yellow), reagle:
-10.1093/isq/sqy041
-
---- Page 36 ---
-
-Bookmark:
-Dec 9
-
-Highlight (blue), reagle:
-3 A World Brain as an “Education System”
-
-Highlight (blue), reagle:
-3.1 A World BrainasaLearning System
-
-Note (yellow), reagle:
-Little discussion of HG Wells directly—rather a literaturereview of work related to motifs in Wells
-
---- Page 39 ---
-
-Highlight (blue), reagle:
-3.2 A World Brain asaTeaching System
-
---- Page 71 ---
-
-In my own view, there is an urgentneed for a sudden surge of
-
-understanding, positive thinking andaltruistic attitudes.
-
-"""  # noqa: E501
-
-TEST_OUT = """author = Duncan Bell title = Founding the world state: H. G. Wells on empire and the English-Speaking peoples date = 20181201 journal = International Studies Quarterly volume = 62 number = 4 publisher = Oxford University Press (OUP) DOI = 10.1093/isq/sqy041 url = http://dx.doi.org/10.1093/isq/sqy041\n-- First = 92\n92 excerpt. 10.1093/isq/sqy041\nsection. 3 A World Brain as an "Education System"\nsection. 3.1 A World BrainasaLearning System\n-- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells\nsection. 3.2 A World Brain asaTeaching System\n129 excerpt. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes."""  # noqa: E501
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
@@ -341,24 +296,3 @@ if __name__ == "__main__":
             print(f"{cmd_extract_dication}")
         else:
             print(new_text)
-
-    if args.test:
-        TEST_RESULTS = process_text(TEST_IN)
-        print("------------------------")
-        print(f"\nSHOULD BE:\n```{repr(TEST_OUT)}```")
-        print(f"\nRESULT IS:\n```{repr(TEST_RESULTS)}```")
-        # debug(f"{type(TEST_OUT)=}", f"{len(TEST_OUT)=}")
-        # debug(f"{type(TEST_RESULTS)=}", f"{len(TEST_RESULTS)=}")
-        if TEST_OUT == TEST_RESULTS:
-            print("\nPASS\n")
-        else:
-            print("\nFAIL: DIFF IS:\n")
-            for diff in difflib.context_diff(
-                TEST_RESULTS.split("\n"),
-                TEST_OUT.split("\n"),
-                fromfile="SHOULD",
-                tofile="RESULT",
-                n=0,
-                lineterm="",
-            ):
-                print(f"{diff}", end="\n")

@@ -23,6 +23,7 @@ class args:
 
 
 def get_bib_preamble(token):
+    """Call out to format.ISBN/DOI APIs and get biblio information"""
     info(f"{token=}")
     if token.startswith("10"):
         scrape_token = formats.ScrapeDOI

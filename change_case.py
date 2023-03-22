@@ -68,7 +68,6 @@ def create_wordset(file_name):
         return wordset
     else:
         raise Exception("Could not find wordset %s" % file_name)
-    return set()
 
 
 # TODO find alternative to hardcoded path that also works with import
@@ -262,44 +261,9 @@ def change_case(text, case_direction="sentence"):
     )
 
 
-def demonstrate_changes(change_case, case_direction):
-    """Prints out sentence case (default) for a number of test strings"""
-    ## TODO: convert this to pytest with actual comparison.
-    TESTS = (
-        "My Defamation 2.0 Experience: A Story of Wikipedia and a Boy",
-        "My defamation 2.0 experience: a story of Wikipedia and a boy",
-        "Broadband makes women and Aaron happy",
-        "Broadband Makes Women and Aaron Happy",
-        "Tax Example Explains the Value of Hosted Software to Business",
-        "PS3 shipments pass 35 million units worldwide",
-        "New Theorem Proved by Poincaré",
-        "Wikipedia goes 3D",
-        "Wikipedia trumps Britannica",
-        "Wikirage: What's hot now on Wikipedia",
-        "Glycogen: A Trojan Horse for Neurons",
-        "Characterization of the SKN7 Ortholog of Aspergillus Fumigatus",
-        "Wikipedia:Attribution",
-        "Why Do People Write for Wikipedia? Incentives to Contribute",
-        '<span class="pplri7t-x-x-120">Wikipedia:WikiLove</span>',
-        "The Altruism Question: Toward a Social-Psychological Answer",
-        "  Human Services:  Cambridge War Memorial Recreation Center",
-        "Career Advice:     Stop Admitting Ph.D. Students - Inside Higher Ed",
-        "THIS SENTENCE ABOUT AOL IN AMERICA IS ALL CAPS",
-        "Lessons I learned on the road as a Digital Nomad",
-        "r/AmItheButtface",
-    )
-
-    import doctest
-
-    doctest.testmod()
-
-    for test in TESTS:
-        debug("case_direction = '%s'" % case_direction)
-        print(change_case(test, case_direction))
-
-
-def main(argv):
-    """Process arguments and execute."""
+def parse_args() -> argparse.Namespace:
+    """Process arguments"""
+    # https://docs.python.org/3/library/argparse.html
 
     arg_parser = argparse.ArgumentParser(
         description="Change the case of some text, defaulting to sentence case."
@@ -351,6 +315,9 @@ def main(argv):
     )
     args = arg_parser.parse_args()
 
+    # args.text is a list; make it a string
+    args.text = " ".join(args.text)
+
     log_level = 100  # default
     if args.verbose == 1:
         log_level = logging.CRITICAL  # 50
@@ -369,20 +336,32 @@ def main(argv):
         )
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
+    return args
 
-    case_direction = "sentence"
-    if args.title_case:
-        case_direction = "title"
-    debug("case_direction = %s" % case_direction)
+
+def main(argv):
+    """Process arguments and execute."""
 
     if args.test:
-        demonstrate_changes(change_case, case_direction)
-    else:
-        text = " ".join(args.text)
-        result = change_case(text, case_direction)
-        debug(result)
-        print(result)
+        import doctest
+
+        import pytest
+
+        from tests import test_change_case
+
+        print("Running tests")
+        doctest.testmod()
+        pytest.main(["-v", "-k", "change_case"])
+
+        test_change_case.test_change_case()
+        sys.exit()
+
+    case_type = "title" if args.title_case else "sentence"
+    debug(f"{args.text=}")
+    debug("case_type = %s" % case_type)
+    print(change_case(args.text, case_type))
 
 
 if "__main__" == __name__:
-    main(sys.argv[1:])
+    args = parse_args()
+    main(args)

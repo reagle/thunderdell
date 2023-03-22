@@ -788,7 +788,7 @@ if __name__ == "__main__":
 
         from tests import test_thunderdell
 
-        print("Running test")
+        print("Running tests")
         doctest.testmod()
         test_thunderdell.test_results()
         sys.exit()

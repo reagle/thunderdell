@@ -12,8 +12,6 @@ useful for detecting inadvertent changes.
 from config import TESTS_FOLDER
 from extract_goodreader import parse_args, process_text
 
-# TODO: currently, extract-goodreader.py fails this test
-
 
 def test_process_text():
     """

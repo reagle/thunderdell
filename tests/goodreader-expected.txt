@@ -5,4 +5,5 @@ section. 3 A World Brain as an "Education System"
 section. 3.1 A World BrainasaLearning System
 -- Little discussion of HG Wells directly---rather a literature review of work related to motifs in Wells
 section. 3.2 A World Brain asaTeaching System
-129 excerpt. In my own view, there is an urgent need for a sudden surge of understanding, positive thinking and altruistic attitudes.
+161 excerpt. In my own view, there is an urgent need for a sudden surge of
+161 excerpt. understanding, positive thinking and altruistic attitudes.

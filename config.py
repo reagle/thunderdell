@@ -8,6 +8,8 @@
 
 """Sets some user configuration values."""
 
+# TODO: move all paths to pathlib 2023-03-23
+
 import os
 from pathlib import Path
 

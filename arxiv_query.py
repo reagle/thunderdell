@@ -29,7 +29,8 @@ ACCEPT_HEADERS = {
     "atom": "application/atom+xml",
 }
 
-def query(number: int, accept: str="application/atom+xml"):
+
+def query(number: int, accept: str = "application/atom+xml"):
     """Query the number Web service; returns string"""
 
     info(f"{accept=}")
@@ -50,7 +51,7 @@ def query(number: int, accept: str="application/atom+xml"):
         return False
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     import argparse
 
     arg_parser = argparse.ArgumentParser(

@@ -25,7 +25,6 @@ from collections import namedtuple
 from collections.abc import Callable
 from typing import NamedTuple
 from urllib.parse import parse_qs
-from xml.etree.ElementTree import parse
 
 import config
 from biblio.fields import (
@@ -96,7 +95,7 @@ def build_bib(
         mm_file = os.path.abspath(mm_files.pop())
         # debug(f"   parsing {mm_file}")
         try:
-            doc = parse(mm_file).getroot()
+            doc = et.parse(mm_file).getroot()
         except (OSError, et.ParseError) as err:
             debug(f"    failed to parse {mm_file} because of {err}")
             continue

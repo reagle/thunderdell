@@ -197,22 +197,23 @@ def change_case(text, case_direction="sentence"):
     text = text.strip().replace("  ", " ")
     debug(f"** sentence_case: {type(text)} text = '{text}'")
 
-    # create abbreviation sans BORING words
+    # Determine if text is in title-case or all-caps
     debug(set(text.split()).difference(BORING_WORDS))
-    text_abbreviation = "".join(
+    # Create abbreviation sans BORING words for title case detection
+    text_abbreviated = "".join(
         [word[0] for word in set(text.split()).difference(BORING_WORDS)]
     )
-    debug("  text_abbreviation = %s " % text_abbreviation)
-    text_is_titlecase = text_abbreviation.isupper()
-    debug("  text_is_titlecase = '%s'" % text_is_titlecase)
+    debug(f"  text_abbreviation = {text_abbreviated} ")
+    text_is_titlecase = text_abbreviated.isupper()
+    debug(f"  text_is_titlecase = '{text_is_titlecase}'")
     text_is_ALLCAPS = text.isupper()
-    debug("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
+    debug(f"  text_is_ALLCAPS = '{text_is_ALLCAPS}'")
 
-    text = ": " + text  # make first phrase consistent for processing below
-    PUNCTUATION = ":.?"
-    PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep them in the split
+    text = f": {text}"
+    PUNCTUATION = ":.?"  # characters that need capitalization afterwards
+    PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep matched punctuation in split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    debug("  phrases = '%s'" % phrases)
+    debug(f"  phrases = '{phrases}'")
     new_text = []
     for phrase in phrases:
         if phrase == "":
@@ -222,12 +223,11 @@ def change_case(text, case_direction="sentence"):
             continue
 
         words = phrase.split(" ")
-        debug("words = '%s'" % words)
+        debug(f"words = '{words}'")
         for index, word in enumerate(words):
-            # [0].upper() + word[1:].lower()
-            word_capitalized = word.capitalize()
             debug("----------------")
-            debug("word = '%s'" % word)
+            debug(f"word = '{word}'")
+            word_capitalized = word.capitalize()
             if is_proper_noun(word):
                 debug("  word is_proper_noun")
                 new_word = word
@@ -235,15 +235,15 @@ def change_case(text, case_direction="sentence"):
                 debug("  word_capitalized is_proper_noun")
                 new_word = word_capitalized
             else:
-                debug("  changing case of '%s'" % word)
+                debug(f"  changing case of '{word}'")
                 if case_direction == "sentence":
                     new_word = word.lower()
                 elif case_direction == "title":
-                    debug("  text_is_ALLCAPS = '%s'" % text_is_ALLCAPS)
+                    debug(f"  text_is_ALLCAPS = '{text_is_ALLCAPS}'")
                     if text_is_ALLCAPS:
                         debug("   lowering word because text_is_ALLCAPS")
                         word = safe_lower(word)
-                    debug("  adding '%s' as is" % word)
+                    debug(f"  adding '{word}' as is")
                     new_word = safe_capwords(word)
                 else:
                     raise Exception(f"Unknown {case_direction=}")
@@ -253,7 +253,7 @@ def change_case(text, case_direction="sentence"):
 
             new_text.append(new_word)
 
-    return (
+    return (  # readjust spacing around punctuation that split then joined
         " ".join(new_text[1:])
         .replace(" : ", ": ")
         .replace(" . ", ". ")

@@ -17,6 +17,8 @@ import re
 import string
 import sys
 
+from config import BIN_DIR
+
 critical = logging.critical
 error = logging.error
 warn = logging.warn
@@ -24,7 +26,6 @@ info = logging.info
 debug = logging.debug
 excpt = logging.exception
 
-HOME = os.path.expanduser("~")
 
 ARTICLES = {"a", "an", "the"}
 CONJUNCTIONS = {"and", "but", "nor", "or"}
@@ -49,17 +50,14 @@ JUNK_WORDS = {
     "re",
 }
 BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
-# BORING_WORDS used in safe_capwords() and change_case()
-# not used by thunderdell.py because it doesn't require slow
+# BORING_WORDS is used in safe_capwords() and change_case() below.
+# Not used by thunderdell.py because it doesn't require slow
 # wordset processing below
 
 
 def create_wordset(file_name):
     """Returns a wordset given a file"""
-    # TODO: adding logging.debug() in this function
-    # disables all logging up to critical. Why?
 
-    # debug("file_name = '%s'" % (file_name))
     wordset = set()
     if os.path.isfile(file_name):
         for line in codecs.open(file_name, "r", "utf-8").readlines():
@@ -71,13 +69,12 @@ def create_wordset(file_name):
 
 
 # TODO find alternative to hardcoded path that also works with import
-LIST_PATH = HOME + "/bin/td/biblio/"
+LIST_PATH = BIN_DIR + "/biblio/"
 WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
 wordset = create_wordset(WORD_LIST_FN)
 wordset_lower = {word for word in wordset if word[0].islower()}
 wordset_upper = {word for word in wordset if word[0].isupper()}
-# wordset_nocase used in is_proper_noun()
-wordset_nocase = {word.lower() for word in wordset}
+wordset_nocase = {word.lower() for word in wordset}  # used in is_proper_noun()
 
 PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
@@ -86,6 +83,105 @@ wordset_proper_nouns = {
 }
 # proper_nouns used in safe_lower() and is_proper_noun()
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
+
+
+def sentence_case(text):
+    """Convert text to sentence case for APA-like citations
+
+    >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
+    'My defamation 2.0 experience: A story of Wikipedia'
+    """
+    return change_case(text, case_direction="sentence")
+
+
+def title_case(text):
+    """Change to sentence or title case.
+
+    >>> title_case('The best title ever')
+    'The Best Title Ever'
+    """
+    return change_case(text, case_direction="title")
+
+
+def change_case(text, case_direction="sentence"):
+    """Change to sentence or title case.
+
+    >>> change_case('I Am A Sentence.', 'sentence')
+    'I am a sentence.'
+    """
+    text = text.strip().replace("  ", " ")
+    debug(f"** sentence_case: {type(text)} text = '{text}'")
+
+    # Determine if text is in title-case or all-caps
+    # Create abbreviation sans BORING words for title case detection
+    text_abbreviated = "".join(
+        [word[0] for word in set(text.split()).difference(BORING_WORDS)]
+    )
+    text_is_titlecase = text_abbreviated.isupper()
+    debug(f"  '{text_abbreviated=}' ")
+    debug(f"  '{text_is_titlecase=}'")
+    debug(f"  '{text.isupper()=}'")
+
+    text = f": {text}"
+    PUNCTUATION = ":.?"  # characters that need capitalization afterwards
+    PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep matched punctuation in split
+    phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
+    debug(f"  phrases = '{phrases}'")
+    new_text = []
+    for phrase in phrases:
+        if phrase == "":
+            continue
+        if phrase in PUNCTUATION:
+            new_text.append(phrase)
+            continue
+
+        words = phrase.split(" ")
+        debug(f"words = '{words}'")
+        is_first = True
+        for word in words:
+            debug("----------------")
+            debug(f"word = '{word}'")
+
+            new_word = change_case_word(word, is_first, case_direction)
+            new_text.append(new_word)
+            is_first = False  # next word will not be is_first
+
+    return (  # readjust spacing around punctuation that split then joined
+        " ".join(new_text[1:])
+        .replace(" : ", ": ")
+        .replace(" . ", ". ")
+        .replace(" ? ", "? ")
+    )
+
+
+def change_case_word(word: str, is_first: bool, case_direction: str) -> str:
+    """Change the case of a lone word."""
+    word_capitalized = word.capitalize()
+    if is_proper_noun(word):
+        debug("  word is_proper_noun, not changing")
+        new_word = word
+    elif is_proper_noun(word_capitalized):
+        debug("  word_capitalized is_proper_noun")
+        new_word = word_capitalized
+    else:
+        debug(f"  changing case of '{word}'")
+        if case_direction == "sentence":
+            new_word = word.lower()
+            debug(f"  ... to '{new_word}'")
+        elif case_direction == "title":
+            if word.isupper():
+                debug("   lowering word because word.isupper()")
+                word = safe_lower(word)
+            debug(f"  adding '{word}' as is")
+            new_word = safe_capwords(word)
+        else:
+            raise Exception(f"Unknown {case_direction=}")
+
+        if word and is_first:  # capitalize first word in a phrase
+            debug("  capitalize it as first word in phrase")
+            new_word = new_word[0].capitalize() + new_word[1:]
+
+    return new_word
 
 
 def safe_capwords(text):
@@ -177,88 +273,6 @@ def is_proper_noun(word):
         return True
     debug("    '%s' is_proper_noun: False" % word)
     return False
-
-
-def sentence_case(text):
-    return change_case(text, case_direction="sentence")
-
-
-def title_case(text):
-    return change_case(text, case_direction="title")
-
-
-def change_case(text, case_direction="sentence"):
-    """Convert text to sentence case for APA like citations
-
-    >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
-    'My defamation 2.0 experience: A story of Wikipedia'
-
-    """
-    text = text.strip().replace("  ", " ")
-    debug(f"** sentence_case: {type(text)} text = '{text}'")
-
-    # Determine if text is in title-case or all-caps
-    debug(set(text.split()).difference(BORING_WORDS))
-    # Create abbreviation sans BORING words for title case detection
-    text_abbreviated = "".join(
-        [word[0] for word in set(text.split()).difference(BORING_WORDS)]
-    )
-    debug(f"  text_abbreviation = {text_abbreviated} ")
-    text_is_titlecase = text_abbreviated.isupper()
-    debug(f"  text_is_titlecase = '{text_is_titlecase}'")
-    text_is_ALLCAPS = text.isupper()
-    debug(f"  text_is_ALLCAPS = '{text_is_ALLCAPS}'")
-
-    text = f": {text}"
-    PUNCTUATION = ":.?"  # characters that need capitalization afterwards
-    PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep matched punctuation in split
-    phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    debug(f"  phrases = '{phrases}'")
-    new_text = []
-    for phrase in phrases:
-        if phrase == "":
-            continue
-        if phrase in PUNCTUATION:
-            new_text.append(phrase)
-            continue
-
-        words = phrase.split(" ")
-        debug(f"words = '{words}'")
-        for index, word in enumerate(words):
-            debug("----------------")
-            debug(f"word = '{word}'")
-            word_capitalized = word.capitalize()
-            if is_proper_noun(word):
-                debug("  word is_proper_noun")
-                new_word = word
-            elif is_proper_noun(word_capitalized):
-                debug("  word_capitalized is_proper_noun")
-                new_word = word_capitalized
-            else:
-                debug(f"  changing case of '{word}'")
-                if case_direction == "sentence":
-                    new_word = word.lower()
-                elif case_direction == "title":
-                    debug(f"  text_is_ALLCAPS = '{text_is_ALLCAPS}'")
-                    if text_is_ALLCAPS:
-                        debug("   lowering word because text_is_ALLCAPS")
-                        word = safe_lower(word)
-                    debug(f"  adding '{word}' as is")
-                    new_word = safe_capwords(word)
-                else:
-                    raise Exception(f"Unknown {case_direction=}")
-                if word and index == 0:  # capitalize first word in a phrase
-                    debug("  capitalizing it as first word in phrase")
-                    new_word = new_word[0].capitalize() + new_word[1:]
-
-            new_text.append(new_word)
-
-    return (  # readjust spacing around punctuation that split then joined
-        " ".join(new_text[1:])
-        .replace(" : ", ": ")
-        .replace(" . ", ". ")
-        .replace(" ? ", "? ")
-    )
 
 
 def parse_args() -> argparse.Namespace:

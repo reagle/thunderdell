@@ -128,7 +128,7 @@ def google_query(isbn):
         return False
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     import argparse
 
     arg_parser = argparse.ArgumentParser(

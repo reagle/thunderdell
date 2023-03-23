@@ -62,7 +62,7 @@ def query(doi, accept="application/citeproc+json"):
         #          " style=apa" https://doi.org/10.26300/spsf-tc23
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     import argparse
 
     arg_parser = argparse.ArgumentParser(

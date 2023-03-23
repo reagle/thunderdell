@@ -353,7 +353,7 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def main(argv):
+def main(args):
     """Process arguments and execute."""
 
     if args.test:
@@ -376,6 +376,6 @@ def main(argv):
     print(change_case(args.text, case_type))
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     args = parse_args()
     main(args)

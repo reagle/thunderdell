@@ -158,8 +158,7 @@ class ScrapeDefault:
         """rough match of a date, then pass to dateutil's magic abilities"""
 
         DATE_XPATHS = (
-            """//li/span[@class="byline_label"]"""
-            """/following-sibling::span/@title""",
+            """//li/span[@class="byline_label"]/following-sibling::span/@title""",
         )  # tynan.com
         if self.HTML_p is not None:
             info("checking date xpaths")
@@ -176,10 +175,9 @@ class ScrapeDefault:
                         continue
 
         date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
-        try:
-            dmatch = re.search(date_regexp, self.text, re.IGNORECASE)
-            return dt_parse(dmatch.group(0)).strftime("%Y%m%d")
-        except (AttributeError, TypeError, ValueError):
+        if self.text and (d_match := re.search(date_regexp, self.text, re.IGNORECASE)):
+            return dt_parse(d_match.group(0)).strftime("%Y%m%d")
+        else:
             date = time.strftime("%Y%m%d", NOW)
             info(f"making date NOW = {date}")
             return date

@@ -19,5 +19,6 @@ from .scrape.WMMeta import ScrapeWMMeta
 from .scrape.arxiv import ScrapeArXiv
 from .scrape.default import ScrapeDefault
 from .scrape.mastodon import ScrapeMastodon
+from .scrape.nytimes import ScrapeNYT
 from .scrape.reddit import ScrapeReddit
 from .scrape.twitter import ScrapeTwitter

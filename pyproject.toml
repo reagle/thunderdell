@@ -60,8 +60,8 @@ python_files = [
 
 [[tool.mypy.overrides]]
 module = [
-    "tweepy",
     "mastodon",
+    "tweepy",
 ]
 ignore_missing_imports = true
 

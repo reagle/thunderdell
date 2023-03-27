@@ -37,6 +37,7 @@ from formats import (
     ScrapeISBN,
     ScrapeMARC,
     ScrapeMastodon,
+    ScrapeNYT,
     ScrapeReddit,
     ScrapeTwitter,
     ScrapeWMMeta,
@@ -96,10 +97,11 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
         host_path = url.split("//")[1]
         dispatch_scraper = (
             ("en.wikipedia.org/w", ScrapeENWP),
-            ("meta.wikimedia.org/w", ScrapeWMMeta),
             ("marc.info/", ScrapeMARC),
-            ("twitter.com/", ScrapeTwitter),
+            ("meta.wikimedia.org/w", ScrapeWMMeta),
             ("ohai.social/", ScrapeMastodon),
+            ("twitter.com/", ScrapeTwitter),
+            ("www.nytimes.com/", ScrapeNYT),
             ("www.reddit.com/", ScrapeReddit),
         )
 

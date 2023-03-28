@@ -49,7 +49,7 @@ class ScrapeWMMeta(ScrapeDefault):
         # in browser, id="lastmod", but python gets id="footer-info-lastmod"
         day, month, year = re.search(
             r"""<li id="footer-info-lastmod"> This page was last edited """
-            r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
+            + r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
             cite_HTML_u,
         ).groups()
         month = bf.MONTH2DIGIT[month[0:3].lower()]

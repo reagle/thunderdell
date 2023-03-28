@@ -19,9 +19,10 @@ https://github.com/reagle/thunderdell
 import logging
 import textwrap
 
+import pendulum as pm
+
 # https://realpython.com/twitter-bot-python-tweepy/
 import tweepy
-from dateutil.parser import parse as dt_parse
 
 from utils.web_api_tokens import (
     TW_ACCESS_TOKEN,
@@ -85,7 +86,7 @@ class ScrapeTwitter(ScrapeDefault):
         return title
 
     def get_date(self):
-        return dt_parse(self.status["created_at"]).strftime("%Y%m%d")
+        return pm.parse(self.status["created_at"], strict=False).strftime("%Y%m%d")
 
     def get_excerpt(self):
         return self.status["text"].strip()

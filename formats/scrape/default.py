@@ -22,7 +22,7 @@ import string
 import time
 from urllib.parse import urlparse
 
-from dateutil.parser import parse as dt_parse
+import pendulum as pm
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
@@ -154,7 +154,7 @@ class ScrapeDefault:
         return "UNKNOWN"
 
     def get_date(self):
-        """rough match of a date, then pass to dateutil's magic abilities"""
+        """rough match of a date, then pass to pendulum/dateutil's magic abilities"""
 
         DATE_XPATHS = (
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
@@ -166,7 +166,7 @@ class ScrapeDefault:
                 xpath_result = self.HTML_p.xpath(path)
                 if xpath_result:
                     info(f"'{xpath_result=}'; '{path=}'")
-                    date = dt_parse(xpath_result[0]).strftime("%Y%m%d")
+                    date = pm.parse(xpath_result[0], strict=False).strftime("%Y%m%d")
                     info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date
@@ -175,7 +175,8 @@ class ScrapeDefault:
 
         date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         if self.text and (d_match := re.search(date_regexp, self.text, re.IGNORECASE)):
-            return dt_parse(d_match.group(0)).strftime("%Y%m%d")
+            return pm.parse(d_match.group(0), strict=False).strftime("%Y%m%d")
+
         else:
             date = time.strftime("%Y%m%d", NOW)
             info(f"making date NOW = {date}")

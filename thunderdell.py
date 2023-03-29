@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <https://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
+"""Extract a bibliography from a Freeplane mindmap to multiple formats.
 
-"""Thunderdell, by Joseph Reagle http://reagle.org/joseph/
+https://reagle.org/joseph/2009/01/thunderdell.html
+"""
 
-Extract a bibliography from a Freeplane mindmap"""
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import errno
@@ -580,13 +579,11 @@ def parse_names(names):
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(
-        description="""Outputs YAML/CSL bibliography.\n
+    arg_parser = argparse.ArgumentParser(description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
-    and last character."""
-    )
+    and last character.""")
     arg_parser.add_argument(
         "-a",
         "--author-create",
@@ -702,7 +699,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--version",
         action="version",
-        version=f"1.0 using Python {sys.version}",
+        version=f"{__version__} using Python {sys.version}",
     )
     arg_parser.add_argument(
         "-L",
@@ -793,9 +790,7 @@ if __name__ == "__main__":
         sys.exit()
 
     if args.fields:
-        print(
-            textwrap.dedent(
-                f"""
+        print(textwrap.dedent(f"""
                 ================ BIBLATEX_TYPES_ (deprecated) =========
                 http://intelligent.pe.kr/LaTex/bibtex2.htm\n
                 {pretty_tabulate_list(list(BIBLATEX_TYPES))}
@@ -819,9 +814,7 @@ if __name__ == "__main__":
                     t=biblatex/CSL type (e.g., t=thesis)
                     ot=organization's subtype (e.g., W3C REC)
                     pa=section|paragraph|location|chapter|verse|column|line\n\n
-        """
-            )
-        )
+        """))
         sys.exit()
 
     if args.query:

@@ -1,19 +1,14 @@
-#!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-
 """
 Keyword shortcuts for BusySponge.
 
 https://github.com/reagle/thunderdell
 """
 
-# Expansions for common tags/activities
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
 
+# General
 GENERAL_KEY_SHORTCUTS = {
     "aca": "academia",
     "add": "addiction",
@@ -50,8 +45,8 @@ GENERAL_KEY_SHORTCUTS = {
     "zei": "zeitgeist",
 }
 
+# Tech Prediction, Vision, and Utopia
 TV_KEY_SHORTCUTS = {
-    # Tech Prediction, Vision, and Utopia
     "dis": "disappointed",
     "nai": "naive",
     "opt": "optimistic",
@@ -61,8 +56,8 @@ TV_KEY_SHORTCUTS = {
     "uto": "utopia",
 }
 
+# Geek Feminism
 GF_KEY_SHORTCUTS = {
-    # Geek Feminism
     "fem": "feminism",
     "gen": "gender",
     "gf": "gfem",
@@ -71,8 +66,8 @@ GF_KEY_SHORTCUTS = {
     "prv": "privilege",
 }
 
+# Life-hacking
 LH_KEY_SHORTCUTS = {
-    # Lifehack
     "com": "complicity",
     "lh": "lifehack",
     "pro": "productivity",
@@ -84,8 +79,8 @@ LH_KEY_SHORTCUTS = {
     "rati": "rational",
 }
 
+# Comments
 RTC_KEY_SHORTCUTS = {
-    # Comments
     "ano": "anonymous",
     "ass": "assessment",
     "aut": "automated",
@@ -107,8 +102,8 @@ RTC_KEY_SHORTCUTS = {
     "pup": "puppet",
 }
 
+# Wikipedia
 WP_KEY_SHORTCUTS = {
-    # Wikipedia
     "alt": "alternative",
     "aut": "authority",
     "ana": "analysis",

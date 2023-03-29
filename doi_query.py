@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2015-2017 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-""" Return CrossRef bibliographic data for a given a DOI.
-    See http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html 
-    # noqa: E501
+"""Return CrossRef bibliographic data for a given a DOI.
+
+http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html 
 """
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import json
 import logging
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--version",
         action="version",
-        version=f"1.0 using Python {sys.version}",
+        version=f"{__version__} using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 

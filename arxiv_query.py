@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2015-2017 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-""" Return bibliographic data for a given a arXiv number.
+"""Return bibliographic data for a given a arXiv number.
 
-Thank you to arXiv for use of its open access interoperability
 https://arxiv.org/help/api/index
 https://arxiv.org/help/api/basics
 http://export.arxiv.org/api/query?id_list=2001.08293
 """
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import logging
 import pprint
@@ -78,7 +76,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--version",
         action="version",
-        version=f"1.0 using Python {sys.version}",
+        version=f"{__version__} using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 

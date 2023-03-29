@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
+"""Textual utilities.
 
-"""Textual utilities."""
+https://github.com/reagle/thunderdell
+"""
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
+
 
 import logging
 import re

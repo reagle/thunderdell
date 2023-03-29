@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-
 """Defines the many data schemes (keys, values, and fields)
-of bibliographic formats"""
+of bibliographic formats
+"""
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
 
 from collections import namedtuple
 

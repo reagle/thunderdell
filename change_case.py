@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-""" Change the case of some text, making use of varied word lists.
-    See http://en.wikipedia.org/wiki/Sentence_case and
-    https://www.zotero.org/trac/ticket/832 ."""
+"""Change the case of some text, making use of varied word lists.
+
+http://en.wikipedia.org/wiki/Sentence_case
+https://www.zotero.org/trac/ticket/832
+"""
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
@@ -325,7 +326,7 @@ def parse_args() -> argparse.Namespace:
     arg_parser.add_argument(
         "--version",
         action="version",
-        version=f"1.0 using Python {sys.version}",
+        version=f"{__version__} using Python {sys.version}",
     )
     args = arg_parser.parse_args()
 

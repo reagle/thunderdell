@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
+"""Web utilities.
+
+https://github.com/reagle/thunderdell
 """
-Web functionality I frequently make use of.
-"""
+
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import html.entities
 import json
@@ -121,13 +120,11 @@ def yasn_publish(comment, title, subtitle, url, tags):
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
-    info(
-        f"""comment = {len(comment)}: {comment}
+    info(f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}
          url = {len(url)}: {url}
          tags = {len(tags)}: {tags}
-         {total_len=}"""
-    )
+         {total_len=}""")
 
     twitter_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)

@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <https://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
-
-"""Sets some user configuration values."""
+"""Sets user configuration values.
+"""
 
 # TODO: move all paths to pathlib 2023-03-23
 

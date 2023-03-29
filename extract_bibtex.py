@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
+"""Convert a bibtex file into a mindmap.
+"""
 
-"""Convert a bibtex file into a mindmap."""
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 import logging
 import re
@@ -117,11 +117,8 @@ def process(entries: dict):
         )
 
         if "abstract" in entry:
-            fdo.write(
-                """      <node COLOR="#999999" \
-                TEXT="&quot;%s&quot;"/>\n"""
-                % xml_escape(entry["abstract"])
-            )
+            fdo.write("""      <node COLOR="#999999" \
+                TEXT="&quot;%s&quot;"/>\n""" % xml_escape(entry["abstract"]))
 
         fdo.write("""    </node>\n  </node>\n""")
 

@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
-#
-# This file is part of Thunderdell/BusySponge
-# <http://reagle.org/joseph/2009/01/thunderdell>
-# (c) Copyright 2009-2023 by Joseph Reagle
-# Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
-#
+"""Log and annotate a URL to loggers (e.g., mindmap, blogs) 
+with meta/bibliographic data about the URL from a scraper.
 
+https://reagle.org/joseph/2009/01/thunderdell.html
 """
-BusySponge, by Joseph Reagle http://reagle.org/joseph/
 
-BusySponge permits me to easily log and annotate a URL to various loggers
-(e.g., mindmap, blogs) with meta/bibliographic data about the URL from
-a scraping.
-
-https://github.com/reagle/thunderdell
-"""
+__author__ = "Joseph Reagle"
+__copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
+__license__ = "GLPv3"
+__version__ = "1.0"
 
 # TODO
 # - archive URLs to f/old/`r=`
@@ -242,7 +236,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--version",
         action="version",
-        version=f"1.0 using Python {sys.version}",
+        version=f"{__version__} using Python {sys.version}",
     )
     args = arg_parser.parse_args()
     log_level = logging.ERROR  # 40

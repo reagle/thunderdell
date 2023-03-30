@@ -1,4 +1,11 @@
-"""Scrape NYTimes bibliographic data.
+"""Scrape NYTimes bibliographic data using their API.
+
+Use the API because NYTimes blocks some bots.
+
+As of 2023-03-30 the following seems to work without the API
+but this could change, so continue with API.
+
+    AGENT_HEADERS = {"User-Agent": "curl/7.54"} 
 
 https://github.com/reagle/thunderdell
 """

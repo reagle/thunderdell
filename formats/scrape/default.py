@@ -150,8 +150,9 @@ class ScrapeDefault:
         """rough match of a date, then pass to pendulum/dateutil's magic abilities"""
 
         DATE_XPATHS = (
+            """//meta[@name="date"]/@content""",
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
-        )  # tynan.com
+        )
         if self.HTML_p is not None:
             info("checking date xpaths")
             for path in DATE_XPATHS:
@@ -168,6 +169,7 @@ class ScrapeDefault:
 
         date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         if self.text and (d_match := re.search(date_regexp, self.text, re.IGNORECASE)):
+            breakpoint()
             return pm.parse(d_match.group(0), strict=False).strftime("%Y%m%d")
 
         else:

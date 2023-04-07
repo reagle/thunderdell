@@ -169,7 +169,6 @@ class ScrapeDefault:
 
         date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
         if self.text and (d_match := re.search(date_regexp, self.text, re.IGNORECASE)):
-            breakpoint()
             return pm.parse(d_match.group(0), strict=False).strftime("%Y%m%d")
 
         else:

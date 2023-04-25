@@ -72,7 +72,7 @@ class ScrapeNYT(ScrapeDefault):
 
     def get_date(self):
         pub_date = self.json["pub_date"]
-        date = pm.parse(pub_date, strict=False).strftime("%Y-%m-%d")
+        date = pm.parse(pub_date, strict=False).strftime("%Y%m%d")
         return date
 
     def get_excerpt(self):

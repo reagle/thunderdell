@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process Kindle email export into format accepted by `extract-dictation.py`.
+"""Process Kindle email export into format accepted by `extract_dictation.py`.
 """
 
 __author__ = "Joseph Reagle"
@@ -222,7 +222,7 @@ if __name__ == "__main__":
                 do_publish = "-p"
             else:
                 do_publish = ""
-            cmd_extract_dication = ["extract-dictation.py", do_publish, fixed_fn]
+            cmd_extract_dication = ["extract_dictation.py", do_publish, fixed_fn]
             content = process_email(file_name)
             new_text = process_html(content)
             if args.output_to_file:
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     fixed_fd.write(new_text)
                 subprocess.run(["open", fixed_fn])
                 user_input = input(
-                    "\nfollow up with extract-dictation.py? 'y' for yes: "
+                    "\nfollow up with extract_dictation.py? 'y' for yes: "
                 )
                 if user_input == "y":
                     subprocess.run(cmd_extract_dication)

@@ -152,6 +152,7 @@ class ScrapeDefault:
         DATE_XPATHS = (
             """//meta[@name="date"]/@content""",
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
+            """//relative-time/@datetime""",
         )
         if self.HTML_p is not None:
             info("checking date xpaths")

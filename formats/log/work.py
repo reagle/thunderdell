@@ -37,7 +37,7 @@ def log2work(args, biblio):
 
     print("to log2work\n")
     info(f"biblio = '{biblio}'")
-    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/plan/plans/index.html"
+    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/plan/index.html"
     info(f"{ofile=}")
     subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
     title = biblio["title"].strip() + subtitle

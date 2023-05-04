@@ -20,7 +20,7 @@ HOME = os.path.expanduser("~")
 def query_sponge(query: str) -> str:
     in_files = [
         HOME + "/joseph/plan/index.html",
-        HOME + "/joseph/plan/old.html",
+        HOME + "/joseph/plan/done.html",
         HOME + "/joseph/plan/2010/s10.html",
         HOME + "/joseph/plan/2009/f09.html",
         HOME + "/joseph/plan/2009/s09.html",
@@ -66,7 +66,7 @@ def query_sponge(query: str) -> str:
         <html xmlns="http://www.w3.org/1999/xhtml">
         <title>Reagle's Planning Page</title>
         <link rel="stylesheet" type="text/css"
-        href="../plans/plan.css" />
+        href="../plan.css" />
         </head>
         <body xml:lang="en" lang="en">
         <div>

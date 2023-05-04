@@ -19,14 +19,8 @@ HOME = os.path.expanduser("~")
 
 def query_sponge(query: str) -> str:
     in_files = [
-        HOME + "/joseph/plan/plans/index.html",
-        HOME + "/joseph/plan/plans/20.html",
-        HOME + "/joseph/plan/plans/18.html",
-        HOME + "/joseph/plan/plans/16.html",
-        HOME + "/joseph/plan/plans/15.html",
-        HOME + "/joseph/plan/plans/12.html",
-        HOME + "/joseph/plan/plans/11s.html",
-        HOME + "/joseph/plan/plans/11f.html",
+        HOME + "/joseph/plan/index.html",
+        HOME + "/joseph/plan/old.html",
         HOME + "/joseph/plan/2010/s10.html",
         HOME + "/joseph/plan/2009/f09.html",
         HOME + "/joseph/plan/2009/s09.html",

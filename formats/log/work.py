@@ -54,7 +54,7 @@ def log2work(args, biblio):
     html_comment = f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
-    uid = "e" + date_token + "-" + digest[:4]
+    uid = "e" + date_token + "-" + digest[:5]
     log_item = (
         f'<li class="event" id="{uid}">{date_token}: {hashtags}] {html_comment}</li>'
     )

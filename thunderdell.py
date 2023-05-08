@@ -92,7 +92,7 @@ def build_bib(
     # debug(f"   mm_files = {mm_files}")
     while mm_files:
         mm_file = os.path.abspath(mm_files.pop())
-        # debug(f"   parsing {mm_file}")
+        warning(f"   parsing {mm_file}")
         try:
             doc = et.parse(mm_file).getroot()
         except (OSError, et.ParseError) as err:

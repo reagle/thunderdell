@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Create a categorized (based on `kw=`) mindmap from a chronological one.
+"""Create a categorized mindmap based on the first `kw=` declaration in
+each source.
 """
 
 __author__ = "Joseph Reagle"
@@ -8,13 +9,15 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import os
+import pdb
 import re
+from pathlib import Path
 
 import lxml.etree as et
 
 
-def categorize_mindmap(old_fn):
+def categorize_mindmap(old_fn: Path) -> None:
+    cat_fn = Path(old_fn.stem + "-cat.mm")
     old_doc = et.parse(old_fn)
     old_map = old_doc.getroot()
 
@@ -22,9 +25,15 @@ def categorize_mindmap(old_fn):
 
     for old_node in old_map.getiterator():
         if old_node.get("STYLE_REF", "default") == "cite":
+            print(f"{old_node.get('TEXT')}")
             if "kw=" in old_node.get("TEXT"):
-                kmatch = re.findall(r"kw=\S+", old_node.get("TEXT"), re.IGNORECASE)
-                keyword = kmatch[0].split("kw=")[1]  # use first keyword
+                try:
+                    kmatch = re.findall(r"kw=\S+", old_node.get("TEXT"), re.IGNORECASE)
+                    keyword = kmatch[0].split("kw=")[1]  # use first keyword
+                except IndexError as e:
+                    print(
+                        f"\nCouldn't find kw=__ value for {old_node.get('TEXT')}: {e=}"
+                    )
             else:
                 keyword = "UNLABELLED"
             categorized_nodes.setdefault(keyword, []).append(
@@ -34,9 +43,9 @@ def categorize_mindmap(old_fn):
     new_map = et.Element("map", version="1.10.3")
     new_doc = et.ElementTree(new_map)
     root_node = et.SubElement(new_map, "node")
-    root_node.set("TEXT", "%s" % cat_fn)
+    root_node.set("TEXT", str(cat_fn))
 
-    for keyword, node_list in sorted(  # make tuple sort case insensitive
+    for keyword, node_list in sorted(
         categorized_nodes.items(), key=lambda t: tuple(t[0].lower())
     ):
         cat_node = et.SubElement(root_node, "node")
@@ -50,9 +59,8 @@ def categorize_mindmap(old_fn):
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
         description=(
-            "Transform mindmap organized by weeks into one organized by categories,"
-            " which are populated using the first `kw=foo` bibliography field of each"
-            " entry."
+            "Create a categorized mindmap based on the first `kw=` "
+            "declaration in each source."
         )
     )
     arg_parser.add_argument(
@@ -61,7 +69,5 @@ if __name__ == "__main__":
         help="filename to process",
     )
     args = arg_parser.parse_args()
-    old_fn = args.filename
-    fileName, extension = os.path.splitext(old_fn)
-    cat_fn = f"{fileName}-cat.mm"
+    old_fn = Path(args.filename)
     categorize_mindmap(old_fn)

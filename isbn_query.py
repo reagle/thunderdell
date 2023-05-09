@@ -15,13 +15,16 @@ import sys
 import pendulum as pm
 import requests
 
+# from dateutil.parser import ParserError  # type: ignore
+
+
 log_level = 100  # default
 critical = logging.critical
 info = logging.info
 dbg = logging.debug
 
 
-def query(isbn):
+def query(isbn: str):
     """Query available ISBN services"""
     bib = {}
     bib_open = bib_google = None
@@ -38,7 +41,7 @@ def query(isbn):
     return bib
 
 
-def open_query(isbn):
+def open_query(isbn: str):
     """Query the ISBN Web service; returns string"""
     # https://openlibrary.org/dev/docs/api/books
     # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=details&format=json
@@ -73,9 +76,13 @@ def open_query(isbn):
                 elif key == "publish_places":
                     json_bib["address"] = json_details[key][0]
                 elif key == "publish_date":
-                    json_bib["date"] = pm.parse(
-                        json_details[key], strict=False
-                    ).strftime("%Y%m%d")
+                    try:
+                        json_bib["date"] = pm.parse(
+                            json_details[key], strict=False
+                        ).strftime("%Y%m%d")
+                    except pm.parsing.exceptions.ParserError as error:
+                        print(f"Failed to parse time string: {error}")
+                        return False
                 elif type(value) == str:
                     json_bib[key] = value.strip()
                     info("  value = '%s'" % json_bib[key])
@@ -166,7 +173,7 @@ if __name__ == "__main__":
         log_level = logging.INFO
     elif args.verbose >= 3:
         log_level = logging.DEBUG
-    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    LOG_FORMAT = "%(levelno)s %(funcName).7s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
             filename="isbn_query.log",

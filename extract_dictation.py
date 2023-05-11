@@ -332,7 +332,7 @@ def create_mm(text, file_out):
         )
 
 
-def main(argv):
+def process_args(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
@@ -345,6 +345,7 @@ def main(argv):
 
     # positional arguments
     arg_parser.add_argument("file_names", nargs="*", metavar="FILE_NAMES")
+
     # optional arguments
     arg_parser.add_argument(
         "-p",
@@ -392,7 +393,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    args = main(sys.argv[1:])
+    args = process_args(sys.argv[1:])
     critical("==================================")
     critical(f"{args=}")
     file_names = args.file_names
@@ -409,25 +410,19 @@ if __name__ == "__main__":
                 ),
             )
             file_name = file_name[0:-4] + ".txt"
-        try:
-            encoding = "UTF-8"
-            # encoding = chardet.detect(open(file_name).read())['encoding']
-            fdi = open(file_name, encoding=encoding, errors="replace")
-            text = fdi.read()
-            if encoding == "UTF-8":
-                if text[0] == str(codecs.BOM_UTF8, "utf8"):
-                    text = text[1:]
-                    print("removed BOM")
-            # it's not decoding MS Word txt right, Word is not starting with
-            # utf-8 even though I set to default if no special characters
-            # write simple Word txt to UTF-8 encoder
-            file_name_out = os.path.splitext(file_name)[0] + ".mm"
-            file_out = open(file_name_out, "w", encoding="utf-8", errors="replace")
-            # sys.stdout = codecs.getwriter('UTF-8')(
-            #     sys.__stdout__, errors='replace')
-        except OSError:
-            print("    file_name does not exist")
-            continue
+
+        encoding = "UTF-8"
+        fdi = open(file_name, encoding=encoding, errors="replace")
+        text = fdi.read()
+        if encoding == "UTF-8":
+            if text[0] == str(codecs.BOM_UTF8, "utf8"):
+                text = text[1:]
+                print("removed BOM")
+        # it's not decoding MS Word txt right, Word is not starting with
+        # utf-8 even though I set to default if no special characters
+        # write simple Word txt to UTF-8 encoder
+        file_name_out = os.path.splitext(file_name)[0] + ".mm"
+        file_out = open(file_name_out, "w", encoding="utf-8", errors="replace")
 
         create_mm(text, file_out)
         file_out.close()

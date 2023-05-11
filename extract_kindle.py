@@ -177,24 +177,24 @@ if __name__ == "__main__":
                 "Do not recognize file type: {file_name} {splitext(file_name)[1]}."
             )
 
-        user_input = input(
-            "\nIn the output to come, include option for publish to social media? 'y'"
-            + " for yes: "
-        )
-        if user_input == "y":
-            do_publish = "-p"
-        else:
-            do_publish = ""
-
-        cmd_extract_dication = ["extract_dictation.py", do_publish, fixed_fn]
         new_text = process_html(html_content)
 
         if args.output_to_file:
             fixed_fn.write_text(new_text)
             subprocess.run(["open", str(fixed_fn)])
-            user_input = input("\nfollow up with extract_dictation.py? 'y' for yes: ")
-            if user_input == "y":
+            user_input = input(
+                "\nWhen you are done in the text editor, should I invoke"
+                + " `extract_dictation.py`?\n"
+                + " 'y' for yes,\n"
+                + " 'yp' to also include `-p` (publish to social media)\n: "
+            )
+
+            if user_input.startswith("y"):
+                cmd_extract_dication = ["extract_dictation.py"]
+                if user_input == "yp":
+                    cmd_extract_dication.append("-p")
+                cmd_extract_dication.append(str(fixed_fn.absolute()))
+                print(f"executing: {cmd_extract_dication=}")
                 subprocess.run(cmd_extract_dication)
-            print(f"{cmd_extract_dication}")
         else:
             print(new_text)

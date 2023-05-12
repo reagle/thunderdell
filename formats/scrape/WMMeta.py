@@ -38,6 +38,15 @@ class ScrapeWMMeta(ScrapeDefault):
         return title.replace(" - Meta", "")
 
     def get_date(self):  # Meta is often foobar because of proxy bugs
+        day, month, year = re.search(
+            r"""<li id="footer-info-lastmod"> This page was last edited """
+            + r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
+            self.html_u,
+        ).groups()
+        month = bf.MONTH2DIGIT[month[0:3].lower()]
+        return "%d%02d%02d" % (int(year), int(month), int(day))
+
+    def get_date_old(self):  # Meta is often foobar because of proxy bugs
         _, _, cite_HTML_u, resp = get_HTML(self.get_permalink())
         # in browser, id="lastmod", but python gets id="footer-info-lastmod"
         day, month, year = re.search(
@@ -55,7 +64,7 @@ class ScrapeWMMeta(ScrapeDefault):
         return ""  # no good way to identify first paragraph at Meta
 
     def get_permalink(self):
-        permalink = self.url.split("/wiki/")[0] + re.search(
-            '''<li id="t-permalink"><a href="(.*?)"''', self.html_u
-        ).group(1)
+        url_host = self.url.split("/wiki/")[0]
+        url_path = self.html_p.xpath("""//li[@id="t-permalink"]/a/@href""")[0]
+        permalink = url_host + url_path
         return unescape_XML(permalink)

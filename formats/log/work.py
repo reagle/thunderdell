@@ -61,10 +61,11 @@ def log2work(args, biblio):
     info(f"{log_item=}")
 
     plan_tree = l_etree.parse(ofile, l_etree.XMLParser(ns_clean=True, recover=True))
-    ul_found = plan_tree.xpath(
-        """//x:div[@id='Done']/x:ul""",
-        namespaces={"x": "http://www.w3.org/1999/xhtml"},
-    )  # ul_found = plan_tree.xpath('''//div[@id='Done']/ul''')
+    # ul_found = plan_tree.xpath(
+    #     """//x:div[@id='Done']/x:ul""",
+    #     namespaces={"x": "http://www.w3.org/1999/xhtml"},
+    # )
+    ul_found = plan_tree.xpath("""//div[@id='Done']/ul""")
     info("ul_found = %s" % (ul_found))
     if ul_found:
         ul_found[0].text = "\n              "
@@ -75,7 +76,7 @@ def log2work(args, biblio):
             log_item_xml = l_etree.XML(
                 unicodedata.normalize("NFKD", log_item).encode("ascii", "ignore")
             )
-        log_item_xml.tail = "\n\n              "
+        log_item_xml.tail = "\n\n      "
         ul_found[0].insert(0, log_item_xml)
         new_content = l_etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="xml"

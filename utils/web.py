@@ -16,6 +16,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape  # unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
+from lxml import etree
 
 import config
 from biblio.keywords import KEY_SHORTCUTS
@@ -27,22 +28,20 @@ dbg = logging.debug
 
 
 def get_HTML(
-    url,
-    referer="",
-    data=None,
-    cookie=None,
-    retry_counter=0,
-    cache_control=None,
-):
+    url: str,
+    referer: str = "",
+    data: str = "",
+    cookie: str = "",
+    retry_counter: int = 0,
+    cache_control: str = "",
+) -> tuple[bytes, etree._ElementTree, str, requests.Response]:
     """Return [HTML content, response] of a given URL."""
 
-    from lxml import etree
-
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
-    r = requests.get(url, headers=agent_headers, verify=True)
+    req = requests.get(url, headers=agent_headers, verify=True)
     # info(f"{r.headers['content-type']=}")
-    if "html" in r.headers["content-type"]:
-        HTML_bytes = r.content
+    if "html" in req.headers["content-type"]:
+        HTML_bytes = req.content
     else:
         raise OSError("URL content is not HTML.")
 
@@ -53,7 +52,7 @@ def get_HTML(
     HTML_utf8 = etree.tostring(HTML_parsed, encoding="utf-8")
     HTML_unicode = HTML_utf8.decode("utf-8", "replace")
 
-    return HTML_bytes, HTML_parsed, HTML_unicode, r
+    return HTML_bytes, HTML_parsed, HTML_unicode, req
 
 
 def get_JSON(

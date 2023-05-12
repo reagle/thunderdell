@@ -43,11 +43,11 @@ class ScrapeDefault:
         self.url = url
         self.comment = comment
         try:
-            self.html_b, self.HTML_p, self.html_u, self.resp = get_HTML(
+            self.html_b, self.html_p, self.html_u, self.resp = get_HTML(
                 url, cache_control="no-cache"
             )
         except OSError:
-            self.html_b, self.HTML_p, self.html_u, self.resp = (
+            self.html_b, self.html_p, self.html_u, self.resp = (
                 None,
                 None,
                 None,
@@ -99,11 +99,11 @@ class ScrapeDefault:
             # first of many
             """//*[1][contains(@class, 'byline')][1]//text()""",
         )
-        if self.HTML_p is not None:
+        if self.html_p is not None:
             info("checking author xpaths")
             for path in AUTHOR_XPATHS:
                 info(f"trying = '{path}'")
-                xpath_result = self.HTML_p.xpath(path)
+                xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     info(f"{xpath_result=}; {path=}")
                     author = string.capwords(" ".join(xpath_result).strip())
@@ -154,11 +154,11 @@ class ScrapeDefault:
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
             """//relative-time/@datetime""",
         )
-        if self.HTML_p is not None:
+        if self.html_p is not None:
             info("checking date xpaths")
             for path in DATE_XPATHS:
                 info(f"trying = '{path}'")
-                xpath_result = self.HTML_p.xpath(path)
+                xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     info(f"'{xpath_result=}'; '{path=}'")
                     date = pm.parse(xpath_result[0], strict=False).strftime("%Y%m%d")

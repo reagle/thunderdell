@@ -160,26 +160,29 @@ def get_logger(text: str) -> tuple[Callable, dict]:
 # Miscellaneous
 #######################################
 
-DESCRIPTION = """
-blog codex:    b o [pra|soc|tec] TAGS URL|DOI|ISBN TITLE. BODY
-blog goatee:   b g URL|DOI|ISBN TITLE. BODY
-mindmap:       b m TAGS URL|DOI|ISBN ABSTRACT
-nifty:         b n TAGS URL|DOI|ISBN COMMENT
-work plan:     b j TAGS URL|DOI|ISBN COMMENT
-console:       b c TAGS URL|DOI|ISBN COMMENT
-  's. ' begins summary
-  '> '  begins excerpt (as does a character)
-  ', '  begins paraphrase
-  '-- ' begins note
-  'key=value' for metadata; e.g.,
-    au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
-    Entry types (et=cb) values must be typed as container shortcut.
+DESCRIPTION = DESCRIPTION = "Given a URL, tag, scrape, and log it."
+
+EPILOG = """
+  blog codex:    b o [pra|soc|tec] TAGS URL|DOI|ISBN TITLE. BODY
+  blog goatee:   b g URL|DOI|ISBN TITLE. BODY
+  mindmap:       b m TAGS URL|DOI|ISBN ABSTRACT
+  nifty:         b n TAGS URL|DOI|ISBN COMMENT
+  work plan:     b j TAGS URL|DOI|ISBN COMMENT
+  console:       b c TAGS URL|DOI|ISBN COMMENT
+    's. ' begins summary
+    '> '  begins excerpt (as does a character)
+    ', '  begins paraphrase
+    '-- ' begins note
+    'key=value' for metadata; e.g.,
+      au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
+      Entry types (et=cb) values must be typed as container shortcut.
 """
 
 
 def print_usage(message: str) -> None:
     print(message)
     print(DESCRIPTION)
+    print(EPILOG)
 
 
 # Check to see if the script is executing as main.
@@ -187,7 +190,8 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
-        description="""Given a URL, tag, scrape, and log it.""",
+        description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     arg_parser.add_argument(

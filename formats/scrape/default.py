@@ -15,6 +15,7 @@ import string
 import time
 from urllib.parse import urlparse
 
+import datefinder
 import pendulum as pm
 
 from biblio.fields import SITE_CONTAINER_MAP
@@ -147,8 +148,7 @@ class ScrapeDefault:
         return "UNKNOWN"
 
     def get_date(self):
-        """rough match of a date, then pass to pendulum/dateutil's magic abilities"""
-
+        """Return date from xpath, earliest from datefinder, or today's date."""
         DATE_XPATHS = (
             """//meta[@name="date"]/@content""",
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
@@ -168,10 +168,12 @@ class ScrapeDefault:
                     else:
                         continue
 
-        date_regexp = r"(\d+,? )?(%s)\w*(,? \d+)?(,? \d+)" % MONTHS
-        if self.text and (d_match := re.search(date_regexp, self.text, re.IGNORECASE)):
-            return pm.parse(d_match.group(0), strict=False).strftime("%Y%m%d")
-
+        earliest_date = sorted(
+            d.strftime("%Y%m%d") for d in datefinder.find_dates(self.text)
+        )[0]
+        if earliest_date:
+            info(f"found {earliest_date=}")
+            return earliest_date
         else:
             date = time.strftime("%Y%m%d", NOW)
             info(f"making date NOW = {date}")

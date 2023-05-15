@@ -168,15 +168,15 @@ class ScrapeDefault:
                     else:
                         continue
 
-        earliest_date = sorted(
+        earliest_dates = [
             d.strftime("%Y%m%d") for d in datefinder.find_dates(self.text)
-        )[0]
-        if earliest_date:
-            info(f"found {earliest_date=}")
-            return earliest_date
+        ]
+        if earliest_dates:
+            info(f"found {earliest_dates=}")
+            return sorted(earliest_dates)[0]
         else:
+            info(f"making date {NOW=}")
             date = time.strftime("%Y%m%d", NOW)
-            info(f"making date NOW = {date}")
             return date
 
     def get_title(self):

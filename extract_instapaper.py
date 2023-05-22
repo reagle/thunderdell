@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process Instapaper export into format accepted by `extract-dictation.py`.
+"""Process Instapaper export into format accepted by `extract_dictation.py`.
 """
 
 __author__ = "Joseph Reagle"

@@ -10,7 +10,6 @@ __version__ = "1.0"
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
 import logging
-import os
 import re
 import subprocess
 import sys
@@ -33,7 +32,7 @@ critical = logging.critical
 exception = logging.exception
 
 MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
-    <node TEXT="reading" FOLDED="false" ID="ID_327818409" STYLE="oval">
+    <node TEXT="reading" FOLDED="false" ID="ID_327818409">
         <font SIZE="18"/>
         <hook NAME="MapStyle">
             <map_styles>
@@ -344,7 +343,7 @@ def process_args(argv):
     )
 
     # positional arguments
-    arg_parser.add_argument("file_names", nargs="*", metavar="FILE_NAMES")
+    arg_parser.add_argument("file_names", nargs="+", type=Path, metavar="FILE_NAMES")
 
     # optional arguments
     arg_parser.add_argument(
@@ -392,38 +391,23 @@ def process_args(argv):
     return args
 
 
+def remove_BOM(text: str) -> str:
+    if text[0] == str(codecs.BOM_UTF8, "utf8"):
+        print("removing BOM")
+        return text[1:]
+    return text
+
+
 if __name__ == "__main__":
     args = process_args(sys.argv[1:])
     critical("==================================")
     critical(f"{args=}")
-    file_names = args.file_names
-    file_names = [os.path.abspath(file_name) for file_name in file_names]
-    for file_name in file_names:
-        if file_name.endswith(".rtf"):  # when MS Word saves as RTF
-            subprocess.call(
-                ["/usr/bin/X11/catdoc", "-aw", file_name],
-                stdout=open(
-                    "%s.txt" % file_name[0:-4],
-                    "w",
-                    encoding="utf-8",
-                    errors="replace",
-                ),
-            )
-            file_name = file_name[0:-4] + ".txt"
-
-        encoding = "UTF-8"
-        fdi = open(file_name, encoding=encoding, errors="replace")
-        text = fdi.read()
-        if encoding == "UTF-8":
-            if text[0] == str(codecs.BOM_UTF8, "utf8"):
-                text = text[1:]
-                print("removed BOM")
-        # it's not decoding MS Word txt right, Word is not starting with
-        # utf-8 even though I set to default if no special characters
-        # write simple Word txt to UTF-8 encoder
-        file_name_out = os.path.splitext(file_name)[0] + ".mm"
-        file_out = open(file_name_out, "w", encoding="utf-8", errors="replace")
-
-        create_mm(text, file_out)
-        file_out.close()
+    for file_name in args.file_names:
+        file_name_out = file_name.with_suffix(".mm")
+        with file_name.open(encoding="UTF-8", errors="replace") as fdi:
+            text = remove_BOM(fdi.read())
+            with file_name_out.open(
+                "w", encoding="utf-8", errors="replace"
+            ) as file_out:
+                create_mm(text, file_out)
         subprocess.call(["open", "-a", "Freeplane.app", file_name_out])

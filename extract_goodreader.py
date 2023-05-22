@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process GoodReader email export into format accepted by `extract-dictation.py`.
+"""Process GoodReader email export into format accepted by `extract_dictation.py`.
 """
 
 __author__ = "Joseph Reagle"
@@ -16,9 +16,12 @@ from email import policy
 from email.parser import BytesParser
 from os.path import splitext
 
-import roman
-from enchant.checker import SpellChecker  # https://pypi.org/project/pyenchant/
+import roman  # type:ignore
 
+# https://pypi.org/project/pyenchant/
+from enchant.checker import SpellChecker  # type:ignore
+
+from config import BIN_DIR
 from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
@@ -196,7 +199,7 @@ def parse_args(argv: list) -> argparse.Namespace:
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description="""Format (emailed) GoodRead annotation for use with
-        dictation-extract.py in
+        extract_dictation.py in
             https://github.com/reagle/thunderdell
         """
     )
@@ -288,17 +291,17 @@ if __name__ == "__main__":
         new_text = process_text(args, text)
 
         fixed_fn = splitext(file_name)[0] + "-fixed.txt"
+        cmd_extract_dication = [f"{BIN_DIR}/extract_dictation.py", fixed_fn]
+
         user_input = input("\npublish to social media? 'y' for yes: ")
         if user_input == "y":
-            do_publish = "-p"
-        else:
-            do_publish = ""
-        cmd_extract_dication = ["extract-dictation.py", do_publish, fixed_fn]
+            cmd_extract_dication.append("-p")
+
         if args.output_to_file:
             with open(fixed_fn, "w") as fixed_fd:
                 fixed_fd.write(new_text)
             subprocess.run(["open", fixed_fn])
-            user_input = input("\nfollow up with extract-dictation.py? 'y' for yes: ")
+            user_input = input("\nfollow up with extract_dictation.py? 'y' for yes: ")
             if user_input == "y":
                 subprocess.run(cmd_extract_dication)
             print(f"{cmd_extract_dication}")

@@ -13,6 +13,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import Any
 from xml.sax.saxutils import escape  # unescape
 
 import requests  # http://docs.python-requests.org/en/latest/
@@ -63,7 +64,7 @@ def get_JSON(
     retry_counter=0,
     cache_control=None,
     requested_content_type="application/json",
-):
+) -> dict[str, Any]:
     """Return [JSON content, response] of a given URL."""
 
     AGENT_HEADERS = {"User-Agent": "Thunderdell/BusySponge"}
@@ -89,9 +90,11 @@ def get_text(url: str) -> str:
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
 
 
-def yasn_publish(comment, title, subtitle, url, tags):
+def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:
     "Send annotated URL to social networks"
     info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
+    photo_path = None
+
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
             ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
@@ -114,8 +117,6 @@ def yasn_publish(comment, title, subtitle, url, tags):
             photo_path = Path(url.split("//", 1)[1])
             if not photo_path.exists():
                 raise OSError(f"{photo_path} doesn't exist.")
-    else:
-        photo_path = None
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
@@ -130,7 +131,7 @@ def yasn_publish(comment, title, subtitle, url, tags):
 
 
 def twitter_update(
-    comment: str, title: str, url: str, tags: str, photo_path: Path
+    comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
     import tweepy  # https://twython.readthedocs.io/en/latest/index.html
 
@@ -153,14 +154,13 @@ def twitter_update(
             tweet = shrink_message("twitter", comment, title, url, tags)
             api.update_status(status=tweet)
     except tweepy.errors.TweepyException as err:
-        print(err)
-        print(f"tweet failed {len(tweet)}: {tweet}")
+        print(f"tweet failed {err}")
     else:
         print(f"tweet worked {len(tweet)}: {tweet}")
 
 
 def mastodon_update(
-    comment: str, title: str, url: str, tags: str, photo_path: Path
+    comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
@@ -193,6 +193,7 @@ def mastodon_update(
 def shrink_message(service, comment, title, url, tags):
     """Shrink message to fit into limit"""
 
+    limit = 500
     if service == "ohai":  # mastodon instance
         limit = 500
     elif service == "twitter":
@@ -255,13 +256,13 @@ def len_twitter(text: str) -> int:
     return len(text.encode("utf-16-le")) // 2
 
 
-def escape_XML(s):  # http://wiki.python.org/moin/EscapingXml
+def escape_XML(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
     """Escape XML character entities; & < > are defaulted"""
     extras = {"\t": "  "}
     return escape(s, extras)
 
 
-def unescape_XML(text):  # .0937s 4.11%
+def unescape_XML(text: str) -> str:  # .0937s 4.11%
     """
     Removes HTML or XML character references and entities from text.
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
@@ -269,7 +270,7 @@ def unescape_XML(text):  # .0937s 4.11%
 
     """
 
-    def fixup_chars(m):
+    def fixup_chars(m: re.Match[str]) -> str:
         text = m.group(0)
         if text[:2] == "&#":
             # character reference

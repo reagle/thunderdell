@@ -8,13 +8,13 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import codecs
 import logging
 import re
 import subprocess
 import sys
 import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
+from typing import TextIO
 
 from biblio.fields import (
     BIB_FIELDS,  # dict of field to its shortcut
@@ -92,8 +92,15 @@ def get_date():
 
 
 def build_mm_from_txt(
-    line, started, in_part, in_chapter, in_section, in_subsection, entry
-):
+    mm_fd: TextIO,
+    line: str,
+    started: bool,
+    in_part: bool,
+    in_chapter: bool,
+    in_section: bool,
+    in_subsection: bool,
+    entry: dict,
+) -> tuple[bool, bool, bool, bool, bool, dict]:
     citation = ""
 
     if line not in ("", "\r", "\n"):
@@ -101,19 +108,19 @@ def build_mm_from_txt(
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started:  # Do I need to close a previous entry
                 if in_subsection:
-                    file_out.write("""        </node>\n""")
+                    mm_fd.write("""        </node>\n""")
                     in_subsection = False
                 if in_section:
-                    file_out.write("""      </node>\n""")
+                    mm_fd.write("""      </node>\n""")
                     in_section = False
                 if in_chapter:
-                    file_out.write("""    </node>\n""")
+                    mm_fd.write("""    </node>\n""")
                     in_chapter = False
                 if in_part:
-                    file_out.write("""    </node>\n""")
+                    mm_fd.write("""    </node>\n""")
                     in_part = False
 
-                file_out.write("""</node>\n</node>\n""")
+                mm_fd.write("""</node>\n</node>\n""")
                 started = False
             started = True
             # should space be optional '(\w+) ?='
@@ -137,19 +144,22 @@ def build_mm_from_txt(
                 entry["title"] += ": " + entry["subtitle"]
                 del entry["subtitle"]
 
-            file_out.write(
-                """<node STYLE_REF="%s" TEXT="%s" POSITION="RIGHT">\n"""
-                % ("author", clean(entry["author"].title()))
+            mm_fd.write(
+                """<node STYLE_REF="{}" TEXT="{}" POSITION="RIGHT">\n""".format(
+                    "author", clean(entry["author"].title())
+                )
             )
             if "url" in entry:  # write title with hyperlink
-                file_out.write(
-                    """  <node STYLE_REF="%s" LINK="%s" TEXT="%s">\n"""
-                    % ("title", clean(entry["url"]), clean(entry["title"]))
+                mm_fd.write(
+                    """  <node STYLE_REF="{}" LINK="{}" TEXT="{}">\n""".format(
+                        "title", clean(entry["url"]), clean(entry["title"])
+                    )
                 )
             else:
-                file_out.write(  # write plain title
-                    """  <node STYLE_REF="%s" TEXT="%s">\n"""
-                    % ("title", clean(entry["title"]))
+                mm_fd.write(  # write plain title
+                    """  <node STYLE_REF="{}" TEXT="{}">\n""".format(
+                        "title", clean(entry["title"])
+                    )
                 )
 
             for token, value in sorted(entry.items()):
@@ -168,30 +178,31 @@ def build_mm_from_txt(
             if citation != "":
                 clean(citation)
             citation += " r=%s" % get_date()
-            file_out.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
+            mm_fd.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
 
         elif re.match(r"summary\.(.*)", line, re.I):
             matches = re.match(r"summary\.(.*)", line, re.I)
             entry["summary"] = matches.groups()[0]
-            file_out.write(
-                """  <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % ("annotation", clean(entry["summary"]))
+            mm_fd.write(
+                """  <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
+                    "annotation", clean(entry["summary"])
+                )
             )
 
         elif re.match("part.*", line, re.I):
             if in_part:
                 if in_chapter:
-                    file_out.write("""    </node>\n""")  # close chapter
+                    mm_fd.write("""    </node>\n""")  # close chapter
                     in_chapter = False
                 if in_section:
-                    file_out.write("""      </node>\n""")  # close section
+                    mm_fd.write("""      </node>\n""")  # close section
                     in_section = False
                 if in_subsection:
-                    file_out.write("""      </node>\n""")  # close section
+                    mm_fd.write("""      </node>\n""")  # close section
                     in_subsection = False
-                file_out.write("""  </node>\n""")  # close part
+                mm_fd.write("""  </node>\n""")  # close part
                 in_part = False
-            file_out.write(
+            mm_fd.write(
                 """  <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
             )
             in_part = True
@@ -199,45 +210,48 @@ def build_mm_from_txt(
         elif re.match("chapter.*", line, re.I):
             if in_chapter:
                 if in_section:
-                    file_out.write("""      </node>\n""")  # close section
+                    mm_fd.write("""      </node>\n""")  # close section
                     in_section = False
                 if in_subsection:
-                    file_out.write("""      </node>\n""")  # close section
+                    mm_fd.write("""      </node>\n""")  # close section
                     in_subsection = False
-                file_out.write("""    </node>\n""")  # close chapter
+                mm_fd.write("""    </node>\n""")  # close chapter
                 in_chapter = False
-            file_out.write(
+            mm_fd.write(
                 """    <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
             )
             in_chapter = True
 
         elif re.match("section.*", line, re.I):
             if in_subsection:
-                file_out.write("""      </node>\n""")  # close section
+                mm_fd.write("""      </node>\n""")  # close section
                 in_subsection = False
             if in_section:
-                file_out.write("""    </node>\n""")
+                mm_fd.write("""    </node>\n""")
                 in_section = False
-            file_out.write(
-                """      <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("quote", clean(line[9:]))
+            mm_fd.write(
+                """      <node STYLE_REF="{}" TEXT="{}">\n""".format(
+                    "quote", clean(line[9:])
+                )
             )
             in_section = True
 
         elif re.match("subsection.*", line, re.I):
             if in_subsection:
-                file_out.write("""    </node>\n""")
+                mm_fd.write("""    </node>\n""")
                 in_subsection = False
-            file_out.write(
-                """      <node STYLE_REF="%s" TEXT="%s">\n"""
-                % ("quote", clean(line[12:]))
+            mm_fd.write(
+                """      <node STYLE_REF="{}" TEXT="{}">\n""".format(
+                    "quote", clean(line[12:])
+                )
             )
             in_subsection = True
 
         elif re.match("(--.*)", line, re.I):
-            file_out.write(
-                """          <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % ("default", clean(line))
+            mm_fd.write(
+                """          <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
+                    "default", clean(line)
+                )
             )
 
         else:
@@ -263,82 +277,84 @@ def build_mm_from_txt(
                 node_color = "quote"
                 line_text = line_text[0:-9]
 
-            file_out.write(
-                """          <node STYLE_REF="%s" TEXT="%s"/>\n"""
-                % (node_color, clean(" ".join((line_no, line_text))))
+            mm_fd.write(
+                """          <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
+                    node_color, clean(" ".join((line_no, line_text)))
+                )
             )
 
     return started, in_part, in_chapter, in_section, in_subsection, entry
 
 
-def create_mm(text, file_out):
+def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
     import traceback
 
-    entry = {}  # a bibliographic entry for yasn_publish
-    entry["keyword"] = []  # there might not be any
-    started = False
-    in_part = False
-    in_chapter = False
-    in_section = False
-    in_subsection = False
-    line_number = 0
+    with mm_file_name.open("w", encoding="utf-8", errors="replace") as mm_fd:
+        entry = {}  # a bibliographic entry for yasn_publish
+        entry["keyword"] = []  # there might not be any
+        started = False
+        in_part = False
+        in_chapter = False
+        in_section = False
+        in_subsection = False
+        line_number = 0
 
-    file_out.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
+        mm_fd.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
 
-    for line in text.split("\n"):
-        line = line.strip()
-        try:
-            (
-                started,
-                in_part,
-                in_chapter,
-                in_section,
-                in_subsection,
-                entry,
-            ) = build_mm_from_txt(
-                line,
-                started,
-                in_part,
-                in_chapter,
-                in_section,
-                in_subsection,
-                entry,
+        for line in text.split("\n"):
+            line = line.strip()
+            try:
+                (
+                    started,
+                    in_part,
+                    in_chapter,
+                    in_section,
+                    in_subsection,
+                    entry,
+                ) = build_mm_from_txt(
+                    mm_fd,
+                    line,
+                    started,
+                    in_part,
+                    in_chapter,
+                    in_section,
+                    in_subsection,
+                    entry,
+                )
+            except KeyError as err:
+                print(err)
+                print(traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line)
+                sys.exit()
+            line_number += 1
+
+        if in_subsection:
+            mm_fd.write("""</node>""")  # close the last subsection
+        if in_section:
+            mm_fd.write("""</node>""")  # close the last section
+        if in_chapter:
+            mm_fd.write("""</node>""")  # close the last chapter
+        if in_part:
+            mm_fd.write("""</node>""")  # close the last part
+        mm_fd.write("""</node>\n</node>\n</node>\n""")  # close the last entry
+        mm_fd.write("""</node>\n</map>\n""")  # close the document
+        info(f"{entry=}")
+        if args.publish:
+            yasn_publish(
+                entry["summary"],
+                entry["title"],
+                None,
+                entry["url"],
+                " ".join(entry["keyword"]),
             )
-        except KeyError as err:
-            print(err)
-            print(traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line)
-            sys.exit()
-        line_number += 1
-
-    if in_subsection:
-        file_out.write("""</node>""")  # close the last section
-    if in_section:
-        file_out.write("""</node>""")  # close the last section
-    if in_chapter:
-        file_out.write("""</node>""")  # close the last chapter
-    if in_part:
-        file_out.write("""</node>""")  # close the last part
-    file_out.write("""</node>\n</node>\n</node>\n""")  # close the last entry
-    file_out.write("""</node>\n</map>\n""")  # close the document
-    info(f"{entry=}")
-    if args.publish:
-        yasn_publish(
-            entry["summary"],
-            entry["title"],
-            None,
-            entry["url"],
-            " ".join(entry["keyword"]),
-        )
 
 
 def process_args(argv):
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""Convert dictated notes to mindmap in
-            https://github.com/reagle/thunderdell
+        description="""Convert dictated notes to mindmap.
 
-        author must be first in citation pairs, e.g., "author = ...
+        `author` must be first in citation pairs, e.g., "author = ...
         """
     )
 
@@ -391,23 +407,12 @@ def process_args(argv):
     return args
 
 
-def remove_BOM(text: str) -> str:
-    if text[0] == str(codecs.BOM_UTF8, "utf8"):
-        print("removing BOM")
-        return text[1:]
-    return text
-
-
 if __name__ == "__main__":
     args = process_args(sys.argv[1:])
     critical("==================================")
     critical(f"{args=}")
-    for file_name in args.file_names:
-        file_name_out = file_name.with_suffix(".mm")
-        with file_name.open(encoding="UTF-8", errors="replace") as fdi:
-            text = remove_BOM(fdi.read())
-            with file_name_out.open(
-                "w", encoding="utf-8", errors="replace"
-            ) as file_out:
-                create_mm(text, file_out)
-        subprocess.call(["open", "-a", "Freeplane.app", file_name_out])
+    for source_fn in args.file_names:
+        text = source_fn.read_text()
+        mm_file_name = source_fn.with_suffix(".mm")
+        create_mm(args, text, mm_file_name)
+        subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])

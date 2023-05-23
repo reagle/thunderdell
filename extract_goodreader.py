@@ -14,14 +14,14 @@ import subprocess
 import sys
 from email import policy
 from email.parser import BytesParser
-from os.path import splitext
+from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 import roman  # type:ignore
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore
 
-from config import BIN_DIR
+from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
@@ -168,7 +168,7 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
     return text_new
 
 
-def restore_spaces(text) -> str:
+def restore_spaces(text: str) -> str:
     """Restore spaces to OCR text using pyenchant, taken from
     https://stackoverflow.com/questions/23314834/tokenizing-unsplit-words-from-ocr-using-nltk
     """
@@ -205,7 +205,7 @@ def parse_args(argv: list) -> argparse.Namespace:
     )
 
     # positional arguments
-    arg_parser.add_argument("file_names", nargs="*", metavar="FILE_NAMES")
+    arg_parser.add_argument("file_names", nargs="*", type=Path, metavar="FILE_NAMES")
     # optional arguments
     arg_parser.add_argument(
         "-f",
@@ -221,6 +221,13 @@ def parse_args(argv: list) -> argparse.Namespace:
         action="store_true",
         default=False,
         help="output to FILE-fixed.txt",
+    )
+    arg_parser.add_argument(
+        "-p",
+        "--publish",
+        action="store_true",
+        default=False,
+        help="publish to social networks",
     )
     arg_parser.add_argument(
         "-L",
@@ -262,15 +269,14 @@ def parse_args(argv: list) -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    text: str = ""
 
     critical("==================================")
     critical(f"{args=}")
-    file_names = args.file_names
 
-    for file_name in file_names:
-        if file_name.endswith(".eml"):
-            with open(file_name, "rb") as fp:
+    for file_name in args.file_names:
+        text: str = ""
+        if file_name.suffix == ".eml":
+            with file_name.open("rb") as fp:
                 msg = BytesParser(policy=policy.default).parse(fp)
                 for part in msg.walk():
                     debug(f"{part=}")
@@ -284,26 +290,31 @@ if __name__ == "__main__":
                         )
                         text = content
                         debug(f"TEXT IS:\n ```{text}```")
+                    else:
+                        raise TypeError(
+                            f"Can extract text because {msg_content_type=} is unknown."
+                        )
         else:
-            with open(file_name) as f:
-                text = f.read()
+            text = file_name.read_text()
 
         new_text = process_text(args, text)
 
-        fixed_fn = splitext(file_name)[0] + "-fixed.txt"
-        cmd_extract_dication = [f"{BIN_DIR}/extract_dictation.py", fixed_fn]
+        fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
 
-        user_input = input("\npublish to social media? 'y' for yes: ")
-        if user_input == "y":
-            cmd_extract_dication.append("-p")
+        if not args.publish:
+            user_input = input("\npublish to social media? 'y' for yes: ")
+            if user_input == "y":
+                args.publish = True
 
         if args.output_to_file:
-            with open(fixed_fn, "w") as fixed_fd:
-                fixed_fd.write(new_text)
-            subprocess.run(["open", fixed_fn])
-            user_input = input("\nfollow up with extract_dictation.py? 'y' for yes: ")
+            fixed_fn.write_text(new_text)
+            subprocess.run(["open", str(fixed_fn)])  # manual edits in text editor
+            print("\nedit in your text editor; when done ")
+            user_input = input("follow up with extract_dictation.py? 'y' for yes: ")
+            edited_text = fixed_fn.read_text()
             if user_input == "y":
-                subprocess.run(cmd_extract_dication)
-            print(f"{cmd_extract_dication}")
+                mm_file_name = file_name.with_suffix(".mm")
+                create_mm(args, edited_text, mm_file_name)
+                subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
         else:
             print(new_text)

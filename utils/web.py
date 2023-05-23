@@ -97,7 +97,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
 
     if tags and tags[0] != "#":  # they've not yet been hashified
         tags = " ".join(
-            ["#" + KEY_SHORTCUTS.get(tag, tag) for tag in tags.strip().split(" ")]
+            [f"#{KEY_SHORTCUTS.get(tag, tag)}" for tag in tags.strip().split(" ")]
         )
     comment, title, subtitle, url, tags = (
         v.strip() if isinstance(v, str) else ""
@@ -133,6 +133,10 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
 def twitter_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
+    """
+    Updates the authenticated Twitter account with a tweet and optional photo.
+    """
+
     import tweepy  # https://twython.readthedocs.io/en/latest/index.html
 
     from .web_api_tokens import (
@@ -190,8 +194,8 @@ def mastodon_update(
         print(f"toot worked {len(toot)}: {toot}")
 
 
-def shrink_message(service, comment, title, url, tags):
-    """Shrink message to fit into limit"""
+def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
+    """Shrink message to fit into character limit."""
 
     limit = 500
     if service == "ohai":  # mastodon instance
@@ -201,7 +205,7 @@ def shrink_message(service, comment, title, url, tags):
     info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
     TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
-    limit = limit - PADDING
+    limit -= PADDING
 
     info(f"{limit=}")
     message_room = limit - len_twitter(tags)

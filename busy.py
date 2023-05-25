@@ -72,7 +72,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     busy.py c .test doi:10.1177/1097184x15613831
     busy.py c .test isbn:9780860917137
     busy.py c .test arxiv:2001.08293
-    """  # noqa: E501
+    """
 
     url = urllib.parse.unquote(url)
     url = re.sub(  # use canonical reddit domain

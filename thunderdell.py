@@ -106,12 +106,13 @@ def build_bib(
             # debug("chasing")
             for link in links:
                 link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
-                if link not in done and link not in mm_files:
-                    if not any(
-                        word in link for word in ("syllabus", "readings")
-                    ):  # 'old'
-                        # debug(f"    mm_files.appending {link}")
-                        mm_files.append(link)
+                if (
+                    link not in done
+                    and link not in mm_files
+                    and not any(word in link for word in ("syllabus", "readings"))
+                ):  # 'old'
+                    # debug(f"    mm_files.appending {link}")
+                    mm_files.append(link)
 
     if args.query:
         serve_query(args, entries)
@@ -169,9 +170,12 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
         return parent_map[node]
 
     for d in node.iter():
-        if "LINK" in d.attrib:  # found a local reference link
-            if not d.get("LINK").startswith("http:") and d.get("LINK").endswith(".mm"):
-                links.append(unescape_XML(d.get("LINK")))
+        if (  # found a local reference link
+            "LINK" in d.attrib
+            and not d.get("LINK").startswith("http:")
+            and d.get("LINK").endswith(".mm")
+        ):
+            links.append(unescape_XML(d.get("LINK")))
         # skip nodes that are structure, comment, and empty of text
         if "STYLE_REF" in d.attrib and d.get("TEXT"):
             if d.get("STYLE_REF") == "author":
@@ -220,19 +224,18 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
 
     # debug("querying")
     results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
+
     if os.path.exists(results_file_name):
         os.remove(results_file_name)
     try:
-        args.results_file = open(results_file_name, "w", encoding="utf-8")
+        with open(results_file_name, "w", encoding="utf-8") as results_file:
+            results_file.write(RESULT_FILE_HEADER)
+            results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+            emit_results(args, entries)
+            results_file.write("</ul></body></html>\n")
     except OSError as err:
-        print(f"{err}")
-        print(f"There was an error writing to {results_file_name}")
+        print(f"{err}\nThere was an error writing to {results_file_name}")
         raise
-    args.results_file.write(RESULT_FILE_HEADER)
-    args.results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-    emit_results(args, entries)
-    args.results_file.write("</ul></body></html>\n")
-    args.results_file.close()
     # debug(f"{results_file=}")
     if args.in_main:
         ADDRESS_IN_USE = False
@@ -567,9 +570,8 @@ def parse_names(names):
             if chunks[-1] in SUFFIXES:
                 jr = chunks.pop(-1)
             last = chunks.pop(-1)
-            if len(chunks) > 0:
-                if chunks[-1] in PARTICLES:
-                    von = chunks.pop(-1)
+            if len(chunks) > 0 and chunks[-1] in PARTICLES:
+                von = chunks.pop(-1)
             first = " ".join(chunks)
         else:
             last = name

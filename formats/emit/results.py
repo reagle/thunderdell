@@ -15,6 +15,7 @@ import os
 import re
 import urllib.parse
 from html import escape
+from io import TextIOWrapper
 
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
@@ -32,12 +33,14 @@ debug = logging.debug
 
 
 def emit_results(
-    args: argparse.Namespace,
+    # args: argparse.Namespace,
+    query: str,
     entries: dict[str, dict],
+    results_file: TextIOWrapper,
 ) -> None:
     """Emit the results of the query"""
 
-    results_file = args.results_file
+    # results_file = args.results_file
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
@@ -49,7 +52,7 @@ def emit_results(
         MM_mm_file = get_url_MM(entry["_mm_file"])
 
         # if I am what was queried, print all of me
-        if entry["identifier"] == args.query:
+        if entry["identifier"] == query:
             results_file.write('%s<li class="li_entry_identifier">\n' % (spaces))
             spaces = spaces + " "
             results_file.write('%s<ul class="tit_tree">\n' % (spaces))

@@ -218,7 +218,7 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
 
 def serve_query(args: argparse.Namespace, entries: dict) -> None:
     """
-    Given the entries resulting from a query and crawl of the mindmaps,
+    Given the entries resulting from a crawl/query of the mindmaps,
     create a web server and open browser.
     """
 
@@ -231,7 +231,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
         with open(results_file_name, "w", encoding="utf-8") as results_file:
             results_file.write(RESULT_FILE_HEADER)
             results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-            emit_results(args, entries)
+            emit_results(args.query, entries, results_file)
             results_file.write("</ul></body></html>\n")
     except OSError as err:
         print(f"{err}\nThere was an error writing to {results_file_name}")

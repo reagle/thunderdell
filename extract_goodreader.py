@@ -223,13 +223,6 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="output to FILE-fixed.txt",
     )
     arg_parser.add_argument(
-        "-p",
-        "--publish",
-        action="store_true",
-        default=False,
-        help="publish to social networks",
-    )
-    arg_parser.add_argument(
         "-L",
         "--log-to-file",
         action="store_true",
@@ -301,18 +294,19 @@ if __name__ == "__main__":
 
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
 
-        if not args.publish:
-            user_input = input("\npublish to social media? 'y' for yes: ")
-            if user_input == "y":
-                args.publish = True
-
         if args.output_to_file:
             fixed_fn.write_text(new_text)
-            subprocess.run(["open", str(fixed_fn)])  # manual edits in text editor
-            print("\nedit in your text editor; when done ")
-            user_input = input("follow up with extract_dictation.py? 'y' for yes: ")
-            edited_text = fixed_fn.read_text()
-            if user_input == "y":
+            subprocess.run(["open", str(fixed_fn)])
+            user_input = input(
+                "\nWhen you are done in the text editor, should I invoke"
+                + " `extract_dictation.py`?\n"
+                + " 'y' for yes,\n"
+                + " 'yp' to also include `-p` (publish to social media)\n: "
+            )
+
+            if user_input.startswith("y"):
+                if user_input == "yp":
+                    args.publish = True
                 mm_file_name = file_name.with_suffix(".mm")
                 create_mm(args, edited_text, mm_file_name)
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])

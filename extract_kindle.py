@@ -19,6 +19,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup  # type:ignore
 
 import change_case
+from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
@@ -190,11 +191,10 @@ if __name__ == "__main__":
             )
 
             if user_input.startswith("y"):
-                cmd_extract_dication = ["extract_dictation.py"]
                 if user_input == "yp":
-                    cmd_extract_dication.append("-p")
-                cmd_extract_dication.append(str(fixed_fn.absolute()))
-                print(f"executing: {cmd_extract_dication=}")
-                subprocess.run(cmd_extract_dication)
+                    args.publish = True
+                mm_file_name = file_name.with_suffix(".mm")
+                create_mm(args, edited_text, mm_file_name)
+                subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
         else:
             print(new_text)

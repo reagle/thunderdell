@@ -305,9 +305,11 @@ if __name__ == "__main__":
             )
 
             if user_input.startswith("y"):
+                args.publish = False
                 if user_input == "yp":
                     args.publish = True
                 mm_file_name = file_name.with_suffix(".mm")
+                edited_text = fixed_fn.read_text()
                 create_mm(args, edited_text, mm_file_name)
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
         else:

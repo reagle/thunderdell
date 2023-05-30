@@ -20,6 +20,8 @@ import roman  # type:ignore
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore
+from enchant import Dict
+from typing import Pattern
 
 from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
@@ -147,7 +149,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
             debug(f"testing {is_roman=}")
             if page_num_result and is_roman:
                 page_num_result = roman.toRoman(page_num_result).lower()
-            fixed_line = smart_to_markdown(restore_spaces(line))
+            fixed_line = smart_to_markdown(clean_ocr(line))
             debug(f"{page_num_result} {prefix} {fixed_line}".strip())
             text_new.append(f"{page_num_result} {prefix} {fixed_line}".strip())
 
@@ -168,18 +170,47 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
     return text_new
 
 
+def clean_ocr(text: str) -> str:
+    """Remove OCR artifacts of junk hyphens and missing spaces"""
+    new_text = remove_junk_hyphens(text)
+    new_text = restore_spaces(new_text)
+    return new_text
+
+
+def remove_junk_hyphens(
+    text: str,
+    hyphen_RE: Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),
+    enchant_d: Dict = Dict("en_US"),  # noqa: B008 (performed once at definition)
+) -> str:
+    """Remove junk hyphens from PDF/OCR text.
+
+    >>> remove_junk_hyphens('Do out-calls for your co-worker until lunch, then sw-ap.')
+    'Do out-calls for your co-worker until lunch, then swap.'
+    """
+    matches = hyphen_RE.findall(text)
+
+    for match in matches:
+        hyphenated_word = match[0] + match[1] + match[2]
+        debug(f"{hyphenated_word=}")
+        debug(f"{enchant_d.check(match[0])=}")
+        debug(f"{enchant_d.check(match[2])=}")
+        if not (enchant_d.check(match[0]) and enchant_d.check(match[2])):
+            replacement = match[0] + match[2]
+            text = text.replace(hyphenated_word, replacement)
+
+    return text
+
+
 def restore_spaces(text: str) -> str:
-    """Restore spaces to OCR text using pyenchant, taken from
+    """Restore lost spaces in PDFs using pyenchant, taken from
     https://stackoverflow.com/questions/23314834/tokenizing-unsplit-words-from-ocr-using-nltk
     """
 
     checker = SpellChecker("en_US")
-    # remove spurious hyphens, too aggressive right now...
-    text = re.sub(r"([a-zA-Z]{,2})(-)([a-zA-Z]{,2})", r"\1\3", text)
-    # debug(text)
+    debug(text)
     checker.set_text(text)
     for error in checker:
-        # debug(f'{error.word}, {error.suggest()}')
+        debug(f"{error.word}, {error.suggest()}")
         for suggestion in error.suggest():
             # suggestion must be same as original with spaces removed
             if error.word.replace(" ", "") == suggestion.replace(" ", ""):

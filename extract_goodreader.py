@@ -17,11 +17,10 @@ from email.parser import BytesParser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 import roman  # type:ignore
+from enchant import Dict
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore
-from enchant import Dict
-from typing import Pattern
 
 from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
@@ -68,11 +67,11 @@ def process_text(args: argparse.Namespace, text: str) -> str:
     """
 
     # 1st page number specified in PDF comment
-    page_num_first_specfied = args.first  # 1st page specified
-    page_num_first_parsed = None  # 1st page number as parsed
-    page_num_offset = None  # page number offset
-    page_num_parsed = None  # actual/parsed page number
-    page_num_result = None  # page number result
+    page_num_first_specfied: int = args.first  # 1st page specified in args
+    page_num_first_parsed: int = 0  # 1st page number as parsed
+    page_num_offset: int = 0  # page number offset
+    page_num_parsed: int | str = 0  # page number parsed, can be roman
+    page_num_result: int | str = 0  # page number result, can be roman or ""
     color = kind = prefix = ""
     ignore_next_line = False
     is_roman = False
@@ -149,7 +148,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
             debug(f"testing {is_roman=}")
             if page_num_result and is_roman:
                 page_num_result = roman.toRoman(page_num_result).lower()
-            fixed_line = smart_to_markdown(clean_ocr(line))
+            fixed_line = smart_to_markdown(clean_pdf_ocr(line))
             debug(f"{page_num_result} {prefix} {fixed_line}".strip())
             text_new.append(f"{page_num_result} {prefix} {fixed_line}".strip())
 
@@ -170,22 +169,24 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
     return text_new
 
 
-def clean_ocr(text: str) -> str:
+def clean_pdf_ocr(text: str) -> str:
     """Remove OCR artifacts of junk hyphens and missing spaces"""
     new_text = remove_junk_hyphens(text)
-    new_text = restore_spaces(new_text)
+    new_text = restore_lost_spaces(new_text)
     return new_text
 
 
 def remove_junk_hyphens(
     text: str,
-    hyphen_RE: Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),
+    hyphen_RE: re.Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),
     enchant_d: Dict = Dict("en_US"),  # noqa: B008 (performed once at definition)
 ) -> str:
-    """Remove junk hyphens from PDF/OCR text.
+    """Remove junk hyphens from PDFs using pyenchant.
 
-    >>> remove_junk_hyphens('Do out-calls for your co-worker until lunch, then sw-ap.')
-    'Do out-calls for your co-worker until lunch, then swap.'
+    Test if the constituent parts of hyphenated text are actual words.
+
+    >>> remove_junk_hyphens('Do out-calls for your co-worker until lu-nch-bre-ak.')
+    'Do out-calls for your co-worker until lunch-break.'
     """
     matches = hyphen_RE.findall(text)
 
@@ -201,26 +202,32 @@ def remove_junk_hyphens(
     return text
 
 
-def restore_spaces(text: str) -> str:
-    """Restore lost spaces in PDFs using pyenchant, taken from
-    https://stackoverflow.com/questions/23314834/tokenizing-unsplit-words-from-ocr-using-nltk
+def restore_lost_spaces(text: str) -> str:
+    """Restore lost spaces in PDFs using pyenchant.
+
+    Replace words not in a dictionary with nearest suggestion, which
+    if often two words separated by a space.
+
+    >>> restore_lost_spaces('Excerpts sometimeslose their spaces.')
+    'Excerpts sometimes lose their spaces.'
     """
 
     checker = SpellChecker("en_US")
     debug(text)
     checker.set_text(text)
     for error in checker:
+        assert error.word is not None  # for typing
         debug(f"{error.word}, {error.suggest()}")
         for suggestion in error.suggest():
-            # suggestion must be same as original with spaces removed
+            # Suggestion must be same as original with spaces removed
             if error.word.replace(" ", "") == suggestion.replace(" ", ""):
                 error.replace(suggestion)
                 break
-    return checker.get_text()
+    return str(checker.get_text())  # str() for typing
 
 
 def _get_group_n(regex: re.Pattern, text: str, number: int) -> str | None:
-    """Type friendly matching function"""
+    """Match function -- for typing."""
     match = regex.search(text)
     return match.group(number) if match else None
 

@@ -173,7 +173,7 @@ class ScrapeDefault:
         ]
         if earliest_dates:
             info(f"found {earliest_dates=}")
-            return sorted(earliest_dates)[0]
+            return earliest_dates[0]
         else:
             info(f"making date {NOW=}")
             date = time.strftime("%Y%m%d", NOW)

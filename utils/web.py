@@ -126,7 +126,8 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          tags = {len(tags)}: {tags}
          {total_len=}""")
 
-    twitter_update(comment, title, url, tags, photo_path)
+    # TODO: uncomment when persistent login is working (see below)
+    # twitter_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)
 
 
@@ -137,30 +138,27 @@ def twitter_update(
     Updates the authenticated Twitter account with a tweet and optional photo.
     """
 
-    import tweepy  # https://twython.readthedocs.io/en/latest/index.html
+    # https://github.com/trevorhobenshield/twitter-api-client
+    from twitter.account import Account
 
-    from .web_api_tokens import (
-        TW_ACCESS_TOKEN,
-        TW_ACCESS_TOKEN_SECRET,
-        TW_CONSUMER_KEY,
-        TW_CONSUMER_SECRET,
+    from utils.web_api_tokens import (
+        TW_EMAIL,
+        TW_PASSWORD,
+        TW_USERNAME,
     )
 
-    auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
-    auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-    try:
-        if photo_path:
-            tweet = shrink_message("twitter", comment, title, "", tags)
-            media = api.media_upload(photo_path)
-            api.update_status(status=tweet, media_ids=[media.media_id])
-        else:
-            tweet = shrink_message("twitter", comment, title, url, tags)
-            api.update_status(status=tweet)
-    except tweepy.errors.TweepyException as err:
-        print(f"tweet failed {err}")
+    # TODO: this creates too many new logins, disabling twitter_update above
+    # until issue resolved 2023-06-02
+    # https://github.com/trevorhobenshield/twitter-api-client/issues/64
+    account = Account(TW_EMAIL, TW_USERNAME, TW_PASSWORD)  # , debug=2, save=True
+
+    # TODO: test media upload 2023-06-02
+    if photo_path:
+        shrunk_msg = shrink_message("twitter", comment, title, "", tags)
+        account.tweet(shrunk_msg, media=[{"media": str(photo_path)}])
     else:
-        print(f"tweet worked {len(tweet)}: {tweet}")
+        shrunk_msg = shrink_message("twitter", comment, title, url, tags)
+        account.tweet(shrunk_msg)
 
 
 def mastodon_update(

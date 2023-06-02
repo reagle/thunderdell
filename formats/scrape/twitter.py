@@ -14,21 +14,18 @@ import textwrap
 
 import pendulum as pm
 
-# https://realpython.com/twitter-bot-python-tweepy/
-import tweepy
+# https://github.com/trevorhobenshield/twitter-api-client
+from twitter.scraper import Scraper
 
 from utils.web_api_tokens import (
-    TW_ACCESS_TOKEN,
-    TW_ACCESS_TOKEN_SECRET,
-    TW_CONSUMER_KEY,
-    TW_CONSUMER_SECRET,
+    TW_EMAIL,
+    TW_PASSWORD,
+    TW_USERNAME,
 )
 
 from .default import ScrapeDefault
 
-auth = tweepy.OAuthHandler(TW_CONSUMER_KEY, TW_CONSUMER_SECRET)
-auth.set_access_token(TW_ACCESS_TOKEN, TW_ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
+scraper = Scraper(TW_EMAIL, TW_USERNAME, TW_PASSWORD, debug=0, save=False)
 
 # function aliases
 critical = logging.critical
@@ -48,11 +45,9 @@ class ScrapeTwitter(ScrapeDefault):
             identity = url.rsplit("/", 1)[1]
         else:
             raise RuntimeError("cannot identify twitter ID in {url}")
-        try:
-            self.status = api.get_status(id=identity)._json
-        except tweepy.TweepError as err:
-            print(err)
-            raise err
+        twitter_result = scraper.tweets_by_id([identity])
+        self.status = twitter_result[0]["data"]["tweetResult"]["result"]
+        print(f"{self.status=}")
 
     def get_biblio(self):
         biblio = {
@@ -68,18 +63,21 @@ class ScrapeTwitter(ScrapeDefault):
         return biblio
 
     def get_author(self):
-        name = self.status["user"]["name"].strip()
-        screen_name = self.status["user"]["screen_name"].strip()
+        name = self.status["core"]["user_results"]["result"]["legacy"]["name"].strip()
+        screen_name = self.status["core"]["user_results"]["result"]["legacy"][
+            "screen_name"
+        ].strip()
         print(f"{name=}")
         return f"{name} ({screen_name})"
 
     def get_title(self):
-        title = self.status["text"].split("\n")[0]
+        title = self.status["legacy"]["full_text"].split("\n")[0]
         title = textwrap.shorten(title, 136, break_long_words=False, placeholder="...")
         return title
 
     def get_date(self):
-        return pm.parse(self.status["created_at"], strict=False).strftime("%Y%m%d")
+        created_at = self.status["legacy"]["created_at"]
+        return pm.parse(created_at, strict=False).strftime("%Y%m%d")  # type: ignore
 
     def get_excerpt(self):
-        return self.status["text"].strip()
+        return self.status["legacy"]["full_text"].strip()

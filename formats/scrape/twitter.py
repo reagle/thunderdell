@@ -16,16 +16,12 @@ import pendulum as pm
 
 # https://github.com/trevorhobenshield/twitter-api-client
 from twitter.scraper import Scraper
-
-from utils.web_api_tokens import (
-    TW_EMAIL,
-    TW_PASSWORD,
-    TW_USERNAME,
-)
+from twitter.util import init_session
 
 from .default import ScrapeDefault
 
-scraper = Scraper(TW_EMAIL, TW_USERNAME, TW_PASSWORD, debug=0, save=False)
+session = init_session()
+scraper = Scraper(session=session, debug=1, save=False)
 
 # function aliases
 critical = logging.critical

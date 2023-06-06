@@ -152,10 +152,12 @@ def twitter_update(
 
     # https://github.com/trevorhobenshield/twitter-api-client/issues/64
     cookies_fp = Path(TMP_DIR + "twitter.cookies")
+    # TODO: deal with expired cookies 2023-06-06
     if cookies_fp.exists():
         cookies = orjson.loads(cookies_fp.read_bytes())
         session = Client(cookies=cookies)
         account = Account(session=session)
+        info(f"using existing {cookies=}")
     else:
         session = init_session()
         account = Account(email=TW_EMAIL, username=TW_USERNAME, password=TW_PASSWORD)
@@ -165,8 +167,10 @@ def twitter_update(
             if k in {"ct0", "auth_token"}
         }
         cookies_fp.write_bytes(orjson.dumps(cookies))
+        info(f"using new {cookies=}")
 
-    # TODO: test media upload 2023-06-02
+    # TODO: prompts too many cookie exception on 2nd use: 2023-06-06
+    # CookieConflict: Multiple cookies exist with name=ct0
     if photo_path:
         shrunk_msg = shrink_message("twitter", comment, title, "", tags)
         account.tweet(shrunk_msg, media=[{"media": str(photo_path)}])

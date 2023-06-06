@@ -126,8 +126,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          tags = {len(tags)}: {tags}
          {total_len=}""")
 
-    # TODO: uncomment when persistent login is working (see below)
-    # twitter_update(comment, title, url, tags, photo_path)
+    twitter_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)
 
 
@@ -139,18 +138,33 @@ def twitter_update(
     """
 
     # https://github.com/trevorhobenshield/twitter-api-client
+    import orjson
+    from httpx import Client
     from twitter.account import Account
+    from twitter.util import init_session
 
+    from config import TMP_DIR
     from utils.web_api_tokens import (
         TW_EMAIL,
         TW_PASSWORD,
         TW_USERNAME,
     )
 
-    # TODO: this creates too many new logins, disabling twitter_update above
-    # until issue resolved 2023-06-02
     # https://github.com/trevorhobenshield/twitter-api-client/issues/64
-    account = Account(TW_EMAIL, TW_USERNAME, TW_PASSWORD)  # , debug=2, save=True
+    cookies_fp = Path(TMP_DIR + "twitter.cookies")
+    if cookies_fp.exists():
+        cookies = orjson.loads(cookies_fp.read_bytes())
+        session = Client(cookies=cookies)
+        account = Account(session=session)
+    else:
+        session = init_session()
+        account = Account(email=TW_EMAIL, username=TW_USERNAME, password=TW_PASSWORD)
+        cookies = {
+            k: v
+            for k, v in account.session.cookies.items()
+            if k in {"ct0", "auth_token"}
+        }
+        cookies_fp.write_bytes(orjson.dumps(cookies))
 
     # TODO: test media upload 2023-06-02
     if photo_path:

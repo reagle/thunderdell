@@ -271,10 +271,10 @@ if __name__ == "__main__":
         sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
-            pretty_tabulate_dict(dictionary, 3)
+            print(pretty_tabulate_dict(dictionary, 4))
         sys.exit()
     if args.container_shortcuts:
-        pretty_tabulate_dict(bf.CSL_SHORTCUTS, 3)
+        print(pretty_tabulate_dict(bf.CSL_SHORTCUTS, 4))
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))

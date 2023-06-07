@@ -177,6 +177,7 @@ def twitter_update(
     else:
         shrunk_msg = shrink_message("twitter", comment, title, url, tags)
         account.tweet(shrunk_msg)
+    print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 
 def mastodon_update(

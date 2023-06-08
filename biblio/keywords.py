@@ -12,7 +12,6 @@ __license__ = "GLPv3"
 GENERAL_KEY_SHORTCUTS = {
     "aca": "academia",
     "add": "addiction",
-    "adv": "advice",
     "edu": "education",
     "eth": "ethics",
     "exi": "exit",
@@ -35,15 +34,27 @@ GENERAL_KEY_SHORTCUTS = {
     "pri": "privacy",
     "psy": "psychology",
     "red": "reddit",
-    "rel": "relationship",
     "ske": "skepticism",
     "spe": "speech",
     "str": "structure",
     "tea": "teaching",
     "tec": "technology",
     "tro": "troll",
-    "zei": "zeitgeist",
 }
+
+
+# Advice
+ADVICE_KEY_SHORTCUTS = {
+    "adv": "advice",
+    "aut": "authority",  # normative: who deserves to have power
+    "eff": "efficacy",
+    "exp": "expertise",  # descriptive: best process for knowing
+    "hea": "health",
+    "mot": "motivation",
+    "rel": "relationship",
+    "zei": "zeitgeist",  # recognition in culture
+}
+
 
 # Tech Prediction, Vision, and Utopia
 TV_KEY_SHORTCUTS = {
@@ -105,7 +116,6 @@ RTC_KEY_SHORTCUTS = {
 # Wikipedia
 WP_KEY_SHORTCUTS = {
     "alt": "alternative",
-    "aut": "authority",
     "ana": "analysis",
     "apo": "apologize",
     "att": "attack",
@@ -118,11 +128,9 @@ WP_KEY_SHORTCUTS = {
     "coi": "COI",
     "dep": "deployment",
     "ecc": "eccentric",
-    "exp": "expertise",
     "fai": "faith",
     "fru": "frustration",
     "gov": "governance",
-    "mot": "motivation",
     "not": "notability",
     "par": "participation",
     "phi": "philosophy",
@@ -133,6 +141,7 @@ WP_KEY_SHORTCUTS = {
 
 LIST_OF_KEYSHORTCUTS = (
     GENERAL_KEY_SHORTCUTS,
+    ADVICE_KEY_SHORTCUTS,
     GF_KEY_SHORTCUTS,
     RTC_KEY_SHORTCUTS,
     WP_KEY_SHORTCUTS,

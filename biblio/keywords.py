@@ -47,6 +47,7 @@ GENERAL_KEY_SHORTCUTS = {
 ADVICE_KEY_SHORTCUTS = {
     "adv": "advice",
     "aut": "authority",  # normative: who deserves to have power
+    "con": "controversy",
     "eff": "efficacy",
     "exp": "expertise",  # descriptive: best process for knowing
     "hea": "health",
@@ -123,7 +124,6 @@ WP_KEY_SHORTCUTS = {
     "blo": "block",
     "cab": "cabal",
     "col": "collaboration",
-    "con": "consensus",
     "cit": "citation",
     "coi": "COI",
     "dep": "deployment",

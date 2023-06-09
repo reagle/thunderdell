@@ -21,6 +21,7 @@ from enchant import Dict
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore
+from send2trash import send2trash
 
 from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
@@ -261,6 +262,13 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="output to FILE-fixed.txt",
     )
     arg_parser.add_argument(
+        "-t",
+        "--trash",
+        action="store_true",
+        default=False,
+        help="trash file after prompt for running extract-dictation",
+    )
+    arg_parser.add_argument(
         "-L",
         "--log-to-file",
         action="store_true",
@@ -350,5 +358,11 @@ if __name__ == "__main__":
                 edited_text = fixed_fn.read_text()
                 create_mm(args, edited_text, mm_file_name)
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
+            if args.trash:
+                send2trash(file_name)
+            else:
+                user_input = input("\nTrash file?" + " 'y' for yes,\n")
+                if user_input == "y":
+                    send2trash(file_name)
         else:
             print(new_text)

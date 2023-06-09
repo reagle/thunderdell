@@ -160,7 +160,9 @@ def twitter_update(
         info(f"using existing {cookies=}")
     else:
         session = init_session()
-        account = Account(email=TW_EMAIL, username=TW_USERNAME, password=TW_PASSWORD)
+        account = Account(
+            email=TW_EMAIL, username=TW_USERNAME, password=TW_PASSWORD, save=False
+        )
         cookies = {
             k: v
             for k, v in account.session.cookies.items()

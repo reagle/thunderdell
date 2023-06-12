@@ -243,8 +243,8 @@ if __name__ == "__main__":
         version=f"{__version__} using Python {sys.version}",
     )
     args = arg_parser.parse_args()
-    log_level = logging.ERROR  # 40
 
+    log_level = logging.ERROR  # 40
     if args.verbose == 1:
         log_level = logging.WARNING  # 30
     elif args.verbose == 2:

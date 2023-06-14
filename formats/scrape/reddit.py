@@ -37,7 +37,7 @@ class ScrapeReddit(ScrapeDefault):
         RE_REDDIT_URL = re.compile(
             r"""
                 (?P<prefix>http.*?reddit\.com/)
-                (?P<root>(r/\w+)|(u(ser)?/\w+)|(wiki/\w+))
+                (?P<root>(r/[\w\.]+)|(u(ser)?/\w+)|(wiki/\w+))
                 (?P<post>/comments/(?P<pid>\w+)/(?P<title>\w+)/)?
                 (?P<comment>(?P<cid>\w+))?
                 """,
@@ -45,6 +45,7 @@ class ScrapeReddit(ScrapeDefault):
         )
 
         # https://www.reddit.com/r/Professors/comments/104xivl/comment/j38d68q/?context=3
+        # https://www.reddit.com/r/reddit.com/comments/87/the_downing_street_memo/
 
         self.type = "unknown"
         url = url.split("/?")[0]  # remove parameters from url

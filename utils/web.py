@@ -171,8 +171,6 @@ def twitter_update(
         cookies_fp.write_bytes(orjson.dumps(cookies))
         info(f"using new {cookies=}")
 
-    # TODO: prompts too many cookie exception on 2nd use: 2023-06-06
-    # CookieConflict: Multiple cookies exist with name=ct0
     if photo_path:
         shrunk_msg = shrink_message("twitter", comment, title, "", tags)
         account.tweet(shrunk_msg, media=[{"media": str(photo_path)}])

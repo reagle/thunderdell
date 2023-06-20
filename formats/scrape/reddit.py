@@ -13,6 +13,7 @@ import logging
 import re
 import time
 from datetime import datetime
+from urllib.parse import urlparse, urlunparse
 
 from change_case import sentence_case
 from utils.web import get_JSON
@@ -30,9 +31,9 @@ NOW = time.localtime()
 
 
 class ScrapeReddit(ScrapeDefault):
-    def __init__(self, url, comment):
+    def __init__(self, url_clean, comment):
         print("Scraping reddit", end="\n")
-        ScrapeDefault.__init__(self, url, comment)
+        ScrapeDefault.__init__(self, url_clean, comment)
 
         RE_REDDIT_URL = re.compile(
             r"""
@@ -44,14 +45,12 @@ class ScrapeReddit(ScrapeDefault):
             re.VERBOSE,
         )
 
-        # https://www.reddit.com/r/Professors/comments/104xivl/comment/j38d68q/?context=3
-        # https://www.reddit.com/r/reddit.com/comments/87/the_downing_street_memo/
-
         self.type = "unknown"
-        url = url.split("/?")[0]  # remove parameters from url
-        self.json = get_JSON(f"{url}.json")
-        if RE_REDDIT_URL.match(url):
-            self.url_dict = RE_REDDIT_URL.match(url).groupdict()
+        url_parsed = urlparse(url_clean)._replace(query="", fragment="")
+        url_clean = urlunparse(url_parsed)
+        self.json = get_JSON(f"{url_clean}.json")
+        if match := RE_REDDIT_URL.match(url_clean):
+            self.url_dict = match.groupdict()
             info(f"{self.url_dict=}")
             if self.url_dict["cid"]:
                 self.type = "comment"
@@ -64,6 +63,8 @@ class ScrapeReddit(ScrapeDefault):
                     self.type = "user"
                 if self.url_dict["root"].startswith("wiki/"):
                     self.type = "wiki"
+        else:
+            raise TypeError("Unknown type of Reddit resource.")
         info(f"{self.type=}")
 
     def get_biblio(self):

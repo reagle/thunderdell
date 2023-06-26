@@ -168,16 +168,16 @@ class ScrapeDefault:
                     else:
                         continue
 
+        date = time.strftime("%Y%m%d", NOW)
         try:
             earliest_dates = [
                 d.strftime("%Y%m%d") for d in datefinder.find_dates(self.text)
             ]
-        except TypeError:
-            info(f"making date {NOW=}")
-            return time.strftime("%Y%m%d", NOW)  # default when earliest_date fails
-        else:
-            info(f"returning first of {earliest_dates=}")
-            return earliest_dates[0]
+            date = earliest_dates[0]
+        except (TypeError, IndexError) as e:
+            info(f"date not found returning default NOW: {e}")
+            pass
+        return date
 
     def get_title(self):
         title_regexps = {

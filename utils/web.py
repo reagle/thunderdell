@@ -35,7 +35,7 @@ def get_HTML(
     cookie: str = "",
     retry_counter: int = 0,
     cache_control: str = "",
-) -> tuple[bytes, etree._ElementTree, str, requests.Response]:
+) -> tuple[bytes, etree._Element, str, requests.Response]:
     """Return [HTML content, response] of a given URL."""
 
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}

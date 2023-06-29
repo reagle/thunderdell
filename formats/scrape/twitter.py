@@ -21,7 +21,7 @@ from twitter.util import init_session
 from .default import ScrapeDefault
 
 session = init_session()
-scraper = Scraper(session=session, debug=1, save=False)
+scraper = Scraper(session=session)
 
 # function aliases
 critical = logging.critical

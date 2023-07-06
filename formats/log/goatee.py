@@ -78,17 +78,12 @@ def log2goatee(args, biblio):
             thumb_url = path + "/thumbs/" + jpg
             alt_text = blog_title.replace("-", " ")
             fd.write(
-                """<p><a href="%s"><img alt="%s" class="thumb right" """
-                """src="%s"/></a></p>\n\n"""
-                % (
-                    url,
-                    alt_text,
-                    thumb_url,
-                )
+                f'''<p><a href="{url}"><img alt="{alt_text}" class="thumb right"'''
+                + f"""src="{thumb_url}"/></a></p>\n\n"""
             )
             fd.write(
                 f'<p><a href="{url}"><img alt="{alt_text}" '
-                f'class="view" src="{url}"/></a></p>'
+                + f'class="view" src="{url}"/></a></p>'
             )
     fd.close()
     Popen([config.VISUAL, filename])

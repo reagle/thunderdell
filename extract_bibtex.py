@@ -9,8 +9,6 @@ __version__ = "1.0"
 
 import logging
 import re
-
-# from os import chdir, environ, mkdir, rename
 from os.path import abspath, expanduser, splitext  # exists
 
 HOME = expanduser("~")
@@ -24,7 +22,7 @@ error = logging.error
 excpt = logging.exception
 
 
-def regexParse(text: str):
+def regexParse(text: list[str]):
     entries = {}
     key_pat = re.compile(r"@\w+{(.*),")
     value_pat = re.compile(r"\s+(\w+) ?= ?{(.*)},?")
@@ -43,9 +41,9 @@ def regexParse(text: str):
 
 def xml_escape(text: str) -> str:
     """Remove entities and spurious whitespace"""
-    import cgi
+    import html
 
-    escaped_text = cgi.escape(text, quote=True).strip()
+    escaped_text = html.escape(text, quote=True).strip()
     return escaped_text
 
 
@@ -67,8 +65,9 @@ def process(entries: dict):
 
         if "url" in entry:
             fdo.write(
-                """    <node COLOR="#090f6b" LINK="%s" TEXT="%s">\n"""
-                % (xml_escape(entry["url"]), xml_escape(entry["title"]))
+                """    <node COLOR="#090f6b" LINK="{}" TEXT="{}">\n""".format(
+                    xml_escape(entry["url"]), xml_escape(entry["title"])
+                )
             )
         else:
             fdo.write(
@@ -113,7 +112,7 @@ def process(entries: dict):
 
         fdo.write(
             """      <node COLOR="#ff33b8" TEXT="%s"/>\n"""
-            % xml_escape(" ".join(["%s=%s" % vals for vals in cite]))
+            % xml_escape(" ".join(["{}={}".format(*vals) for vals in cite]))
         )
 
         if "abstract" in entry:

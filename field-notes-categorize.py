@@ -9,7 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import pdb
 import re
 from pathlib import Path
 

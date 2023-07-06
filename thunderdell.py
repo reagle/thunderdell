@@ -272,8 +272,7 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
         '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
     )
     for entry in list(entries.values()):
-        args.query = entry["identifier"]
-        emit_results(args, entries)
+        emit_results(entry["identifier"], entries, args.results_file)
     args.results_file.write("</ul></body></html>\n")
     args.results_file.close()
     if args.in_main:

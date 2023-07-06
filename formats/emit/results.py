@@ -32,18 +32,15 @@ debug = logging.debug
 
 
 def emit_results(
-    # args: argparse.Namespace,
     query: str,
     entries: dict[str, dict],
     results_file: TextIOWrapper,
 ) -> None:
     """Emit the results of the query"""
 
-    # results_file = args.results_file
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]
-        # author = create_biblatex_author(entry["author"])
         title = entry["title"]
         date = entry["date"]
         url = entry.get("url", "")

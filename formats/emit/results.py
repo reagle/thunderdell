@@ -9,7 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import argparse
 import logging
 import os
 import re
@@ -58,8 +57,9 @@ def emit_results(
             results_file.write('%s<ul class="tit_tree">\n' % (spaces))
             spaces = spaces + " "
             results_file.write(
-                '%s<li style="text-align: right">[<a href="%s">%s</a>]</li>\n'
-                % (spaces, MM_mm_file, base_mm_file),
+                '{}<li style="text-align: right">[<a href="{}">{}</a>]</li>\n'.format(
+                    spaces, MM_mm_file, base_mm_file
+                ),
             )
             fl_names = ", ".join(name[0] + " " + name[2] for name in entry["author"])
             title_mdn = f"{title}"

@@ -7,11 +7,15 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+# TODO 2023-07-07
+# - convert about to biblatex date format (d=)
+# - handle name variances (e.g., "First Last" without comma)
+
 import logging
 import re
-from os.path import abspath, expanduser, splitext  # exists
+from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-HOME = expanduser("~")
+HOME = str(Path("~").expanduser())
 
 log_level = 100  # default
 critical = logging.critical
@@ -22,19 +26,25 @@ error = logging.error
 excpt = logging.exception
 
 
-def regexParse(text: list[str]):
+def regex_parse(text: list[str]) -> dict[str, dict[str, str]]:
+    key = ""
     entries = {}
-    key_pat = re.compile(r"@\w+{(.*),")
-    value_pat = re.compile(r"\s+(\w+) ?= ?{(.*)},?")
+
+    key_pattern = re.compile(r"@\w*{(.*)")  # Beginning/id of bibtex entry
+    value_pattern = re.compile(r"\s*(\w+) ?= ?{(.*)},?")
+
     for line in text:
-        key_match = key_pat.match(line)
+        print(f"{line=}")
+        key_match = key_pattern.match(line)
         if key_match:
             key = key_match.group(1)
+            print(f"{key=}")
             entries[key] = {}
-            continue
-        value_match = value_pat.match(line)
+            continue  # Keys/IDs are assumed to be alone on single line
+        value_match = value_pattern.match(line)
         if value_match:
             field, value = value_match.groups()
+            print(f"{field=} {value=}")
             entries[key][field] = value.replace("{", "").replace("}", "")
     return entries
 
@@ -47,8 +57,8 @@ def xml_escape(text: str) -> str:
     return escaped_text
 
 
-def process(entries: dict):
-    fdo.write("""<map version="0.7.2">\n<node TEXT="Readings">\n""")
+def process(entries: dict, fdo):
+    fdo.write("""<map version="1.11.1">\n<node TEXT="Readings">\n""")
 
     for entry in list(entries.values()):
         info("entry = '%s'" % (entry))
@@ -127,10 +137,12 @@ def process(entries: dict):
 if __name__ == "__main__":
     import argparse  # http://docs.python.org/dev/library/argparse.html
 
-    arg_parser = argparse.ArgumentParser(description="TBD")
+    arg_parser = argparse.ArgumentParser(
+        description="Converts bibtex files to mindmap."
+    )
 
     # positional arguments
-    arg_parser.add_argument("files", nargs="+", metavar="FILE")
+    arg_parser.add_argument("file_names", nargs="+", type=Path, metavar="FILE_NAMES")
     # optional arguments
     arg_parser.add_argument(
         "-L",
@@ -140,20 +152,13 @@ if __name__ == "__main__":
         help="log to file %(prog)s.log",
     )
     arg_parser.add_argument(
-        "-n",
-        "--number",
-        type=int,
-        default=10,
-        help="some number (default: %(default)s)",
-    )
-    arg_parser.add_argument(
         "-V",
         "--verbose",
         action="count",
         default=0,
         help="Increase verbosity (specify multiple times for more)",
     )
-    arg_parser.add_argument("--version", action="version", version="TBD")
+    arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args()
 
     if args.verbose == 1:
@@ -165,7 +170,7 @@ if __name__ == "__main__":
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="extract-bibtex.log",
+            filename="extract_bibtex.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
@@ -173,15 +178,14 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    # Do some actual work.
-    files = [abspath(file_name) for file_name in args.files]
-    for file_name in files:
+    for file_path in args.file_names:
         try:
-            src = open(file_name, encoding="utf-8", errors="replace").read()
-            fileOut = splitext(file_name)[0] + ".mm"
-            fdo = open(fileOut, "wb", encoding="utf-8", errors="replace")
+            bibtex_content = file_path.read_text(encoding="utf-8", errors="replace")
+            file_out = file_path.with_suffix(".mm")
+            fdo = file_out.open("w")
         except OSError:
-            print("    file does not exist")
+            print(f"{file_path=} does not exist")
             continue
-        entries = regexParse(src.split("\n"))
-        process(entries)
+        entries = regex_parse(bibtex_content.split("\n"))
+        process(entries, fdo)
+        fdo.close()

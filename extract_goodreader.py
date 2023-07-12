@@ -358,11 +358,13 @@ if __name__ == "__main__":
                 edited_text = fixed_fn.read_text()
                 create_mm(args, edited_text, mm_file_name)
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
-            if args.trash:
-                send2trash(file_name)
-            else:
-                user_input = input("\nTrash file?" + " 'y' for yes,\n")
-                if user_input == "y":
-                    send2trash(file_name)
+
+            if args.trash or input("\nTrash file? 'y' for yes,\n") == "y":
+                detrius = [
+                    file_name.stem + ".eml",
+                    file_name.stem + "-fixed.txt",
+                    file_name.stem + ".mm",
+                ]
+                send2trash(detrius)
         else:
             print(new_text)

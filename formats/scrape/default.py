@@ -9,6 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
+import datetime
 import logging
 import re
 import string
@@ -32,6 +33,22 @@ debug = logging.debug
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
+
+
+def winnow_dates(self) -> datetime.datetime:
+    """Validate and sanity check results from datefinder.
+    Remove dates if:
+    - in the future
+    - older than 50 years"""
+
+    now = datetime.datetime.now()
+    fifty_years_ago = now - datetime.timedelta(days=50 * 365.25)
+    winnowed_dates = []
+
+    for date in datefinder.find_dates(self.text):
+        if date <= now and date >= fifty_years_ago:  # type: ignore (weird bug?)
+            winnowed_dates.append(date)
+    return winnowed_dates[0]
 
 
 class ScrapeDefault:
@@ -148,9 +165,10 @@ class ScrapeDefault:
         return "UNKNOWN"
 
     def get_date(self):
-        """Return date from xpath, earliest from datefinder, or today's date."""
+        """Return date from xpath, guess from datefinder, or today's date."""
         DATE_XPATHS = (
             """//meta[@name="date"]/@content""",
+            """//meta[@name="pubdate"]/@content""",
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
             """//relative-time/@datetime""",
         )
@@ -170,10 +188,7 @@ class ScrapeDefault:
 
         date = time.strftime("%Y%m%d", NOW)
         try:
-            earliest_dates = [
-                d.strftime("%Y%m%d") for d in datefinder.find_dates(self.text)
-            ]
-            date = earliest_dates[0]
+            date = winnow_dates(self).strftime("%Y%m%d")
         except (TypeError, IndexError) as e:
             info(f"date not found returning default NOW: {e}")
             pass

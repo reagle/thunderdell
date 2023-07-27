@@ -169,6 +169,7 @@ class ScrapeDefault:
         DATE_XPATHS = (
             """//meta[@name="date"]/@content""",
             """//meta[@name="pubdate"]/@content""",
+            """//meta[@property="article:published_time"]/@content""",
             """//li/span[@class="byline_label"]/following-sibling::span/@title""",
             """//relative-time/@datetime""",
         )

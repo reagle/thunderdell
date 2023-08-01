@@ -85,12 +85,24 @@ def main(argv: list[str]) -> argparse.Namespace:
     return args
 
 
+def only_unique_items(original_list: list) -> list:
+    """Given a list, return a list with unique items."""
+    # Instapaper has bug where it exports redundant highlights,
+    # so I remove redundancies. 2023-08-01
+    uniques = []
+    for item in original_list:
+        if item not in uniques:
+            uniques.append(item)
+    return uniques
+
+
 def process_files(args: argparse.Namespace, file_names: list[str]):
-    URL_RE = re.compile(r"# \[.*\]\((.*)\)")
+    URL_RE = re.compile(r"# \[.*\]\((.*)\)")  # markdown title
     for file_name in file_names:
         info(f"{file_name=}")
         with open(file_name) as f:
-            lines = f.readlines()
+            lines = only_unique_items(f.readlines())
+            print(f"{lines=}")
             first_line = lines[0]
             info(f"{first_line=}")
             comment = "\n" + "".join(lines).replace("\n\u200b\n", "").replace(

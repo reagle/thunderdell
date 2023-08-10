@@ -83,7 +83,7 @@ def open_query(isbn: str):
                     except pm.parsing.exceptions.ParserError as error:
                         print(f"Failed to parse time string: {error}")
                         return False
-                elif type(value) == str:
+                elif isinstance(value, str):
                     json_bib[key] = value.strip()
                     info("  value = '%s'" % json_bib[key])
             json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
@@ -126,7 +126,7 @@ def google_query(isbn):
                 json_bib["author"] = ", ".join(value)
             if key == "publishedDate":
                 json_bib["date"] = value.replace("-", "")
-            elif type(value) == str:
+            elif isinstance(value, str):
                 json_bib[key] = value.strip()
                 info(f"  value = '{json_bib[key]}'")
         json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"

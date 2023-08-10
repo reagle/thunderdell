@@ -50,12 +50,7 @@ def log2goatee(args, biblio):
             filename = blog_title
             blog_title = blog_title.replace("-", " ")
     filename = filename.strip().replace(" ", "-").replace("'", "")
-    filename = GOATEE_ROOT + "{}/{}{}-{}.md".format(
-        this_year,
-        this_month,
-        this_day,
-        filename,
-    )
+    filename = GOATEE_ROOT + f"{this_year}/{this_month}{this_day}-{filename}.md"
     info(f"{blog_title=}")
     info(f"{filename=}")
     if os.path.exists(filename):

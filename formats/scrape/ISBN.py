@@ -45,10 +45,7 @@ class ScrapeISBN(ScrapeDefault):
             info(f"key = '{key}'")
             if key.startswith("subject"):
                 continue
-            info(
-                "key = '%s' value = '%s' type(value) = '%s'\n"
-                % (key, value, type(value))
-            )
+            info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'\n")
             if value in (None, [], ""):
                 pass
             elif key == "author":

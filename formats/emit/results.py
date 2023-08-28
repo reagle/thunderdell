@@ -81,7 +81,7 @@ def emit_results(
             results_file.write(f"{spaces}</ul><!--tit_tree-->\n")
             results_file.write(f"{spaces}</li>\n")
 
-        # if some nodes were matched, PP with citation info reversed
+        # if some nodes were matched, pretty print with citation info reversed
         if "_node_results" in entry:
             print_entry(
                 identifier,
@@ -167,7 +167,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
             # biblatex: page, column, line, verse, section, paragraph
             # kindle: location
             if "pagination" in entry:
-                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"], "")
+                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"], None)
                 if prefix is None:
                     raise Exception(
                         f"unknown locator '{entry['pagination']}' "
@@ -175,6 +175,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
                     )
                 locator = f"{prefix} {locator}"
             else:
+                # If no pagination specified, assume page number
                 if "-" in locator:
                     locator = f", pp. {locator}"
                 else:
@@ -195,7 +196,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
 
     results_file.write(
         f'{spaces}<li style="{style}" class="{style_ref}">'
-        + f"{prefix}{hypertext}{cite}</li>\n"
+        + f"{hypertext}{cite}</li>\n"
     )
 
 

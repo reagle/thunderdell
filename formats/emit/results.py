@@ -152,7 +152,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
     text = text.replace(  # restore my query_highlight strongs
         "&lt;strong&gt;", "<strong>"
     ).replace("&lt;/strong&gt;", "</strong>")
-    prefix = "&gt; " if style_ref == "quote" else ""
+    quote_mark = "&gt; " if style_ref == "quote" else ""
     # don't reverse short texts and certain style refs
     if len(text) < 50 or style_ref in ["author", "title", "cite"]:
         cite = ""
@@ -196,7 +196,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
 
     results_file.write(
         f'{spaces}<li style="{style}" class="{style_ref}">'
-        + f"{hypertext}{cite}</li>\n"
+        + f"{quote_mark}{hypertext}{cite}</li>\n"
     )
 
 

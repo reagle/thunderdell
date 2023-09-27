@@ -104,6 +104,7 @@ def build_mm_from_txt(
     citation = ""
 
     if line not in ("", "\r", "\n"):
+        # print(f"{line=}")
         if line.lower().startswith("author ="):
             # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
             if started:  # Do I need to close a previous entry
@@ -412,7 +413,7 @@ if __name__ == "__main__":
     critical("==================================")
     critical(f"{args=}")
     for source_fn in args.file_names:
-        text = source_fn.read_text()
+        text = source_fn.read_text(encoding="utf-8-sig")
         mm_file_name = source_fn.with_suffix(".mm")
         create_mm(args, text, mm_file_name)
         subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])

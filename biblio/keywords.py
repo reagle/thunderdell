@@ -26,6 +26,7 @@ GENERAL_KEY_SHORTCUTS = {
     "lit": "literacy",
     "ope": "open",
     "mon": "money",
+    "ora": "oratory",
     "nor": "norms",
     "pat": "patience",
     "pyt": "python",

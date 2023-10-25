@@ -11,6 +11,9 @@ select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "UP", 
 # "RUF" warns about ambiguous Unicode for curly quotes
 # "C90" McCabe complexity 
 
+# These rules are redundant with black use and ruff format
+ignore = ["E501", "Q000", "Q001", "Q002", "Q003"]
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",

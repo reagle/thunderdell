@@ -19,7 +19,7 @@ __version__ = "1.0"
 import logging
 import time
 
-import pendulum as pm
+import arrow
 
 from change_case import sentence_case
 from utils.web import get_JSON
@@ -72,7 +72,7 @@ class ScrapeNYT(ScrapeDefault):
 
     def get_date(self):
         pub_date = self.json["pub_date"]
-        date = pm.parse(pub_date, strict=False).strftime("%Y%m%d")
+        date = arrow.get(pub_date).format("YYYYMMDD")
         return date
 
     def get_excerpt(self):

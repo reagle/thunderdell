@@ -12,7 +12,7 @@ import logging
 import pprint
 import sys
 
-import pendulum as pm
+import arrow
 import requests
 
 # from dateutil.parser import ParserError  # type: ignore
@@ -66,9 +66,9 @@ def open_query(isbn: str):
             json_details = json_vol["details"]
             for key, value in list(json_details.items()):
                 if key == "authors":
-                    json_bib["author"] = ", ".join(
-                        [author["name"] for author in json_details["authors"]]
-                    )
+                    json_bib["author"] = ", ".join([
+                        author["name"] for author in json_details["authors"]
+                    ])
                 if key == "by_statement":
                     json_bib["author"] = json_details["by_statement"]
                 elif key == "publishers":
@@ -77,10 +77,10 @@ def open_query(isbn: str):
                     json_bib["address"] = json_details[key][0]
                 elif key == "publish_date":
                     try:
-                        json_bib["date"] = pm.parse(
-                            json_details[key], strict=False
-                        ).strftime("%Y%m%d")
-                    except pm.parsing.exceptions.ParserError as error:
+                        json_bib["date"] = arrow.get(json_details[key]).format(
+                            "YYYYMMDD"
+                        )
+                    except arrow.parser.ParserError as error:
                         print(f"Failed to parse time string: {error}")
                         return False
                 elif isinstance(value, str):

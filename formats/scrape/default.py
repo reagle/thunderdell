@@ -16,8 +16,8 @@ import string
 import time
 from urllib.parse import urlparse
 
+import arrow
 import datefinder
-import pendulum as pm
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
@@ -180,7 +180,7 @@ class ScrapeDefault:
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     info(f"'{xpath_result=}'; '{path=}'")
-                    date = pm.parse(xpath_result[0], strict=False).strftime("%Y%m%d")
+                    date = arrow.get(xpath_result[0]).format("YYYYMMDD")
                     info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date
@@ -192,7 +192,6 @@ class ScrapeDefault:
             date = winnow_dates(self).strftime("%Y%m%d")
         except (TypeError, IndexError) as e:
             info(f"date not found returning default NOW: {e}")
-            pass
         return date
 
     def get_title(self):

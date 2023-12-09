@@ -12,7 +12,7 @@ __version__ = "1.0"
 import logging
 import textwrap
 
-import pendulum as pm
+import arrow
 
 # https://github.com/trevorhobenshield/twitter-api-client
 from twitter.scraper import Scraper
@@ -73,7 +73,7 @@ class ScrapeTwitter(ScrapeDefault):
 
     def get_date(self):
         created_at = self.status["legacy"]["created_at"]
-        return pm.parse(created_at, strict=False).strftime("%Y%m%d")  # type: ignore
+        return arrow.get(created_at).format("YYYYMMDD")
 
     def get_excerpt(self):
         return self.status["legacy"]["full_text"].strip()

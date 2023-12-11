@@ -14,6 +14,8 @@ import sys
 import webbrowser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
+from send2trash import send2trash
+
 import busy
 
 HOME = str(Path("~").expanduser())
@@ -128,3 +130,6 @@ if __name__ == "__main__":
     critical("==================================")
     critical(f"{args=}")
     process_files(args, args.file_names)
+    user_input = input("\nTrash processed file? 'y' for yes,\n")
+    if user_input == "y":
+        send2trash(args.file_names)

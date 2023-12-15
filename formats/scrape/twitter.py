@@ -73,7 +73,7 @@ class ScrapeTwitter(ScrapeDefault):
 
     def get_date(self):
         created_at = self.status["legacy"]["created_at"]
-        return arrow.get(created_at).format("YYYYMMDD")
+        return arrow.get(created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("YYYYMMDD")
 
     def get_excerpt(self):
         return self.status["legacy"]["full_text"].strip()

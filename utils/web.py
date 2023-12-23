@@ -120,11 +120,13 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
-    info(f"""comment = {len(comment)}: {comment}
+    info(
+        f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}
          url = {len(url)}: {url}
          tags = {len(tags)}: {tags}
-         {total_len=}""")
+         {total_len=}"""
+    )
 
     twitter_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)

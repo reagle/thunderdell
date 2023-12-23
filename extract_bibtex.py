@@ -126,8 +126,11 @@ def process(entries: dict, fdo):
         )
 
         if "abstract" in entry:
-            fdo.write("""      <node COLOR="#999999" \
-                TEXT="&quot;%s&quot;"/>\n""" % xml_escape(entry["abstract"]))
+            fdo.write(
+                """      <node COLOR="#999999" \
+                TEXT="&quot;%s&quot;"/>\n"""
+                % xml_escape(entry["abstract"])
+            )
 
         fdo.write("""    </node>\n  </node>\n""")
 

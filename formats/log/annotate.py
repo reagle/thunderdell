@@ -156,10 +156,12 @@ def do_console_annotation(args, biblio):
         if key.startswith("c_"):
             initial_text.append(f"{bf.CSL_FIELDS[key]}={title_case(biblio[key])}")
         if key == "tags" and biblio["tags"]:
-            tags = " ".join([
-                "kw=" + KEY_SHORTCUTS.get(tag, tag)
-                for tag in biblio["tags"].strip().split(" ")
-            ])
+            tags = " ".join(
+                [
+                    "kw=" + KEY_SHORTCUTS.get(tag, tag)
+                    for tag in biblio["tags"].strip().split(" ")
+                ]
+            )
             initial_text.append(tags)
     if args.publish:
         warning("appending -p to text")

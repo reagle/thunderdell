@@ -580,11 +580,13 @@ def parse_names(names):
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(description="""Outputs YAML/CSL bibliography.\n
+    arg_parser = argparse.ArgumentParser(
+        description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
     3 significant words (i.e., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
-    and last character.""")
+    and last character."""
+    )
     arg_parser.add_argument(
         "-a",
         "--author-create",
@@ -791,7 +793,9 @@ if __name__ == "__main__":
         sys.exit()
 
     if args.fields:
-        print(textwrap.dedent(f"""
+        print(
+            textwrap.dedent(
+                f"""
                 ================ BIBLATEX_TYPES_ (deprecated) =========
                 http://intelligent.pe.kr/LaTex/bibtex2.htm\n
                 {pretty_tabulate_list(list(BIBLATEX_TYPES))}
@@ -815,7 +819,9 @@ if __name__ == "__main__":
                     t=biblatex/CSL type (e.g., t=thesis)
                     ot=organization's subtype (e.g., W3C REC)
                     pa=section|paragraph|location|chapter|verse|column|line\n\n
-        """))
+        """
+            )
+        )
         sys.exit()
 
     if args.query:

@@ -60,7 +60,8 @@ def query_sponge(query: str) -> str:
     else:
         out_str = """<p>No results for query '%s'</p>""" % query
 
-    HTMLPage = """<?xml version="1.0" encoding="iso-8859-1"?>
+    HTMLPage = (
+        """<?xml version="1.0" encoding="iso-8859-1"?>
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
@@ -79,7 +80,9 @@ def query_sponge(query: str) -> str:
               <input name="sitesearch" checked="checked"value="MindMap"
                type="radio" /> MM
             </form>
-        </div>%s</body></html>""" % out_str
+        </div>%s</body></html>"""
+        % out_str
+    )
 
     out_fd = codecs.open(out_file, "w", "utf-8", "replace")
     out_fd.write(HTMLPage)

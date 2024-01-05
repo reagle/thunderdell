@@ -17,7 +17,7 @@ from email.parser import BytesParser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 import roman  # type:ignore
-from enchant import Dict
+from enchant import Dict  # type:ignore # sometimes mismatch with system version
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore

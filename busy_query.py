@@ -68,6 +68,7 @@ def query_sponge(query: str) -> str:
         <title>Reagle's Planning Page</title>
         <link rel="stylesheet" type="text/css"
         href="../plan.css" />
+        <link rel="icon" type="image/x-icon" href="https://reagle.org/favicon.ico">
         </head>
         <body xml:lang="en" lang="en">
         <div>

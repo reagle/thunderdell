@@ -102,13 +102,28 @@ def log2mm(args, biblio):
     title_node = SubElement(
         author_node,
         "node",
-        {"TEXT": title, "STYLE_REF": "title", "LINK": permalink},
+        {
+            "TEXT": title,
+            "STYLE_REF": "title",
+            "FORMAT": "markdownPatternFormat",
+            "LINK": permalink,
+        },
     )
     cite_node = SubElement(  # noqa: F841
-        title_node, "node", {"TEXT": citation, "STYLE_REF": "cite"}
+        title_node,
+        "node",
+        {"TEXT": citation, "STYLE_REF": "cite", "FORMAT": "markdownPatternFormat"},
     )
     if abstract:
-        SubElement(title_node, "node", {"TEXT": abstract, "STYLE_REF": "annotation"})
+        SubElement(
+            title_node,
+            "node",
+            {
+                "TEXT": abstract,
+                "STYLE_REF": "annotation",
+                "FORMAT": "markdownPatternFormat",
+            },
+        )
     if excerpt:
         for excerpt_chunk in excerpt.split("\n\n"):
             info(f"{excerpt_chunk=}")
@@ -126,7 +141,11 @@ def log2mm(args, biblio):
             SubElement(
                 title_node,
                 "node",
-                {"TEXT": excerpt_chunk, "STYLE_REF": style_ref},
+                {
+                    "TEXT": excerpt_chunk,
+                    "STYLE_REF": style_ref,
+                    "FORMAT": "markdownPatternFormat",
+                },
             )
 
     ElementTree(mindmap).write(ofile, encoding="utf-8")

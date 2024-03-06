@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Log and annotate a URL to loggers (e.g., mindmap, blogs) 
+"""Log and annotate a URL to loggers (e.g., mindmap, blogs)
 with meta/bibliographic data about the URL from a scraper.
 
 https://reagle.org/joseph/2009/01/thunderdell.html

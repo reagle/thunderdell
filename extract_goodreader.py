@@ -176,8 +176,7 @@ def clean_pdf_ocr(text: str) -> str:
     new_text = restore_lost_spaces(new_text)
     return new_text
 
-# TODO 2024-03-06: dealing with dictionary bindings is terrible, move
-# to using wordlist-american.txt
+# This dependency on pyenchant tends to cause problems, but I need suggestion
 def remove_junk_hyphens(
     text: str,
     hyphen_RE: re.Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),
@@ -204,6 +203,7 @@ def remove_junk_hyphens(
     return text
 
 
+# This dependency on pyenchant tends to cause problems, but I need suggestion
 def restore_lost_spaces(text: str) -> str:
     """Restore lost spaces in PDFs using pyenchant.
 

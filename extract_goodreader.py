@@ -176,7 +176,8 @@ def clean_pdf_ocr(text: str) -> str:
     new_text = restore_lost_spaces(new_text)
     return new_text
 
-
+# TODO 2024-03-06: dealing with dictionary bindings is terrible, move
+# to using wordlist-american.txt
 def remove_junk_hyphens(
     text: str,
     hyphen_RE: re.Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),

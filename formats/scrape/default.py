@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 
 import arrow
 import datefinder
+import dateutil.parser as du
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
@@ -180,7 +181,9 @@ class ScrapeDefault:
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     info(f"'{xpath_result=}'; '{path=}'")
-                    date = arrow.get(xpath_result[0]).format("YYYYMMDD")
+                    # arrow.get is not powerful enough parser, so use dateutil
+                    # date = arrow.get(xpath_result[0]).format("YYYYMMDD")
+                    date = du.parse(xpath_result[0]).strftime("%Y%m%d")
                     info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date

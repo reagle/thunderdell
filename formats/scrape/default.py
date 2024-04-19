@@ -16,7 +16,7 @@ import string
 import time
 from urllib.parse import urlparse
 
-import arrow
+# import arrow # replaced with dateutil.parser
 import datefinder
 import dateutil.parser as du
 

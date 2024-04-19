@@ -5,14 +5,17 @@ preview = true
 
 [tool.ruff]
 
-select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "UP", "YTT"]
+# Same as Black.
+line-length = 88
+
+lint.select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "UP", "YTT"]
 # "SIM", "PTH"] # good, but hard on old code
 # "PLR" need to understand more
 # "RUF" warns about ambiguous Unicode for curly quotes
-# "C90" McCabe complexity 
+# "C90" McCabe complexity
 
 # These rules are redundant with black use and ruff format
-ignore = ["E501", "Q000", "Q001", "Q002", "Q003"]
+lint.ignore = ["E501", "Q000", "Q001", "Q002", "Q003"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -38,37 +41,22 @@ exclude = [
     "_old",
 ]
 
-# Same as Black.
-line-length = 88
-
 # Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-[tool.ruff.mccabe] # enabled via "C90" above
+[tool.ruff.lint.mccabe] # enabled via "C90" above
 max-complexity = 10
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-r a -q --doctest-modules"
 testpaths = [
-    # "biblio", "formats", "tests"
+    "biblio", "formats", "tests"
 ]
 filterwarnings = "ignore::DeprecationWarning"
 enable_assertion_pass_hook = true
-python_files = [
-    "*.py",
-    ]
-
-[tool.mypy]
-
-[[tool.mypy.overrides]]
-module = [
-    "mastodon",
-    "tweepy",
-]
-ignore_missing_imports = true
 
 [tool.pyright]
 reportMissingImports = false
 reportMissingTypeStubs = false
-pythonVersion = '3.11'
+pythonVersion = '3.12'

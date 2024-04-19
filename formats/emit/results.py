@@ -54,9 +54,7 @@ def emit_results(
             results_file.write('%s<ul class="tit_tree">\n' % (spaces))
             spaces = spaces + " "
             results_file.write(
-                '{}<li style="text-align: right">[<a href="{}">{}</a>]</li>\n'.format(
-                    spaces, MM_mm_file, base_mm_file
-                ),
+                f'{spaces}<li style="text-align: right">[<a href="{MM_mm_file}">{base_mm_file}</a>]</li>\n',
             )
             fl_names = ", ".join(name[0] + " " + name[2] for name in entry["author"])
             title_mdn = f"{title}"

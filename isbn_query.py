@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Return bibliographic data for a given an ISBN.
-"""
+"""Return bibliographic data for a given an ISBN."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -57,7 +56,7 @@ def open_query(isbn: str):
     info(f"{URL=}")
     r = requests.get(URL)
     returned_content_type = r.headers["content-type"]
-    info(f"r.content = '{r.content}'")
+    info(f"r.content = '{r.content!r}'")
     if returned_content_type.startswith("application/json"):
         if r.content != b"{}":
             json_bib = {"isbn": str(isbn)}

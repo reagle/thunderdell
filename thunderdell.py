@@ -22,6 +22,7 @@ import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
 from collections.abc import Callable
+from io import TextIOWrapper
 from typing import NamedTuple
 from urllib.parse import parse_qs
 
@@ -74,11 +75,10 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
 
-
 def build_bib(
     args: argparse.Namespace,
     file_name: str,
-    emitter_func: Callable[[argparse.Namespace, dict], None],
+    emitter_func: Callable[[argparse.Namespace, dict], None]
 ) -> None:
     """Parse and process files, including new ones encountered if chasing"""
 
@@ -229,9 +229,10 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
         os.remove(results_file_name)
     try:
         with open(results_file_name, "w", encoding="utf-8") as results_file:
+            args.results_file = results_file
             results_file.write(RESULT_FILE_HEADER)
             results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-            emit_results(args.query, entries, results_file)
+            emit_results(args, entries)
             results_file.write("</ul></body></html>\n")
     except OSError as err:
         print(f"{err}\nThere was an error writing to {results_file_name}")
@@ -272,7 +273,8 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
         '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
     )
     for entry in list(entries.values()):
-        emit_results(entry["identifier"], entries, args.results_file)
+        args.query = entry["identifier"]
+        emit_results(args, entries)
     args.results_file.write("</ul></body></html>\n")
     args.results_file.close()
     if args.in_main:

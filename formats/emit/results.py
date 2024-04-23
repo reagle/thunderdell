@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
+import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging
 import os
 import re
@@ -32,12 +32,13 @@ debug = logging.debug
 
 
 def emit_results(
-    query: str,
+    args: argparse.Namespace,
     entries: dict[str, dict],
-    results_file: TextIOWrapper,
 ) -> None:
     """Emit the results of the query"""
 
+    query = args.query
+    results_file = args.results_file
     spaces = " "
     for _, entry in sorted(entries.items()):
         identifier = entry["identifier"]

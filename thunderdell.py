@@ -803,7 +803,7 @@ if __name__ == "__main__":
                     d=2013 in=MIT t=mastersthesis
                     d=2013 in=MIT t=phdthesis
 
-                ================  CSL_TYPES (preferred) ================ 
+                ================  CSL_TYPES (preferred) ================
                 http://aurimasv.github.io/z2csl/typeMap.xml\n
                 {pretty_tabulate_list(list(BIB_TYPES))}
 
@@ -811,9 +811,9 @@ if __name__ == "__main__":
                     d=2013 in=MIT t=thesis g=Undergraduate thesis
                     d=2013 in=MIT t=thesis g=Masters thesis
                     d=2013 in=MIT t=thesis g=PhD dissertation
-                
+
                 ================  FIELD_SHORTCUTS ================
-                 
+
                 {pretty_tabulate_dict(BIB_SHORTCUTS)}
 
                     t=biblatex/CSL type (e.g., t=thesis)

@@ -1,0 +1,8 @@
+lxml
+requests
+datefinder
+xmltodict
+mastodon.py
+arrow
+twitter
+twitter-api-client

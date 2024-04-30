@@ -393,18 +393,20 @@ def identity_add_title(ident, title):
     """
     # debug(f"title = '{title}'")
     suffix = ""
-    clean_title = (
-        title.replace("Wikipedia:", "")
-        .replace("Category:", "")
-        .replace("WikiEN-l", "")
-        .replace("Wikipedia-l", "")
-        .replace("Wiki-l", "")
-        .replace("Wiktionary-l", "")
-        .replace("Foundation-l", "")
-        .replace("Textbook-l", "")
-        .replace(".0", "")
-        .replace("'", "")
-    )
+
+    CLEAN_PATTERN = re.compile(r"""
+        ^Wikipedia:|           # Wikipedia namespaces
+        ^Category:|
+        ^\[WikiEN-l\]|         # email lists
+        ^\[Wikipedia-l\]|
+        ^\[Wiki-l\]|
+        ^\[Wiktionary-l\]|
+        ^\[Foundation-l\]|
+        ^\[Textbook-l\]|
+        \.0|                   # 2.0
+        '|                     # apostrophe
+    """, flags=re.VERBOSE)
+    clean_title = CLEAN_PATTERN.sub("", title) or "foo"
 
     NOT_ALPHANUM_PAT = re.compile("[^a-zA-Z0-9']")
     title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())

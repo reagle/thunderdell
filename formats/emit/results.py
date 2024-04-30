@@ -14,7 +14,6 @@ import os
 import re
 import urllib.parse
 from html import escape
-from io import TextIOWrapper
 
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
@@ -147,7 +146,7 @@ LOCATOR_PREFIX_MAP = {
 def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
     """Move locator number to the end of the text with the biblatex key"""
     style_ref = node.get("STYLE_REF", "default")
-    text = escape_XML(node.get("TEXT"))
+    text = escape_XML(node.get("TEXT", ""))
     text = text.replace(  # restore my query_highlight strongs
         "&lt;strong&gt;", "<strong>"
     ).replace("&lt;/strong&gt;", "</strong>")

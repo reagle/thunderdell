@@ -22,7 +22,6 @@ import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
 from collections.abc import Callable
-from io import TextIOWrapper
 from typing import NamedTuple
 from urllib.parse import parse_qs
 

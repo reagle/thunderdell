@@ -118,10 +118,12 @@ def emit_json_csl(args, entries):
         )
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
-    # # start of json buffer, to be written out after comma cleanup
+    # Start of json buffer, to be written out after comma cleanup
+    # NOTE: f-string interpolation does not happen immediately
+    # when the string is appended to the list 2024-05-02
     file_buffer = ["[\n"]
     for _key, entry in sorted(entries.items()):
-        # debug(f"{key=}")
+        # debug(f"{_key=}")
         entry_type, genre, medium = guess_csl_type(entry)
         file_buffer.append(f'  {{ "id": "{entry["identifier"]}",\n')
         file_buffer.append(f'    "type": "{entry_type}",\n')
@@ -139,11 +141,12 @@ def emit_json_csl(args, entries):
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
-            if field in entry and entry[field] is not None:
+            if field in entry and entry[field]:
                 value = entry[field]
                 # debug(f"short, field = '{short} , {field}'")
-                # skipped fields
-                if field in ("identifier", "entry_type", "issue"):
+                if field in ("identifier", "entry_type"): # already done above
+                    continue
+                if field in ("issue"): # done below with date/season
                     continue
 
                 # special format fields

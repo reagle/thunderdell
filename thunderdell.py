@@ -74,10 +74,11 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 <ul class="RESULT_FILE_QUERY_BOX">
 """
 
+
 def build_bib(
     args: argparse.Namespace,
     file_name: str,
-    emitter_func: Callable[[argparse.Namespace, dict], None]
+    emitter_func: Callable[[argparse.Namespace, dict], None],
 ) -> None:
     """Parse and process files, including new ones encountered if chasing"""
 
@@ -284,10 +285,10 @@ def commit_entry(args, entry, entries):
     """Place an entry in the entries dictionary
     with default values if need be"""
     if entry != {}:
-        entry.setdefault("author", [("", "John", "Doe", "")])
-        entry.setdefault("ori_author", [("", "John", "Doe", "")])
+        entry.setdefault("author", [("John", "", "Doe", "")])
+        entry.setdefault("ori_author", [("John", "", "Doe", "")])
         entry.setdefault("title", "Unknown")
-        entry.setdefault("0000")
+        entry.setdefault("date", "0000")
         entry.setdefault("_mm_file", "")
 
         # pull the citation, create an identifier, and enter in entries
@@ -382,7 +383,7 @@ def identity_add_title(ident, title):
     """Return a non-colliding identity.
 
     Disambiguate keys by appending the first letter of first
-    3 significant words (i.e., no WP:namespace, articles, conjunctions
+    3 significant words (e.g., no WP:namespace, articles, conjunctions
     or short prepositions). If only one word, use first, penultimate,
     and last character.
 
@@ -393,7 +394,8 @@ def identity_add_title(ident, title):
     # debug(f"title = '{title}'")
     suffix = ""
 
-    CLEAN_PATTERN = re.compile(r"""
+    CLEAN_PATTERN = re.compile(
+        r"""
         ^Wikipedia:|           # Wikipedia namespaces
         ^Category:|
         ^\[WikiEN-l\]|         # email lists
@@ -404,7 +406,10 @@ def identity_add_title(ident, title):
         ^\[Textbook-l\]|
         \.0|                   # 2.0
         '|                     # apostrophe
-    """, flags=re.VERBOSE)
+        ^r/                    # subreddits
+    """,
+        flags=re.VERBOSE,
+    )
     clean_title = CLEAN_PATTERN.sub("", title) or "foo"
 
     NOT_ALPHANUM_PAT = re.compile("[^a-zA-Z0-9']")

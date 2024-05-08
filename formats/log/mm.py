@@ -127,6 +127,8 @@ def log2mm(args, biblio):
     if excerpt:
         for excerpt_chunk in excerpt.split("\n\n"):
             info(f"{excerpt_chunk=}")
+            if excerpt_chunk == "":
+                continue
             if excerpt_chunk.startswith(", "):
                 style_ref = "paraphrase"
                 excerpt_chunk = excerpt_chunk[2:]

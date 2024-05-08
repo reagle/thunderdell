@@ -137,7 +137,8 @@ def do_console_annotation(args, biblio):
 
         info("biblio.get('excerpt', '') = '%s'" % (biblio.get("excerpt", "")))
         info(f"console_annotations = '{console_annotations}'")
-        biblio["excerpt"] = biblio.get("excerpt", "") + console_annotations
+        if console_annotations.strip():  # don't bother with default excerpt
+            biblio["excerpt"] = console_annotations
 
         # See if there is a container/bf.CSL_SHORTCUTS redundant with 'c_web'
         if (
@@ -148,7 +149,7 @@ def do_console_annotation(args, biblio):
             del biblio["c_web"]
         return biblio, do_publish
 
-    # code of do_console_annotation
+    # Setup initial id and bibliographic information including keywords
     info(f"{biblio['author']=}")
     tentative_id = get_tentative_ident(biblio)
     initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]

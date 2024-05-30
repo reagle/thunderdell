@@ -363,8 +363,7 @@ def pull_citation(args, entry: dict) -> dict:
 def parse_pairs(entry: dict) -> dict:
     """Parse pairs of the form: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"""
 
-    if "cite" in entry:
-        citation = entry["cite"]
+    if citation := entry.get("cite"):
         # split around tokens of length 1-3 and
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         # get rid of first empty string of results
@@ -372,10 +371,13 @@ def parse_pairs(entry: dict) -> dict:
         # 2 refs to an iterable are '*' unpacked and rezipped
         cite_pairs = zip(*[iter(cites)] * 2, strict=True)  # pyright: ignore
         for short, value in cite_pairs:  # pyright: ignore
-            try:
-                entry[BIB_SHORTCUTS[short]] = value.strip()
-            except KeyError as error:
-                print(("Key error on ", error, entry["title"], entry["_mm_file"]))
+            if key := BIB_SHORTCUTS.get(short):
+              if key in entry and key == "keyword":
+                  entry[key] += f", {value.strip()}"
+              else:
+                  entry[key] = value.strip()
+            else:
+                  print(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
     return entry
 
 

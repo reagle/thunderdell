@@ -6,7 +6,7 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 """
-Run tests against golden YAML results; 
+Run tests against golden YAML results;
 useful for detecting inadvertent changes.
 """
 import os

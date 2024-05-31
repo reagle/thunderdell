@@ -192,8 +192,9 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
                 entry["title"] = unescape_XML(d.get("TEXT"))
                 entry["_mm_file"] = mm_file
                 entry["_title_node"] = d
-                if "LINK" in d.attrib:
-                    entry["url"] = d.get("LINK")
+                if url := d.attrib.get("LINK"):
+                    if not url.startswith(("../", "file://")):  # Ignore local
+                        entry["url"] = url
                 if args.query:
                     author_highlighted = _query_highlight(author_node, args.query)
                     if author_highlighted is not None:
@@ -372,12 +373,12 @@ def parse_pairs(entry: dict) -> dict:
         cite_pairs = zip(*[iter(cites)] * 2, strict=True)  # pyright: ignore
         for short, value in cite_pairs:  # pyright: ignore
             if key := BIB_SHORTCUTS.get(short):
-              if key in entry and key == "keyword":
-                  entry[key] += f", {value.strip()}"
-              else:
-                  entry[key] = value.strip()
+                if key in entry and key == "keyword":
+                    entry[key] += f", {value.strip()}"
+                else:
+                    entry[key] = value.strip()
             else:
-                  print(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
+                print(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
     return entry
 
 

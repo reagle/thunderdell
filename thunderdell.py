@@ -160,14 +160,11 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
         return None
 
     def _get_author_node(node):
-        """Return the nearest author node ancestor"""
-        ancestor = _get_parent(node)
+        """Return the nearest ancestor that is an author node using parent_map[node]"""
+        ancestor = parent_map[node]
         while ancestor.get("STYLE_REF") != "author":
-            ancestor = _get_parent(ancestor)
+            ancestor = parent_map[ancestor]
         return ancestor
-
-    def _get_parent(node):
-        return parent_map[node]
 
     for d in node.iter():
         if (  # found a local reference link

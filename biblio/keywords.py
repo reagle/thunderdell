@@ -52,6 +52,7 @@ ADVICE_KEY_SHORTCUTS = {
     "eff": "efficacy",
     "exp": "expertise",  # descriptive: best process for knowing
     "hea": "health",
+    "hoa": "hoax",
     "mot": "motivation",
     "rel": "relationship",
     "zei": "zeitgeist",  # recognition in culture

@@ -280,9 +280,30 @@ def len_twitter(text: str) -> int:
 
 
 def escape_XML(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
-    """Escape XML character entities; & < > are defaulted"""
+    """Escape XML character entities including & < >"""
     extras = {"\t": "  "}
     return escape(s, extras)
+
+
+CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
+
+
+def straighten_quotes(text):
+    """
+    Convert curly quotes to straight quotes.
+
+    >>> straighten_quotes('Hello “world”')
+    'Hello "world"'
+    >>> straighten_quotes('“Curly” quotes')
+    '"Curly" quotes'
+    >>> straighten_quotes("It's a ‘quoted’ text")
+    "It's a 'quoted' text"
+    >>> straighten_quotes(None)
+    None
+    """
+    if text is None:
+        return None
+    return text.translate(CURLY_TABLE)
 
 
 def unescape_XML(text: str) -> str:  # .0937s 4.11%

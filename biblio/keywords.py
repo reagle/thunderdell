@@ -55,6 +55,7 @@ ADVICE_KEY_SHORTCUTS = {
     "hoa": "hoax",
     "mot": "motivation",
     "rel": "relationship",
+    "syn": "syndication",  # related to zeitgeist
     "zei": "zeitgeist",  # recognition in culture
 }
 

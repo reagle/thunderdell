@@ -20,7 +20,7 @@ import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 import config
 
 # from formats.emit.biblatex import create_biblatex_author
-from utils.web import escape_XML
+from utils.web import escape_XML, straighten_quotes
 
 # logger function aliases
 critical = logging.critical
@@ -146,7 +146,8 @@ LOCATOR_PREFIX_MAP = {
 def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
     """Move locator number to the end of the text with the biblatex key"""
     style_ref = node.get("STYLE_REF", "default")
-    text = escape_XML(node.get("TEXT", ""))
+    text = straighten_quotes(node.get("TEXT", ""))
+    text = escape_XML(text)
     text = text.replace(  # restore my query_highlight strongs
         "&lt;strong&gt;", "<strong>"
     ).replace("&lt;/strong&gt;", "</strong>")
@@ -200,11 +201,9 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
 
 def pretty_print(node, entry, spaces, results_file):
     """Pretty print a node and descendants into indented HTML"""
-    # bug: nested titles are printed twice. 101217
     if node.get("TEXT") is not None:
         reverse_print(node, entry, spaces, results_file)
-    # I should clean all of this up to use simpleHTMLwriter,
-    # markup.py, or yattag
+    # TODO: replace manual HTML with simpleHTMLwriter,markup.py, or yattag
     if len(node) > 0:
         results_file.write(f'{spaces}<li><ul class="pprint_recurse">\n')
         spaces = spaces + " "

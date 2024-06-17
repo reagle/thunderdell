@@ -69,7 +69,7 @@ def log2console(args, biblio):
             if token == "tags":
                 for value in tags_expanded.strip().split(" "):
                     # print('keyword = %s' % value)
-                    bib_in_single_line += "keyword = %s " % value
+                    bib_in_single_line += f"keyword = {value} "
             else:
                 # print(('%s = %s' % (token, biblio[token])))
                 bib_in_single_line += f"{token} = {biblio[token]} "

@@ -68,10 +68,10 @@ def emit_results(
             )
             mdn_cite = f"[@{identifier}]"
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
-            mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]}, {title_mdn}"
+            mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]},  «{title_mdn}»"
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote))
-            mdn_link = f"""[{identifier}]: {url} {fl_names}, {date[0]}, «{title}»" """
-            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
+            # mdn_link = f"""[{identifier}]: {url} {fl_names}, {date[0]}, «{title}»" """
+            # results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             # results_file.write(f'{spaces}<li class="pretty_print">\n')
             pretty_print(entry["_title_node"], entry, spaces, results_file)

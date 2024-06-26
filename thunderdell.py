@@ -82,37 +82,30 @@ def build_bib(
 ) -> None:
     """Parse and process files, including new ones encountered if chasing"""
 
-    links = []  # list of other files encountered in the mind map
-    done = []  # list of files processed, kept to prevent loops
-    entries: dict[str, dict] = {}  # dict of {id : {entry}}, by insertion order
-    mm_files = [
+    links = set()
+    done = set()
+    entries: dict[str, dict] = {}
+    mm_files = {
         file_name,
-    ]  # list of file encountered (e.g. chase option)
-
-    # debug(f"   mm_files = {mm_files}")
+    }
     while mm_files:
-        mm_file = os.path.abspath(mm_files.pop())
-        warning(f"   parsing {mm_file}")
+        mm_file = mm_files.pop()  # Switched to set's pop function, it removes and returns an arbitrary element.
+        debug(f"   parsing {mm_file}")
         try:
             doc = et.parse(mm_file).getroot()
         except (OSError, et.ParseError) as err:
             debug(f"    failed to parse {mm_file} because of {err}")
             continue
-        # debug(f"    successfully parsed {mm_file}")
         entries, links = walk_freeplane(args, doc, mm_file, entries, links=[])
-        # debug("    done.appending %s" % os.path.abspath(mm_file))
-        done.append(mm_file)
+        # Append after processing to avoid self-loop
+        done.add(mm_file)
         if args.chase:
-            # debug("chasing")
-            for link in links:
-                link = os.path.abspath(os.path.dirname(mm_file) + "/" + link)
-                if (
-                    link not in done
-                    and link not in mm_files
-                    and not any(word in link for word in ("syllabus", "readings"))
-                ):  # 'old'
-                    # debug(f"    mm_files.appending {link}")
-                    mm_files.append(link)
+            new_links = {
+                os.path.abspath(os.path.dirname(mm_file) + "/" + link)
+                for link in links
+                if not any(word in link for word in ("syllabus", "readings"))
+            }
+            mm_files.update(new_links - done)
 
     if args.query:
         serve_query(args, entries)
@@ -379,7 +372,7 @@ def parse_pairs(entry: dict) -> dict:
     return entry
 
 
-def identity_add_title(ident, title):
+def identity_add_title(ident: str, title: str) -> str:
     """Return a non-colliding identity.
 
     Disambiguate keys by appending the first letter of first
@@ -410,13 +403,13 @@ def identity_add_title(ident, title):
     """,
         flags=re.VERBOSE,
     )
-    clean_title = CLEAN_PATTERN.sub("", title) or "foo"
-
     NOT_ALPHANUM_PAT = re.compile("[^a-zA-Z0-9']")
+
+    clean_title = CLEAN_PATTERN.sub("", title) or "foo"
     title_words = NOT_ALPHANUM_PAT.split(clean_title.lower())
 
     if len(title_words) == 1:
-        suffix = f"{title_words[0][0]}{title_words[0][-2]}{title_words[0][-1]}"
+        suffix = f"{title_words[0][0]}{title_words[0][-2:]}"
     else:
         suffix = "".join([word[0] for word in title_words if word not in BORING_WORDS])
         suffix = suffix[:3]

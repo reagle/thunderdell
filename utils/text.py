@@ -22,20 +22,21 @@ debug = logging.debug
 
 
 def escape_latex(text: str) -> str:
-    """Escape common characters for Latex"""
-
-    text = (
-        text.replace("$", r"\$")
-        .replace("&", r"\&")
-        .replace("%", r"\%")
-        .replace("#", r"\#")
-        .replace("_", r"\_")
-        .replace("{", r"\{")
-        .replace("}", r"\}")
-        .replace("~", r"\~{}")
-        .replace("^", r"\^{}")
+    return f"{text}".translate(
+        str.maketrans(
+            {
+                "$": r"\$",
+                "&": r"\&",
+                "%": r"\%",
+                "#": r"\#",
+                "_": r"\_",
+                "{": r"\{",
+                "}": r"\}",
+                "~": r"\~{}",
+                "^": r"\^{}",
+            }
+        )
     )
-    return text
 
 
 def normalize_whitespace(text: str) -> str:
@@ -65,32 +66,19 @@ def pretty_tabulate_dict(mydict: dict, cols: int = 4) -> str:
 
 
 def strip_accents(text: str) -> str:
-    """strip accents and those chars that can't be stripped"""
-    # >>> strip_accents(u'nôn-åscîî')
-    # ^ fails because of doctest bug u'non-ascii'
-    try:  # test if ascii
-        text.encode("ascii")
-    except UnicodeEncodeError:
-        return "".join(
-            x
-            for x in unicodedata.normalize("NFKD", text)
-            if unicodedata.category(x) != "Mn"
-        )
-    else:
+    """strip accents and those chars that can't be stripped
+    >>> strip_accents(u'nôn-åscîî')
+    'non-ascii'
+    """
+    if text.isascii():
         return text
+    return unicodedata.normalize("NFKD", text).encode("ASCII", "ignore").decode("ASCII")
 
 
 def smart_to_markdown(text: str) -> str:
-    """Convert unicode punctuation (i.e., "smart quotes") to markdown form."""
-    text = (
-        text.replace("“", '"')
-        .replace("”", '"')
-        .replace("‘", "'")
-        .replace("’", "'")
-        .replace("–", "--")
-        .replace("—", "---")
+    return text.translate(
+        str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'", "–": "--", "—": "---"})
     )
-    return text
 
 
 def html_to_text(text: str) -> str:

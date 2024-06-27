@@ -14,6 +14,7 @@ import os
 import re
 import time
 from collections import namedtuple
+from pathlib import Path
 from subprocess import call
 
 import config
@@ -37,17 +38,18 @@ def do_console_annotation(args, biblio):
 
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
-    def rotate_files(filename, maximum=5):
+    def rotate_files(filename: Path, maximum: int = 5):
         """create at most {maximum} rotating files"""
 
-        bare, ext = os.path.splitext(filename)
+        bare = filename.with_suffix("")
+        ext = filename.suffix
         for counter in reversed(range(2, maximum + 1)):
-            old_filename = f"{bare}{counter-1}{ext}"
-            new_filename = f"{bare}{counter}{ext}"
-            if os.path.exists(old_filename):
-                os.rename(old_filename, new_filename)
-        if os.path.exists(filename):
-            os.rename(filename, f"{bare}1{ext}")
+            old_filename = bare.with_name(f"{bare.name}{counter-1}{ext}")
+            new_filename = bare.with_name(f"{bare.name}{counter}{ext}")
+            if old_filename.exists():
+                old_filename.rename(new_filename)
+        if filename.exists():
+            filename.rename(bare.with_name(f"{bare.name}1{ext}"))
 
     def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
         info(biblio)
@@ -68,18 +70,17 @@ def do_console_annotation(args, biblio):
             {},
         )
 
-    def edit_annotation(initial_text, resume_edit=False):
+    def edit_annotation(initial_text: str, resume_edit: bool = False):
         """Write initial bib info to a tmp file, edit and return"""
 
-        annotation_fn = f"{config.TMP_DIR}b-annotation.txt"
+        annotation_fn = config.TMP_DIR / "b-annotation.txt"
         if not resume_edit:
             rotate_files(annotation_fn)
-            if os.path.exists(annotation_fn):
-                os.remove(annotation_fn)
-            with open(annotation_fn, "w", encoding="utf-8") as annotation_file:
-                annotation_file.write(initial_text)
-        call([config.EDITOR, annotation_fn])
-        return open(annotation_fn, encoding="utf-8").readlines()
+            if annotation_fn.exists():
+                annotation_fn.unlink()
+            annotation_fn.write_text(initial_text, encoding="utf-8")
+        call([config.EDITOR, str(annotation_fn)])
+        return annotation_fn.read_text(encoding="utf-8").splitlines()
 
     def parse_bib(args, biblio, edited_text):
         """Parse the bib assignments"""

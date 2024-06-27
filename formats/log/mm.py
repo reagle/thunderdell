@@ -11,6 +11,7 @@ __version__ = "1.0"
 
 import logging
 import time
+from pathlib import Path
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
 import config
@@ -59,12 +60,11 @@ def log2mm(args, biblio):
     biblio, args.publish = do_console_annotation(args, biblio)
     info(f"{biblio}")
 
-    # now = time.gmtime()
     this_week = time.strftime("%U", NOW)
     this_year = time.strftime("%Y", NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
-    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
+    ofile = config.HOME / "data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
     info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
@@ -92,7 +92,7 @@ def log2mm(args, biblio):
     else:
         tags = ""
 
-    mindmap = parse(ofile).getroot()
+    mindmap = parse(str(ofile)).getroot()
     mm_years = mindmap[0]
     for mm_year in mm_years:
         if mm_year.get("TEXT") == this_year:
@@ -169,7 +169,7 @@ def log2mm(args, biblio):
                 },
             )
 
-    ElementTree(mindmap).write(ofile, encoding="utf-8")
+    ElementTree(mindmap).write(str(ofile), encoding="utf-8")
 
     if args.publish:
         info("YASN")

@@ -22,6 +22,7 @@ import webbrowser
 import xml.etree.ElementTree as et
 from collections import namedtuple
 from collections.abc import Callable
+from pathlib import Path
 from typing import NamedTuple
 from urllib.parse import parse_qs
 
@@ -77,19 +78,15 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 
 def build_bib(
     args: argparse.Namespace,
-    file_name: str,
+    file_name: Path,
     emitter_func: Callable[[argparse.Namespace, dict], None],
 ) -> None:
-    """Parse and process files, including new ones encountered if chasing"""
-
     links = set()
     done = set()
     entries: dict[str, dict] = {}
-    mm_files = {
-        file_name,
-    }
+    mm_files = {file_name}
     while mm_files:
-        mm_file = mm_files.pop()  # Switched to set's pop function, it removes and returns an arbitrary element.
+        mm_file = mm_files.pop()
         debug(f"   parsing {mm_file}")
         try:
             doc = et.parse(mm_file).getroot()
@@ -97,11 +94,11 @@ def build_bib(
             debug(f"    failed to parse {mm_file} because of {err}")
             continue
         entries, links = walk_freeplane(args, doc, mm_file, entries, links=[])
-        # Append after processing to avoid self-loop
         done.add(mm_file)
         if args.chase:
             new_links = {
-                os.path.abspath(os.path.dirname(mm_file) + "/" + link)
+                # (mm_file.parent / link).resolve()
+                (Path(mm_file).parent / link).resolve()
                 for link in links
                 if not any(word in link for word in ("syllabus", "readings"))
             }
@@ -180,7 +177,7 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
                 entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
                 entry["author"] = parse_names(entry["ori_author"])
                 entry["title"] = unescape_XML(d.get("TEXT"))
-                entry["_mm_file"] = mm_file
+                entry["_mm_file"] = str(mm_file)
                 entry["_title_node"] = d
                 if url := d.attrib.get("LINK"):
                     if not url.startswith(("../", "file://")):  # Ignore local
@@ -214,10 +211,10 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
     """
 
     # debug("querying")
-    results_file_name = f"{config.TMP_DIR}query-thunderdell.html"
+    results_file_name = config.TMP_DIR / "query-thunderdell.html"
 
-    if os.path.exists(results_file_name):
-        os.remove(results_file_name)
+    if results_file_name.exists():
+        results_file_name.unlink()
     try:
         with open(results_file_name, "w", encoding="utf-8") as results_file:
             args.results_file = results_file
@@ -231,7 +228,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
     # debug(f"{results_file=}")
     if args.in_main:
         ADDRESS_IN_USE = False
-        os.chdir(config.CGI_DIR + "/..")
+        os.chdir(config.CGI_DIR.parent)
         handler = http.server.CGIHTTPRequestHandler
         handler.cgi_directories = ["/cgi-bin"]
         try:
@@ -252,9 +249,10 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
     Given the entries resulting from a crawl of the mindmaps,
     create a local web page and open browser.
     """
-    results_file_name = f"{config.TMP_DIR}pretty-print.html"
+    # results_file_name = config.TMP_DIR / "pretty-print.html"
+    results_file_name = args.input_file.with_suffix(".html")
     try:
-        args.results_file = open(results_file_name, "w", encoding="utf-8")
+        args.results_file = results_file_name.open("w", encoding="utf-8")
     except OSError as err:
         print(f"{err}")
         print(f"There was an error writing to {results_file_name}")
@@ -626,6 +624,7 @@ if __name__ == "__main__":
         "-i",
         "--input-file",
         default=config.DEFAULT_MAP,
+        type=Path,
         metavar="FILENAME",
         help="mindmap to process",
     )
@@ -732,7 +731,7 @@ if __name__ == "__main__":
     )
 
     args = arg_parser.parse_args()
-    file_name = os.path.abspath(args.input_file)
+    file_name = args.input_file.absolute()
 
     log_level = logging.ERROR  # 40
     if args.verbose == 1:
@@ -781,7 +780,7 @@ if __name__ == "__main__":
         else:
             extension = ".unknown"
             raise Exception(f"unknown {extension}")
-        output_fn = f"{os.path.splitext(file_name)[0]}{extension}"
+        output_fn = file_name.with_suffix(extension)
         args.outfd = open(output_fn, "w", encoding="utf-8")
     if args.tests:
         import doctest

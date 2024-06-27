@@ -250,7 +250,7 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
     create a local web page and open browser.
     """
     # results_file_name = config.TMP_DIR / "pretty-print.html"
-    results_file_name = args.input_file.with_suffix(".html")
+    results_file_name = Path(args.input_file.with_suffix(".html")).absolute()
     try:
         args.results_file = results_file_name.open("w", encoding="utf-8")
     except OSError as err:

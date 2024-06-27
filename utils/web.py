@@ -109,7 +109,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
         if "goatee.net/photo" in url:
             title = ""
             tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
-            photo_path = Path(f"{config.HOME}/f/{url[19:]}")
+            photo_path = config.HOME / "f" / url[19:]
         if url.startswith("file://"):
             url.replace("file:///", "file://")
             title = ""
@@ -153,7 +153,7 @@ def twitter_update(
     )
 
     # https://github.com/trevorhobenshield/twitter-api-client/issues/64
-    cookies_fp = Path(TMP_DIR + "twitter.cookies")
+    cookies_fp = TMP_DIR / "twitter.cookies"
     # TODO: deal with expired cookies 2023-06-06
     if cookies_fp.exists():
         cookies = orjson.loads(cookies_fp.read_bytes())
@@ -197,8 +197,8 @@ def mastodon_update(
     )
     toot = shrink_message("ohai", comment, title, url, tags)
     try:
-        if photo_path:
-            photo_fn = Path(photo_path).stem
+        if photo_path.exists():
+            photo_fn = photo_path.stem
             photo_desc = " ".join(
                 [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
             )

@@ -8,10 +8,10 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
 import logging
 import os
 import time
+from pathlib import Path
 from subprocess import Popen
 
 import config
@@ -33,7 +33,7 @@ def log2opencodex(args, biblio):
     """
 
     blog_title = blog_body = ""
-    CODEX_ROOT = f"{config.HOME}/data/2web/reagle.org/joseph/content/"
+    CODEX_ROOT = config.HOME / "data/2web/reagle.org/joseph/content/"
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = " ".join(biblio["title"].split(" ")[0:3])
     entry = biblio["comment"]
@@ -64,20 +64,21 @@ def log2opencodex(args, biblio):
         .replace("'", "")
         .replace("/", "-")
     )
-    filename = f"{CODEX_ROOT}{category}/{this_year}-{filename}.md"
+    filename = CODEX_ROOT / category / f"{this_year}-{filename}.md"
     info(f"{filename=}")
-    if os.path.exists(filename):
+    if filename.exists():
         raise FileExistsError(f"\nfilename {filename} already exists")
-    fd = open(filename, "w", encoding="utf-8", errors="replace")
-    fd.write("---\n")
-    fd.write("title: %s\n" % blog_title)
-    fd.write("date: %s\n" % time.strftime("%Y-%m-%d", NOW))
-    fd.write("tags: %s\n" % tags)
-    fd.write("category: %s\n" % category)
-    fd.write("...\n\n")
-    fd.write(blog_body.strip())
-    if "url" in biblio and "excerpt" in biblio:
-        fd.write("\n\n[{}]({})\n\n".format(biblio["title"], biblio["url"]))
-        fd.write("> %s\n" % biblio["excerpt"])
-    fd.close()
-    Popen([config.VISUAL, filename])
+
+    with filename.open("w", encoding="utf-8", errors="replace") as fd:
+        fd.write("---\n")
+        fd.write(f"title: {blog_title}\n")
+        fd.write(f"date: {time.strftime('%Y-%m-%d', NOW)}\n")
+        fd.write(f"tags: {tags}\n")
+        fd.write(f"category: {category}\n")
+        fd.write("...\n\n")
+        fd.write(blog_body.strip())
+        if "url" in biblio and "excerpt" in biblio:
+            fd.write(f"\n\n[{biblio['title']}]({biblio['url']})\n\n")
+            fd.write(f"> {biblio['excerpt']}\n")
+
+    Popen([config.VISUAL, str(filename)])

@@ -13,10 +13,10 @@ __version__ = "1.0"
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import codecs
 import logging
-import os.path
 import re
 import string
 import sys
+from pathlib import Path
 
 from config import BIN_DIR
 
@@ -26,7 +26,6 @@ warn = logging.warn
 info = logging.info
 debug = logging.debug
 excpt = logging.exception
-
 
 ARTICLES = {"a", "an", "the"}
 CONJUNCTIONS = {"and", "but", "nor", "or"}
@@ -56,28 +55,27 @@ BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 # wordset processing below
 
 
-def create_wordset(file_name):
+def create_wordset(file_path: Path) -> set:
     """Returns a wordset given a file"""
 
     wordset = set()
-    if os.path.isfile(file_name):
-        for line in codecs.open(file_name, "r", "utf-8").readlines():
+    if file_path.is_file():
+        for line in file_path.read_text(encoding="utf-8").splitlines():
             if line.strip() != "":
                 wordset.add(line.strip())
         return wordset
     else:
-        raise Exception("Could not find wordset %s" % file_name)
-
+        raise Exception(f"Could not find wordset {file_path}")
 
 # TODO find alternative to hardcoded path that also works with import
-LIST_PATH = BIN_DIR + "/biblio/"
-WORD_LIST_FN = LIST_PATH + "wordlist-american.txt"
+LIST_PATH = BIN_DIR / "biblio"
+WORD_LIST_FN = LIST_PATH / "wordlist-american.txt"
 wordset = create_wordset(WORD_LIST_FN)
 wordset_lower = {word for word in wordset if word[0].islower()}
 wordset_upper = {word for word in wordset if word[0].isupper()}
 wordset_nocase = {word.lower() for word in wordset}  # used in is_proper_noun()
 
-PROPER_NOUNS_FN = LIST_PATH + "wordlist-proper-nouns.txt"
+PROPER_NOUNS_FN = LIST_PATH / "wordlist-proper-nouns.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset_proper_nouns = {
     word for word in wordset_upper if word.lower() not in wordset_lower
@@ -306,6 +304,7 @@ def parse_args() -> argparse.Namespace:
     arg_parser.add_argument(
         "-o",
         "--out-filename",
+        type=Path,
         help="output results to filename",
         metavar="FILE",
     )
@@ -352,7 +351,6 @@ def parse_args() -> argparse.Namespace:
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
     return args
-
 
 def main(args):
     """Process arguments and execute."""

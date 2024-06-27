@@ -10,10 +10,10 @@ __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging
-import os
 import re
 import urllib.parse
 from html import escape
+from pathlib import Path
 
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
@@ -44,7 +44,7 @@ def emit_results(
         title = entry["title"]
         date = entry["date"]
         url = entry.get("url", "")
-        base_mm_file = os.path.basename(entry["_mm_file"])
+        base_mm_file = Path(entry["_mm_file"]).name
         MM_mm_file = get_url_MM(entry["_mm_file"])
 
         # if I am what was queried, print all of me
@@ -70,12 +70,8 @@ def emit_results(
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
             mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]},  «{title_mdn}»"
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote))
-            # mdn_link = f"""[{identifier}]: {url} {fl_names}, {date[0]}, «{title}»" """
-            # results_file.write(JS_CLICK_TO_COPY % (escape(mdn_link), mdn_link))
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
-            # results_file.write(f'{spaces}<li class="pretty_print">\n')
             pretty_print(entry["_title_node"], entry, spaces, results_file)
-            # results_file.write(f'{spaces}</li><!--pretty_print-->')
             results_file.write(f"{spaces}</ul><!--tit_tree-->\n")
             results_file.write(f"{spaces}</li>\n")
 
@@ -83,8 +79,6 @@ def emit_results(
         if "_node_results" in entry:
             print_entry(
                 identifier,
-                # author,
-                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -105,11 +99,8 @@ def emit_results(
             results_file.write(f"{spaces}</li>\n")
         # if my author or title matched, print biblio w/ link to complete entry
         elif "_author_result" in entry:
-            # author = f"{entry['_author_result'].get('TEXT')} {entry['date'].year}"
             print_entry(
                 identifier,
-                # author,
-                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -121,8 +112,6 @@ def emit_results(
             title = entry["_title_result"].get("TEXT")
             print_entry(
                 identifier,
-                # author,
-                # date,
                 title,
                 url,
                 MM_mm_file,
@@ -253,10 +242,11 @@ def get_url_query(token):
     return url_query
 
 
-def get_url_MM(file_name):
+def get_url_MM(file_name: str) -> str:
     """Return URL for the source MindMap based on whether CGI or cmdline"""
     if __name__ == "__main__":
         return file_name
     else:  # CGI
-        client_path = file_name.replace(f"{config.HOME}", f"{config.CLIENT_HOME}")
-        return f"file://{client_path}"
+        file_path = Path(file_name).absolute()
+        client_path = file_path.relative_to(config.HOME)
+        return f"file://{config.CLIENT_HOME / client_path}"

@@ -12,6 +12,7 @@ __version__ = "1.0"
 import logging
 import re
 import time
+from pathlib import Path
 
 import config
 
@@ -31,7 +32,7 @@ def log2nifty(args, biblio):
     """
 
     print("to log2nifty\n")
-    ofile = f"{config.HOME}/data/2web/goatee.net/nifty-stuff.html"
+    ofile = config.HOME / "data/2web/goatee.net/nifty-stuff.html"
 
     title = biblio["title"]
     comment = biblio["comment"]
@@ -40,17 +41,13 @@ def log2nifty(args, biblio):
     date_token = time.strftime("%y%m%d", NOW)
     log_item = f'<dt><a href="{url}">{title}</a> ({date_token})</dt><dd>{comment}</dd>'
 
-    fd = open(ofile)
-    content = fd.read()
-    fd.close()
+    content = ofile.read_text(encoding="utf-8")
 
     INSERTION_RE = re.compile('(<dl style="clear: left;">)')
     newcontent = INSERTION_RE.sub(
-        "\\1 \n  %s" % log_item, content, re.DOTALL | re.IGNORECASE
+        f"\\1 \n  {log_item}", content, re.DOTALL | re.IGNORECASE
     )
     if newcontent:
-        fd = open(ofile, "w", encoding="utf-8", errors="replace")
-        fd.write(newcontent)
-        fd.close()
+        ofile.write_text(newcontent, encoding="utf-8")
     else:
-        raise RuntimeError("Sorry, output regexp subsitution failed.")
+        raise RuntimeError("Sorry, output regexp substitution failed.")

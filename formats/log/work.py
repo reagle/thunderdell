@@ -12,6 +12,7 @@ __version__ = "1.0"
 import logging
 import time
 import unicodedata
+from pathlib import Path
 
 from lxml import etree as l_etree
 
@@ -37,7 +38,7 @@ def log2work(args, biblio):
 
     print("to log2work\n")
     info(f"biblio = '{biblio}'")
-    ofile = f"{config.HOME}/data/2web/reagle.org/joseph/plan/index.html"
+    ofile = config.HOME / "data/2web/reagle.org/joseph/plan/index.html"
     info(f"{ofile=}")
     subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
     title = biblio["title"].strip() + subtitle
@@ -46,7 +47,7 @@ def log2work(args, biblio):
     if biblio["tags"]:
         hashtags = ""
         for tag in biblio["tags"].strip().split(" "):
-            hashtags += "#%s " % KEY_SHORTCUTS.get(tag, tag)
+            hashtags += f"#{KEY_SHORTCUTS.get(tag, tag)} "
         hashtags = hashtags.strip()
     else:
         hashtags = "#misc"
@@ -60,13 +61,11 @@ def log2work(args, biblio):
     )
     info(f"{log_item=}")
 
-    plan_tree = l_etree.parse(ofile, l_etree.XMLParser(ns_clean=True, recover=True))
-    # ul_found = plan_tree.xpath(
-    #     """//x:div[@id='Done']/x:ul""",
-    #     namespaces={"x": "http://www.w3.org/1999/xhtml"},
-    # )
+    plan_tree = l_etree.parse(
+        str(ofile), l_etree.XMLParser(ns_clean=True, recover=True)
+    )
     ul_found = plan_tree.xpath("""//div[@id='Done']/ul""")
-    info("ul_found = %s" % (ul_found))
+    info(f"ul_found = {ul_found}")
     if ul_found:
         ul_found[0].text = "\n              "
         try:  # lxml bug https://bugs.launchpad.net/lxml/+bug/1902364
@@ -81,9 +80,7 @@ def log2work(args, biblio):
         new_content = l_etree.tostring(
             plan_tree, pretty_print=True, encoding="unicode", method="xml"
         )
-        new_plan_fd = open(ofile, "w", encoding="utf-8", errors="replace")
-        new_plan_fd.write(new_content)
-        new_plan_fd.close()
+        ofile.write_text(new_content, encoding="utf-8")
     else:
         raise RuntimeError("Sorry, not found: //x:div[@id='Done']/x:ul")
 

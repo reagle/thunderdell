@@ -16,13 +16,13 @@ def cgi_main(args):
     import cgi
     import codecs
     import logging
-    import os
     import re
     import sys
+    from pathlib import Path
     from urllib.parse import unquote
 
-    HOME = os.path.expanduser("~")
-    TMP_DIR = HOME + "/tmp/.td/"
+    HOME = Path.home()
+    TMP_DIR = HOME / "tmp" / ".td"
     # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
@@ -49,16 +49,17 @@ def cgi_main(args):
     if query.startswith("@"):
         query = query[1:]
 
-    sys.path.append(HOME + "/bin/td")
+    sys.path.append(str(HOME / "bin/td"))
     if site == "BusySponge":
         import busy_query
 
-        query_result_file = busy_query.query_sponge(query)
-        fileObj = codecs.open(query_result_file, "r", "utf-8", "replace")
-        print(fileObj.read())
-        fileObj.close()
+        query_result_file = Path(busy_query.query_sponge(query))
+        print(query_result_file.read_text(encoding="utf-8", errors="replace"))
+        # fileObj = codecs.open(query_result_file, "r", "utf-8", "replace")
+        # print(fileObj.read())
+        # fileObj.close()
     else:
-        MINDMAP = HOME + "/joseph/readings.mm"
+        MINDMAP = HOME / "joseph/readings.mm"
 
         import thunderdell as td
 
@@ -76,9 +77,8 @@ def cgi_main(args):
 
         td.build_bib(args, MINDMAP, td.emit_results)
 
-        fileObj = codecs.open(TMP_DIR + "query-thunderdell.html", "r", "utf-8")
-        print(fileObj.read())
-        fileObj.close()
+        result_file = TMP_DIR / "query-thunderdell.html"
+        print(result_file.read_text(encoding="utf-8"))
 
 
 def print_error(msg):

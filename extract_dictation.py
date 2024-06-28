@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Extract a mindmap from a dictated text file using ad-hoc conventions.
-"""
+"""Extract a mindmap from a dictated text file using ad-hoc conventions."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -178,7 +177,7 @@ def build_mm_from_txt(
                     citation += " kw=" + " kw=".join(value)
             if citation != "":
                 clean(citation)
-            citation += " r=%s" % get_date()
+            citation += f" r={get_date()}"
             mm_fd.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
 
         elif re.match(r"summary\.(.*)", line, re.I):
@@ -300,7 +299,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         in_subsection = False
         line_number = 0
 
-        mm_fd.write("""%s\n<node TEXT="Readings">\n""" % MINDMAP_PREAMBLE)
+        mm_fd.write(f"""{MINDMAP_PREAMBLE}\n<node TEXT="Readings">\n""")
 
         for line in text.split("\n"):
             line = line.strip()

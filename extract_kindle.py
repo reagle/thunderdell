@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Process Kindle email export into format accepted by `extract_dictation.py`.
-"""
+"""Process Kindle email export into format accepted by `extract_dictation.py`."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -40,7 +39,7 @@ def process_email(file_name: Path) -> str:
             msg_content_type = part.get_content_subtype()
             debug(f"{part=}, {msg_content_type=}")
             if msg_content_type == "html":
-                debug("part is HTML: %s" % msg_content_type)
+                debug(f"part is HTML: {msg_content_type}")
                 charset = part.get_content_charset(failobj="utf-8")
                 content = part.get_payload(decode=True).decode(charset, "replace")
                 return content

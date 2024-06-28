@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Process GoodReader email export into format accepted by `extract_dictation.py`.
-"""
+"""Process GoodReader email export into format accepted by `extract_dictation.py`."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -21,7 +20,7 @@ from enchant import Dict  # type:ignore # sometimes mismatch with system version
 
 # https://pypi.org/project/pyenchant/
 from enchant.checker import SpellChecker  # type:ignore
-from send2trash import send2trash
+from send2trash import send2trash  # type:ignore
 
 from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
@@ -97,8 +96,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
 
         if page_num_match := RE_PAGE_NUM.match(line):
             info(f"{page_num_match=}")
-            assert page_num_match is not None  # pyright needs for group(1) below
-            page_num_parsed = page_num_match.group(1)
+            page_num_parsed = str(page_num_match.group(1))
             if page_num_parsed.isdigit():
                 page_num_parsed = int(page_num_parsed)
                 is_roman = False
@@ -118,7 +116,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
             debug(f"{page_num_parsed=} SET")
             if not page_num_first_parsed:
                 debug("SETTING initials")
-                page_num_first_parsed = page_num_parsed
+                page_num_first_parsed = int(page_num_parsed)
                 debug(f"{page_num_first_parsed=}")
                 if page_num_first_specfied:
                     page_num_offset = page_num_first_specfied - page_num_first_parsed
@@ -129,7 +127,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
             debug("RE_ANNOTATION match")
             debug(f"{page_num_parsed=}")
             debug(f"{page_num_offset=}")
-            page_num_result = page_num_parsed + page_num_offset
+            page_num_result = int(page_num_parsed) + page_num_offset
             debug(f"{page_num_result=}")
             # Kinds are either:
             # - "Highlight (cyan)": section title
@@ -175,6 +173,7 @@ def clean_pdf_ocr(text: str) -> str:
     new_text = remove_junk_hyphens(text)
     new_text = restore_lost_spaces(new_text)
     return new_text
+
 
 # This dependency on pyenchant tends to cause problems, but I need suggestion
 def remove_junk_hyphens(
@@ -323,7 +322,7 @@ if __name__ == "__main__":
                     msg_content_type = part.get_content_subtype()
                     debug(f"{msg_content_type=}")
                     if msg_content_type == "plain":
-                        debug("part is plain: %s" % msg_content_type)
+                        debug(f"part is plain: {msg_content_type}")
                         charset = part.get_content_charset(failobj="utf-8")
                         content = part.get_payload(decode=True).decode(
                             charset, "replace"

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Convert a bibtex file into a mindmap.
-"""
+"""Convert a bibtex file into a mindmap."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -61,7 +60,7 @@ def process(entries: dict, fdo):
     fdo.write("""<map version="1.11.1">\n<node TEXT="Readings">\n""")
 
     for entry in list(entries.values()):
-        info("entry = '%s'" % (entry))
+        info(f"entry = '{entry}'")
         cite = []
         reordered_names = []
         names = xml_escape(entry["author"])
@@ -70,7 +69,9 @@ def process(entries: dict, fdo):
             last, first = name.split(", ")
             reordered_names.append(first + " " + last)
         fdo.write(
-            """  <node COLOR="#338800" TEXT="%s">\n""" % ", ".join(reordered_names)
+            """  <node COLOR="#338800" TEXT="{}">\n""".format(
+                ", ".join(reordered_names)
+            )
         )
 
         if "url" in entry:
@@ -81,8 +82,9 @@ def process(entries: dict, fdo):
             )
         else:
             fdo.write(
-                """    <node COLOR="#090f6b" TEXT="%s">\n"""
-                % xml_escape(entry["title"])
+                """    <node COLOR="#090f6b" TEXT="{}">\n""".format(
+                    xml_escape(entry["title"])
+                )
             )
 
         # it would be more elegant to just loop through
@@ -121,15 +123,15 @@ def process(entries: dict, fdo):
             cite.append(("nt", entry["note"]))
 
         fdo.write(
-            """      <node COLOR="#ff33b8" TEXT="%s"/>\n"""
-            % xml_escape(" ".join(["{}={}".format(*vals) for vals in cite]))
+            """      <node COLOR="#ff33b8" TEXT="{}"/>\n""".format(
+                xml_escape(" ".join(["{}={}".format(*vals) for vals in cite]))
+            )
         )
 
         if "abstract" in entry:
             fdo.write(
                 """      <node COLOR="#999999" \
-                TEXT="&quot;%s&quot;"/>\n"""
-                % xml_escape(entry["abstract"])
+                TEXT="&quot;{}&quot;"/>\n""".format(xml_escape(entry["abstract"]))
             )
 
         fdo.write("""    </node>\n  </node>\n""")

@@ -157,12 +157,14 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
         return ancestor
 
     for d in node.iter():
-        if (  # found a local reference link
+        link = d.get("LINK", "")
+        if (
             "LINK" in d.attrib
-            and not d.get("LINK").startswith("http:")
-            and d.get("LINK").endswith(".mm")
+            and (link := d.get("LINK")).endswith(".mm")  # other mindmaps
+            and not link.startswith("http")  # local only
+            and not link.endswith("-outline.mm")  # no outlines
         ):
-            links.append(unescape_XML(d.get("LINK")))
+            links.append(unescape_XML(link))
         # skip nodes that are structure, comment, and empty of text
         if "STYLE_REF" in d.attrib and d.get("TEXT"):
             if d.get("STYLE_REF") == "author":

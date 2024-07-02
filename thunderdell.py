@@ -149,12 +149,16 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
             return node
         return None
 
-    def _get_author_node(node):
+    def _get_author_node(title_node):
         """Return the nearest ancestor that is an author node using parent_map[node]"""
-        ancestor = parent_map[node]
-        while ancestor.get("STYLE_REF") != "author":
-            ancestor = parent_map[ancestor]
-        return ancestor
+        try:
+            ancestor = parent_map[title_node]
+            while ancestor.get("STYLE_REF") != "author":
+                ancestor = parent_map[ancestor]
+            return ancestor
+        except KeyError as err:
+            print(f'''ERROR: author node not found for "{title_node.get('TEXT')}"''')
+            sys.exit()
 
     for d in node.iter():
         link = d.get("LINK", "")

@@ -26,7 +26,6 @@ debug = logging.debug
 
 NOW = time.localtime()
 
-
 def log2goatee(args, biblio):
     """
     Start at a blog entry at goatee

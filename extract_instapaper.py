@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Process Instapaper export into format accepted by `extract_dictation.py`.
-"""
+"""Process Instapaper export into format accepted by `extract_dictation.py`."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -14,19 +13,20 @@ import sys
 import webbrowser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-from send2trash import send2trash
+from send2trash import send2trash  # type: ignore
 
 import busy
 
 HOME = str(Path("~").expanduser())
 sys.path.insert(0, f"{HOME}/bin/td")
 
-debug = logging.debug
-info = logging.info
-warning = logging.warning
-error = logging.error
-critical = logging.critical
-exception = logging.exception
+# mnemonic: CEWID
+critical = logging.critical  # 50
+error = logging.error  # 40
+warn = logging.warn  # 30
+info = logging.info  # 20
+dbg = logging.debug  # 10
+excpt = logging.exception  # 40, includes exception info
 
 
 def main(argv: list[str]) -> argparse.Namespace:
@@ -66,13 +66,7 @@ def main(argv: list[str]) -> argparse.Namespace:
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = 100  # default
-    if args.verbose >= 3:
-        log_level = logging.DEBUG  # 10
-    elif args.verbose == 2:
-        log_level = logging.INFO  # 20
-    elif args.verbose == 1:
-        log_level = logging.ERROR  # 40
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(

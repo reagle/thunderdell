@@ -22,12 +22,13 @@ from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
-debug = logging.debug
-info = logging.info
-warning = logging.warning
-error = logging.error
-critical = logging.critical
-exception = logging.exception
+# mnemonic: CEWID
+critical = logging.critical  # 50
+error = logging.error  # 40
+warn = logging.warn  # 30
+info = logging.info  # 20
+dbg = logging.debug  # 10
+excpt = logging.exception  # 40, includes exception info
 
 
 def process_email(file_name: Path) -> str:
@@ -136,13 +137,7 @@ def parse_args(argv: list) -> argparse.Namespace:
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = 100  # default
-    if args.verbose >= 3:
-        log_level = logging.DEBUG  # 10
-    elif args.verbose == 2:
-        log_level = logging.INFO  # 20
-    elif args.verbose == 1:
-        log_level = logging.ERROR  # 40
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(

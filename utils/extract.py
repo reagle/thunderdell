@@ -13,12 +13,13 @@ import logging
 
 import formats
 
-debug = logging.debug
-info = logging.info
-warning = logging.warning
-error = logging.error
-critical = logging.critical
-exception = logging.exception
+# mnemonic: CEWID
+critical = logging.critical  # 50
+error = logging.error  # 40
+warn = logging.warn  # 30
+info = logging.info  # 20
+dbg = logging.debug  # 10
+excpt = logging.exception  # 40, includes exception info
 
 
 class args:

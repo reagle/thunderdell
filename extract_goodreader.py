@@ -285,13 +285,7 @@ def parse_args(argv: list) -> argparse.Namespace:
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = 100  # default
-    if args.verbose >= 3:
-        log_level = logging.DEBUG  # 10
-    elif args.verbose == 2:
-        log_level = logging.INFO  # 20
-    elif args.verbose == 1:
-        log_level = logging.ERROR  # 40
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(

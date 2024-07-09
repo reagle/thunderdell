@@ -197,10 +197,10 @@ def mastodon_update(
     )
     toot = shrink_message("ohai", comment, title, url, tags)
     try:
-        if photo_path.exists():
+        if photo_path and photo_path.is_file():
             photo_fn = photo_path.stem
             photo_desc = " ".join(
-                [chunk for chunk in photo_fn.split("-") if not chunk.isdigit()]
+                chunk for chunk in photo_fn.split("-") if not chunk.isdigit()
             )
             media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
             ohai.status_post(status=toot, media_ids=media)

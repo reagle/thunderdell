@@ -12,7 +12,6 @@ __version__ = "1.0"
 import logging
 import time
 import unicodedata
-from pathlib import Path
 
 from lxml import etree as l_etree
 

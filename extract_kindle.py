@@ -42,7 +42,7 @@ def process_email(file_name: Path) -> str:
             if msg_content_type == "html":
                 debug(f"part is HTML: {msg_content_type}")
                 charset = part.get_content_charset(failobj="utf-8")
-                content = part.get_payload(decode=True).decode(charset, "replace")
+                content = part.get_payload(decode=True).decode(charset, "replace")  # type: ignore
                 return content
         raise Exception("There's no HTML attachment to process.")
 

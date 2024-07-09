@@ -25,7 +25,7 @@ critical = logging.critical  # 50
 error = logging.error  # 40
 warn = logging.warn  # 30
 info = logging.info  # 20
-dbg = logging.debug  # 10
+debug = logging.debug  # 10
 excpt = logging.exception  # 40, includes exception info
 
 

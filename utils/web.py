@@ -79,7 +79,7 @@ def get_JSON(
     if requested_content_type == returned_content_type:
         return json.loads(r.content)
     else:
-        raise OSError("URL content is not JSON.")
+        raise OSError(f"URL content is not JSON. {url=}")
 
 
 def get_text(url: str) -> str:
@@ -334,3 +334,21 @@ def unescape_XML(text: str) -> str:  # .0937s 4.11%
         return text  # leave as is
 
     return re.sub(r"&#?\w+;", fixup_chars, text)
+
+
+def canonicalize_url(url: str) -> str:
+    """
+    >>> canonicalize_url("https://old.reddit.com/r/Python/")
+    'https://www.reddit.com/r/Python/'
+    >>> canonicalize_url("https://i.reddit.com/r/news/comments/123456.compact")
+    'https://www.reddit.com/r/news/comments/123456'
+    >>> canonicalize_url("https://example.com/page")
+    'https://example.com/page'
+    """
+    if "reddit.com" in url:
+        return re.sub(
+            r"^https?://(?:old\.|i\.)?reddit\.com(/.*?)(?:\.compact)?$",
+            r"https://www.reddit.com\1",
+            url,
+        )
+    return url

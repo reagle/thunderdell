@@ -43,6 +43,7 @@ from formats import (
     log2work,
 )
 from utils.text import pretty_tabulate_dict
+from utils.web import canonicalize_url
 
 # function aliases
 critical = logging.critical
@@ -75,11 +76,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     """
 
     url = urllib.parse.unquote(url)
-    url = re.sub(  # use canonical reddit domain
-        r"(https?://(old|i)\.reddit.com/(.*)(\.compact)?)",
-        r"https://www.reddit.com/\3",
-        url,
-    )
+    url = canonicalize_url(url)
     info(f"url = '{url}'")
     if url.lower().startswith("doi:"):
         return ScrapeDOI(url, comment)

@@ -79,6 +79,7 @@ GF_KEY_SHORTCUTS = {
     "sex": "sexism",
     "mer": "meritocracy",
     "prv": "privilege",
+    "sj": "sj",  # social justice
 }
 
 # Life-hacking

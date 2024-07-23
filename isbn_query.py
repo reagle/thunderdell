@@ -84,7 +84,7 @@ def open_query(isbn: str):
                         return False
                 elif isinstance(value, str):
                     json_bib[key] = value.strip()
-                    info("  value = '%s'" % json_bib[key])
+                    info(f"  value = '{json_bib[key]}'")
             json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
             if "title" in json_bib and "subtitle" in json_bib:
                 subtitle = json_bib["subtitle"]

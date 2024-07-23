@@ -41,7 +41,7 @@ def query(doi, accept="application/citeproc+json"):
     info(f"{accept=}")
     info(f"{doi=}")
     headers = {"Accept": accept}
-    url = "http://dx.doi.org/%s" % doi
+    url = f"http://dx.doi.org/{doi}"
     info(f"{url=}")
     r = requests.get(url, headers=headers)
     debug(f"{r=} {r.content=}")
@@ -115,6 +115,6 @@ if __name__ == "__main__":
             accept = ACCEPT_HEADERS[args.style]
         else:
             accept = args.style
-    info("accept = %s " % accept)
+    info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))

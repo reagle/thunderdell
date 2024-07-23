@@ -65,7 +65,7 @@ def log2console(args, biblio):
                 biblio["title"] = ""
             elif token == "subtitle":
                 biblio["subtitle"] = ""
-        if token in biblio and biblio[token]:
+        if biblio.get(token):
             if token == "tags":
                 for value in tags_expanded.strip().split(" "):
                     # print('keyword = %s' % value)

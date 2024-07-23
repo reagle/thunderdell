@@ -11,7 +11,6 @@ __version__ = "1.0"
 
 import logging
 import time
-from pathlib import Path
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
 import config

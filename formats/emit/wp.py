@@ -44,7 +44,7 @@ def emit_wp(args, entries):
                 prefix = ""
                 suffix = name_num
             elif field == "editor":
-                prefix = f"editor{str(name_num)}-"
+                prefix = f"editor{name_num!s}-"
                 suffix = ""
             args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
             args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')

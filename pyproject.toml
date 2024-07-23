@@ -8,14 +8,13 @@ preview = true
 # Same as Black.
 line-length = 88
 
-lint.select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "RUF", "UP", "YTT"]
-# "SIM", "PTH"] # good, but hard on old code
+lint.select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "RUF", "UP", "YTT", "SIM", "PTH"]
 # "PLR" need to understand more
-# "RUF" warns about ambiguous Unicode for curly quotes
 # "C90" McCabe complexity
 
 # These rules are redundant with black use and ruff format
-lint.ignore = ["E501", "Q000", "Q001", "Q002", "Q003"]
+# "RUF{001,002}" warns about ambiguous Unicode for curly quotes
+lint.ignore = ["E501", "Q000", "Q001", "Q002", "Q003", "RUF001", "RUF002"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [

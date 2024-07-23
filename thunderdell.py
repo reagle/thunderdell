@@ -10,6 +10,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
+import contextlib  # https://docs.python.org/3/library/contextlib.html
 import errno
 import http.server
 import logging
@@ -112,7 +113,7 @@ def build_bib(
         emitter_func(args, entries)
 
 
-def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
+def walk_freeplane(args, node, mm_file, entries, links):
     """Walk the freeplane XML tree and build:
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
@@ -789,20 +790,23 @@ if __name__ == "__main__":
     if args.defaults:
         args.chase = True
         args.output_to_file = True
+
+    # Determine the output file path
     if args.output_to_file:
         if args.YAML_CSL:
-            extension = ".yaml"
+            suffix = ".yaml"
         elif args.JSON_CSL:
-            extension = ".json"
+            suffix = ".json"
         elif args.biblatex:
-            extension = ".bib"
+            suffix = ".bib"
         elif args.WP_citation:
-            extension = ".wiki"
+            suffix = ".wiki"
         else:
-            extension = ".unknown"
-            raise Exception(f"unknown {extension}")
-        output_fn = file_name.with_suffix(extension)
-        args.outfd = open(output_fn, "w", encoding="utf-8")
+            raise ValueError("Unknown output format")
+        output_path = file_name.with_suffix(suffix)
+    else:
+        output_path = None
+
     if args.tests:
         import doctest
 
@@ -849,5 +853,12 @@ if __name__ == "__main__":
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
         emitter_func = emit_results
-    build_bib(args, file_name, emitter_func)
-    args.outfd.close()
+
+    # Use a context manager to handle the output
+    with contextlib.ExitStack() as stack:
+        if output_path:
+            args.outfd = stack.enter_context(output_path.open("w", encoding="utf-8"))
+        else:
+            args.outfd = sys.stdout
+
+        build_bib(args, file_name, emitter_func)

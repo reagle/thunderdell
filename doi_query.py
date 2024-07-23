@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Return CrossRef bibliographic data for a given a DOI.
 
-http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html 
+http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
 """
 
 __author__ = "Joseph Reagle"
@@ -111,10 +111,7 @@ if __name__ == "__main__":
 
     accept = ACCEPT_HEADERS["json"]
     if args.style:
-        if args.style in ACCEPT_HEADERS:
-            accept = ACCEPT_HEADERS[args.style]
-        else:
-            accept = args.style
+        accept = ACCEPT_HEADERS.get(args.style, args.style)
     info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))

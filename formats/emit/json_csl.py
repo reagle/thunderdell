@@ -144,9 +144,9 @@ def emit_json_csl(args, entries):
             if entry.get(field):
                 value = entry[field]
                 # debug(f"short, field = '{short} , {field}'")
-                if field in ("identifier", "entry_type"): # already done above
+                if field in ("identifier", "entry_type"):  # already done above
                     continue
-                if field in ("issue"): # done below with date/season
+                if field in ("issue"):  # done below with date/season
                     continue
 
                 # special format fields
@@ -169,7 +169,7 @@ def emit_json_csl(args, entries):
                         continue
                     if field == "date":
                         # debug(f"value = '{value}'")
-                        season = entry["issue"] if "issue" in entry else None
+                        season = entry.get("issue", None)
                         file_buffer.append('    "issued": ')
                         file_buffer.extend(do_csl_date(value, season))
                     if field == "origdate":

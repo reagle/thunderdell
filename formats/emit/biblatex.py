@@ -226,14 +226,13 @@ def emit_biblatex(args, entries):
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         # if an edited collection, remove author and booktitle
-        if all(f in entry for f in ("author", "editor", "title", "booktitle")):
-            if (
-                entry["author"] == entry["editor"]
-                and entry["title"] == entry["booktitle"]
-            ):
-                del entry["author"]
-                del entry["booktitle"]
-
+        if (
+            all(f in entry for f in ("author", "editor", "title", "booktitle"))
+            and entry["author"] == entry["editor"]
+            and entry["title"] == entry["booktitle"]
+        ):
+            del entry["author"]
+            del entry["booktitle"]
         # CSL type and field conversions
         # debug(f"{entry=}")
         for field in ("c_blog", "c_web", "c_forum"):

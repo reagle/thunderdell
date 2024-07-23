@@ -68,16 +68,15 @@ def clean(text):
     text = text.strip(", \f\r\n")
     REPLACEMENTS = [
         ("&", "&amp;"),
-        ("'", "&apos;"),
-        ('"', "&quot;"),
-        ("“", "&quot;"),
-        ("”", "&quot;"),
-        ("‘", "'"),
-        ("’", "'"),
-        (" – ", " -- "),
-        ("–", " -- "),
+        ("\N{APOSTROPHE}", "&apos;"),
+        ("\N{QUOTATION MARK}", "&quot;"),
+        ("\N{LEFT DOUBLE QUOTATION MARK}", "&quot;"),
+        ("\N{RIGHT DOUBLE QUOTATION MARK}", "&quot;"),
+        ("\N{LEFT SINGLE QUOTATION MARK}", "\N{APOSTROPHE}"),
+        ("\N{RIGHT SINGLE QUOTATION MARK}", "\N{APOSTROPHE}"),
+        (" \N{EN DASH} ", " -- "),
+        ("\N{EN DASH}", " -- "),
     ]
-
     for v1, v2 in REPLACEMENTS:
         text = text.replace(v1, v2)
     return text
@@ -302,7 +301,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
 
         mm_fd.write(f"""{MINDMAP_PREAMBLE}\n<node TEXT="Readings">\n""")
 
-        for line in text.split("\n"):
+        for line_number, line in enumerate(text.split("\n")):
             line = line.strip()
             try:
                 (
@@ -326,7 +325,6 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
                 print(err)
                 print(traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line)
                 sys.exit()
-            line_number += 1
 
         if in_subsection:
             mm_fd.write("""</node>""")  # close the last subsection

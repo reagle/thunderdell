@@ -164,19 +164,15 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
                 locator = f"{prefix} {locator}"
             else:
                 # If no pagination specified, assume page number
-                if "-" in locator:
-                    locator = f", pp. {locator}"
-                else:
-                    locator = f", p. {locator}"
+                locator = f", pp. {locator}" if "-" in locator else f", p. {locator}"
         cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
 
     hypertext = text
 
     # if node has first child <font BOLD="true"/> then embolden
     style = ""
-    if len(node) > 0:
-        if node[0].tag == "font" and node[0].get("BOLD") == "true":
-            style = "font-weight: bold"
+    if len(node) > 0 and node[0].tag == "font" and node[0].get("BOLD") == "true":
+        style = "font-weight: bold"
 
     if "LINK" in node.attrib:
         link = escape(node.get("LINK", ""))
@@ -220,10 +216,7 @@ def print_entry(
         f'<a href="{get_url_query(identifier)}">{identifier}</a>'
     )
     title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'
-    if url:
-        link_html = f'[<a class="link_html" href="{url}">url</a>]'
-    else:
-        link_html = ""
+    link_html = f'[<a class="link_html" href="{url}">url</a>]' if url else ""
     from_html = f'from <a class="from_html" href="{MM_mm_file}">{base_mm_file}</a>'
     results_file.write(
         f"{spaces}{identifier_html}, <em>{title_html}</em> {link_html} [{from_html}]"

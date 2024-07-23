@@ -99,10 +99,7 @@ if __name__ == "__main__":
 
     accept = ACCEPT_HEADERS["atom"]
     if args.style:
-        if args.style in ACCEPT_HEADERS:
-            accept = ACCEPT_HEADERS[args.style]
-        else:
-            accept = args.style
+        accept = ACCEPT_HEADERS.get(args.style, args.style)
     info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))

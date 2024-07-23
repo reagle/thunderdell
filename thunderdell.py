@@ -156,7 +156,7 @@ def walk_freeplane(args, node, mm_file, entries, links):  # noqa: C901
             while ancestor.get("STYLE_REF") != "author":
                 ancestor = parent_map[ancestor]
             return ancestor
-        except KeyError as err:
+        except KeyError:
             print(f'''ERROR: author node not found for "{title_node.get('TEXT')}"''')
             sys.exit()
 
@@ -355,22 +355,37 @@ def pull_citation(args, entry: dict) -> dict:
     return entry
 
 
-def parse_pairs(entry: dict) -> dict:
-    """Parse pairs of the form: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"""
+def parse_pairs(entry: dict[str, str]) -> dict[str, str]:
+    """Parse entry['cite'] values as `key=value` pairs; add them to entry dictionary.
 
+    >>> entry = {"cite": "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241", "title": "Test", "_mm_file": "test.mm"}
+    >>> BIB_SHORTCUTS = {"d": "date", "j": "journal", "v": "volume", "n": "number", "pp": "pages"}
+    >>> parse_pairs(entry)
+    {'cite': 'd=20030723 j=Research Policy v=32 n=7 pp=1217-1241', 'title': 'Test', '_mm_file': 'test.mm', 'date': '20030723', 'journal': 'Research Policy', 'volume': '32', 'number': '7', 'pages': '1217-1241'}
+
+    """
     if citation := entry.get("cite"):
-        # split around tokens of length 1-3 and
-        EQUAL_PAT = re.compile(r"(\w{1,3})=")
-        # get rid of first empty string of results
-        cites = EQUAL_PAT.split(citation)[1:]
-        # 2 refs to an iterable are '*' unpacked and rezipped
-        cite_pairs = zip(*[iter(cites)] * 2, strict=True)  # pyright: ignore
-        for short, value in cite_pairs:  # pyright: ignore
+        CITE_RE = re.compile(
+            r"""
+            (\w{1,3})=([^=]+)  # key = value
+            (?=                # positive lookahead (don't consume characters)
+                \s+\w{1,3}=|$  # space(s), another key-value pair OR end of string
+            )
+            """,
+            re.VERBOSE,
+        )
+
+        # Use regex to find all key-value pairs in one pass
+        for short, value in CITE_RE.findall(citation):
+            # Look up the full key name in BIB_SHORTCUTS
             if key := BIB_SHORTCUTS.get(short):
-                if key in entry and key == "keyword":
-                    entry[key] += f", {value.strip()}"
+                value = value.strip()
+                if key == "keyword" and key in entry:
+                    # Append new keywords to existing ones
+                    entry[key] += f", {value}"
                 else:
-                    entry[key] = value.strip()
+                    # Set or overwrite the value for other keys
+                    entry[key] = value
             else:
                 print(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
     return entry

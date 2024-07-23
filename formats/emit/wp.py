@@ -37,15 +37,10 @@ def emit_wp(args, entries):
 
     def output_wp_names(field, names):
         """Rejigger names for odd WP author and editor conventions."""
-        name_num = 0
-        for name in names:
-            name_num += 1
-            if field == "author":
-                prefix = ""
-                suffix = name_num
-            elif field == "editor":
-                prefix = f"editor{name_num!s}-"
-                suffix = ""
+        for name_num, name in enumerate(names, 1):
+            prefix, suffix = "", name_num
+            if field == "editor":
+                prefix, suffix = f"editor{name_num!s}-", ""
             args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
             args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
 
@@ -70,10 +65,7 @@ def emit_wp(args, entries):
                     "shorttitle",
                 ):
                     continue
-                elif field == "author":
-                    output_wp_names(field, value)
-                    continue
-                elif field == "editor":
+                elif field == "author" or field == "editor":
                     output_wp_names(field, value)
                     continue
                 elif field in ("date", "origdate", "urldate"):

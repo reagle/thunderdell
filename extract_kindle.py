@@ -34,7 +34,7 @@ excpt = logging.exception  # 40, includes exception info
 def process_email(file_name: Path) -> str:
     """Process parts of a MIME message stored in file."""
 
-    with open(file_name, "rb") as fp:
+    with file_name.open(mode="rb") as fp:
         msg = BytesParser(policy=policy.default).parse(fp)
         for part in msg.walk():
             msg_content_type = part.get_content_subtype()

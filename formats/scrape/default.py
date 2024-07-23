@@ -155,7 +155,7 @@ class ScrapeDefault:
                         MAX_MATCH += 35
                         if ", " in author:
                             MAX_MATCH += 35
-                    info("author = '%s'" % dmatch.group())
+                    info(f"author = '{dmatch.group()}'")
                     if len(author) > 4 and len(author) < MAX_MATCH:
                         return string.capwords(author)
                     else:

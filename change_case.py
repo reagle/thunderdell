@@ -11,7 +11,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import codecs
 import logging
 import re
 import string
@@ -199,7 +198,7 @@ def safe_capwords(text):
     new_text = []
     words = text.split(" ")
     for word in words:
-        debug("word = '%s'" % word)
+        debug(f"word = '{word}'")
         if word:  # this split will remove multiple white-spaces
             if word.lower() in BORING_WORDS:
                 new_text.append(word.lower())
@@ -226,10 +225,10 @@ def safe_lower(text):
     new_text = []
     words = text.split(" ")
     for word in words:
-        debug("  word = '%s'" % word)
+        debug(f"  word = '{word}'")
         if word:  # this split will remove multiple white-spaces
             word_capitalized = word.capitalize()
-            debug("  word_capitalized = '%s'" % word_capitalized)
+            debug(f"  word_capitalized = '{word_capitalized}'")
             if word in proper_nouns:
                 new_text.append(word)
             elif word.isupper():
@@ -240,7 +239,7 @@ def safe_lower(text):
                     new_text.append(word.lower())
             else:
                 new_text.append(word.lower())
-    debug("  new_text = '%s'" % new_text)
+    debug(f"  new_text = '{new_text}'")
     return " ".join(new_text)
 
 
@@ -256,7 +255,7 @@ def is_proper_noun(word):
     True
 
     """
-    debug("    word = '%s'" % word)
+    debug(f"    word = '{word}'")
     parts = word.split("-")  # '([\W]+)'
     # debug("parts = '%s'" %parts)
     if len(parts) > 1:
@@ -267,10 +266,10 @@ def is_proper_noun(word):
         debug("    word in proper_nouns: True")
         return True
     if word.lower() not in wordset_nocase:  # not known to me at all: proper
-        debug("    word.lower() = '%s'" % word.lower())
+        debug(f"    word.lower() = '{word.lower()}'")
         debug("    word.lower() not in wordset_nocase: True")
         return True
-    debug("    '%s' is_proper_noun: False" % word)
+    debug(f"    '{word}' is_proper_noun: False")
     return False
 
 
@@ -371,7 +370,7 @@ def main(args):
 
     case_type = "title" if args.title_case else "sentence"
     debug(f"{args.text=}")
-    debug("case_type = %s" % case_type)
+    debug(f"case_type = {case_type}")
     print(change_case(args.text, case_type))
 
 

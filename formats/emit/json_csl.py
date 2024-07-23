@@ -141,7 +141,7 @@ def emit_json_csl(args, entries):
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
-            if field in entry and entry[field]:
+            if entry.get(field):
                 value = entry[field]
                 # debug(f"short, field = '{short} , {field}'")
                 if field in ("identifier", "entry_type"): # already done above

@@ -49,9 +49,9 @@ def emit_results(
 
         # if I am what was queried, print all of me
         if entry["identifier"] == query:
-            results_file.write('%s<li class="li_entry_identifier">\n' % (spaces))
+            results_file.write(f'{spaces}<li class="li_entry_identifier">\n')
             spaces = spaces + " "
-            results_file.write('%s<ul class="tit_tree">\n' % (spaces))
+            results_file.write(f'{spaces}<ul class="tit_tree">\n')
             spaces = spaces + " "
             results_file.write(
                 f'{spaces}<li style="text-align: right">[<a href="{MM_mm_file}">{base_mm_file}</a>]</li>\n',

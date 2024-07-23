@@ -10,7 +10,6 @@ __version__ = "1.0"
 
 
 import logging
-import os
 import re
 import time
 from collections import namedtuple
@@ -93,7 +92,7 @@ def do_console_annotation(args, biblio):
         console_annotations = ""
         biblio["comment"] = ""
 
-        print("@%s\n" % (tentative_id))
+        print(f"@{tentative_id}\n")
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
             info(f"{line=}")
@@ -136,7 +135,7 @@ def do_console_annotation(args, biblio):
                         line = ", " + line  # prepend paraphrase mark
                 console_annotations += "\n\n" + line.strip()
 
-        info("biblio.get('excerpt', '') = '%s'" % (biblio.get("excerpt", "")))
+        info("biblio.get('excerpt', '') = '{}'".format(biblio.get("excerpt", "")))
         info(f"console_annotations = '{console_annotations}'")
         if console_annotations.strip():  # don't bother with default excerpt
             biblio["excerpt"] = console_annotations
@@ -175,12 +174,12 @@ def do_console_annotation(args, biblio):
     try:
         biblio, do_publish = parse_bib(args, biblio, edited_text)
     except (TypeError, KeyError) as e:
-        print("Error parsing biblio assignments: %s\nTry again." % e)
+        print(f"Error parsing biblio assignments: {e}\nTry again.")
         time.sleep(2)
         edited_text = edit_annotation("", resume_edit=True)
         biblio, do_publish = parse_bib(args, biblio, edited_text)
 
     tweaked_id = get_tentative_ident(biblio)
     if tweaked_id != tentative_id:
-        print(("logged: %s to" % get_tentative_ident(biblio)), end="\n")
+        print((f"logged: {get_tentative_ident(biblio)} to"), end="\n")
     return biblio, do_publish

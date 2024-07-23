@@ -34,7 +34,7 @@ def query(number: int, accept: str = "application/atom+xml"):
     info(f"{accept=}")
     info(f"{number=}")
     headers = {"Accept": accept}
-    url = "http://export.arxiv.org/api/query?id_list=%s" % number
+    url = f"http://export.arxiv.org/api/query?id_list={number}"
     info(f"{url=}")
     r = requests.get(url, headers=headers)
     requested_content_type = accept.split(";")[0]
@@ -103,6 +103,6 @@ if __name__ == "__main__":
             accept = ACCEPT_HEADERS[args.style]
         else:
             accept = args.style
-    info("accept = %s " % accept)
+    info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))

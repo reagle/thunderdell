@@ -566,7 +566,7 @@ def parse_names(names):
     >>> parse_names('First van der Last, First van der Last II, van Last')
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
-    """  # noqa: E501
+    """
 
     names_p = []
     # debug(f"names = '{names}'")

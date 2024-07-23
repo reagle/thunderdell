@@ -8,7 +8,7 @@ preview = true
 # Same as Black.
 line-length = 88
 
-lint.select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "UP", "YTT"]
+lint.select = ["A", "B", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "RUF", "UP", "YTT"]
 # "SIM", "PTH"] # good, but hard on old code
 # "PLR" need to understand more
 # "RUF" warns about ambiguous Unicode for curly quotes

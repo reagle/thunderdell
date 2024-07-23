@@ -12,7 +12,6 @@ __version__ = "1.0"
 import logging
 import re
 import time
-from pathlib import Path
 
 import config
 

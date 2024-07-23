@@ -54,7 +54,7 @@ Lessons I learned on the road as a Digital Nomad
 Lessons I learned on the road as a digital nomad
 r/AmItheButtface 
 r/AmItheButtface
-""".strip().split("\n")  # noqa: E501
+""".strip().split("\n")
 
 
 def test_change_case():

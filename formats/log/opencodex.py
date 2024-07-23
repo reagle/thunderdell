@@ -9,9 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import logging
-import os
 import time
-from pathlib import Path
 from subprocess import Popen
 
 import config

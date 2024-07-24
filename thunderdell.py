@@ -749,7 +749,8 @@ if __name__ == "__main__":
     file_name = args.input_file.absolute()
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
-    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    # LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         print("logging to file")
         log.basicConfig(

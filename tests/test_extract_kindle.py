@@ -6,10 +6,12 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 """
-Run tests against golden YAML results; 
-useful for detecting inadvertent changes.
+Run tests against golden YAML results; useful for detecting inadvertent changes.
+
+Run in parent folder as `pytest tests`.
 """
-from config import TESTS_FOLDER
+
+from config import TESTS_FOLDER  # Path object
 from extract_kindle import process_html  # parse_args
 
 
@@ -27,10 +29,8 @@ def test_process_html():
     result_txt = process_html(given_txt)
     # print(f"{result=}")
 
-    with open(TESTS_FOLDER / "kindle-result.txt", "w") as result_fd:
-        result_fd.write(result_txt)
-    with open(TESTS_FOLDER / "kindle-expected.txt") as expected_fd:
-        expected_txt = expected_fd.read()
+    (TESTS_FOLDER / "kindle-result.txt").write_text(result_txt)
+    expected_txt = (TESTS_FOLDER / "kindle-expected.txt").read_text()
     # print(f"{expected=}")
     assert result_txt == expected_txt
 

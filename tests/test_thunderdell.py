@@ -6,15 +6,14 @@
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
 """
-Run tests against golden YAML results;
-useful for detecting inadvertent changes.
+Run tests against golden YAML results; useful for detecting inadvertent changes.
+
+Run in parent folder as `pytest tests`.
 """
-import os
+
 import subprocess
 
 from config import TESTS_FOLDER, THUNDERDELL_EXE
-
-HOME = os.path.expanduser("~")
 
 
 def test_results():
@@ -26,11 +25,12 @@ def test_results():
     for test_fn in sorted(TESTS_FOLDER.glob("*.mm")):
         print(f"{test_fn=}")
         output = subprocess.run(
-            [THUNDERDELL_EXE, "-i", test_fn],
+            [str(THUNDERDELL_EXE), "-i", test_fn],
             capture_output=True,
         )
         result = output.stdout.decode("utf-8")
-        expect = open(test_fn.with_suffix(".yaml")).read()
+        # expect = open(test_fn.with_suffix(".yaml")).read()
+        expect = test_fn.with_suffix(".yaml").read_text()
         assert result == expect
 
 

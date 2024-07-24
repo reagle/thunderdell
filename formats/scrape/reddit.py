@@ -20,6 +20,8 @@ from utils.web import get_JSON
 
 from .default import ScrapeDefault
 
+NOW = time.localtime()
+
 
 class ScrapeReddit(ScrapeDefault):
     def __init__(self, url_clean, comment):

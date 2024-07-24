@@ -211,7 +211,7 @@ def emit_yaml_csl(args, entries):
                         continue
                     if field == "date":
                         # debug(f"value = '{value}'")
-                        season = entry["issue"] if "issue" in entry else None
+                        season = entry.get("issue", None)
                         args.outfd.write("  issued:\n")
                         emit_yaml_date(value, season)
                     if field == "origdate":

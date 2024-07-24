@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import re
 
 from biblio.fields import (
@@ -19,13 +19,6 @@ from biblio.fields import (
     EXCLUDE_URLS,
 )
 from formats.emit.yaml_csl import guess_csl_type
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 def emit_json_csl(args, entries):
@@ -95,7 +88,7 @@ def emit_json_csl(args, entries):
             date_buffer.append(f'        "season": "{season}",\n')
         date_buffer.append("    },\n")
 
-        debug(f"{date_buffer=}")
+        log.debug(f"{date_buffer=}")
         return date_buffer
 
     def csl_protect_case(title):

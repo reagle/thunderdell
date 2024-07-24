@@ -9,7 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import textwrap
 
 import arrow
@@ -22,13 +21,6 @@ from .default import ScrapeDefault
 
 session = init_session()
 scraper = Scraper(session=session)
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeTwitter(ScrapeDefault):

@@ -9,19 +9,12 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 
 import arxiv_query
 from change_case import sentence_case
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeArXiv(ScrapeDefault):
@@ -38,9 +31,9 @@ class ScrapeArXiv(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-        info(f"url = {self.url}")
+        log.info(f"url = {self.url}")
         dict_bib = arxiv_query.query(self.identifier)
-        info(f"{dict_bib=}")
+        log.info(f"{dict_bib=}")
         biblio = {
             "entry_type": "report",
             "permalink": self.url,
@@ -50,7 +43,7 @@ class ScrapeArXiv(ScrapeDefault):
             "comment": self.comment,
         }
         for key, value in list(dict_bib.items()):
-            info(f"{key=} {value=} {type(value)=}")
+            log.info(f"{key=} {value=} {type(value)=}")
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -65,7 +58,7 @@ class ScrapeArXiv(ScrapeDefault):
             biblio["title"] = "UNKNOWN"
         else:
             biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
-        info(f"{biblio=}")
+        log.info(f"{biblio=}")
         return biblio
 
     def get_author(self, bib_dict):
@@ -76,5 +69,5 @@ class ScrapeArXiv(ScrapeDefault):
 
     def get_date(self, bib_dict):
         date = bib_dict["published"][0:10].replace("-", "")
-        info(f"{date=}")
+        log.info(f"{date=}")
         return date

@@ -9,20 +9,12 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import re
 
 from biblio import fields as bf
 from utils.web import get_HTML, unescape_XML
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeWMMeta(ScrapeDefault):

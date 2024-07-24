@@ -9,7 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import re
 
 from biblio.fields import (
@@ -21,13 +20,6 @@ from biblio.fields import (
     CSL_TYPES,
     EXCLUDE_URLS,
 )
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 def guess_csl_type(entry):

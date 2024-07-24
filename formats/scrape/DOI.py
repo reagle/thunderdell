@@ -9,19 +9,12 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 
 import doi_query
 from change_case import sentence_case
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeDOI(ScrapeDefault):
@@ -31,16 +24,16 @@ class ScrapeDOI(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-        info(f"url = {self.url}")
+        log.info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)
-        info(f"{json_bib=}")
+        log.info(f"{json_bib=}")
         biblio = {
             "permalink": self.url,
             "excerpt": "",
             "comment": self.comment,
         }
         for key, value in list(json_bib.items()):
-            info(f"{key=} {value=} {type(value)=}")
+            log.info(f"{key=} {value=} {type(value)=}")
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -61,7 +54,7 @@ class ScrapeDOI(ScrapeDefault):
             biblio["title"] = "UNKNOWN"
         else:
             biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
-        info(f"{biblio=}")
+        log.info(f"{biblio=}")
         return biblio
 
     def get_author(self, bib_dict):
@@ -69,13 +62,13 @@ class ScrapeDOI(ScrapeDefault):
         if "author" in bib_dict:
             names = ""
             for name_dic in bib_dict["author"]:
-                info(f"name_dic = '{name_dic}'")
+                log.info(f"name_dic = '{name_dic}'")
                 if "literal" in name_dic:
                     name_reverse = name_dic["literal"].split(", ")
                     joined_name = f"{name_reverse[1]} {name_reverse[0]}"
                 else:
                     joined_name = f"{name_dic['given']} {name_dic['family']}"
-                info(f"joined_name = '{joined_name}'")
+                log.info(f"joined_name = '{joined_name}'")
                 names = names + ", " + joined_name
             names = names[2:]  # remove first comma
         return names
@@ -83,7 +76,7 @@ class ScrapeDOI(ScrapeDefault):
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
-        info(f"{date_parts=}")
+        log.info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = "%d%02d%02d" % (int(year), int(month), int(day))
@@ -94,5 +87,5 @@ class ScrapeDOI(ScrapeDefault):
             date = str(date_parts[0])
         else:
             date = "0000"
-        info(f"{date=}")
+        log.info(f"{date=}")
         return date

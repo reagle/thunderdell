@@ -10,7 +10,7 @@ __version__ = "1.0"
 
 
 import datetime
-import logging
+import logging as log
 import re
 import string
 import time
@@ -25,14 +25,6 @@ from change_case import sentence_case
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
 
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
-
-NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
@@ -89,7 +81,7 @@ class ScrapeDefault:
         biblio["title"], biblio["c_web"] = self.split_title_org()
         for site, container, container_type in SITE_CONTAINER_MAP:
             if site in biblio["url"]:
-                info(f"{container=}")
+                log.info(f"{container=}")
                 biblio[container_type] = container
                 del biblio["c_web"]
         return biblio
@@ -119,17 +111,17 @@ class ScrapeDefault:
             """//*[1][contains(@class, 'byline')][1]//text()""",
         )
         if self.html_p is not None:
-            info("checking author xpaths")
+            log.info("checking author xpaths")
             for path in AUTHOR_XPATHS:
-                info(f"trying = '{path}'")
+                log.info(f"trying = '{path}'")
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
-                    info(f"{xpath_result=}; {path=}")
+                    log.info(f"{xpath_result=}; {path=}")
                     author = string.capwords(" ".join(xpath_result).strip())
                     if author.lower().startswith("by "):
                         author = author[3:]
                     author = author.replace(" And ", ", ")
-                    info(f"{author=}; {path=}")
+                    log.info(f"{author=}; {path=}")
                     if author != "":
                         return author
                     else:
@@ -143,25 +135,25 @@ class ScrapeDefault:
                 r"\s{3,}by[:]? (.*)",
             )
             # info(self.text)
-            info("checking regexs")
+            log.info("checking regexs")
             for regex in AUTHOR_REGEXS:
-                info(f"trying = '{regex}'")
+                log.info(f"trying = '{regex}'")
                 dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
                 if dmatch:
-                    info(f'matched: "{regex}"')
+                    log.info(f'matched: "{regex}"')
                     author = dmatch.group(1).strip()
                     MAX_MATCH = 30
                     if " and " in author:
                         MAX_MATCH += 35
                         if ", " in author:
                             MAX_MATCH += 35
-                    info(f"author = '{dmatch.group()}'")
+                    log.info(f"author = '{dmatch.group()}'")
                     if len(author) > 4 and len(author) < MAX_MATCH:
                         return string.capwords(author)
                     else:
-                        info(f"length {len(author)} is <4 or > {MAX_MATCH}")
+                        log.info(f"length {len(author)} is <4 or > {MAX_MATCH}")
                 else:
-                    info(f'failed: "{regex}"')
+                    log.info(f'failed: "{regex}"')
 
         return "UNKNOWN"
 
@@ -175,16 +167,16 @@ class ScrapeDefault:
             """//relative-time/@datetime""",
         )
         if self.html_p is not None:
-            info("checking date xpaths")
+            log.info("checking date xpaths")
             for path in DATE_XPATHS:
-                info(f"trying = '{path}'")
+                log.info(f"trying = '{path}'")
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
-                    info(f"'{xpath_result=}'; '{path=}'")
+                    log.info(f"'{xpath_result=}'; '{path=}'")
                     # arrow.get is not powerful enough parser, so use dateutil
                     # date = arrow.get(xpath_result[0]).format("YYYYMMDD")
                     date = du.parse(xpath_result[0]).strftime("%Y%m%d")
-                    info(f"date = '{date}'; xpath = '{path}'")
+                    log.info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date
                     else:
@@ -194,7 +186,7 @@ class ScrapeDefault:
         try:
             date = winnow_dates(self).strftime("%Y%m%d")
         except (TypeError, IndexError) as e:
-            info(f"date not found returning default NOW: {e}")
+            log.info(f"date not found returning default NOW: {e}")
         return date
 
     def get_title(self):
@@ -224,33 +216,33 @@ class ScrapeDefault:
         ORG_WORDS = ["blog", "lab", "center"]
 
         title = title_ori = self.get_title()
-        info(f"title_ori = '{title_ori}'")
+        log.info(f"title_ori = '{title_ori}'")
         org = org_ori = self.get_org()
-        info(f"org_ori = '{org_ori}'")
+        log.info(f"org_ori = '{org_ori}'")
         STRONG_DELIMTERS = re.compile(r"\s[\|—«»]\s")
         WEAK_DELIMITERS = re.compile(r"[:;-]\s")
         if STRONG_DELIMTERS.search(title_ori):
-            info("STRONG_DELIMTERS")
+            log.info("STRONG_DELIMTERS")
             parts = STRONG_DELIMTERS.split(title_ori)
         else:
-            info("WEAK_DELIMITERS")
+            log.info("WEAK_DELIMITERS")
             parts = WEAK_DELIMITERS.split(title_ori)
-        info(f"parts = '{parts}'")
+        log.info(f"parts = '{parts}'")
         if len(parts) >= 2:
             beginning, end = " : ".join(parts[0:-1]), parts[-1]
             title, org = beginning, end
             title_c14n = title.replace(" ", "").lower()
             org_c14n = org.replace(" ", "").lower()
             if org_ori.lower() in org_c14n.lower():
-                info("org_ori.lower() in org_c14n.lower(): pass")
+                log.info("org_ori.lower() in org_c14n.lower(): pass")
                 title, org = " ".join(parts[0:-1]), parts[-1]
             elif org_ori.lower() in title_c14n:
-                info("org_ori.lower() in title_c14n: switch")
+                log.info("org_ori.lower() in title_c14n: switch")
                 title, org = parts[-1], " ".join(parts[0:-1])
             else:
-                info(f"{beginning=}, {end=}")
+                log.info(f"{beginning=}, {end=}")
                 end_ratio = float(len(end)) / len(beginning + end)
-                info(
+                log.info(
                     " end_ratio: %d / %d = %.2f"
                     % (len(end), len(beginning + end), end_ratio)
                 )
@@ -258,7 +250,7 @@ class ScrapeDefault:
                 if end_ratio > 0.5 or any(
                     word.lower() in beginning for word in ORG_WORDS
                 ):
-                    info("ratio and org_word: switch")
+                    log.info("ratio and org_word: switch")
                     title = end
                     org = beginning
             title = sentence_case(title.strip())
@@ -288,8 +280,8 @@ class ScrapeDefault:
                 line = " ".join(line.split())  # removes redundant space
                 if len(line) >= 250:
                     line = smart_to_markdown(line)
-                    info(f"line = '{line}'")
-                    info(f"length = {len(line)}; 2nd_char = '{line[1]}'")
+                    log.info(f"line = '{line}'")
+                    log.info(f"length = {len(line)}; 2nd_char = '{line[1]}'")
                     if line[1].isalpha():
                         excerpt = line
                         return excerpt.strip()

@@ -10,16 +10,16 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import json
-import logging
+import logging as log
 import pprint
 import sys
 
 import requests
 
 log_level = 100  # default
-critical = logging.critical
-info = logging.info
-debug = logging.debug
+log.critical = log.critical
+log.info = log.info
+log.debug = log.debug
 
 # https://citation.crosscite.org/docs.html
 # Types available to output to the CLI
@@ -38,17 +38,17 @@ ACCEPTABLE_TYPES = (
 def query(doi, accept="application/citeproc+json"):
     """Query the DOI Web service; returns string"""
 
-    info(f"{accept=}")
-    info(f"{doi=}")
+    log.info(f"{accept=}")
+    log.info(f"{doi=}")
     headers = {"Accept": accept}
     url = f"http://dx.doi.org/{doi}"
-    info(f"{url=}")
+    log.info(f"{url=}")
     r = requests.get(url, headers=headers)
-    debug(f"{r=} {r.content=}")
+    log.debug(f"{r=} {r.content=}")
     returned_content_type = r.headers["content-type"].split("; ")[0]
     if returned_content_type in ACCEPTABLE_TYPES:
         json_bib = json.loads(r.content)
-        info(f"{json_bib=}")
+        log.info(f"{json_bib=}")
         return json_bib
     else:
         raise RuntimeError(
@@ -92,21 +92,21 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="doi_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     accept = ACCEPT_HEADERS["json"]
     if args.style:
         accept = ACCEPT_HEADERS.get(args.style, args.style)
-    info(f"accept = {accept} ")
+    log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))

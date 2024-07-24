@@ -68,13 +68,6 @@ def cgi_main(args):
         args.chase = True
         args.cgi = True
 
-        def _ignore(_):
-            pass  # this overrides td's logging
-
-        td.critical = _ignore
-        td.info = _ignore
-        td.dbg = _ignore
-
         td.build_bib(args, MINDMAP, td.emit_results)
 
         result_file = TMP_DIR / "query-thunderdell.html"

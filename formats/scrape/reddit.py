@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import re
 import time
 from datetime import datetime
@@ -19,15 +19,6 @@ from change_case import sentence_case
 from utils.web import get_JSON
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
-
-NOW = time.localtime()
 
 
 class ScrapeReddit(ScrapeDefault):
@@ -51,7 +42,7 @@ class ScrapeReddit(ScrapeDefault):
         self.json = get_JSON(f"{url_clean}.json")
         if match := RE_REDDIT_URL.match(url_clean):
             self.url_dict = match.groupdict()
-            info(f"{self.url_dict=}")
+            log.info(f"{self.url_dict=}")
             if self.url_dict["cid"]:
                 self.type = "comment"
             elif self.url_dict["pid"]:
@@ -65,7 +56,7 @@ class ScrapeReddit(ScrapeDefault):
                     self.type = "wiki"
         else:
             raise TypeError("Unknown type of Reddit resource.")
-        info(f"{self.type=}")
+        log.info(f"{self.type=}")
 
     def get_biblio(self):
         biblio = {
@@ -85,12 +76,12 @@ class ScrapeReddit(ScrapeDefault):
         return biblio
 
     def get_org(self):
-        info("GETTING ORG")
+        log.info("GETTING ORG")
         organization = "Reddit"
-        info(f"{self.type=}")
+        log.info(f"{self.type=}")
         if self.type in ["post", "comment"]:
             organization = self.url_dict["root"]
-        info(f"{organization=}")
+        log.info(f"{organization=}")
         return organization.strip()
 
     def get_author(self):
@@ -98,9 +89,9 @@ class ScrapeReddit(ScrapeDefault):
         if self.type == "post":
             author = self.json[0]["data"]["children"][0]["data"]["author"]
         if self.type == "comment":
-            info(f"{self.json[1]=}")
+            log.info(f"{self.json[1]=}")
             author = self.json[1]["data"]["children"][0]["data"]["author"]
-        info(f"{author=}")
+        log.info(f"{author=}")
         return author.strip()
 
     def get_title(self):
@@ -109,7 +100,7 @@ class ScrapeReddit(ScrapeDefault):
             title = self.url_dict["root"]
         elif self.type in ["post", "comment"]:
             title = sentence_case(self.json[0]["data"]["children"][0]["data"]["title"])
-        info(f"{title=}")
+        log.info(f"{title=}")
         return title.strip()
 
     def get_date(self):
@@ -132,5 +123,5 @@ class ScrapeReddit(ScrapeDefault):
                 excerpt = post_data["url_overridden_by_dest"]  # link post
         elif self.type == "comment":
             excerpt = self.json[1]["data"]["children"][0]["data"]["body"]
-        info(f"returning {excerpt}")
+        log.info(f"returning {excerpt}")
         return excerpt.strip()

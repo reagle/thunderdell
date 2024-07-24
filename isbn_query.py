@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import json
-import logging
+import logging as log
 import pprint
 import sys
 
@@ -15,12 +15,6 @@ import arrow
 import requests
 
 # from dateutil.parser import ParserError  # type: ignore
-
-
-log_level = 100  # default
-critical = logging.critical
-info = logging.info
-dbg = logging.debug
 
 
 def query(isbn: str):
@@ -48,15 +42,15 @@ def open_query(isbn: str):
     if isbn.startswith("isbn:"):
         isbn = isbn[5:]
     isbn = isbn.replace("-", "")
-    info(f"{isbn=}")
+    log.info(f"{isbn=}")
     URL = (
         f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}"
         "&jscmd=details&format=json"
     )
-    info(f"{URL=}")
+    log.info(f"{URL=}")
     r = requests.get(URL)
     returned_content_type = r.headers["content-type"]
-    info(f"r.content = '{r.content!r}'")
+    log.info(f"r.content = '{r.content!r}'")
     if returned_content_type.startswith("application/json"):
         if r.content != b"{}":
             json_bib = {"isbn": str(isbn)}
@@ -84,7 +78,7 @@ def open_query(isbn: str):
                         return False
                 elif isinstance(value, str):
                     json_bib[key] = value.strip()
-                    info(f"  value = '{json_bib[key]}'")
+                    log.info(f"  value = '{json_bib[key]}'")
             json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
             if "title" in json_bib and "subtitle" in json_bib:
                 subtitle = json_bib["subtitle"]
@@ -106,16 +100,16 @@ def google_query(isbn):
     if isbn.startswith("isbn:"):
         isbn = isbn[5:]
     isbn = isbn.replace("-", "")
-    info(f"{isbn=}")
+    log.info(f"{isbn=}")
     URL = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-    info(f"{URL=}")
+    log.info(f"{URL=}")
     r = requests.get(URL)
     returned_content_type = r.headers["content-type"]
     # info(f"r.content = '{r.content}'")
     json_bib = {"isbn": str(isbn)}
     if returned_content_type.startswith("application/json"):
         json_result = json.loads(r.content)
-        info(f"json_result['totalItems']={json_result['totalItems']}")
+        log.info(f"json_result['totalItems']={json_result['totalItems']}")
         if json_result["totalItems"] == 0:
             print(f"Google unknown ISBN for {isbn}")
             return False
@@ -127,7 +121,7 @@ def google_query(isbn):
                 json_bib["date"] = value.replace("-", "")
             elif isinstance(value, str):
                 json_bib[key] = value.strip()
-                info(f"  value = '{json_bib[key]}'")
+                log.info(f"  value = '{json_bib[key]}'")
         json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
         return json_bib
     else:
@@ -166,17 +160,17 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="isbn_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    info(args.ISBN[0])
+    log.info(args.ISBN[0])
     pprint.pprint(query(args.ISBN[0]))

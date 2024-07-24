@@ -9,18 +9,10 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import re
 import time
 
 import config
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 NOW = time.localtime()
 

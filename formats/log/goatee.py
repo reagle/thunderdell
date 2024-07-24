@@ -9,19 +9,12 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import re
 import time
 from subprocess import Popen
 
 import config
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 NOW = time.localtime()
 
@@ -31,7 +24,7 @@ def log2goatee(args, biblio):
     """
 
     GOATEE_ROOT = config.HOME / "data/2web/goatee.net/content/"
-    info(f"{biblio['comment']=}")
+    log.info(f"{biblio['comment']=}")
     blog_title, sep, blog_body = biblio["comment"].partition(". ")
 
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
@@ -48,8 +41,8 @@ def log2goatee(args, biblio):
             blog_title = blog_title.replace("-", " ")
     filename = filename.strip().replace(" ", "-").replace("'", "")
     filename = GOATEE_ROOT / f"{this_year}/{this_month}{this_day}-{filename}.md"
-    info(f"{blog_title=}")
-    info(f"{filename=}")
+    log.info(f"{blog_title=}")
+    log.info(f"{filename=}")
     if filename.exists():
         raise FileExistsError(f"\nfilename {filename} already exists")
     with filename.open("w", encoding="utf-8", errors="replace") as fd:

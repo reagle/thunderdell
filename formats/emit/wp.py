@@ -10,16 +10,8 @@ __version__ = "1.0"
 
 
 import calendar
-import logging
 
 from biblio.fields import BIB_SHORTCUTS_ITEMS, BIBLATEX_WP_FIELD_MAP
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 def emit_wp(args, entries):

@@ -9,18 +9,11 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import time
 
 from biblio.keywords import KEY_SHORTCUTS
 from utils.web import yasn_publish
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 NOW = time.localtime()
 
@@ -47,7 +40,7 @@ def log2console(args, biblio):
         "excerpt",
         "url",
     )
-    info(f"biblio = '{biblio}'")
+    log.info(f"biblio = '{biblio}'")
     if biblio["tags"]:
         tags = biblio["tags"].strip().split(" ")
         tags_expanded = ""
@@ -57,7 +50,7 @@ def log2console(args, biblio):
         # biblio['keywords'] = tags_expanded[0:-1]  # removes last space
     bib_in_single_line = ""
     for token in TOKENS:
-        info(f"token = '{token}'")
+        log.info(f"token = '{token}'")
         if token not in biblio:
             if token == "url":  # I want these printed even if don't exist
                 biblio["url"] = ""

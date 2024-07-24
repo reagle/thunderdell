@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import logging
+import logging as log
 import re
 import sys
 import webbrowser
@@ -18,14 +18,6 @@ from send2trash import send2trash  # type: ignore
 import busy
 
 HOME = Path.home()
-
-# mnemonic: CEWID
-critical = logging.critical  # 50
-error = logging.error  # 40
-warn = logging.warn  # 30
-info = logging.info  # 20
-debug = logging.debug  # 10
-excpt = logging.exception  # 40, includes exception info
 
 
 def main(argv: list[str]) -> argparse.Namespace:
@@ -65,17 +57,17 @@ def main(argv: list[str]) -> argparse.Namespace:
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="extract-omnivore.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     return args
 
@@ -89,7 +81,7 @@ def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
     """
     URL_RE = re.compile(r"https?://\S+")
     for file_path in file_paths:
-        info(f"{file_path=}")
+        log.info(f"{file_path=}")
         url_found = False
         url = ""
         comment = [""]  # initial line for summary
@@ -127,8 +119,8 @@ def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    critical("==================================")
-    critical(f"{args=}")
+    log.critical("==================================")
+    log.critical(f"{args=}")
     process_files(args, args.file_names)
     user_input = input("\nTrash processed file? 'y' for yes,\n")
     if user_input == "y":

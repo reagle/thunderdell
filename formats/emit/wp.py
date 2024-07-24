@@ -57,7 +57,7 @@ def emit_wp(args, entries):
                     "shorttitle",
                 ):
                     continue
-                elif field == "author" or field == "editor":
+                elif field in ("author", "editor"):
                     output_wp_names(field, value)
                     continue
                 elif field in ("date", "origdate", "urldate"):

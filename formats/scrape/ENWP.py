@@ -18,6 +18,8 @@ from utils.web import get_HTML, unescape_XML
 
 from .default import ScrapeDefault
 
+NOW = time.localtime()
+
 
 class ScrapeENWP(ScrapeDefault):
     def __init__(self, url, comment):

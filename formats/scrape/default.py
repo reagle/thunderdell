@@ -25,6 +25,7 @@ from change_case import sentence_case
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
 
+NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 

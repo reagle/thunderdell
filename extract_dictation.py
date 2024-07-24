@@ -159,11 +159,10 @@ def build_mm_from_txt(
                 if token not in ("author", "title", "url", "keyword"):
                     if token in BIB_SHORTCUTS:
                         t, v = token.lower(), value
+                    elif token.lower() in BIB_FIELDS:
+                        t, v = BIB_FIELDS[token.lower()], value
                     else:
-                        if token.lower() in BIB_FIELDS:
-                            t, v = BIB_FIELDS[token.lower()], value
-                        else:
-                            raise Exception(f"{token=} not in BIB_FIELDS")
+                        raise Exception(f"{token=} not in BIB_FIELDS")
                     citation_add = f" {t}={v}"
                     citation += citation_add
                 if token == "keyword":

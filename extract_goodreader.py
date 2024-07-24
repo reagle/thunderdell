@@ -214,7 +214,7 @@ def restore_lost_spaces(text: str) -> str:
         for suggestion in error.suggest():
             # Suggestion must be same as original with spaces removed
             if error.word.replace(" ", "") == suggestion.replace(" ", ""):
-                log.error.replace(suggestion)
+                error.replace(suggestion)
                 break
     return str(checker.get_text())  # str() for typing
 
@@ -278,7 +278,7 @@ def parse_args(argv: list) -> argparse.Namespace:
     args = arg_parser.parse_args(argv)
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
-    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         log.basicConfig(
             filename="extract-goodreader.log",

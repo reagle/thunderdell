@@ -799,10 +799,13 @@ if __name__ == "__main__":
         import doctest
 
         from tests import test_thunderdell
+        # from tests import test_extract_kindle, text_extract_goodreader
 
         print("Running tests")
         doctest.testmod()
         test_thunderdell.test_results()
+        # test_extract_kindle.test_process_html()
+        # test_extract_goodreader.test_process_text()
         sys.exit()
 
     if args.fields:

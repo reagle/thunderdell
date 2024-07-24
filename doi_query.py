@@ -92,12 +92,7 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    if args.verbose == 1:
-        log_level = logging.CRITICAL
-    elif args.verbose == 2:
-        log_level = logging.INFO
-    elif args.verbose >= 3:
-        log_level = logging.DEBUG
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         logging.basicConfig(

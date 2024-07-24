@@ -223,7 +223,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
     if results_file_name.exists():
         results_file_name.unlink()
     try:
-        with open(results_file_name, "w", encoding="utf-8") as results_file:
+        with results_file_name.open(mode="w", encoding="utf-8") as results_file:
             args.results_file = results_file
             results_file.write(RESULT_FILE_HEADER)
             results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
@@ -755,14 +755,8 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     file_name = args.input_file.absolute()
 
-    log_level = logging.ERROR  # 40
-    if args.verbose == 1:
-        log_level = logging.WARNING  # 30
-    elif args.verbose == 2:
-        log_level = logging.INFO  # 20
-    elif args.verbose >= 3:
-        log_level = logging.DEBUG  # 10
-    LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         print("logging to file")
         logging.basicConfig(

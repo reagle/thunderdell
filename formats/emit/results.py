@@ -9,7 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import logging
 import re
 import urllib.parse
 from html import escape
@@ -21,13 +20,6 @@ import config
 
 # from formats.emit.biblatex import create_biblatex_author
 from utils.web import escape_XML, straighten_quotes
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 def emit_results(

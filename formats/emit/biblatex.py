@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import re
 
 from biblio.fields import (
@@ -23,13 +23,6 @@ from biblio.fields import (
     ONLINE_JOURNALS,
 )
 from utils.text import escape_latex, normalize_whitespace
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 #################################################################
 # Emitter utils
@@ -218,7 +211,7 @@ def emit_biblatex(args, entries):
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        info(f"{entry=}")
+        log.info(f"{entry=}")
         if entry["ori_author"] in container_values:
             if not args.author_create:
                 del entry["author"]

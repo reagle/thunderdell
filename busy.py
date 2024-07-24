@@ -14,7 +14,7 @@ __version__ = "1.0"
 # - archive URLs to f/old/`r=`
 
 import argparse
-import logging
+import logging as log
 import re
 import sys
 import time
@@ -45,13 +45,6 @@ from formats import (
 from utils.text import pretty_tabulate_dict
 from utils.web import canonicalize_url
 
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
-
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
@@ -77,7 +70,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
     url = urllib.parse.unquote(url)
     url = canonicalize_url(url)
-    info(f"url = '{url}'")
+    log.info(f"url = '{url}'")
     if url.lower().startswith("doi:"):
         return ScrapeDOI(url, comment)
     elif url.lower().startswith("isbn:"):
@@ -98,7 +91,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
         for prefix, scraper in dispatch_scraper:
             if host_path.startswith(prefix):
-                info(f"scrape = {scraper} ")
+                log.info(f"scrape = {scraper} ")
                 return scraper(url, comment)  # creates instance
 
     # Return the default scraper if no other scraper is matched
@@ -133,7 +126,7 @@ def get_logger(text: str) -> tuple[Callable, dict]:
                 .replace(r"\=", "=")
             )
 
-        info(f"params = '{params}'")
+        log.info(f"params = '{params}'")
         function_map = {
             "n": log2nifty,
             "j": log2work,
@@ -241,18 +234,18 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         print("logging to file")
-        logging.basicConfig(
+        log.basicConfig(
             filename="busy.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     if args.tests:
         print("Running doctests")
@@ -269,10 +262,10 @@ if __name__ == "__main__":
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))
-    info("-------------------------------------------------------")
-    info("-------------------------------------------------------")
-    info(f"{logger=}")
-    info(f"{params=}")
+    log.info("-------------------------------------------------------")
+    log.info("-------------------------------------------------------")
+    log.info(f"{logger=}")
+    log.info(f"{params=}")
     comment = "" if not params["comment"] else params["comment"]
     if params["url"]:  # not all log2work entries have urls
         scraper = get_scraper(params["url"].strip(), comment)
@@ -280,5 +273,5 @@ if __name__ == "__main__":
     else:
         biblio = {"title": "", "url": "", "comment": comment}
     biblio["tags"] = params["tags"]
-    info(f"{biblio=}")
+    log.info(f"{biblio=}")
     logger(args, biblio)

@@ -5,7 +5,7 @@ Use the API because NYTimes blocks some bots.
 As of 2023-03-30 the following seems to work without the API
 but this could change, so continue with API.
 
-    AGENT_HEADERS = {"User-Agent": "curl/7.54"} 
+    AGENT_HEADERS = {"User-Agent": "curl/7.54"}
 
 https://github.com/reagle/thunderdell
 """
@@ -16,7 +16,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import time
 
 import arrow
@@ -26,13 +25,6 @@ from utils.web import get_JSON
 from utils.web_api_tokens import NYT_APP_KEY
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 NOW = time.localtime()
 

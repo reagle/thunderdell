@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import logging
+import logging as log
 import re
 import subprocess
 import sys
@@ -21,15 +21,8 @@ from biblio.fields import (
 )
 from utils.web import yasn_publish
 
-HOME = str(Path("~").expanduser())
+HOME = Path.home()
 
-# mnemonic: CEWID
-critical = logging.critical  # 50
-error = logging.error  # 40
-warn = logging.warn  # 30
-info = logging.info  # 20
-debug = logging.debug  # 10
-excpt = logging.exception  # 40, includes exception info
 
 MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
     <node TEXT="reading" FOLDED="false" ID="ID_327818409">
@@ -129,9 +122,9 @@ def build_mm_from_txt(
             # unpacked with '*' and rezipped
             cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))
             for token, value in cite_pairs:
-                info(f"{token=}, {value=}")
+                log.info(f"{token=}, {value=}")
                 if token == "keyword":
-                    info(f"{entry=}")
+                    log.info(f"{entry=}")
                     entry.setdefault("keyword", []).append(value.strip())
                 else:
                     entry[token.lower()] = value.strip()
@@ -336,7 +329,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
             mm_fd.write("""</node>""")  # close the last part
         mm_fd.write("""</node>\n</node>\n</node>\n""")  # close the last entry
         mm_fd.write("""</node>\n</map>\n""")  # close the document
-        info(f"{entry=}")
+        log.info(f"{entry=}")
         if args.publish:
             yasn_publish(
                 entry["summary"],
@@ -385,25 +378,25 @@ def process_args(argv):
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="extract-dictation.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     return args
 
 
 if __name__ == "__main__":
     args = process_args(sys.argv[1:])
-    critical("==================================")
-    critical(f"{args=}")
+    log.critical("==================================")
+    log.critical(f"{args=}")
     for source_fn in args.file_names:
         text = source_fn.read_text(encoding="utf-8-sig")
         mm_file_name = source_fn.with_suffix(".mm")

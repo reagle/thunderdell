@@ -9,18 +9,11 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 
 from change_case import sentence_case
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeISBN(ScrapeDefault):
@@ -32,20 +25,20 @@ class ScrapeISBN(ScrapeDefault):
     def get_biblio(self):
         import isbn_query
 
-        info(f"url = {self.url}")
+        log.info(f"url = {self.url}")
         json_bib = isbn_query.query(self.url)
-        info(f"json_bib = '{json_bib}'")
+        log.info(f"json_bib = '{json_bib}'")
         biblio = {
             "permalink": self.url,
             "excerpt": "",
             "comment": self.comment,
         }
-        info("### json_bib.items()")
+        log.info("### json_bib.items()")
         for key, value in list(json_bib.items()):
-            info(f"key = '{key}'")
+            log.info(f"key = '{key}'")
             if key.startswith("subject"):
                 continue
-            info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'\n")
+            log.info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'\n")
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -77,14 +70,14 @@ class ScrapeISBN(ScrapeDefault):
     def get_author(self, bib_dict):
         names = "UNKNOWN"
         if "author" in bib_dict:
-            info(f"{bib_dict['author']=}")
+            log.info(f"{bib_dict['author']=}")
             names = bib_dict["author"]
         return names
 
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
-        info(f"{date_parts=}")
+        log.info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = "%d%02d%02d" % (int(year), int(month), int(day))
@@ -95,5 +88,5 @@ class ScrapeISBN(ScrapeDefault):
             date = str(date_parts[0])
         else:
             date = "0000"
-        info(f"{date=}")
+        log.info(f"{date=}")
         return date

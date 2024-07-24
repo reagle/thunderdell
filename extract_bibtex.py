@@ -10,19 +10,11 @@ __version__ = "1.0"
 # - convert about to biblatex date format (d=)
 # - handle name variances (e.g., "First Last" without comma)
 
-import logging
+import logging as log
 import re
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-HOME = str(Path("~").expanduser())
-
-log_level = 100  # default
-critical = logging.critical
-info = logging.info
-dbg = logging.debug
-warn = logging.warn
-error = logging.error
-excpt = logging.exception
+HOME = Path.home()
 
 
 def regex_parse(text: list[str]) -> dict[str, dict[str, str]]:
@@ -60,7 +52,7 @@ def process(entries: dict, fdo):
     fdo.write("""<map version="1.11.1">\n<node TEXT="Readings">\n""")
 
     for entry in list(entries.values()):
-        info(f"entry = '{entry}'")
+        log.info(f"entry = '{entry}'")
         cite = []
         reordered_names = []
         names = xml_escape(entry["author"])
@@ -166,17 +158,17 @@ if __name__ == "__main__":
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="extract_bibtex.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     for file_path in args.file_names:
         try:

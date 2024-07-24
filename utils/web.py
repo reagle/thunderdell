@@ -10,7 +10,7 @@ __version__ = "1.0"
 
 import html.entities
 import json
-import logging
+import logging as log
 import re
 from pathlib import Path
 from typing import Any
@@ -22,10 +22,7 @@ from lxml import etree
 import config
 from biblio.keywords import KEY_SHORTCUTS
 
-log = logging.getLogger("utils_web")
-critical = logging.critical
-info = logging.info
-dbg = logging.debug
+log = log.getLogger("utils_web")
 
 
 def get_HTML(
@@ -92,7 +89,7 @@ def get_text(url: str) -> str:
 
 def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:
     "Send annotated URL to social networks"
-    info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
+    log.info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     photo_path = None
 
     if tags and tags[0] != "#":  # they've not yet been hashified
@@ -120,7 +117,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
-    info(
+    log.info(
         f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}
          url = {len(url)}: {url}
@@ -159,7 +156,7 @@ def twitter_update(
         cookies = orjson.loads(cookies_fp.read_bytes())
         session = Client(cookies=cookies)
         account = Account(session=session)
-        info(f"using existing {cookies=}")
+        log.info(f"using existing {cookies=}")
     else:
         session = init_session()
         account = Account(
@@ -171,7 +168,7 @@ def twitter_update(
             if k in {"ct0", "auth_token"}
         }
         cookies_fp.write_bytes(orjson.dumps(cookies))
-        info(f"using new {cookies=}")
+        log.info(f"using new {cookies=}")
 
     if photo_path:
         shrunk_msg = shrink_message("twitter", comment, title, "", tags)
@@ -221,49 +218,49 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
         limit = 500
     elif service == "twitter":
         limit = 280
-    info(f"{comment=}")
+    log.info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
     TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
     limit -= PADDING
 
-    info(f"{limit=}")
+    log.info(f"{limit=}")
     message_room = limit - len_twitter(tags)
-    info(f"message_room - len(tags) = {message_room}")
+    log.info(f"message_room - len(tags) = {message_room}")
 
-    info(f"{len_twitter(url)=}")
+    log.info(f"{len_twitter(url)=}")
     if service == "twitter" and len_twitter(url) > TWITTER_SHORTENER_LEN:
         message_room = message_room - TWITTER_SHORTENER_LEN
-        info(f"  shortened to {TWITTER_SHORTENER_LEN}")
+        log.info(f"  shortened to {TWITTER_SHORTENER_LEN}")
     else:
         message_room = message_room - len_twitter(url)
-    info(f"message_room after url = {message_room}")
+    log.info(f"message_room after url = {message_room}")
 
-    info(f"{len_twitter(title)=}")
+    log.info(f"{len_twitter(title)=}")
     if len_twitter(title) > message_room:
-        info("title is too long")
+        log.info("title is too long")
         title = f"{title[:message_room - 1]}…"
-        info(f"  truncated to {len_twitter(title)}")
+        log.info(f"  truncated to {len_twitter(title)}")
     message_room = message_room - len_twitter(title)
-    info(f"{message_room=} after title = ")
+    log.info(f"{message_room=} after title = ")
 
-    info(f"{len_twitter(comment)=}")
+    log.info(f"{len_twitter(comment)=}")
     if len_twitter(comment) > message_room:
-        info("comment is too long")
+        log.info("comment is too long")
         if message_room > 5:
-            info(" truncating")
+            log.info(" truncating")
             comment = f"{comment[:message_room - 1]}…"
-            info(f"  truncated to {len_twitter(comment)}")
-            info(f"{comment}")
+            log.info(f"  truncated to {len_twitter(comment)}")
+            log.info(f"{comment}")
         else:
-            info(" skipping")
+            log.info(" skipping")
             comment = ""
     message_room = message_room - len_twitter(comment)
-    info(f"message_room after comment = {message_room}")
+    log.info(f"message_room after comment = {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
     message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-    info(f"{len_twitter(message)=}: {message=}")
+    log.info(f"{len_twitter(message)=}: {message=}")
     return message
 
 

@@ -11,17 +11,12 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-import logging
+import logging as log
 import pprint
 import sys
 
 import requests
 import xmltodict
-
-log_level = 100  # default
-critical = logging.critical
-info = logging.info
-debug = logging.debug
 
 ACCEPT_HEADERS = {
     "atom": "application/atom+xml",
@@ -31,16 +26,16 @@ ACCEPT_HEADERS = {
 def query(number: int, accept: str = "application/atom+xml"):
     """Query the number Web service; returns string"""
 
-    info(f"{accept=}")
-    info(f"{number=}")
+    log.info(f"{accept=}")
+    log.info(f"{number=}")
     headers = {"Accept": accept}
     url = f"http://export.arxiv.org/api/query?id_list={number}"
-    info(f"{url=}")
+    log.info(f"{url=}")
     r = requests.get(url, headers=headers)
     requested_content_type = accept.split(";")[0]
-    debug(f"{r=}")
+    log.debug(f"{r=}")
     returned_content_type = r.headers["content-type"]
-    info("{returned_content_type=}; {requested_content_type=}")
+    log.info("{returned_content_type=}; {requested_content_type=}")
     if requested_content_type in returned_content_type:
         xml_bib = r.content
         return xmltodict.parse(xml_bib)["feed"]["entry"]
@@ -80,21 +75,21 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="arxiv_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     accept = ACCEPT_HEADERS["atom"]
     if args.style:
         accept = ACCEPT_HEADERS.get(args.style, args.style)
-    info(f"accept = {accept} ")
+    log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))

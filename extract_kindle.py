@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import logging
+import logging as log
 import re
 import subprocess
 import sys
@@ -22,14 +22,6 @@ from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
 from utils.text import smart_to_markdown
 
-# mnemonic: CEWID
-critical = logging.critical  # 50
-error = logging.error  # 40
-warn = logging.warn  # 30
-info = logging.info  # 20
-debug = logging.debug  # 10
-excpt = logging.exception  # 40, includes exception info
-
 
 def process_email(file_name: Path) -> str:
     """Process parts of a MIME message stored in file."""
@@ -38,9 +30,9 @@ def process_email(file_name: Path) -> str:
         msg = BytesParser(policy=policy.default).parse(fp)
         for part in msg.walk():
             msg_content_type = part.get_content_subtype()
-            debug(f"{part=}, {msg_content_type=}")
+            log.debug(f"{part=}, {msg_content_type=}")
             if msg_content_type == "html":
-                debug(f"part is HTML: {msg_content_type}")
+                log.debug(f"part is HTML: {msg_content_type}")
                 charset = part.get_content_charset(failobj="utf-8")
                 content = part.get_payload(decode=True).decode(charset, "replace")  # type: ignore
                 return content
@@ -63,7 +55,7 @@ def process_html(content: str) -> str:
 
     if RE_ISBN.search(content):
         ISBN = RE_ISBN.search(content).group(0)
-        info(f"{ISBN=}")
+        log.info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
     text_new.append("edition = Kindle")
     if pagination_type == "Location":
@@ -72,7 +64,7 @@ def process_html(content: str) -> str:
     soup = BeautifulSoup(content, "html.parser")
     divs = soup.findAll("div")
     for div in divs:
-        debug(f"{div=}")
+        log.debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
                 color, _, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
@@ -137,35 +129,35 @@ def parse_args(argv: list) -> argparse.Namespace:
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args(argv)
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
-        logging.basicConfig(
+        log.basicConfig(
             filename="extract-kindle.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     return args
 
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    info("==================================")
-    debug(f"{args=}")
+    log.info("==================================")
+    log.debug(f"{args=}")
 
     file_names = args.file_names
     for file_name in file_names:
-        debug(f"{file_name=}")
+        log.debug(f"{file_name=}")
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
         if file_name.suffix == ".eml":
-            info(f"processing {file_name} as eml")
+            log.info(f"processing {file_name} as eml")
             html_content = process_email(file_name)
         elif file_name.suffix == ".html":
-            info(f"processing {file_name} as html")
+            log.info(f"processing {file_name} as html")
             html_content = file_name.read_text()
         else:
             raise OSError(

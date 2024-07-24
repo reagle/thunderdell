@@ -13,7 +13,7 @@ import argparse  # http://docs.python.org/dev/library/argparse.html
 import contextlib  # https://docs.python.org/3/library/contextlib.html
 import errno
 import http.server
-import logging
+import logging as log
 import os
 import re
 import sys
@@ -39,15 +39,6 @@ from biblio.fields import (
 from formats import emit_biblatex, emit_json_csl, emit_results, emit_wp, emit_yaml_csl
 from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
 from utils.web import unescape_XML
-
-log_level = logging.ERROR  # 40 # declared here for when imported
-
-# logger function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 #################################################################
 # Mindmap parsing, bib building, and query emitting
@@ -88,11 +79,11 @@ def build_bib(
     mm_files = {file_name}
     while mm_files:
         mm_file = mm_files.pop()
-        debug(f"   parsing {mm_file}")
+        log.debug(f"   parsing {mm_file}")
         try:
             doc = et.parse(mm_file).getroot()
         except (OSError, et.ParseError) as err:
-            debug(f"    failed to parse {mm_file} because of {err}")
+            log.debug(f"    failed to parse {mm_file} because of {err}")
             continue
         entries, links = walk_freeplane(args, doc, mm_file, entries, links=[])
         done.add(mm_file)
@@ -508,7 +499,9 @@ def get_ident(entry, entries, delim: str = ""):
 
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
-        warning(f"collision on {ident}: {entry['title']} & {entries[ident]['title']}")
+        log.warning(
+            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
+        )
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
@@ -755,15 +748,15 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     file_name = args.input_file.absolute()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelno)s %(funcName).5s: %(message)s"
     if args.log_to_file:
         print("logging to file")
-        logging.basicConfig(
+        log.basicConfig(
             filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     args.in_main = True
     args.outfd = sys.stdout

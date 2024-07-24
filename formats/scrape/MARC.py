@@ -9,18 +9,10 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
 import re
 import time
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 
 class ScrapeMARC(ScrapeDefault):
@@ -67,10 +59,9 @@ class ScrapeMARC(ScrapeDefault):
         msg_body = "\n".join(self.html_u.splitlines()[13:-17])
         msg_paras = msg_body.split("\n\n")
         for para in msg_paras:
-            if para.count("\n") > 2:
-                if not para.count("&gt;") > 1:
-                    excerpt = para.replace("\n", " ")
-                    break
+            if para.count("\n") > 2 and not para.count("&gt;") > 1:
+                excerpt = para.replace("\n", " ")
+                break
         return excerpt.strip()
 
     def get_permalink(self):

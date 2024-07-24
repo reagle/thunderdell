@@ -9,8 +9,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
-
 # import textwrap
 import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
@@ -18,13 +16,6 @@ import utils.text as ut
 import utils.web_api_tokens as wat
 
 from .default import ScrapeDefault
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 api = mastodon.Mastodon(
     access_token=wat.OHAI_ACCESS_TOKEN, api_base_url=wat.MASTODON_APP_BASE

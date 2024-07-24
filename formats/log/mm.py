@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging
+import logging as log
 import time
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
@@ -19,13 +19,6 @@ from biblio.keywords import KEY_SHORTCUTS
 from utils.web import yasn_publish
 
 from .annotate import do_console_annotation
-
-# function aliases
-critical = logging.critical
-error = logging.error
-warning = logging.warning
-info = logging.info
-debug = logging.debug
 
 NOW = time.localtime()
 CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
@@ -57,14 +50,14 @@ def log2mm(args, biblio):
 
     print("to log2mm")
     biblio, args.publish = do_console_annotation(args, biblio)
-    info(f"{biblio}")
+    log.info(f"{biblio}")
 
     this_week = time.strftime("%U", NOW)
     this_year = time.strftime("%Y", NOW)
     date_read = time.strftime("%Y%m%d %H:%M UTC", NOW)
 
     ofile = config.HOME / "data/2web/reagle.org/joseph/2005/ethno/field-notes.mm"
-    info(f"{biblio=}")
+    log.info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
     subtitle = biblio["subtitle"] if "subtitle" in biblio else ""
@@ -79,7 +72,7 @@ def log2mm(args, biblio):
     citation = ""
     for key, value in list(biblio.items()):
         if key in bf.BIB_FIELDS:
-            info(f"{key=} {value=}")
+            log.info(f"{key=} {value=}")
             citation += f"{bf.BIB_FIELDS[key]}={value} "
     citation += f" r={date_read} "
     if biblio["tags"]:
@@ -144,7 +137,7 @@ def log2mm(args, biblio):
         )
     if excerpt:
         for excerpt_chunk in excerpt.split("\n\n"):
-            info(f"{excerpt_chunk=}")
+            log.info(f"{excerpt_chunk=}")
             if excerpt_chunk == "":
                 continue
             if excerpt_chunk.startswith(", "):
@@ -171,5 +164,5 @@ def log2mm(args, biblio):
     ElementTree(mindmap).write(str(ofile), encoding="utf-8")
 
     if args.publish:
-        info("YASN")
+        log.info("YASN")
         yasn_publish(abstract, title, subtitle, permalink, tags)

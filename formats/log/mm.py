@@ -60,7 +60,7 @@ def log2mm(args, biblio):
     log.info(f"{biblio=}")
     author = biblio["author"]
     title = biblio["title"]
-    subtitle = biblio["subtitle"] if "subtitle" in biblio else ""
+    subtitle = biblio.get("subtitle", "")
     abstract = biblio["comment"]
     excerpt = biblio["excerpt"]
     permalink = biblio["permalink"]

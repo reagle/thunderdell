@@ -40,7 +40,7 @@ def winnow_dates(self) -> datetime.datetime:
     winnowed_dates = []
 
     for date in datefinder.find_dates(self.text):
-        if date <= now and date >= fifty_years_ago:  # type: ignore (weird bug?)
+        if date <= now and date >= fifty_years_ago:
             winnowed_dates.append(date)
     return winnowed_dates[0]
 

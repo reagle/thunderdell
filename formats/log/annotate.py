@@ -45,7 +45,7 @@ def do_console_annotation(args, biblio):
 
     def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
         log.info(biblio)
-        return td.get_ident(
+        return td.get_identifier(
             {
                 "author": td.parse_names(biblio["author"]),
                 "title": biblio["title"],

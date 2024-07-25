@@ -284,7 +284,7 @@ def commit_entry(args, entry, entries):
         except Exception:
             print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
             raise
-        entry["identifier"] = get_ident(entry, entries)
+        entry["identifier"] = get_identifier(entry, entries)
         entries[entry["identifier"]] = entry
     return entries
 
@@ -451,7 +451,36 @@ def identity_increment(ident, entries):
     return ident
 
 
-def get_ident(entry, entries, delim: str = ""):
+def clean_identifier(ident: str) -> str:
+    """Remove chars not liked by XML, bibtex, pandoc, etc.
+    >>> clean_identifier("u/José Alvereze@[hispania]")
+    'Jose Alverezehispania'
+
+    >>> clean_identifier("<strong>123JohnSmith</strong>")
+    'a123JohnSmith'
+    """
+    clean_id = (
+        ident.replace("<strong>", "")  # added by walk_freeplane.query_highlight
+        .replace("</strong>", "")  # ...
+        .removeprefix("u/")  # Reddit usernames
+        .replace(":", "")  # used for XML namespaces
+        .replace("'", "")  # not permitted in XML name/id attributes
+        .replace("’", "")
+        .replace(".", "")  # punctuation
+        .replace("@", "")
+        .replace("[", "")
+        .replace("]", "")
+        .replace("(", "")
+        .replace(")", "")
+    )
+    # debug(f"4 clean_id = {type(clean_id)} '{clean_id}'")
+    clean_id = strip_accents(clean_id)  # unicode is buggy in bibtex keys
+    if clean_id[0].isdigit():  # pandoc forbids keys starting with digits
+        clean_id = f"a{clean_id}"
+    return clean_id
+
+
+def get_identifier(entry: dict, entries: dict, delim: str = ""):
     """
     Create an identifier (key) for the entry based on last names, year, and title"""
 
@@ -479,24 +508,7 @@ def get_ident(entry, entries, delim: str = ""):
     # debug(f"2 entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry["date"].year))
     # debug(f"3 ident = {type(ident)} '{ident}'")
-    ident = (
-        ident.replace(":", "")
-        .replace("'", "")  # not permitted in xml name/id attributes
-        .replace("’", "")
-        .replace(".", "")  # punctuation
-        .replace("@", "")
-        .replace("[", "")
-        .replace("]", "")
-        .replace("(", "")
-        .replace(")", "")
-        .replace("<strong>", "")  # '@' citation designator
-        .replace("</strong>", "")  # added by walk_freeplane.query_highlight
-    )
-    # debug(f"4 ident = {type(ident)} '{ident}'")
-    ident = strip_accents(ident)  # unicode buggy in bibtex keys
-    if ident[0].isdigit():  # pandoc forbids keys starting with digits
-        ident = f"a{ident}"
-
+    ident = clean_identifier(ident)
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
         log.warning(

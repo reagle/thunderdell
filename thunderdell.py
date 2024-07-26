@@ -152,6 +152,22 @@ def walk_freeplane(args, node, mm_file, entries, links):
             print(f'''ERROR: author node not found for "{title_node.get('TEXT')}"''')
             sys.exit()
 
+    def _remove_identity_hints(authors: str) -> str:
+        """Names in the authors strings might have identity hints:
+        - 'u/' for interviewee using known username
+        - 'p/' for interviewee using pseudonym
+
+        >>> remove_identity_hints("J Smith III, u/Jane Smith, p/AnonymousUser, u/Alice123")
+        'J Smith III, AnonymousUser, Alice123'
+
+        """
+        return ", ".join(
+            [
+                author.removeprefix("u/").removeprefix("p/")
+                for author in authors.split(", ")
+            ]
+        )
+
     for d in node.iter():
         link = d.get("LINK", "")
         if (
@@ -169,17 +185,20 @@ def walk_freeplane(args, node, mm_file, entries, links):
             elif d.get("STYLE_REF") == "title":
                 commit_entry(args, entry, entries)  # new entry, so store previous
                 entry = {}  # and create new one
-                # because entries are based on unique titles, author processing
-                # is deferred until now when a new title is found
+                # Because entries are based on unique titles, author processing
+                # is deferred until now when a new title is found.
                 author_node = _get_author_node(d)
                 entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
-                entry["author"] = parse_names(entry["ori_author"])
+                entry["author"] = parse_names(
+                    _remove_identity_hints(entry["ori_author"])
+                )
                 entry["title"] = unescape_XML(d.get("TEXT"))
                 entry["_mm_file"] = str(mm_file)
                 entry["_title_node"] = d
-                if url := d.attrib.get("LINK"):
-                    if not url.startswith(("../", "file://")):  # Ignore local
-                        entry["url"] = url
+                if (url := d.attrib.get("LINK")) and not url.startswith(
+                    ("../", "file://")  # ignore local file URLS
+                ):
+                    entry["url"] = url
                 if args.query:
                     author_highlighted = _query_highlight(author_node, args.query)
                     if author_highlighted is not None:
@@ -453,7 +472,7 @@ def identity_increment(ident, entries):
 
 def clean_identifier(ident: str) -> str:
     """Remove chars not liked by XML, bibtex, pandoc, etc.
-    >>> clean_identifier("u/José Alvereze@[hispania]")
+    >>> clean_identifier("José Alvereze@[hispania]")
     'Jose Alverezehispania'
 
     >>> clean_identifier("<strong>123JohnSmith</strong>")
@@ -462,9 +481,9 @@ def clean_identifier(ident: str) -> str:
     clean_id = (
         ident.replace("<strong>", "")  # added by walk_freeplane.query_highlight
         .replace("</strong>", "")  # ...
-        .removeprefix("u/")  # Reddit usernames
         .replace(":", "")  # used for XML namespaces
         .replace("'", "")  # not permitted in XML name/id attributes
+        .replace("/", "")
         .replace("’", "")
         .replace(".", "")  # punctuation
         .replace("@", "")
@@ -481,9 +500,7 @@ def clean_identifier(ident: str) -> str:
 
 
 def get_identifier(entry: dict, entries: dict, delim: str = ""):
-    """
-    Create an identifier (key) for the entry based on last names, year, and title"""
-
+    """Create an identifier (key) for the entry based on last names, year, and title"""
     # debug(f"1 {entry=}")
     last_names = []
     name_part = ""
@@ -535,7 +552,6 @@ def parse_date(when: str) -> NamedTuple:
     >>> parse_date('130~')
     Date(year='130', month=None, day=None, circa=True, time=None)
     """
-
     year = month = day = circa = time = None
     if " " in when:
         when, time = when.split(" ", 1)

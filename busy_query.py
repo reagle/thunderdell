@@ -15,6 +15,7 @@ HOME = Path.home()
 
 
 def query_sponge(query: str) -> Path:
+    """Query items logged to my planning page made by Busy Sponge."""
     in_files = [
         HOME / "joseph/plan/index.html",
         HOME / "joseph/plan/done.html",

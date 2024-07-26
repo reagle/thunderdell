@@ -8,15 +8,42 @@ preview = true
 # Same as Black.
 line-length = 88
 
-lint.select = ["A", "B", "D", "BLE", "C4", "C90", "E", "F", "I", "PIE", "Q", "RSE", "RUF", "UP", "YTT", "SIM", "PTH", "PLR"]
-# "PLR" need to understand more
-# "C90" McCabe complexity
+lint.select = [
+"A", # flake8-builtins        https://tinyurl.com/ruff-rules#flake8-builtins-a
+"B", # Flake8-bugbear         https://tinyurl.com/ruff-rules#flake8-bugbear-b
+"BLE", # Flake8-blind-except  https://tinyurl.com/ruff-rules#flake8-blind-except-ble
+"C4", # Flake8-comprehensions https://tinyurl.com/ruff-rules#flake8-comprehensions-c4
+"C90", # McCabe complexity    https://tinyurl.com/ruff-rules#mccabe-c90
+"D", # Pydocstyle             https://tinyurl.com/ruff-rules#pydocstyle-d
+"E", # Pycodestyle errors     https://tinyurl.com/ruff-rules#pycodestyle-e-w
+"F", # Pyflakes               https://tinyurl.com/ruff-rules#pyflakes-f
+"I", # Isort                  https://tinyurl.com/ruff-rules#isort-i
+"PIE", # Flake8-pie           https://tinyurl.com/ruff-rules#flake8-pie-pie
+"PLR", # Pylint refactor      https://tinyurl.com/ruff-rules#pylint-pl
+"PTH", # Flake8-use-pathlib   https://tinyurl.com/ruff-rules#flake8-use-pathlib-pth
+"Q", # Flake8-quotes          https://tinyurl.com/ruff-rules#flake8-quotes-q
+"RSE", # Flake8-raise         https://tinyurl.com/ruff-rules#flake8-raise-rse
+"RUF", # Ruff-specific        https://tinyurl.com/ruff-rules#ruff-specific-rules-ruf
+"SIM", # Flake8-simplify      https://tinyurl.com/ruff-rules#flake8-simplify-sim
+"UP", # Pyupgrade             https://tinyurl.com/ruff-rules#pyupgrade-up
+"YTT", # Flake8-2020          https://tinyurl.com/ruff-rules#flake8-2020-ytt
+]
 
-# These rules are redundant with black use and ruff format
-# "RUF{001,002}" warns about ambiguous Unicode for curly quotes
-lint.ignore = ["E501", "Q000", "Q001", "Q002", "Q003", "RUF001", "RUF002", "PLR0912", "PLR0915", "PLR0913", "PLR2004", "D102"]
-unfixable = ["F401"]
+lint.ignore = [
+"D102", # Missing docstring in public method
+"D107", # Missing docstring in __init__
+"E501", # doctests need long lines
+"PLR0912", # Too many branches in function or method
+"PLR0915", # Too many statements in function or method
+"PLR0913", # Too many arguments to function call
+"PLR2004", # Magic value used in comparison
+"RUF001", # String contains ambiguous Unicode character (curly quotes)
+"RUF002", # Docstring contains ambiguous Unicode character (curly quotes)
+]
 
+lint.unfixable = [
+"F401", # keep unused modules as I'm likely to use them shortly
+]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [

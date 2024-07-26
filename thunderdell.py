@@ -110,7 +110,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
 
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
-        other nodes that match a query.
+         other nodes that match a query.
 
     This function had originally been implemented recursively, but now
     iterates over a depth-first order list of tree nodes in order to

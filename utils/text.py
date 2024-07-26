@@ -32,9 +32,10 @@ def escape_latex(text: str) -> str:
 
 
 def normalize_whitespace(text: str) -> str:
-    """Remove redundant whitespace from a string, including before comma
+    """Remove redundant whitespace from a string, including before comma.
+
     >>> normalize_whitespace('sally, joe , john')
-    'sally, joe, john'
+    'sally, joe, john'.
 
     """
     text = text.replace(" ,", ",")
@@ -58,9 +59,10 @@ def pretty_tabulate_dict(mydict: dict, cols: int = 4) -> str:
 
 
 def strip_accents(text: str) -> str:
-    """strip accents and those chars that can't be stripped
+    """Strip accents and those chars that can't be stripped.
+
     >>> strip_accents(u'nôn-åscîî')
-    'non-ascii'
+    'non-ascii'.
     """
     if text.isascii():
         return text

@@ -18,7 +18,7 @@ import requests
 
 
 def query(isbn: str):
-    """Query available ISBN services"""
+    """Query available ISBN services."""
     bib = {}
     bib_open = bib_google = None
 
@@ -35,7 +35,7 @@ def query(isbn: str):
 
 
 def open_query(isbn: str):
-    """Query the ISBN Web service; returns string"""
+    """Query the ISBN Web service; returns string."""
     # https://openlibrary.org/dev/docs/api/books
     # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=details&format=json
 
@@ -94,7 +94,7 @@ def open_query(isbn: str):
 
 
 def google_query(isbn):
-    """Query the ISBN Web service; returns string"""
+    """Query the ISBN Web service; returns string."""
     # https://books.google.com/books?isbn=0472069322
 
     if isbn.startswith("isbn:"):

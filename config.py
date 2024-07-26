@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Sets user configuration values.
-"""
+"""Sets user configuration values."""
 
 import os
 from pathlib import Path

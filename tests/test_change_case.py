@@ -5,8 +5,7 @@
 # (c) Copyright 2009-2023 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-"""
-Run tests against golden YAML results; 
+"""Run tests against golden YAML results;
 useful for detecting inadvertent changes.
 """
 from change_case import change_case
@@ -58,10 +57,7 @@ r/AmItheButtface
 
 
 def test_change_case():
-    """
-    Tests chage_case variations.
-    """
-
+    """Tests chage_case variations."""
     for test, expect in zip(CASES[::2], CASES[1::2], strict=True):
         result = change_case(test)
         assert result == expect

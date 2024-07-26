@@ -26,13 +26,11 @@ NOW = time.localtime()
 
 
 def do_console_annotation(args, biblio):
-    """Augment biblio with console annotations"""
-
+    """Augment biblio with console annotations."""
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
     def rotate_files(filename: Path, maximum: int = 5):
-        """create at most {maximum} rotating files"""
-
+        """Create at most {maximum} rotating files."""
         bare = filename.with_suffix("")
         ext = filename.suffix
         for counter in reversed(range(2, maximum + 1)):
@@ -63,8 +61,7 @@ def do_console_annotation(args, biblio):
         )
 
     def edit_annotation(initial_text: str, resume_edit: bool = False):
-        """Write initial bib info to a tmp file, edit and return"""
-
+        """Write initial bib info to a tmp file, edit and return."""
         annotation_fn = config.TMP_DIR / "b-annotation.txt"
         if not resume_edit:
             rotate_files(annotation_fn)
@@ -75,8 +72,7 @@ def do_console_annotation(args, biblio):
         return annotation_fn.read_text(encoding="utf-8").splitlines()
 
     def parse_bib(args, biblio, edited_text):
-        """Parse the bib assignments"""
-
+        """Parse the bib assignments."""
         # biblio['tags'] and whether to yasn publish are overwritten by
         # pre-populated and then edited console annotation
         biblio["tags"] = ""

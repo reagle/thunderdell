@@ -21,7 +21,7 @@ HOME = Path.home()
 
 
 def main(argv: list[str]) -> argparse.Namespace:
-    """Process arguments"""
+    """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description="""Format Omnivore.app annotations for use with
@@ -73,11 +73,11 @@ def main(argv: list[str]) -> argparse.Namespace:
 
 
 def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
-    """
-    Process files for highlights and annotations using console annotation syntax:
+    """Process files for highlights and annotations using console annotation syntax.
+
     .summary
     excerpt
-    , annotation
+    , annotation.
     """
     URL_RE = re.compile(r"https?://\S+")
     for file_path in file_paths:

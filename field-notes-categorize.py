@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""Create a categorized mindmap based on the first `kw=` declaration in
-each source.
-"""
+"""Create a categorized mindmap based on the first `kw=` declaration in each source."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"

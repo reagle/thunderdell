@@ -19,10 +19,7 @@ NOW = time.localtime()
 
 
 def log2console(args, biblio):
-    """
-    Log to console.
-    """
-
+    """Log to console."""
     TOKENS = (
         "author",
         "title",

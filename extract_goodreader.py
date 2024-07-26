@@ -43,9 +43,7 @@ RE_PAGE_NUM = re.compile(
 
 
 def process_text(args: argparse.Namespace, text: str) -> str:
-    """Process text for annotation kind, color, and page number, joining
-    lines as needed"""
-
+    """Process text for annotation kind, color, and page number, joining lines as needed."""
     """
     | first_specified | first_parsed | offset | parsed | result |
     |-----------------|--------------|--------|--------|--------|
@@ -161,7 +159,7 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
 
 
 def clean_pdf_ocr(text: str) -> str:
-    """Remove OCR artifacts of junk hyphens and missing spaces"""
+    """Remove OCR artifacts of junk hyphens and missing spaces."""
     new_text = remove_junk_hyphens(text)
     new_text = restore_lost_spaces(new_text)
     return new_text
@@ -204,7 +202,6 @@ def restore_lost_spaces(text: str) -> str:
     >>> restore_lost_spaces('Excerpts sometimeslose their spaces.')
     'Excerpts sometimes lose their spaces.'
     """
-
     checker = SpellChecker("en_US")
     log.debug(text)
     checker.set_text(text)
@@ -226,7 +223,7 @@ def _get_group_n(regex: re.Pattern, text: str, number: int) -> str | None:
 
 
 def parse_args(argv: list) -> argparse.Namespace:
-    """Process arguments"""
+    """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description="""Format (emailed) GoodRead annotation for use with

@@ -25,8 +25,7 @@ CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
 def straighten_quotes(text):
-    """
-    Convert curly quotes to straight quotes.
+    """Convert curly quotes to straight quotes.
 
     >>> straighten_quotes('Hello “world”')
     'Hello "world"'
@@ -43,11 +42,9 @@ def straighten_quotes(text):
 
 
 def log2mm(args, biblio):
+    """Log to bibliographic mindmap, see:
+    http://reagle.org/joseph/2009/01/thunderdell.html.
     """
-    Log to bibliographic mindmap, see:
-        http://reagle.org/joseph/2009/01/thunderdell.html
-    """
-
     print("to log2mm")
     biblio, args.publish = do_console_annotation(args, biblio)
     log.info(f"{biblio}")

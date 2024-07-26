@@ -34,7 +34,6 @@ def get_HTML(
     cache_control: str = "",
 ) -> tuple[bytes, etree._Element, str, requests.Response]:
     """Return [HTML content, response] of a given URL."""
-
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
     req = requests.get(url, headers=agent_headers, verify=True)
     # info(f"{r.headers['content-type']=}")
@@ -63,7 +62,6 @@ def get_JSON(
     requested_content_type="application/json",
 ) -> dict[str, Any]:
     """Return [JSON content, response] of a given URL."""
-
     AGENT_HEADERS = {"User-Agent": "Thunderdell/BusySponge"}
     # info(f"{url=}")
     try:
@@ -80,15 +78,14 @@ def get_JSON(
 
 
 def get_text(url: str) -> str:
-    """Textual version of url"""
-
+    """Textual version of url."""
     import os
 
     return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
 
 
 def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:
-    "Send annotated URL to social networks"
+    """Send annotated URL to social networks."""
     log.info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     photo_path = None
 
@@ -132,10 +129,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
 def twitter_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
-    """
-    Updates the authenticated Twitter account with a tweet and optional photo.
-    """
-
+    """Updates the authenticated Twitter account with a tweet and optional photo."""
     # https://github.com/trevorhobenshield/twitter-api-client
     import orjson
     from httpx import Client
@@ -212,7 +206,6 @@ def mastodon_update(
 
 def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
     """Shrink message to fit into character limit."""
-
     limit = 500
     if service == "ohai":  # mastodon instance
         limit = 500
@@ -265,19 +258,17 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
 
 
 def len_twitter(text: str) -> int:
-    """
-    Twitter counts code units not code points as part of its
+    """Twitter counts code units not code points as part of its
     character limit.
 
     https://developer.twitter.com/en/docs/counting-characters
 
     """
-
     return len(text.encode("utf-16-le")) // 2
 
 
 def escape_XML(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
-    """Escape XML character entities including & < >"""
+    """Escape XML character entities including & < >."""
     extras = {"\t": "  "}
     return escape(s, extras)
 
@@ -286,8 +277,7 @@ CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
 def straighten_quotes(text):
-    """
-    Convert curly quotes to straight quotes.
+    """Convert curly quotes to straight quotes.
 
     >>> straighten_quotes('Hello “world”')
     'Hello "world"'
@@ -304,10 +294,10 @@ def straighten_quotes(text):
 
 
 def unescape_XML(text: str) -> str:  # .0937s 4.11%
-    """
-    Removes HTML or XML character references and entities from text.
+    """Remove HTML or XML character references and entities from text.
+
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
-    Marginally faster than `from xml.sax.saxutils import escape, unescape`
+    Marginally faster than `from xml.sax.saxutils import escape, unescape`.
 
     """
 
@@ -334,13 +324,14 @@ def unescape_XML(text: str) -> str:  # .0937s 4.11%
 
 
 def canonicalize_url(url: str) -> str:
-    """
+    """Canonicalize URL.
+
     >>> canonicalize_url("https://old.reddit.com/r/Python/")
     'https://www.reddit.com/r/Python/'
     >>> canonicalize_url("https://i.reddit.com/r/news/comments/123456.compact")
     'https://www.reddit.com/r/news/comments/123456'
     >>> canonicalize_url("https://example.com/page")
-    'https://example.com/page'
+    'https://example.com/page'.
     """
     if "reddit.com" in url:
         return re.sub(

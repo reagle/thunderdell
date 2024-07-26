@@ -48,8 +48,7 @@ BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 
 
 def create_wordset(file_path: Path) -> set:
-    """Returns a wordset given a file"""
-
+    """Return a wordset given a file."""
     wordset = set()
     if file_path.is_file():
         for line in file_path.read_text(encoding="utf-8").splitlines():
@@ -78,7 +77,7 @@ proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
 
 def sentence_case(text):
-    """Convert text to sentence case for APA-like citations
+    """Convert text to sentence case for APA-like citations.
 
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
     'My defamation 2.0 experience: A story of Wikipedia'
@@ -187,7 +186,6 @@ def safe_capwords(text):
     'the'
 
     """
-
     log.debug(f"  safe_capwords: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
@@ -214,7 +212,6 @@ def safe_lower(text):
     'America'
 
     """
-
     log.debug(f"  safe_lower: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
@@ -238,7 +235,9 @@ def safe_lower(text):
 
 
 def is_proper_noun(word):
-    """A word is a proper noun if it is in that set or doesn't
+    """Check if proper noun.
+
+    A word is a proper noun if it is in that set or doesn't
     appear in the wordset dictionary. Recurse on hyphenated words.
 
     >>> is_proper_noun('W3C')
@@ -268,7 +267,7 @@ def is_proper_noun(word):
 
 
 def parse_args() -> argparse.Namespace:
-    """Process arguments"""
+    """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
 
     arg_parser = argparse.ArgumentParser(
@@ -342,7 +341,6 @@ def parse_args() -> argparse.Namespace:
 
 def main(args):
     """Process arguments and execute."""
-
     if args.test:
         import doctest
 

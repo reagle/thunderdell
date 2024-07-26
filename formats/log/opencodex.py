@@ -19,10 +19,7 @@ NOW = time.localtime()
 
 
 def log2opencodex(args, biblio):
-    """
-    Start at a blog entry at opencodex
-    """
-
+    """Start at a blog entry at opencodex."""
     blog_title = blog_body = ""
     CODEX_ROOT = config.HOME / "data/2web/reagle.org/joseph/content/"
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()

@@ -41,7 +41,7 @@ def regex_parse(text: list[str]) -> dict[str, dict[str, str]]:
 
 
 def xml_escape(text: str) -> str:
-    """Remove entities and spurious whitespace"""
+    """Remove entities and spurious whitespace."""
     import html
 
     escaped_text = html.escape(text, quote=True).strip()

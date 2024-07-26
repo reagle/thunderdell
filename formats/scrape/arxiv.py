@@ -21,7 +21,7 @@ class ScrapeArXiv(ScrapeDefault):
     """Use arXiv API to get biblio data.
     Thank you to arXiv for use of its open access interoperability
     https://arxiv.org/help/api/index
-    https://arxiv.org/help/api/basics
+    https://arxiv.org/help/api/basics.
     """
 
     def __init__(self, url, comment):

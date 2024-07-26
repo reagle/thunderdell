@@ -1,6 +1,4 @@
-"""Defines the many data schemes (keys, values, and fields)
-of bibliographic formats
-"""
+"""Defines the many data schemes (keys, values, and fields) of biblio formats."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"

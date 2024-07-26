@@ -73,6 +73,7 @@ def build_bib(
     file_name: Path,
     emitter_func: Callable[[argparse.Namespace, dict], None],
 ) -> None:
+    """Build bibliography of entries from a Freeplane mindmap."""
     links = set()
     done = set()
     entries: dict[str, dict] = {}
@@ -105,7 +106,8 @@ def build_bib(
 
 
 def walk_freeplane(args, node, mm_file, entries, links):
-    """Walk the freeplane XML tree and build:
+    """Walk the freeplane XML tree and build dictionary of entries.
+
     1. a dictionary of bibliographic entries.
     2. (optionally) for any given entry, lists of author, title, or
         other nodes that match a query.
@@ -125,7 +127,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
     parent_map = {c: p for p in node.iter() for c in p}
 
     def _query_highlight(node, query):
-        """Return a modified node with matches highlighted"""
+        """Return a modified node with matches highlighted."""
         query_lower = query.lower()
         text = node.get("TEXT")
         text_lower = text.lower()
@@ -142,7 +144,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
         return None
 
     def _get_author_node(title_node):
-        """Return the nearest ancestor that is an author node using parent_map[node]"""
+        """Return the nearest ancestor that is an author node using parent_map[node]."""
         try:
             ancestor = parent_map[title_node]
             while ancestor.get("STYLE_REF") != "author":
@@ -153,9 +155,11 @@ def walk_freeplane(args, node, mm_file, entries, links):
             sys.exit()
 
     def _remove_identity_hints(authors: str) -> str:
-        """Names in the authors strings might have identity hints:
+        """Remove identity hints from names.
+
+        Names in the authors strings might have:
         - 'u/' for interviewee using known username
-        - 'p/' for interviewee using pseudonym
+        - 'p/' for interviewee using pseudonym.
 
         >>> remove_identity_hints("J Smith III, u/Jane Smith, p/AnonymousUser, u/Alice123")
         'J Smith III, AnonymousUser, Alice123'
@@ -222,11 +226,10 @@ def walk_freeplane(args, node, mm_file, entries, links):
 
 
 def serve_query(args: argparse.Namespace, entries: dict) -> None:
-    """
-    Given the entries resulting from a crawl/query of the mindmaps,
-    create a web server and open browser.
-    """
+    """Serve crawl/query results and open browser.
 
+    Given the entries resulting from a crawl/query, create a web server and open browser.
+    """
     # debug("querying")
     results_file_name = config.TMP_DIR / "query-thunderdell.html"
 
@@ -262,10 +265,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
 
 
 def show_pretty(args: argparse.Namespace, entries: dict) -> None:
-    """
-    Given the entries resulting from a crawl of the mindmaps,
-    create a local web page and open browser.
-    """
+    """Use pretty format."""
     # results_file_name = config.TMP_DIR / "pretty-print.html"
     results_file_name = Path(args.input_file.with_suffix(".html")).absolute()
     try:
@@ -288,8 +288,7 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
 
 
 def commit_entry(args, entry, entries):
-    """Place an entry in the entries dictionary
-    with default values if need be"""
+    """Place an entry in the entries dictionary with default values if need be."""
     if entry != {}:
         entry.setdefault("author", [("John", "", "Doe", "")])
         entry.setdefault("ori_author", [("John", "", "Doe", "")])
@@ -316,12 +315,11 @@ Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
 
 def pull_citation(args, entry: dict) -> dict:
-    """Modifies entry with parsed citation and field-specific heuristics
+    """Modify entry with parsed citation and field-specific heuristics.
 
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
 
     """
-
     # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
 
     entry = parse_pairs(entry)
@@ -448,8 +446,7 @@ def identity_add_title(ident: str, title: str) -> str:
 
 
 def identity_increment(ident, entries):
-    """Increment numerical suffix of identity until no longer collides with
-    pre-existing entry(s) in the entries dictionary.
+    """Increment numerical suffix of identity until no longer collides.
 
     >>> identity_increment('Wikipedia 2008npv',\
     {'Wikipedia 2008npv': {'title': 'Wikipedia:No Point of View',\
@@ -457,7 +454,6 @@ def identity_increment(ident, entries):
     'Wikipedia 2008npv1'
 
     """
-
     while ident in entries:  # if it still collides
         # debug(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
         if ident[-1].isdigit():
@@ -472,8 +468,9 @@ def identity_increment(ident, entries):
 
 def clean_identifier(ident: str) -> str:
     """Remove chars not liked by XML, bibtex, pandoc, etc.
+
     >>> clean_identifier("José Alvereze@[hispania]")
-    'Jose Alverezehispania'
+    'Jose Alverezehispania'.
 
     >>> clean_identifier("<strong>123JohnSmith</strong>")
     'a123JohnSmith'
@@ -500,7 +497,7 @@ def clean_identifier(ident: str) -> str:
 
 
 def get_identifier(entry: dict, entries: dict, delim: str = ""):
-    """Create an identifier (key) for the entry based on last names, year, and title"""
+    """Create an identifier (key) for the entry based on last names, year, and title."""
     # debug(f"1 {entry=}")
     last_names = []
     name_part = ""
@@ -538,6 +535,7 @@ def get_identifier(entry: dict, entries: dict, delim: str = ""):
 
 def parse_date(when: str) -> NamedTuple:
     """Parse dates that starts with 'YYYY' and returns named tuple.
+
     Without hyphens, strings such as '101210' are ambiguous: years
     have precedence.
 
@@ -589,7 +587,6 @@ def parse_names(names):
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
     """
-
     names_p = []
     # debug(f"names = '{names}'")
     names_split = names.split(",")

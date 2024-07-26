@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Query items logged to my planning page made by Busy Sponge.
-"""
+"""Query items logged to my planning page made by Busy Sponge."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"

@@ -33,8 +33,8 @@ def winnow_dates(self) -> datetime.datetime:
     """Validate and sanity check results from datefinder.
     Remove dates if:
     - in the future
-    - older than 50 years"""
-
+    - older than 50 years.
+    """
     now = datetime.datetime.now()
     fifty_years_ago = now - datetime.timedelta(days=50 * 365.25)
     winnowed_dates = []
@@ -46,9 +46,7 @@ def winnow_dates(self) -> datetime.datetime:
 
 
 class ScrapeDefault:
-    """
-    Default and base class scraper.
-    """
+    """Default and base class scraper."""
 
     def __init__(self, url, comment):
         print("Scraping default Web page;", end="\n")
@@ -88,8 +86,7 @@ class ScrapeDefault:
         return biblio
 
     def get_author(self):
-        """return guess of article author"""
-
+        """Return guess of article author."""
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
             """//meta[@name='DC.Contributor']/@content""",
@@ -212,8 +209,8 @@ class ScrapeDefault:
 
     def split_title_org(self):
         """Separate the title by a delimiter and test if latter half is the
-        organization (if it has certain words (blog) or is too short)"""
-
+        organization (if it has certain words (blog) or is too short).
+        """
         ORG_WORDS = ["blog", "lab", "center"]
 
         title = title_ori = self.get_title()
@@ -273,8 +270,7 @@ class ScrapeDefault:
         return org.title()
 
     def get_excerpt(self):
-        """Select a paragraph if it is long enough and textual"""
-
+        """Select a paragraph if it is long enough and textual."""
         if self.text:
             lines = self.text.split("\n")
             for line in lines:

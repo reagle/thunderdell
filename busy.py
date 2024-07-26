@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Log and annotate a URL to loggers (e.g., mindmap, blogs)
-with meta/bibliographic data about the URL from a scraper.
+"""Log and annotate a URL to loggers with data from scraper.
+
+Log and annotate a URL to loggers (e.g., mindmap, blogs) with meta/bibliographic data about the URL from a scraper.
 
 https://reagle.org/joseph/2009/01/thunderdell.html
 """
@@ -54,8 +55,7 @@ MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 
 def get_scraper(url: str, comment: str) -> ScrapeDefault:
-    """
-    Use the URL to specify a screen scraper, e.g.,
+    """Use the URL to specify a screen scraper, e.g.,.
 
     busy.py c .test https://en.wikipedia.org/wiki/Joseph_M._Reagle_Jr.
     busy.py c .test https://meta.wikimedia.org/wiki/Steward_requests/Bot_status
@@ -67,7 +67,6 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     busy.py c .test isbn:9780860917137
     busy.py c .test arxiv:2001.08293
     """
-
     url = urllib.parse.unquote(url)
     url = canonicalize_url(url)
     log.info(f"url = '{url}'")
@@ -99,10 +98,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
 
 def get_logger(text: str) -> tuple[Callable, dict]:
-    """
-    Given the argument return a function and parameters.
-    """
-
+    """Given the argument return a function and parameters."""
     # tags must be prefixed by dot; URL no longer required
     LOG_REGEX = re.compile(
         r"(?P<scheme>\w) (?P<tags>(\.\w+ )+)?"

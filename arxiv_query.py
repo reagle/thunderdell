@@ -24,8 +24,7 @@ ACCEPT_HEADERS = {
 
 
 def query(number: int, accept: str = "application/atom+xml"):
-    """Query the number Web service; returns string"""
-
+    """Query the number Web service; returns string."""
     log.info(f"{accept=}")
     log.info(f"{number=}")
     headers = {"Accept": accept}

@@ -32,7 +32,7 @@ from utils.text import escape_latex, normalize_whitespace
 def create_biblatex_author(names):
     """Return the parts of the name joined appropriately.
     The BibTex name parsing is best explained in
-    http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf
+    http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf.
 
     >>> create_biblatex_author([('First Middle', 'von', 'Last', 'Jr.'),\
         ('First', '', 'Last', 'II')])
@@ -139,7 +139,7 @@ def bibformat_title(title):
     >>> bibformat_title('Re: "Suicide methods" article')
     "{Re:} `{Suicide} Methods' Article"
     >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
-    "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
+    "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend".
 
     """
     cased_title = quoted_title = []
@@ -152,8 +152,7 @@ def bibformat_title(title):
     CHUNK_PAT = re.compile(r"""([-:])""", re.UNICODE)
 
     def my_title(text):
-        """title case after some chars, but not ['.] like .title()"""
-
+        """Title case after some chars, but not ['.] like .title()."""
         text_list = list(text)
         text_list[0] = text_list[0].upper()
         for chunk in CHUNK_PAT.finditer(text):
@@ -203,7 +202,7 @@ def bibformat_title(title):
 
 
 def emit_biblatex(args, entries):
-    """Emit a biblatex file"""
+    """Emit a biblatex file."""
     # debug(f"entries = '{entries}'")
 
     for _key, entry in sorted(entries.items()):

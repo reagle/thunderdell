@@ -18,10 +18,7 @@ NOW = time.localtime()
 
 
 def log2nifty(args, biblio):
-    """
-    Log to personal blog.
-    """
-
+    """Log to personal blog."""
     print("to log2nifty\n")
     ofile = config.HOME / "data/2web/goatee.net/nifty-stuff.html"
 

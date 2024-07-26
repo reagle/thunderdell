@@ -5,8 +5,7 @@
 # (c) Copyright 2009-2023 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-"""
-Run tests against golden YAML results; useful for detecting inadvertent changes.
+"""Run tests against golden YAML results; useful for detecting inadvertent changes.
 
 Run in parent folder as `pytest tests`.
 """
@@ -17,11 +16,9 @@ from config import TESTS_FOLDER, THUNDERDELL_EXE
 
 
 def test_results():
-    """
-    Tests the overall parsing of Mindmap XML and the relationships between
+    """Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
     """
-
     for test_fn in sorted(TESTS_FOLDER.glob("*.mm")):
         print(f"{test_fn=}")
         output = subprocess.run(

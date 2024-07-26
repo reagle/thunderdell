@@ -5,8 +5,7 @@
 # (c) Copyright 2009-2023 by Joseph Reagle
 # Licensed under the GPLv3, see <http://www.gnu.org/licenses/gpl-3.0.html>
 #
-"""
-Run tests against golden YAML results; useful for detecting inadvertent changes.
+"""Run tests against golden YAML results; useful for detecting inadvertent changes.
 
 Run in parent folder as `pytest tests`.
 """
@@ -16,10 +15,7 @@ from extract_goodreader import parse_args, process_text
 
 
 def test_process_text():
-    """
-    Tests the processing of a GoodReader export.
-    """
-
+    """Tests the processing of a GoodReader export."""
     test_args = ["--first", 0]
     args = parse_args(test_args)
 

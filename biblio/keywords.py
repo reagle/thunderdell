@@ -1,5 +1,4 @@
-"""
-Keyword shortcuts for BusySponge.
+"""Keyword shortcuts for BusySponge.
 
 https://github.com/reagle/thunderdell
 """

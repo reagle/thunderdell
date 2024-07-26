@@ -23,9 +23,7 @@ NOW = time.localtime()
 
 
 def log2work(args, biblio):
-    """
-    Log to work microblog
-    """
+    """Log to work microblog."""
     import hashlib
 
     print("to log2work\n")

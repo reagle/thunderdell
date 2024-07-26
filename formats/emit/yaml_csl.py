@@ -93,7 +93,7 @@ def guess_csl_type(entry):
 
 
 def emit_yaml_csl(args, entries):
-    """Emit citations in YAML/CSL for input to pandoc
+    """Emit citations in YAML/CSL for input to pandoc.
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html
         http://www.yaml.org/spec/1.2/spec.html
@@ -111,8 +111,7 @@ def emit_yaml_csl(args, entries):
         return s
 
     def emit_yaml_people(people):
-        """yaml writer for authors and editors"""
-
+        """Yaml writer for authors and editors."""
         for person in people:
             # debug("person = '%s'" % (' '.join(person)))
             # biblatex ('First Middle', 'von', 'Last', 'Jr.')
@@ -133,8 +132,7 @@ def emit_yaml_csl(args, entries):
                 )
 
     def emit_yaml_date(date, season=None):
-        """yaml writer for dates"""
-
+        """Yaml writer for dates."""
         if date.year:
             args.outfd.write(f"    year: {date.year}\n")
         if date.month:
@@ -150,7 +148,7 @@ def emit_yaml_csl(args, entries):
         """Preserve/bracket proper names/nouns
         https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
         >>> yaml_protect_case("The iKettle – a world off its rocker")
-        "The <span class='nocase'>iKettle</span> – a world off its rocker"
+        "The <span class='nocase'>iKettle</span> – a world off its rocker".
         """
         PROTECT_PAT = re.compile(
             r"""

@@ -19,10 +19,7 @@ import config
 NOW = time.localtime()
 
 def log2goatee(args, biblio):
-    """
-    Start at a blog entry at goatee
-    """
-
+    """Start at a blog entry at goatee."""
     GOATEE_ROOT = config.HOME / "data/2web/goatee.net/content/"
     log.info(f"{biblio['comment']=}")
     blog_title, sep, blog_body = biblio["comment"].partition(". ")

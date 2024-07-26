@@ -26,8 +26,7 @@ def emit_results(
     args: argparse.Namespace,
     entries: dict[str, dict],
 ) -> None:
-    """Emit the results of the query"""
-
+    """Emit the results of the query."""
     query = args.query
     results_file = args.results_file
     spaces = " "
@@ -125,7 +124,7 @@ LOCATOR_PREFIX_MAP = {
 
 
 def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
-    """Move locator number to the end of the text with the biblatex key"""
+    """Move locator number to the end of the text with the biblatex key."""
     style_ref = node.get("STYLE_REF", "default")
     text = straighten_quotes(node.get("TEXT", ""))
     text = escape_XML(text)
@@ -177,7 +176,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
 
 
 def pretty_print(node, entry, spaces, results_file):
-    """Pretty print a node and descendants into indented HTML"""
+    """Pretty print a node and descendants into indented HTML."""
     if node.get("TEXT") is not None:
         reverse_print(node, entry, spaces, results_file)
     # TODO: replace manual HTML with simpleHTMLwriter,markup.py, or yattag
@@ -217,7 +216,7 @@ def print_entry(
 
 
 def get_url_query(token):
-    """Return the URL for an HTML link to the actual title"""
+    """Return the URL for an HTML link to the actual title."""
     token = token.replace("<strong>", "").replace("</strong>", "")
     # urllib won't accept unicode
     token = urllib.parse.quote(token.encode("utf-8"))
@@ -228,7 +227,7 @@ def get_url_query(token):
 
 
 def get_url_MM(file_name: str) -> str:
-    """Return URL for the source MindMap based on whether CGI or cmdline"""
+    """Return URL for the source MindMap based on whether CGI or cmdline."""
     if __name__ == "__main__":
         return file_name
     else:  # CGI

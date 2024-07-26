@@ -22,13 +22,12 @@ from formats.emit.yaml_csl import guess_csl_type
 
 
 def emit_json_csl(args, entries):
-    """Emit citations in CSL/JSON for input to pandoc
+    """Emit citations in CSL/JSON for input to pandoc.
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html
         https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html
 
     """
-
     # NOTE: csljson can NOT be including as md doc yaml metadata
     # TODO: reduce redundancies with emit_yasn
     # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>
@@ -46,8 +45,7 @@ def emit_json_csl(args, entries):
             return s
 
     def do_csl_person(person):
-        """csl writer for authors and editors"""
-
+        """Csl writer for authors and editors."""
         # biblatex ('First Middle', 'von', 'Last', 'Jr.')
         # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
         #      'dropping-particle')
@@ -69,8 +67,7 @@ def emit_json_csl(args, entries):
         return person_buffer
 
     def do_csl_date(date, season=None):
-        """csl writer for dates"""
-
+        """Csl writer for dates."""
         date_buffer = []
         date_buffer.append("{")
         date_buffer.append('"date-parts": [ [ ')
@@ -95,7 +92,7 @@ def emit_json_csl(args, entries):
         """Preserve/bracket proper names/nouns
         https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
         >>> csl_protect_case("The iKettle – a world off its rocker")
-        "The <span class='nocase'>iKettle</span> – a world off its rocker"
+        "The <span class='nocase'>iKettle</span> – a world off its rocker".
         """
         PROTECT_PAT = re.compile(
             r"""

@@ -47,7 +47,7 @@ class ScrapeENWP(ScrapeDefault):
             return self.url
 
     def get_date(self):
-        """find date within span"""
+        """Find date within span."""
         if "oldid" not in self.url and "=Special:" not in self.url:
             _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
             _, day, month, year = re.search(

@@ -54,7 +54,7 @@ MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
 
 
 def clean(text):
-    """clean and encode text"""
+    """Clean and encode text."""
     # TODO: Maybe make use of b.smart_punctuation_to_ascii() and
     # utils_web.escape_XML()
 
@@ -340,7 +340,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
 
 
 def process_args(argv):
-    """Process arguments"""
+    """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description="""Convert dictated notes to mindmap.

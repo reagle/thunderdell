@@ -25,7 +25,6 @@ from utils.text import smart_to_markdown
 
 def process_email(file_name: Path) -> str:
     """Process parts of a MIME message stored in file."""
-
     with file_name.open(mode="rb") as fp:
         msg = BytesParser(policy=policy.default).parse(fp)
         for part in msg.walk():
@@ -41,7 +40,6 @@ def process_email(file_name: Path) -> str:
 
 def process_html(content: str) -> str:
     """Process text for annotation kind, color, and page number."""
-
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
 
     RE_COLOR_PAGE = re.compile(
@@ -84,7 +82,7 @@ def process_html(content: str) -> str:
 
 
 def parse_args(argv: list) -> argparse.Namespace:
-    """Process arguments"""
+    """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     """Process arguments"""
     # https://docs.python.org/3/library/argparse.html

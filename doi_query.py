@@ -36,8 +36,7 @@ ACCEPTABLE_TYPES = (
 
 
 def query(doi, accept="application/citeproc+json"):
-    """Query the DOI Web service; returns string"""
-
+    """Query the DOI Web service; returns string."""
     log.info(f"{accept=}")
     log.info(f"{doi=}")
     headers = {"Accept": accept}

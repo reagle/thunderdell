@@ -42,7 +42,8 @@ def straighten_quotes(text):
 
 
 def log2mm(args, biblio):
-    """Log to bibliographic mindmap, see:
+    """Log to bibliographic mindmap.
+
     http://reagle.org/joseph/2009/01/thunderdell.html.
     """
     print("to log2mm")
@@ -59,7 +60,7 @@ def log2mm(args, biblio):
     title = biblio["title"]
     subtitle = biblio.get("subtitle", "")
     abstract = biblio["comment"]
-    excerpt = biblio["excerpt"]
+    excerpt = biblio.get("excerpt", "")
     permalink = biblio["permalink"]
 
     # Create citation

@@ -72,9 +72,8 @@ def emit_wp(args, entries):
                     if value.circa:
                         date = "{{circa|" + date + "}}"
                     value = date
-                elif field == "title":  # TODO: convert value to title case?
-                    if "booktitle" in entry:
-                        field = "chapter"
+                elif field == "title" and "booktitle" in entry:  # TODO: capital case?
+                    field = "chapter"
                 if field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f"| {field} = {value}\n")

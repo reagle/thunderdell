@@ -21,7 +21,6 @@ import textwrap
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as et
-from collections import namedtuple
 from collections.abc import Callable
 from pathlib import Path
 from typing import NamedTuple
@@ -37,6 +36,7 @@ from biblio.fields import (
     SUFFIXES,
 )
 from formats import emit_biblatex, emit_json_csl, emit_results, emit_wp, emit_yaml_csl
+from types_thunderdell import Date, EntryDict
 from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
 from utils.web import unescape_XML
 
@@ -311,10 +311,8 @@ def commit_entry(args, entry, entries):
 # Entry construction
 #################################################################
 
-Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
-
-def pull_citation(args, entry: dict) -> dict:
+def pull_citation(args, entry: EntryDict) -> EntryDict:
     """Modify entry with parsed citation and field-specific heuristics.
 
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
@@ -364,7 +362,7 @@ def pull_citation(args, entry: dict) -> dict:
     return entry
 
 
-def parse_pairs(entry: dict[str, str]) -> dict[str, str]:
+def parse_pairs(entry: EntryDict) -> EntryDict:
     """Parse entry['cite'] values as `key=value` pairs; add them to entry dictionary.
 
     >>> entry = {"cite": "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241", "title": "Test", "_mm_file": "test.mm"}

@@ -9,6 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
+import argparse
 import logging as log
 import re
 
@@ -22,6 +23,7 @@ from biblio.fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
+from types_thunderdell import Date, EntryDict
 from utils.text import escape_latex, normalize_whitespace
 
 #################################################################
@@ -31,6 +33,7 @@ from utils.text import escape_latex, normalize_whitespace
 
 def create_biblatex_author(names):
     """Return the parts of the name joined appropriately.
+
     The BibTex name parsing is best explained in
     http://www.tug.org/TUGboat/tb27-2/tb87hufflen.pdf.
 
@@ -131,8 +134,9 @@ def guess_biblatex_type(entry):
     return e_t
 
 
-def bibformat_title(title):
-    """Title case text, and preserve/bracket proper names/nouns
+def bibformat_title(title: str) -> str:
+    """Title case text, and preserve/bracket proper names/nouns.
+
     See http://nwalsh.com/tex/texhelp/bibtx-24.html
     >>> bibformat_title("Wikirage: What's hot now on Wikipedia")
     "{Wikirage:} {What's} Hot Now on {Wikipedia}"
@@ -201,7 +205,7 @@ def bibformat_title(title):
 #################################################################
 
 
-def emit_biblatex(args, entries):
+def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
     """Emit a biblatex file."""
     # debug(f"entries = '{entries}'")
 
@@ -275,6 +279,7 @@ def emit_biblatex(args, entries):
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
+                    assert isinstance(value, Date)  # for pyright
                     date = "-".join(filter(None, (value.year, value.month, value.day)))
                     date = date + "~" if value.circa else date
                     value = date

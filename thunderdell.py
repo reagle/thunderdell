@@ -667,14 +667,6 @@ if __name__ == "__main__":
         help="mindmap to process",
     )
     arg_parser.add_argument(
-        "-k",
-        "--keys",
-        default="-no-keys",
-        action="store_const",
-        const="-use-keys",
-        help="show biblatex keys in displayed HTML",
-    )
-    arg_parser.add_argument(
         "-F",
         "--fields",
         action="store_true",
@@ -772,7 +764,6 @@ if __name__ == "__main__":
     file_name = args.input_file.absolute()
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
-    # LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         print("logging to file")

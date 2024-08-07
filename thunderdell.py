@@ -35,7 +35,13 @@ from biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from formats import emit_biblatex, emit_json_csl, emit_results, emit_wp, emit_yaml_csl
+from formats import (
+    emit_biblatex,
+    emit_json_csl,
+    emit_results,
+    emit_wikipedia,
+    emit_yaml_csl,
+)
 from types_thunderdell import Date, EntryDict
 from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
 from utils.web import unescape_XML
@@ -781,7 +787,7 @@ if __name__ == "__main__":
     if args.pretty and file_name == config.DEFAULT_MAP:
         file_name = config.DEFAULT_PRETTY_MAP
     if args.WP_citation:
-        emitter_func = emit_wp
+        emitter_func = emit_wikipedia
     elif args.biblatex:
         emitter_func = emit_biblatex
     elif args.JSON_CSL:

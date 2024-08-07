@@ -25,7 +25,7 @@ def output_wp_names(args: argparse.Namespace, field: str, names: list):
         args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
 
 
-def emit_wp(args: argparse.Namespace, entries: dict[str, EntryDict]):
+def emit_wikipedia(args: argparse.Namespace, entries: dict[str, EntryDict]):
     """Emit citations in Wikipedia's {{citation}} template format.
 
     These can be used in List-defined references blocks.

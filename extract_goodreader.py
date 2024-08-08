@@ -292,8 +292,8 @@ def parse_args(argv: list) -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
 
-    log.critical("==================================")
-    log.critical(f"{args=}")
+    log.info("==================================")
+    log.info(f"{args=}")
 
     for file_name in args.file_names:
         text: str = ""

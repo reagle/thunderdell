@@ -394,8 +394,7 @@ def process_args(argv):
 
 if __name__ == "__main__":
     args = process_args(sys.argv[1:])
-    log.critical("==================================")
-    log.critical(f"{args=}")
+    log.info(f"{args=}")
     for source_fn in args.file_names:
         text = source_fn.read_text(encoding="utf-8-sig")
         mm_file_name = source_fn.with_suffix(".mm")

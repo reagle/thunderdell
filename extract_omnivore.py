@@ -119,8 +119,8 @@ def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
 
 if __name__ == "__main__":
     args = main(sys.argv[1:])
-    log.critical("==================================")
-    log.critical(f"{args=}")
+    log.info("==================================")
+    log.info(f"{args=}")
     process_files(args, args.file_names)
     user_input = input("\nTrash processed file? 'y' for yes,\n")
     if user_input == "y":

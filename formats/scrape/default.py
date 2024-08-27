@@ -20,7 +20,7 @@ import datefinder
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
-from utils.extract import get_date
+from utils.dates import parse_date
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
 
@@ -171,7 +171,7 @@ class ScrapeDefault:
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     log.info(f"'{xpath_result=}'; '{path=}'")
-                    date = get_date(xpath_result[0])
+                    date = parse_date(xpath_result[0])
                     log.info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date

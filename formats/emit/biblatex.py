@@ -143,7 +143,7 @@ def bibformat_title(title: str) -> str:
     >>> bibformat_title('Re: "Suicide methods" article')
     "{Re:} `{Suicide} Methods' Article"
     >>> bibformat_title('''"Am I ugly?": The "disturbing" teen YouTube trend''')
-    "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend".
+    "`Am {I} Ugly?': {The} `Disturbing' Teen {YouTube} Trend"
 
     """
     cased_title = quoted_title = []

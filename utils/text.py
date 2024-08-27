@@ -35,7 +35,7 @@ def normalize_whitespace(text: str) -> str:
     """Remove redundant whitespace from a string, including before comma.
 
     >>> normalize_whitespace('sally, joe , john')
-    'sally, joe, john'.
+    'sally, joe, john'
 
     """
     text = text.replace(" ,", ",")
@@ -62,7 +62,7 @@ def strip_accents(text: str) -> str:
     """Strip accents and those chars that can't be stripped.
 
     >>> strip_accents(u'nôn-åscîî')
-    'non-ascii'.
+    'non-ascii'
     """
     if text.isascii():
         return text

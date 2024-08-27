@@ -16,12 +16,11 @@ import string
 import time
 from urllib.parse import urlparse
 
-# import arrow # replaced with dateutil.parser
 import datefinder
-import dateutil.parser as du
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
+from utils.extract import get_date
 from utils.text import smart_to_markdown
 from utils.web import get_HTML, get_text, unescape_XML
 
@@ -31,6 +30,7 @@ MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 def winnow_dates(self) -> datetime.datetime:
     """Validate and sanity check results from datefinder.
+
     Remove dates if:
     - in the future
     - older than 50 years.
@@ -171,9 +171,7 @@ class ScrapeDefault:
                 xpath_result = self.html_p.xpath(path)
                 if xpath_result:
                     log.info(f"'{xpath_result=}'; '{path=}'")
-                    # arrow.get is not powerful enough parser, so use dateutil
-                    # date = arrow.get(xpath_result[0]).format("YYYYMMDD")
-                    date = du.parse(xpath_result[0]).strftime("%Y%m%d")
+                    date = get_date(xpath_result[0])
                     log.info(f"date = '{date}'; xpath = '{path}'")
                     if date != "":
                         return date
@@ -208,7 +206,9 @@ class ScrapeDefault:
         return title
 
     def split_title_org(self):
-        """Separate the title by a delimiter and test if latter half is the
+        """Split the title from the org.
+
+        Separate the title by a delimiter and test if latter half is the
         organization (if it has certain words (blog) or is too short).
         """
         ORG_WORDS = ["blog", "lab", "center"]

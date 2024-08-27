@@ -12,9 +12,7 @@ import pprint
 import sys
 
 import arrow
-import requests
-
-# from dateutil.parser import ParserError  # type: ignore
+import requests  # type: ignore
 
 
 def query(isbn: str):

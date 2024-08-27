@@ -42,6 +42,13 @@ RE_PAGE_NUM = re.compile(
 )
 
 
+SYM_SPELL = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+RESOURCE_PATH = resources.files("symspellpy").joinpath(
+    "frequency_dictionary_en_82_765.txt"
+)
+SYM_SPELL.load_dictionary(RESOURCE_PATH, term_index=0, count_index=1)
+
+
 def process_text(args: argparse.Namespace, text: str) -> str:
     """Process text for annotation kind, color, and page number, joining lines as needed."""
     """
@@ -159,24 +166,69 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
 
 
 def clean_pdf_ocr(text: str) -> str:
-    """Remove OCR artifacts of junk hyphens and missing spaces."""
+    """Remove OCR artifacts of junk hyphens and missing spaces.
+
+    >>> clean_pdf_ocr('Do cold-calls for your co-worker until lu-nch-bre-ak --- he sometimesloses focus.')
+    'Do cold calls for your coworker until lunch break --- he sometimes loses focus.'
+    """
+    # BUG: fails on punctuation, giving up 2024-08-27
+    # Split on whitespace and punctuation
+    words = re.findall(r"\w+|[^\w\s]|\s+", text)
+    # Split on whitespace and punctuation
+    words = re.findall(r"\w+|[^\w\s]|\s+", text)
+    corrected_words = []
+
+    for word in words:
+        if word.isspace() or not word.isalnum():
+            corrected_words.append(word)
+            continue
+
+        # Remove hyphens if within the word
+        cleaned_word = re.sub(r"(?<!^)-(?!$)", "", word)
+
+        # Preserve original case
+        is_title = cleaned_word.istitle()
+        is_upper = cleaned_word.isupper()
+
+        suggestions = SYM_SPELL.lookup_compound(
+            cleaned_word.lower(), max_edit_distance=2
+        )
+        if suggestions:
+            corrected = suggestions[0].term
+            # Restore original case
+            if is_upper:
+                corrected = corrected.upper()
+            elif is_title:
+                corrected = corrected.title()
+            corrected_words.append(corrected)
+        else:
+            corrected_words.append(word)  # Keep original if no suggestion
+
+    return "".join(corrected_words)
+
+
+def clean_pdf_ocr_old(text: str) -> str:
+    """Remove OCR artifacts of junk hyphens and missing spaces.
+
+    >>> clean_pdf_ocr('Do out-calls for your co-worker until lu-nch-bre-ak because he sometimesloses focus.')
+    'Do outcalls for your co-worker until lunchbreak because he sometimes loses focus.'
+    """
     new_text = remove_junk_hyphens(text)
     new_text = restore_lost_spaces(new_text)
+
     return new_text
 
 
-# This dependency on pyenchant tends to cause problems, but I need suggestion
 def remove_junk_hyphens(
     text: str,
     hyphen_RE: re.Pattern = re.compile(r"([a-zA-Z]{2,})(-)([a-zA-Z]{2,})"),
-    enchant_d: Dict = Dict("en_US"),  # noqa: B008 (performed once at definition)
 ) -> str:
     """Remove junk hyphens from PDFs using pyenchant.
 
     Test if the constituent parts of hyphenated text are actual words.
 
     >>> remove_junk_hyphens('Do out-calls for your co-worker until lu-nch-bre-ak.')
-    'Do out-calls for your co-worker until lunch-break.'
+    'Do out-calls for your coworker until lunch-break.'
     """
     matches = hyphen_RE.findall(text)
 

@@ -258,8 +258,7 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
 
 
 def len_twitter(text: str) -> int:
-    """Twitter counts code units not code points as part of its
-    character limit.
+    """Twitter counts code units not code points as part of its character limit.
 
     https://developer.twitter.com/en/docs/counting-characters
 
@@ -276,7 +275,7 @@ def escape_XML(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
 CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
-def straighten_quotes(text):
+def straighten_quotes(text: str) -> str:
     """Convert curly quotes to straight quotes.
 
     >>> straighten_quotes('Hello “world”')
@@ -285,11 +284,7 @@ def straighten_quotes(text):
     '"Curly" quotes'
     >>> straighten_quotes("It's a ‘quoted’ text")
     "It's a 'quoted' text"
-    >>> straighten_quotes(None)
-    None
     """
-    if text is None:
-        return None
     return text.translate(CURLY_TABLE)
 
 

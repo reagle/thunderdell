@@ -24,23 +24,6 @@ NOW = time.localtime()
 CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
-def straighten_quotes(text):
-    """Convert curly quotes to straight quotes.
-
-    >>> straighten_quotes('Hello “world”')
-    'Hello "world"'
-    >>> straighten_quotes('“Curly” quotes')
-    '"Curly" quotes'
-    >>> straighten_quotes("It's a ‘quoted’ text")
-    "It's a 'quoted' text"
-    >>> straighten_quotes(None)
-    None
-    """
-    if text is None:
-        return None
-    return text.translate(CURLY_TABLE)
-
-
 def log2mm(args, biblio):
     """Log to bibliographic mindmap.
 

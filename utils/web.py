@@ -326,7 +326,7 @@ def canonicalize_url(url: str) -> str:
     >>> canonicalize_url("https://i.reddit.com/r/news/comments/123456.compact")
     'https://www.reddit.com/r/news/comments/123456'
     >>> canonicalize_url("https://example.com/page")
-    'https://example.com/page'.
+    'https://example.com/page'
     """
     if "reddit.com" in url:
         return re.sub(

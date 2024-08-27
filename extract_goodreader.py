@@ -167,8 +167,8 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
 def clean_pdf_ocr(text: str) -> str:
     """Remove OCR artifacts of junk hyphens and missing spaces.
 
-    >>> clean_pdf_ocr('Do out-calls for your co-worker until lu-nch-bre-ak because he sometimesloses focus.')
-    'Do outcalls for your co-worker until lunchbreak because he sometimes loses focus.'
+    >>> clean_pdf_ocr('Do follow-ups for your coworker until lu-nch-bre-ak --- he sometimesloses focus.')
+    'Do follow-ups for your coworker until lunch-break --- he sometimes loses focus.'
     """
     new_text = remove_junk_hyphens(text)
     new_text = restore_lost_spaces(new_text)
@@ -184,8 +184,8 @@ def remove_junk_hyphens(
 
     Test if the constituent parts of hyphenated text are actual words.
 
-    >>> remove_junk_hyphens('Do out-calls for your co-worker until lu-nch-bre-ak.')
-    'Do out-calls for your coworker until lunch-break.'
+    >>> remove_junk_hyphens('Do follow-ups for your coworker until lu-nch-bre-ak.')
+    'Do follow-ups for your coworker until lunch-break.'
     """
     enchant_d = Dict("en_US")
     matches = hyphen_RE.findall(text)

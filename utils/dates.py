@@ -20,9 +20,9 @@ def parse_date(date_str: str, date_format: str = "%Y%m%d") -> str:
 
     arrow.get is not flexible enough parser, so use dateutil.
 
-    >>> get_date("1613474400")
+    >>> parse_date("1613474400")
     '20210216'
-    >>> get_date("2021-02-16T11:20:00Z")
+    >>> parse_date("2021-02-16T11:20:00Z")
     '20210216'
     """
     if date_str.isdigit() and len(date_str) == 10:

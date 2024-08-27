@@ -474,7 +474,7 @@ def clean_identifier(ident: str) -> str:
     """Remove chars not liked by XML, bibtex, pandoc, etc.
 
     >>> clean_identifier("José Alvereze@[hispania]")
-    'Jose Alverezehispania'.
+    'Jose Alverezehispania'
 
     >>> clean_identifier("<strong>123JohnSmith</strong>")
     'a123JohnSmith'

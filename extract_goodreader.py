@@ -15,12 +15,18 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-import roman  # type:ignore
-from enchant import Dict  # type:ignore # sometimes mismatch with system version
+import roman
 
-# https://pypi.org/project/pyenchant/
+# https://pyenchant.github.io/pyenchant/
+# pyenchant provides useful compound word corrections,
+# but is an annoying dependency; if there's a problem test with
+# `import enchant; print(enchant.__version__)`
+# and then `pip uninstall pyenchant; pip install pyenchant`
+from enchant import Dict  # type:ignore
 from enchant.checker import SpellChecker  # type:ignore
-from send2trash import send2trash  # type:ignore
+
+# https://pypi.org/project/Send2Trash/
+from send2trash import send2trash  # type: ignore
 
 from extract_dictation import create_mm
 from utils.extract import get_bib_preamble
@@ -40,13 +46,6 @@ RE_PAGE_NUM = re.compile(
     [ ]---""",
     re.VERBOSE,
 )
-
-
-SYM_SPELL = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
-RESOURCE_PATH = resources.files("symspellpy").joinpath(
-    "frequency_dictionary_en_82_765.txt"
-)
-SYM_SPELL.load_dictionary(RESOURCE_PATH, term_index=0, count_index=1)
 
 
 def process_text(args: argparse.Namespace, text: str) -> str:
@@ -168,48 +167,6 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
 def clean_pdf_ocr(text: str) -> str:
     """Remove OCR artifacts of junk hyphens and missing spaces.
 
-    >>> clean_pdf_ocr('Do cold-calls for your co-worker until lu-nch-bre-ak --- he sometimesloses focus.')
-    'Do cold calls for your coworker until lunch break --- he sometimes loses focus.'
-    """
-    # BUG: fails on punctuation, giving up 2024-08-27
-    # Split on whitespace and punctuation
-    words = re.findall(r"\w+|[^\w\s]|\s+", text)
-    # Split on whitespace and punctuation
-    words = re.findall(r"\w+|[^\w\s]|\s+", text)
-    corrected_words = []
-
-    for word in words:
-        if word.isspace() or not word.isalnum():
-            corrected_words.append(word)
-            continue
-
-        # Remove hyphens if within the word
-        cleaned_word = re.sub(r"(?<!^)-(?!$)", "", word)
-
-        # Preserve original case
-        is_title = cleaned_word.istitle()
-        is_upper = cleaned_word.isupper()
-
-        suggestions = SYM_SPELL.lookup_compound(
-            cleaned_word.lower(), max_edit_distance=2
-        )
-        if suggestions:
-            corrected = suggestions[0].term
-            # Restore original case
-            if is_upper:
-                corrected = corrected.upper()
-            elif is_title:
-                corrected = corrected.title()
-            corrected_words.append(corrected)
-        else:
-            corrected_words.append(word)  # Keep original if no suggestion
-
-    return "".join(corrected_words)
-
-
-def clean_pdf_ocr_old(text: str) -> str:
-    """Remove OCR artifacts of junk hyphens and missing spaces.
-
     >>> clean_pdf_ocr('Do out-calls for your co-worker until lu-nch-bre-ak because he sometimesloses focus.')
     'Do outcalls for your co-worker until lunchbreak because he sometimes loses focus.'
     """
@@ -230,6 +187,7 @@ def remove_junk_hyphens(
     >>> remove_junk_hyphens('Do out-calls for your co-worker until lu-nch-bre-ak.')
     'Do out-calls for your coworker until lunch-break.'
     """
+    enchant_d = Dict("en_US")
     matches = hyphen_RE.findall(text)
 
     for match in matches:
@@ -244,12 +202,11 @@ def remove_junk_hyphens(
     return text
 
 
-# This dependency on pyenchant tends to cause problems, but I need suggestion
 def restore_lost_spaces(text: str) -> str:
     """Restore lost spaces in PDFs using pyenchant.
 
     Replace words not in a dictionary with nearest suggestion, which
-    if often two words separated by a space.
+    is often two words separated by a space.
 
     >>> restore_lost_spaces('Excerpts sometimeslose their spaces.')
     'Excerpts sometimes lose their spaces.'

@@ -15,15 +15,14 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
-import roman
-
 # https://pyenchant.github.io/pyenchant/
 # pyenchant provides useful compound word corrections,
 # but is an annoying dependency; if there's a problem test with
 # `import enchant; print(enchant.__version__)`
 # and then `pip uninstall pyenchant; pip install pyenchant`
-from enchant import Dict  # type:ignore
-from enchant.checker import SpellChecker  # type:ignore
+import enchant
+import enchant.checker
+import roman
 
 # https://pypi.org/project/Send2Trash/
 from send2trash import send2trash  # type: ignore
@@ -62,8 +61,8 @@ def process_text(args: argparse.Namespace, text: str) -> str:
     Table: exemplar values for page calculation
     """
 
-    # 1st page number specified in PDF comment
-    page_num_first_specfied: int = args.first  # 1st page specified in args
+    # 1st page specified in args or PDF comment
+    page_num_first_specfied: int = args.first
     page_num_first_parsed: int = 0  # 1st page number as parsed
     page_num_offset: int = 0  # page number offset
     page_num_parsed: int | str = 0  # page number parsed, can be roman
@@ -187,7 +186,7 @@ def remove_junk_hyphens(
     >>> remove_junk_hyphens('Do follow-ups for your coworker until lu-nch-bre-ak.')
     'Do follow-ups for your coworker until lunch-break.'
     """
-    enchant_d = Dict("en_US")
+    enchant_d = enchant.Dict("en_US")
     matches = hyphen_RE.findall(text)
 
     for match in matches:
@@ -211,7 +210,7 @@ def restore_lost_spaces(text: str) -> str:
     >>> restore_lost_spaces('Excerpts sometimeslose their spaces.')
     'Excerpts sometimes lose their spaces.'
     """
-    checker = SpellChecker("en_US")
+    checker = enchant.checker.SpellChecker("en_US")
     log.debug(text)
     checker.set_text(text)
     for error in checker:

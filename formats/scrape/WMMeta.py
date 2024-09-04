@@ -12,7 +12,7 @@ __version__ = "1.0"
 import re
 
 from biblio import fields as bf
-from utils.web import get_HTML, unescape_XML
+from utils.web import get_HTML, unescape_entities
 
 from .default import ScrapeDefault
 
@@ -59,4 +59,4 @@ class ScrapeWMMeta(ScrapeDefault):
         url_host = self.url.split("/wiki/")[0]
         url_path = self.html_p.xpath("""//li[@id="t-permalink"]/a/@href""")[0]
         permalink = url_host + url_path
-        return unescape_XML(permalink)
+        return unescape_entities(permalink)

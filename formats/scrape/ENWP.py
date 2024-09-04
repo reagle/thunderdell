@@ -14,7 +14,7 @@ import re
 import time
 
 from biblio import fields as bf
-from utils.web import get_HTML, unescape_XML
+from utils.web import get_HTML, unescape_entities
 
 from .default import ScrapeDefault
 
@@ -42,7 +42,7 @@ class ScrapeENWP(ScrapeDefault):
             permalink = self.url.split("/wiki/")[0] + re.search(
                 '''<li id="t-permalink".*?><a href="(.*?)"''', self.html_u
             ).group(1)
-            return unescape_XML(permalink)
+            return unescape_entities(permalink)
         else:
             return self.url
 

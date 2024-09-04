@@ -22,7 +22,7 @@ from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case
 from utils.dates import parse_date
 from utils.text import smart_to_markdown
-from utils.web import get_HTML, get_text, unescape_XML
+from utils.web import get_HTML, get_text, unescape_entities
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
@@ -200,7 +200,7 @@ class ScrapeDefault:
             tmatch = re.search(regexp, self.html_u, re.DOTALL | re.IGNORECASE)
             if tmatch:
                 title = tmatch.group(1).strip()
-                title = unescape_XML(title)
+                title = unescape_entities(title)
                 title = sentence_case(title)
                 title = smart_to_markdown(title)
         return title

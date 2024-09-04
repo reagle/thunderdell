@@ -24,6 +24,8 @@ from biblio.keywords import KEY_SHORTCUTS
 
 log = log.getLogger("utils_web")
 
+entity_RE = re.compile(r"&([#\w]+);")
+
 
 def get_HTML(
     url: str,
@@ -288,34 +290,35 @@ def straighten_quotes(text: str) -> str:
     return text.translate(CURLY_TABLE)
 
 
-def unescape_XML(text: str) -> str:  # .0937s 4.11%
-    """Remove HTML or XML character references and entities from text.
+def unescape_entities(text: str) -> str:
+    """Replace HTML or XML character references and entities with Unicode.
 
     http://effbot.org/zone/re-sub.htm#unescape-htmlentitydefs
-    Marginally faster than `from xml.sax.saxutils import escape, unescape`.
 
+    >>> unescape_entities("&lt;div&gt;foo&lt;/div&gt;")
+    '<div>foo</div>'
+    >>> unescape_entities("Copyright &copy; 2023 &#x263A;")
+    'Copyright © 2023 ☺'
+    >>> unescape_entities("Unknown &entity;")
+    'Unknown &entity;'
     """
 
-    def fixup_chars(m: re.Match[str]) -> str:
-        text = m.group(0)
-        if text[:2] == "&#":
-            # character reference
+    def fixup_chars(match: re.Match) -> str:
+        entity = match.group(1)
+        if entity.startswith("#"):
+            # Handle numeric character references
             try:
-                if text[:3] == "&#x":
-                    return chr(int(text[3:-1], 16))
+                if entity.startswith("#x"):
+                    return chr(int(entity[2:], 16))
                 else:
-                    return chr(int(text[2:-1]))
+                    return chr(int(entity[1:]))
             except ValueError:
-                pass
+                return match.group(0)  # Return the original match if invalid
         else:
-            # named entity
-            try:
-                text = chr(html.entities.name2codepoint[text[1:-1]])
-            except KeyError:
-                pass
-        return text  # leave as is
+            # Handle named entities
+            return html.entities.html5.get(entity, match.group(0))
 
-    return re.sub(r"&#?\w+;", fixup_chars, text)
+    return entity_RE.sub(fixup_chars, text)
 
 
 def canonicalize_url(url: str) -> str:

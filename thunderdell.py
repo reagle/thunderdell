@@ -44,7 +44,7 @@ from formats import (
 )
 from types_thunderdell import Date, EntryDict
 from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
-from utils.web import unescape_XML
+from utils.web import unescape_entities
 
 #################################################################
 # Mindmap parsing, bib building, and query emitting
@@ -186,7 +186,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
             and not link.startswith("http")  # local only
             and not link.endswith("-outline.mm")  # no outlines
         ):
-            links.append(unescape_XML(link))
+            links.append(unescape_entities(link))
         # skip nodes that are structure, comment, and empty of text
         if "STYLE_REF" in d.attrib and d.get("TEXT"):
             if d.get("STYLE_REF") == "author":
@@ -198,11 +198,11 @@ def walk_freeplane(args, node, mm_file, entries, links):
                 # Because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found.
                 author_node = _get_author_node(d)
-                entry["ori_author"] = unescape_XML(author_node.get("TEXT"))
+                entry["ori_author"] = unescape_entities(author_node.get("TEXT"))
                 entry["author"] = parse_names(
                     _remove_identity_hints(entry["ori_author"])
                 )
-                entry["title"] = unescape_XML(d.get("TEXT"))
+                entry["title"] = unescape_entities(d.get("TEXT"))
                 entry["_mm_file"] = str(mm_file)
                 entry["_title_node"] = d
                 if (url := d.attrib.get("LINK")) and not url.startswith(
@@ -218,9 +218,9 @@ def walk_freeplane(args, node, mm_file, entries, links):
                         entry["_title_result"] = title_highlighted
             else:
                 if d.get("STYLE_REF") == "cite":
-                    entry["cite"] = unescape_XML(d.get("TEXT"))
+                    entry["cite"] = unescape_entities(d.get("TEXT"))
                 elif d.get("STYLE_REF") == "annotation":
-                    entry["annotation"] = unescape_XML(d.get("TEXT").strip())
+                    entry["annotation"] = unescape_entities(d.get("TEXT").strip())
                 if args.query:
                     node_highlighted = _query_highlight(d, args.query)
                     if node_highlighted is not None:

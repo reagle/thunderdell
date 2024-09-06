@@ -34,7 +34,7 @@ def guess_csl_type(entry):
     ('paper-conference', None, None)
 
     """
-    # info(f"{entry=}")
+    # log.info(f"{entry=}")
     genre = None
     medium = None
     e_t = "no-type"
@@ -55,7 +55,7 @@ def guess_csl_type(entry):
             raise RuntimeError(f"Unknown entry_type = {e_t}")
 
     ## Guess unknown entry_type based on existence of bibliographic fields
-    types_from_fields = [
+    types_from_fields = (
         # CONTAINER BASED TYPES
         ("article-journal", ["c_journal"]),
         ("article-magazine", ["c_magazine"]),
@@ -80,12 +80,12 @@ def guess_csl_type(entry):
         ("report", ["institution"]),
         # OTHER
         ("webpage", ["url"]),
-    ]
+    )
 
     for bib_type, fields in types_from_fields:
-        # info(f"testing {bib_type=:15} which needs {fields=} ")
+        # log.info(f"testing {bib_type=:15} which needs {fields=} ")
         if all(field in entry for field in fields):
-            # info("FOUND IT: {bib_type=")
+            # log.info("FOUND IT: {bib_type=")
             e_t = bib_type
             break
 
@@ -113,7 +113,6 @@ def emit_yaml_csl(args, entries):
     def emit_yaml_people(people):
         """Yaml writer for authors and editors."""
         for person in people:
-            # debug("person = '%s'" % (' '.join(person)))
             # biblatex ('First Middle', 'von', 'Last', 'Jr.')
             # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
             #      'dropping-particle')
@@ -121,9 +120,6 @@ def emit_yaml_csl(args, entries):
             args.outfd.write(f"  - family: {escape_yaml(family)}\n")
             if given:
                 args.outfd.write(f"    given: {escape_yaml(given)}\n")
-                # args.outfd.write('    given:\n')
-                # for given_part in given.split(' '):
-                #     args.outfd.write('    - %s\n' % escape_yaml(given_part))
             if suffix:
                 args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
             if particle:
@@ -145,25 +141,27 @@ def emit_yaml_csl(args, entries):
             args.outfd.write(f"    season: {season}\n")
 
     def yaml_protect_case(title):
-        """Preserve/bracket proper names/nouns
+        """Preserve/bracket proper names/nouns.
+
         https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+
         >>> yaml_protect_case("The iKettle – a world off its rocker")
         "The <span class='nocase'>iKettle</span> – a world off its rocker".
         """
-        PROTECT_PAT = re.compile(
-            r"""
-            \b # empty string at beginning or end of word
-            (
-            [a-z]+ # one or more lower case
-            [A-Z\./] # capital, period, or forward slash
-            \S+ # one or more non-whitespace
-            )
-            \b # empty string at beginning or end of word
-            """,
-            re.VERBOSE,
-        )
         return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
+    PROTECT_PAT = re.compile(
+        r"""
+        \b # empty string at beginning or end of word
+        (
+        [a-z]+ # one or more lower case
+        [A-Z\./] # capital, period, or forward slash
+        \S+ # one or more non-whitespace
+        )
+        \b # empty string at beginning or end of word
+        """,
+        re.VERBOSE,
+    )
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     args.outfd.write("---\n")
@@ -189,7 +187,7 @@ def emit_yaml_csl(args, entries):
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                # debug(f"short, field = '{short} , {field}'")
+                # log.debug(f"short, field = '{short} , {field}'")
                 # skipped fields
                 if field in ("identifier", "entry_type", "issue"):
                     continue
@@ -204,16 +202,16 @@ def emit_yaml_csl(args, entries):
                     emit_yaml_people(value)
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # debug(f'field = {field}')
+                    # log.debug(f'field = {field}')
                     if value == "0000":
                         continue
                     if field == "date":
-                        # debug(f"value = '{value}'")
+                        # log.debug(f"value = '{value}'")
                         season = entry.get("issue", None)
                         args.outfd.write("  issued:\n")
                         emit_yaml_date(value, season)
                     if field == "origdate":
-                        # debug(f"value = '{value}'")
+                        # log.debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")
                         emit_yaml_date(value)
                     if field == "urldate":
@@ -224,20 +222,20 @@ def emit_yaml_csl(args, entries):
                 if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
                 if field == "url":
-                    # debug(f"url = {value}")
-                    if any(ban for ban in EXCLUDE_URLS if ban in value):
-                        # debug("banned")
+                    # log.debug(f"url = {value}")
+                    if any(ban in value for ban in EXCLUDE_URLS):
+                        # log.debug("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if args.urls_online_only:
-                        # debug("urls_online_only TRUE")
+                        # log.debug("urls_online_only TRUE")
                         if entry_type in {"post", "post-weblog", "webpage"}:
-                            # debug(f"  not skipping online types")
+                            # log.debug(f"  not skipping online types")
                             pass
                         elif "pages" in entry:
-                            # debug("  skipping url, paginated item")
+                            # log.debug("  skipping url, paginated item")
                             continue
-                    # debug(f"  writing url WITHOUT escape_yaml")
+                    # log.debug(f"  writing url WITHOUT escape_yaml")
                     args.outfd.write(f'  URL: "{value}"\n')
                     continue
                 if (
@@ -254,15 +252,15 @@ def emit_yaml_csl(args, entries):
                     #     f'  container-title: "Personal"\n')
                     continue
 
-                # debug(f"{field=}")
+                # log.debug(f"{field=}")
                 if field in CONTAINERS:
-                    # debug(f"in CONTAINERS")
+                    # log.debug(f"in CONTAINERS")
                     field = "container-title"
                     value = yaml_protect_case(value)
-                    # debug(f"{value=}")
+                    # log.debug(f"{value=}")
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    # debug(f"bib2csl field FROM =  {field}")
+                    # log.debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    # debug(f"bib2csl field TO   = {field}")
+                    # log.debug(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {escape_yaml(value)}\n")
     args.outfd.write("...\n")

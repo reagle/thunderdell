@@ -10,13 +10,22 @@
 Run in parent folder as `pytest tests`.
 """
 
+import difflib
 import subprocess
 
 from config import TESTS_FOLDER, THUNDERDELL_EXE
 
 
+def diff_strings(a: str, b: str) -> str:
+    """Return a string representation of the differences between two strings."""
+    diff = difflib.ndiff(a.splitlines(keepends=True), b.splitlines(keepends=True))
+    return "".join(diff)
+
+
 def test_results():
-    """Tests the overall parsing of Mindmap XML and the relationships between
+    """Test results of running thunder.
+
+    Tests the overall parsing of Mindmap XML and the relationships between
     authors with multiple titles and nested authors.
     """
     for test_fn in sorted(TESTS_FOLDER.glob("*.mm")):
@@ -28,7 +37,9 @@ def test_results():
         result = output.stdout.decode("utf-8")
         # expect = open(test_fn.with_suffix(".yaml")).read()
         expect = test_fn.with_suffix(".yaml").read_text()
-        assert result == expect
+        assert (
+            result == expect
+        ), f"\nExpected:\n{expect}\n\nGot:\n{result}\n\nDiff:\n{diff_strings(expect, result)}"
 
 
 if __name__ == "__main__":

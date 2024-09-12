@@ -308,25 +308,23 @@ if __name__ == "__main__":
         if file_name.suffix == ".eml":
             with file_name.open("rb") as fp:
                 msg = BytesParser(policy=policy.default).parse(fp)
+
+            text = ""
+            if msg.is_multipart():
                 for part in msg.walk():
-                    log.debug(f"{part=}")
-                    msg_content_type = part.get_content_subtype()
-                    log.debug(f"{msg_content_type=}")
-                    if msg_content_type == "plain":
-                        log.debug(f"part is plain: {msg_content_type}")
+                    if part.get_content_type() == "text/plain":
                         charset = part.get_content_charset(failobj="utf-8")
-                        content = part.get_payload(decode=True).decode(
-                            charset, "replace"
-                        )
-                        text = content
-                        log.debug(f"TEXT IS:\n ```{text}```")
-                    else:
-                        raise TypeError(
-                            f"Can extract text because {msg_content_type=} is unknown."
-                        )
+                        text += part.get_payload(decode=True).decode(charset, "replace")
+            else:
+                charset = msg.get_content_charset(failobj="utf-8")
+                text = msg.get_payload(decode=True).decode(charset, "replace")
+
+            if not text:
+                raise ValueError("No text content found in the email.")
+
+            log.debug(f"TEXT IS:\n ```{text}```")
         else:
             text = file_name.read_text()
-
         new_text = process_text(args, text)
 
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")

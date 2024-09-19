@@ -11,8 +11,8 @@ references:
     day: 08
   keyword: "test"
   publisher: "Wikipedia"
-  title-short: "Bracket (e.g., [], {}) (oldid=295177316)"
-  title: "Bracket (<span class='nocase'>e.g</span>., [], {})"
+  title-short: "Bracket (e.g., [], {}, $$$) (oldid=295177316)"
+  title: "Bracket (<span class='nocase'>e.g</span>., [], {}, $$$)"
   URL: "http://en.wikipedia.org/?oldid=295177316"
   accessed:
     year: 2009

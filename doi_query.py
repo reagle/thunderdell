@@ -44,7 +44,7 @@ def query(doi, accept="application/citeproc+json"):
     log.info(f"{url=}")
     r = requests.get(url, headers=headers)
     log.debug(f"{r=} {r.content=}")
-    returned_content_type = r.headers["content-type"].split("; ")[0]
+    returned_content_type = r.headers["content-type"].split(";")[0].strip()
     if returned_content_type in ACCEPTABLE_TYPES:
         json_bib = json.loads(r.content)
         log.info(f"{json_bib=}")

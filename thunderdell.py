@@ -733,7 +733,7 @@ if __name__ == "__main__":
         dest="verbose",
         action="count",
         default=0,
-        help="Increase verbosity (specify multiple times for more)",
+        help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument(
         "--version",

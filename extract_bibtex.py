@@ -153,7 +153,7 @@ if __name__ == "__main__":
         "--verbose",
         action="count",
         default=0,
-        help="Increase verbosity (specify multiple times for more)",
+        help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
     args = arg_parser.parse_args()

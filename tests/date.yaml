@@ -27,7 +27,7 @@ references:
     month: 07
     day: 05
   title: "T1"
-  URL: "http://example.com/"
+  URL: "<http://example.com/>"
   accessed:
     year: 2002
     month: 08

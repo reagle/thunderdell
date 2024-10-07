@@ -236,7 +236,7 @@ def emit_yaml_csl(args, entries):
                             # log.debug("  skipping url, paginated item")
                             continue
                     # log.debug(f"  writing url WITHOUT escape_yaml")
-                    args.outfd.write(f'  URL: "{value}"\n')
+                    args.outfd.write(f'  URL: "<{value}>"\n')
                     continue
                 if (
                     field == "eventtitle"

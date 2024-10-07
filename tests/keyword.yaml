@@ -8,7 +8,7 @@ references:
   issued:
     year: 1991
   title: "Title one"
-  URL: "http://example.com/1"
+  URL: "<http://example.com/1>"
 - id: A11992tt
   type: webpage
   author:
@@ -18,7 +18,7 @@ references:
     year: 1992
   keyword: "keyword1"
   title: "Title two"
-  URL: "http://example.com/1"
+  URL: "<http://example.com/1>"
 - id: A11993tt
   type: webpage
   author:
@@ -28,5 +28,5 @@ references:
     year: 1993
   keyword: "keyword1, keyword2"
   title: "Title three"
-  URL: "http://example.com/1"
+  URL: "<http://example.com/1>"
 ...

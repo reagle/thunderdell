@@ -178,7 +178,7 @@ def emit_yaml_csl(args, entries):
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        if entry.get("ori_author") in container_values:
+        if entry.get("ori_author", None) in container_values:
             if not args.author_create:
                 del entry["author"]
             else:

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""CGI/web wrapper for thunderdell and busysponge."""
 
 # set shebang locally to latest
 # !/usr/bin/env python3
@@ -6,57 +7,58 @@
 # !/home/goateene/opt/bin/python3
 
 import argparse
+import logging
+import re
+import os
+import sys
 import traceback
-import warnings
+from pathlib import Path
+import urllib.parse as up
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
+HOME = Path.home()
+TD_DIR = HOME / "bin" / "td"
+TMP_DIR = HOME / "tmp" / ".td"
+sys.path.append(str(TD_DIR))
+sys.stdout.reconfigure(encoding="utf-8")
 
 def cgi_main(args):
-    import cgi
-    import codecs
-    import logging
-    import re
-    import sys
-    from pathlib import Path
-    from urllib.parse import unquote
-
-    HOME = Path.home()
-    TMP_DIR = HOME / "tmp" / ".td"
-    # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
-    sys.stdout.reconfigure(encoding='utf-8')
+    """CGI main function."""
+    # set stdout encoding for subsequent print commands
 
     #  https://docs.python.org/3/library/logging.html
     # "Note that the root logger is created with level WARNING."
     # Set level to ERROR here so I don't see warnings imported from
     # thunderdell when running as server.
     # Alternatively, perhaps could name thunderdell logger, so it's not root
-    LOG_FORMAT = "%(levelname).3s %(funcName).5s: %(message)s"
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     logging.basicConfig(level=logging.ERROR, format=LOG_FORMAT)
 
     print("Content-Type: text/html; charset=utf-8\n\n")
 
-    # TODO replace cgi with urllib.parse.parse_qsl
-    # cgi deprecated in 3.11 https://peps.python.org/pep-0594/#cgi
-    form = cgi.FieldStorage()
-    query = form.getfirst("query", "Wikipedia2008npv")  # Möller2007ecl
-    site = form.getvalue("sitesearch", "MindMap")
-    # query = form.getfirst('query', 'aux2bib')
-    # site = form.getvalue('sitesearch', 'BusySponge')
+    # Get the query string
+    query_string = os.environ.get('QUERY_STRING', '')
 
-    query = unquote(query)
+    # Parse the query string
+    form_data = dict(up.parse_qsl(query_string))
 
+    # Access form data
+    site = form_data.get('sitesearch', 'MindMap')
+    query = form_data.get('query', 'Wikipedia2008npv')
+
+    query = up.unquote(query)
+
+    # citation keys might start with "@", remove if so
     if query.startswith("@"):
         query = query[1:]
 
-    sys.path.append(str(HOME / "bin/td"))
+    # site specific queries
     if site == "BusySponge":
         import busy_query
 
         query_result_file = Path(busy_query.query_sponge(query))
         print(query_result_file.read_text(encoding="utf-8", errors="replace"))
     else:
-        MINDMAP = HOME / "joseph/readings.mm"
+        MINDMAP = HOME / "joseph" / "readings.mm"
 
         import thunderdell as td
 
@@ -72,6 +74,7 @@ def cgi_main(args):
 
 
 def print_error(msg):
+    """Wrap error message in HTML page."""
     print(
         f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         <html>
@@ -95,7 +98,7 @@ if __name__ == "__main__":
     try:
         cgi_main(args)
     except Exception as e:  # noqa: BLE001
-        error_message = f"{type(e).__name__}: {str(e)}"
+        error_message = f"{type(e).__name__}: {e!s}"
         full_traceback = traceback.format_exc()
         print_error(f"{error_message=}")
         print_error(f"{full_traceback=}")

@@ -24,7 +24,7 @@ def cgi_main(args):
     HOME = Path.home()
     TMP_DIR = HOME / "tmp" / ".td"
     # http://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+    sys.stdout.reconfigure(encoding='utf-8')
 
     #  https://docs.python.org/3/library/logging.html
     # "Note that the root logger is created with level WARNING."
@@ -55,9 +55,6 @@ def cgi_main(args):
 
         query_result_file = Path(busy_query.query_sponge(query))
         print(query_result_file.read_text(encoding="utf-8", errors="replace"))
-        # fileObj = codecs.open(query_result_file, "r", "utf-8", "replace")
-        # print(fileObj.read())
-        # fileObj.close()
     else:
         MINDMAP = HOME / "joseph/readings.mm"
 

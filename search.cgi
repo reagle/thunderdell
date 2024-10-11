@@ -8,18 +8,19 @@
 
 import argparse
 import logging
-import re
 import os
+import re
 import sys
 import traceback
-from pathlib import Path
 import urllib.parse as up
+from pathlib import Path
 
 HOME = Path.home()
 TD_DIR = HOME / "bin" / "td"
 TMP_DIR = HOME / "tmp" / ".td"
 sys.path.append(str(TD_DIR))
 sys.stdout.reconfigure(encoding="utf-8")
+
 
 def cgi_main(args):
     """CGI main function."""
@@ -36,14 +37,14 @@ def cgi_main(args):
     print("Content-Type: text/html; charset=utf-8\n\n")
 
     # Get the query string
-    query_string = os.environ.get('QUERY_STRING', '')
+    query_string = os.environ.get("QUERY_STRING", "")
 
     # Parse the query string
     form_data = dict(up.parse_qsl(query_string))
 
     # Access form data
-    site = form_data.get('sitesearch', 'MindMap')
-    query = form_data.get('query', 'Wikipedia2008npv')
+    site = form_data.get("sitesearch", "MindMap")
+    query = form_data.get("query", "Wikipedia2008npv")
 
     query = up.unquote(query)
 

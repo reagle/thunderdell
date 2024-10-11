@@ -46,6 +46,9 @@ lint.unfixable = [
 "F401", # keep unused modules as I'm likely to use them shortly
 ]
 
+# Include files
+extend-include = ["*.cgi"]
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",

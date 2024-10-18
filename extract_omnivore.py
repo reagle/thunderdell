@@ -6,6 +6,8 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+# TODO: 2024-10-18 : add DOI ability since some papers are web pages
+
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging as log
 import re

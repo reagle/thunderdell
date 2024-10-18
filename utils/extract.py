@@ -20,7 +20,7 @@ class args:
     publish = False  # don't tweet at this level
 
 
-def get_bib_preamble(token):
+def get_bib_preamble(token: str) -> list[str]:
     """Call out to get and format biblio information using ISBN/DOI APIs."""
     log.info(f"{token=}")
     scrape_token = formats.ScrapeDOI if token.startswith("10") else formats.ScrapeISBN

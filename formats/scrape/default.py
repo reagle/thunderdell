@@ -186,7 +186,7 @@ class ScrapeDefault:
         return date
 
     def get_title(self):
-        title_regexps = {
+        url_title_regexps = {
             "lists.w3.org": '<!-- subject="(.*?)" -->',
             "lists.kde.org": r"<title>MARC: msg '(.*?)'</title>",
             "www.youtube.com": r'''"title":"(.*?)"''',
@@ -194,10 +194,10 @@ class ScrapeDefault:
         }
 
         url = urlparse(self.url)
-        regexp = title_regexps.get(url.netloc, title_regexps["DEFAULT"])
+        title_regexp = url_title_regexps.get(url.netloc, url_title_regexps["DEFAULT"])
         title = "UNKNOWN TITLE"
         if self.html_u:
-            tmatch = re.search(regexp, self.html_u, re.DOTALL | re.IGNORECASE)
+            tmatch = re.search(title_regexp, self.html_u, re.DOTALL | re.IGNORECASE)
             if tmatch:
                 title = tmatch.group(1).strip()
                 title = unescape_entities(title)

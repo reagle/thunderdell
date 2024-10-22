@@ -36,18 +36,21 @@ def get_HTML(
     """Return [HTML content, response] of a given URL."""
     agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
     req = requests.get(url, headers=agent_headers, verify=True)
-    # info(f"{r.headers['content-type']=}")
-    if "html" in req.headers["content-type"]:
-        HTML_bytes = req.content
-    else:
+
+    if "html" not in req.headers.get("content-type", ""):
         raise OSError("URL content is not HTML.")
 
-    parser_html = etree.HTMLParser()
-    doc = etree.fromstring(HTML_bytes, parser_html)
-    HTML_parsed = doc
+    HTML_bytes = req.content
 
-    HTML_utf8 = etree.tostring(HTML_parsed, encoding="utf-8")
-    HTML_unicode = HTML_utf8.decode("utf-8", "replace")
+    # Detect the encoding from the response
+    encoding = req.encoding or "utf-8"
+
+    # Parse the HTML using the detected encoding
+    parser_html = etree.HTMLParser(encoding=encoding)
+    HTML_parsed = etree.fromstring(HTML_bytes, parser_html)
+
+    # Decode the bytes to a Unicode string using the detected encoding
+    HTML_unicode = HTML_bytes.decode(encoding, "replace")
 
     return HTML_bytes, HTML_parsed, HTML_unicode, req
 
@@ -129,7 +132,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
 def twitter_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
-    """Updates the authenticated Twitter account with a tweet and optional photo."""
+    """Update the authenticated Twitter account with a tweet and optional photo."""
     # https://github.com/trevorhobenshield/twitter-api-client
     import orjson
     from httpx import Client

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process Omnivore.app export into format accepted by `extract_dictation.py`."""
+"""Process raindrop.io export into format accepted by `extract_dictation.py`."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -26,7 +26,7 @@ def main(argv: list[str]) -> argparse.Namespace:
     """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
-        description="""Format Omnivore.app annotations for use with
+        description="""Format raindrop.io annotations for use with
         dictation-extract.py in
             https://github.com/reagle/thunderdell
         """
@@ -63,7 +63,7 @@ def main(argv: list[str]) -> argparse.Namespace:
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         log.basicConfig(
-            filename="extract-omnivore.log",
+            filename="extract-raindrop.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
@@ -101,8 +101,8 @@ def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
             if not line:
                 continue
 
-            # lines are presumed to be excerpts, so remove blockquote symbol
-            if line.startswith("> "):
+            # lines are presumed to be excerpts, so remove list marker
+            if line.startswith("- "):
                 comment.append(line[2:].strip())
             # else, mark with comma as it's a user annotation
             else:

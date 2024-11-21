@@ -337,6 +337,7 @@ BIBLATEX_FIELDS = BIBTEX_FIELDS | {
 EXCLUDE_URLS = {
     "search?q=cache",
     "proquest",
+    "ezproxy",
     "books.google",
     "amazon.com",
     "data/1work/",

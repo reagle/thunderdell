@@ -4,7 +4,7 @@ https://github.com/reagle/thunderdell
 """
 
 from collections.abc import Sequence
-from typing import Dict, NamedTuple, Optional
+from typing import NamedTuple, Optional
 from xml.etree.ElementTree import Element
 
 
@@ -18,7 +18,7 @@ class Date(NamedTuple):
     time: Optional[str] = None
 
 
-class EntryDict(Dict):
+class EntryDict(dict):
     """Structure of entry."""
 
     _mm_file: str

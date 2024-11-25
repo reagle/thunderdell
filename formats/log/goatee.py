@@ -18,6 +18,7 @@ import config
 
 NOW = time.localtime()
 
+
 def log2goatee(args, biblio):
     """Start at a blog entry at goatee."""
     GOATEE_ROOT = config.HOME / "data/2web/goatee.net/content/"

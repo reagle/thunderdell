@@ -125,8 +125,70 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          {total_len=}"""
     )
 
-    twitter_update(comment, title, url, tags, photo_path)
+    bluesky_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)
+    twitter_update(comment, title, url, tags, photo_path)
+
+
+def bluesky_update(
+    comment: str, title: str, url: str, tags: str, photo_path: Path | None
+) -> None:
+    """Update the authenticated Bluesky account with a post and optional photo."""
+    # https://docs.bsky.app/docs/advanced-guides/posts#images-embeds
+    # https://github.com/MarshalX/atproto
+    # TODO: The url will not be clickable in resulting post;
+    #   must use a richtext facet and image embed
+    from atproto import Client, client_utils, models
+
+    from .web_api_tokens import BLUESKY_APP_PASSWORD, BLUESKY_HANDLE
+
+    client = Client()
+    client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
+    # Pass empty string instead of URL, which is added via TextBuilder.link()
+    # Append new line because no separation otherwise
+    post = shrink_message("bluesky", comment, title, "", tags) + "\n"
+    post = client_utils.TextBuilder().text(post).link(url, url)
+
+    if photo_path and photo_path.is_file():
+        photo_desc = get_photo_desc(photo_path)
+        img_data = photo_path.read_bytes()
+
+        # Upload image and create post with embedded image
+        upload = client.upload_blob(img_data)
+        images = [models.AppBskyEmbedImages.Image(alt=photo_desc, image=upload.blob)]
+        embed = models.AppBskyEmbedImages.Main(images=images)
+        client.send_post(text=post, embed=embed, langs=["en-US"])
+    else:
+        client.send_post(text=post, langs=["en-US"])
+
+
+def mastodon_update(
+    comment: str, title: str, url: str, tags: str, photo_path: Path | None
+) -> None:
+    """Update the authenticated Mastodon account with a tweet and optional photo."""
+    import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
+
+    from .web_api_tokens import (
+        MASTODON_APP_BASE,
+        OHAI_ACCESS_TOKEN,
+    )
+
+    ohai = mastodon.Mastodon(
+        access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
+    )
+    toot = shrink_message("ohai", comment, title, url, tags)
+    try:
+        if photo_path and photo_path.is_file():
+            photo_desc = get_photo_desc(photo_path)
+            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
+            ohai.status_post(status=toot, media_ids=media)
+        else:
+            ohai.status_post(status=toot)
+    except mastodon.MastodonError as err:
+        print(err)
+        print(f"toot failed {len(toot)}: {toot}")
+    else:
+        print(f"toot worked {len(toot)}: {toot}")
 
 
 def twitter_update(
@@ -176,36 +238,10 @@ def twitter_update(
     print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 
-def mastodon_update(
-    comment: str, title: str, url: str, tags: str, photo_path: Path | None
-) -> None:
-    """Update the authenticated Mastodon account with a tweet and optional photo."""
-    import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
-
-    from .web_api_tokens import (
-        MASTODON_APP_BASE,
-        OHAI_ACCESS_TOKEN,
-    )
-
-    ohai = mastodon.Mastodon(
-        access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
-    )
-    toot = shrink_message("ohai", comment, title, url, tags)
-    try:
-        if photo_path and photo_path.is_file():
-            photo_fn = photo_path.stem
-            photo_desc = " ".join(
-                chunk for chunk in photo_fn.split("-") if not chunk.isdigit()
-            )
-            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
-            ohai.status_post(status=toot, media_ids=media)
-        else:
-            ohai.status_post(status=toot)
-    except mastodon.MastodonError as err:
-        print(err)
-        print(f"toot failed {len(toot)}: {toot}")
-    else:
-        print(f"toot worked {len(toot)}: {toot}")
+def get_photo_desc(photo_path: Path) -> str:
+    """Extract photo description from filename."""
+    photo_fn = photo_path.stem
+    return " ".join(chunk for chunk in photo_fn.split("-") if not chunk.isdigit())
 
 
 def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
@@ -215,6 +251,8 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
         limit = 500
     elif service == "twitter":
         limit = 280
+    elif service == "bluesky":
+        limit = 300
     log.info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
     TWITTER_SHORTENER_LEN = 23  # twitter uses t.co

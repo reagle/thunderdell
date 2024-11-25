@@ -179,6 +179,7 @@ def twitter_update(
 def mastodon_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
+    """Update the authenticated Mastodon account with a tweet and optional photo."""
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
     from .web_api_tokens import (

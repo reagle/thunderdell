@@ -70,6 +70,7 @@ def strip_accents(text: str) -> str:
 
 
 def smart_to_markdown(text: str) -> str:
+    """Convert smart quotes and dashes to markdown format."""
     return text.translate(
         str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'", "–": "--", "—": "---"})
     )

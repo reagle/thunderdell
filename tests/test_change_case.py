@@ -8,6 +8,7 @@
 """Run tests against golden YAML results;
 useful for detecting inadvertent changes.
 """
+
 from change_case import change_case
 
 CASES = """

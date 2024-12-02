@@ -24,6 +24,7 @@ GENERAL_KEY_SHORTCUTS = {
     "leg": "legal",
     "lit": "literacy",
     "ope": "open",
+    "md": "markdown",
     "mon": "money",
     "ora": "oratory",
     "nor": "norms",

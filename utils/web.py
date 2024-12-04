@@ -11,18 +11,37 @@ __version__ = "1.0"
 import html.entities
 import json
 import logging as log
+import os
 import re
 from pathlib import Path
 from typing import Any
 from xml.sax.saxutils import escape  # unescape
 
+import dotenv
 import requests  # http://docs.python-requests.org/en/latest/
-from lxml import etree
+from lxml import etree  # type: ignore
 
 import config
 from biblio.keywords import KEY_SHORTCUTS
 
 log = log.getLogger("utils_web")
+
+
+def get_credential(key: str) -> str:
+    """Retrieve credential from environ, file, or solicitation."""
+    ENV_FN = Path.home() / ".config" / "api-info.env"
+    # Make sure the file is not public for security's sake
+    if ENV_FN.stat().st_mode & 0o777 != 0o600:
+        print(f"WARNING: {ENV_FN} is not 0o600; fixing")
+        ENV_FN.chmod(0o600)
+
+    # Load from file; environment value wins unless `override=True`
+    dotenv.load_dotenv(dotenv_path=ENV_FN)
+    if (value := os.getenv(key)) is None:
+        value = input(f"Enter value for {key}: ").strip()
+        dotenv.set_key(ENV_FN, key, value)
+
+    return value
 
 
 def get_HTML(
@@ -139,9 +158,13 @@ def bluesky_update(
     import atproto_core
     from atproto import Client, client_utils, models
 
-    from .web_api_tokens import BLUESKY_APP_PASSWORD, BLUESKY_HANDLE
+    import utils.web as uw
+
+    BLUESKY_APP_PASSWORD = uw.get_credential("BLUESKY_APP_PASSWORD")
+    BLUESKY_HANDLE = uw.get_credential("BLUESKY_HANDLE")
 
     skeet_text = shrink_message("bluesky", comment, title, "", tags) + "\n"
+
     try:
         client = Client()
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
@@ -164,10 +187,9 @@ def bluesky_update(
             client.send_post(text=skeet_obj, langs=["en-US"])
     except atproto_core.exceptions.AtProtocolError as err:
         print(err)
-        print(f"skeet failed {len(skeet_text)}: {skeet_text}")
+        print(f"skeet failed {len(skeet_text + url)}: {skeet_text + url}")
     else:
-        print(f"skeet worked {len(skeet_text)}: {skeet_text}")
-    log.info("done")
+        print(f"skeet worked {len(skeet_obj.build_text())}: {skeet_obj.build_text()}")
 
 
 def mastodon_update(
@@ -176,10 +198,10 @@ def mastodon_update(
     """Update the authenticated Mastodon account with a tweet and optional photo."""
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
-    from .web_api_tokens import (
-        MASTODON_APP_BASE,
-        OHAI_ACCESS_TOKEN,
-    )
+    import utils.web as uw
+
+    MASTODON_APP_BASE = uw.get_credential("MASTODON_APP_BASE")
+    OHAI_ACCESS_TOKEN = uw.get_credential("OHAI_ACCESS_TOKEN")
 
     ohai = mastodon.Mastodon(
         access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
@@ -209,15 +231,14 @@ def twitter_update(
     from twitter.account import Account
     from twitter.util import init_session
 
-    from config import TMP_DIR
-    from utils.web_api_tokens import (
-        TW_EMAIL,
-        TW_PASSWORD,
-        TW_USERNAME,
-    )
+    import utils.web as uw
+
+    TW_EMAIL = uw.get_credential("TW_EMAIL")
+    TW_PASSWORD = uw.get_credential("TW_PASSWORD")
+    TW_USERNAME = uw.get_credential("TW_USERNAME")
 
     # https://github.com/trevorhobenshield/twitter-api-client/issues/64
-    cookies_fp = TMP_DIR / "twitter.cookies"
+    cookies_fp = config.TMP_DIR / "twitter.cookies"
     # TODO: deal with expired cookies 2023-06-06
     if cookies_fp.exists():
         cookies = orjson.loads(cookies_fp.read_bytes())

@@ -13,12 +13,13 @@ __version__ = "1.0"
 import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
 import utils.text as ut
-import utils.web_api_tokens as wat
+import utils.web as uw
 
 from .default import ScrapeDefault
 
 api = mastodon.Mastodon(
-    access_token=wat.OHAI_ACCESS_TOKEN, api_base_url=wat.MASTODON_APP_BASE
+    access_token=uw.get_credential("OHAI_ACCESS_TOKEN"),
+    api_base_url=uw.get_credential("MASTODON_APP_BASE"),
 )
 
 

@@ -86,8 +86,6 @@ def truncate_text(text: str, length: int) -> str:
     fragments = re.split("([.!?])", text.strip())
     result = fragments.pop(0)
     for fragment in fragments:
-        print(f"{result=}")
-        print(f"{fragment=}")
         if len(result) + len(fragment) >= length:
             if len(result) >= length:
                 result = result[0 : length - 1] + "…"

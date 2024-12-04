@@ -136,30 +136,38 @@ def bluesky_update(
     """Update the authenticated Bluesky account with a post and optional photo."""
     # https://docs.bsky.app/docs/advanced-guides/posts#images-embeds
     # https://github.com/MarshalX/atproto
-    # TODO: The url will not be clickable in resulting post;
-    #   must use a richtext facet and image embed
+    import atproto_core
     from atproto import Client, client_utils, models
 
     from .web_api_tokens import BLUESKY_APP_PASSWORD, BLUESKY_HANDLE
 
-    client = Client()
-    client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
-    # Pass empty string instead of URL, which is added via TextBuilder.link()
-    # Append new line because no separation otherwise
-    post = shrink_message("bluesky", comment, title, "", tags) + "\n"
-    post = client_utils.TextBuilder().text(post).link(url, url)
+    skeet_text = shrink_message("bluesky", comment, title, "", tags) + "\n"
+    try:
+        client = Client()
+        client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
+        # Pass empty string instead of URL, which is added via TextBuilder.link()
+        # Append new line because no separation otherwise
+        skeet_obj = client_utils.TextBuilder().text(skeet_text).link(url, url)
 
-    if photo_path and photo_path.is_file():
-        photo_desc = get_photo_desc(photo_path)
-        img_data = photo_path.read_bytes()
+        if photo_path and photo_path.is_file():
+            photo_desc = get_photo_desc(photo_path)
+            img_data = photo_path.read_bytes()
 
-        # Upload image and create post with embedded image
-        upload = client.upload_blob(img_data)
-        images = [models.AppBskyEmbedImages.Image(alt=photo_desc, image=upload.blob)]
-        embed = models.AppBskyEmbedImages.Main(images=images)
-        client.send_post(text=post, embed=embed, langs=["en-US"])
+            # Upload image and create skeet with embedded image
+            upload = client.upload_blob(img_data)
+            images = [
+                models.AppBskyEmbedImages.Image(alt=photo_desc, image=upload.blob)
+            ]
+            embed = models.AppBskyEmbedImages.Main(images=images)
+            client.send_post(text=skeet_obj, embed=embed, langs=["en-US"])
+        else:
+            client.send_post(text=skeet_obj, langs=["en-US"])
+    except atproto_core.exceptions.AtProtocolError as err:
+        print(err)
+        print(f"skeet failed {len(skeet_text)}: {skeet_text}")
     else:
-        client.send_post(text=post, langs=["en-US"])
+        print(f"skeet worked {len(skeet_text)}: {skeet_text}")
+    log.info("done")
 
 
 def mastodon_update(

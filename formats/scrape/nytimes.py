@@ -20,16 +20,20 @@ import time
 
 import arrow
 
+import utils.web as uw
 from change_case import sentence_case
 from utils.web import get_JSON
-from utils.web_api_tokens import NYT_APP_KEY
 
 from .default import ScrapeDefault
 
 NOW = time.localtime()
 
+NYT_APP_KEY = uw.get_credential("NYT_APP_KEY")
+
 
 class ScrapeNYT(ScrapeDefault):
+    """Scraper for NYT."""
+
     def __init__(self, url, comment):
         print("Scraping NYT", end="\n")
         ScrapeDefault.__init__(self, url, comment)

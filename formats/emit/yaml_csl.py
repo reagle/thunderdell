@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
+import argparse
 import re
 
 from biblio.fields import (
@@ -20,9 +20,10 @@ from biblio.fields import (
     CSL_TYPES,
     EXCLUDE_URLS,
 )
+from types_thunderdell import EntryDict, PersonName, PubDate
 
 
-def guess_csl_type(entry):
+def guess_csl_type(entry: EntryDict):
     """Guess whether the type of this entry is book, article, etc.
 
     >>> guess_csl_type({'author': [('', '', 'Smith', '')],\
@@ -92,7 +93,7 @@ def guess_csl_type(entry):
     return e_t, genre, medium
 
 
-def emit_yaml_csl(args, entries):
+def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
     """Emit citations in YAML/CSL for input to pandoc.
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html
@@ -102,7 +103,7 @@ def emit_yaml_csl(args, entries):
     """
     # import yaml
 
-    def escape_yaml(s):
+    def escape_yaml(s: str) -> str:
         if s:  # faster to just quote than testing for tokens
             s = s.replace('"', r"'")
             # s = s.replace("#", r"\#") # this was introducing slashes in URLs
@@ -110,7 +111,7 @@ def emit_yaml_csl(args, entries):
             s = f'"{s}"'
         return s
 
-    def emit_yaml_people(people):
+    def emit_yaml_people(people: list[PersonName]) -> None:
         """Yaml writer for authors and editors."""
         for person in people:
             # biblatex ('First Middle', 'von', 'Last', 'Jr.')
@@ -127,7 +128,7 @@ def emit_yaml_csl(args, entries):
                     f"    non-dropping-particle: {escape_yaml(particle)}\n"
                 )
 
-    def emit_yaml_date(date, season=None):
+    def emit_yaml_date(date: PubDate, season: str | None = None):
         """Yaml writer for dates."""
         if date.year:
             args.outfd.write(f"    year: {date.year}\n")
@@ -140,7 +141,7 @@ def emit_yaml_csl(args, entries):
         if season:
             args.outfd.write(f"    season: {season}\n")
 
-    def yaml_protect_case(title):
+    def yaml_protect_case(title: str) -> str:
         """Preserve/bracket proper names/nouns.
 
         https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md

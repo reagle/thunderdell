@@ -17,6 +17,7 @@ from pathlib import Path
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
 import config
+from types_thunderdell import EntryDict
 
 # from formats.emit.biblatex import create_biblatex_author
 from utils.web import escape_XML, straighten_quotes
@@ -24,7 +25,7 @@ from utils.web import escape_XML, straighten_quotes
 
 def emit_results(
     args: argparse.Namespace,
-    entries: dict[str, dict],
+    entries: dict[str, EntryDict],
 ) -> None:
     """Emit the results of the query."""
     query = args.query
@@ -123,7 +124,7 @@ LOCATOR_PREFIX_MAP = {
 }
 
 
-def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
+def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file):
     """Move locator number to the end of the text with the biblatex key."""
     style_ref = node.get("STYLE_REF", "default")
     text = straighten_quotes(node.get("TEXT", ""))
@@ -175,7 +176,7 @@ def reverse_print(node: et._Element, entry: dict, spaces: str, results_file):
     )
 
 
-def pretty_print(node, entry, spaces, results_file):
+def pretty_print(node: et._Element, entry: EntryDict, spaces: str, results_file):
     """Pretty print a node and descendants into indented HTML."""
     if node.get("TEXT") is not None:
         reverse_print(node, entry, spaces, results_file)
@@ -192,16 +193,17 @@ def pretty_print(node, entry, spaces, results_file):
 
 
 def print_entry(
-    identifier,
+    identifier: str,
     # author,
     # date,
-    title,
-    url,
-    MM_mm_file,
-    base_mm_file,
-    spaces,
+    title: str,
+    url: str,
+    MM_mm_file: str,
+    base_mm_file: str,
+    spaces: str,
     results_file,
 ):
+    """Print entry."""
     identifier_html = (
         '<li class="identifier_html">'
         f'<a href="{get_url_query(identifier)}">{identifier}</a>'
@@ -215,7 +217,7 @@ def print_entry(
     results_file.write(f"{spaces}</li><!--identifier_html-->\n")
 
 
-def get_url_query(token):
+def get_url_query(token: str) -> str:
     """Return the URL for an HTML link to the actual title."""
     token = token.replace("<strong>", "").replace("</strong>", "")
     # urllib won't accept unicode

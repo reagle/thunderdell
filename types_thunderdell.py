@@ -8,7 +8,7 @@ from typing import NamedTuple, Optional
 from xml.etree.ElementTree import Element
 
 
-class Date(NamedTuple):
+class PubDate(NamedTuple):
     """Date structure."""
 
     year: str
@@ -18,16 +18,25 @@ class Date(NamedTuple):
     time: Optional[str] = None
 
 
+class PersonName(NamedTuple):
+    """Name structure."""
+
+    first: str
+    middle: str
+    last: str
+    suffix: str
+
+
 class EntryDict(dict):
     """Structure of entry."""
 
     _mm_file: str
     _title_node: Element
-    author: Sequence[tuple]
+    author: list[PersonName]
     cite: str
     custom1: str
     custom2: str
-    date: Date
+    date: PubDate
     entry_type: str
     identifier: str
     number: str
@@ -36,4 +45,4 @@ class EntryDict(dict):
     shorttitle: str
     title: str
     url: str
-    urldate: Date
+    urldate: PubDate

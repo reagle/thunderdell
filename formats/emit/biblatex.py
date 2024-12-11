@@ -23,7 +23,7 @@ from biblio.fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
-from types_thunderdell import Date, EntryDict
+from types_thunderdell import EntryDict, PubDate
 from utils.text import escape_latex, normalize_whitespace
 
 #################################################################
@@ -279,7 +279,7 @@ def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
                 if field in ("author", "editor", "translator"):
                     value = create_biblatex_author(value)
                 if field in ("date", "urldate", "origdate"):
-                    assert isinstance(value, Date)  # for pyright
+                    assert isinstance(value, PubDate)  # for pyright
                     date = "-".join(filter(None, (value.year, value.month, value.day)))
                     date = date + "~" if value.circa else date
                     value = date

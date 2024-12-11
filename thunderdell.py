@@ -20,11 +20,12 @@ import sys
 import textwrap
 import urllib.parse
 import webbrowser
-import xml.etree.ElementTree as et
 from collections.abc import Callable
 from pathlib import Path
-from typing import NamedTuple
 from urllib.parse import parse_qs
+
+# import xml.etree.ElementTree as et
+import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
 
 import config
 from biblio.fields import (
@@ -42,7 +43,7 @@ from formats import (
     emit_wikipedia,
     emit_yaml_csl,
 )
-from types_thunderdell import Date, EntryDict
+from types_thunderdell import EntryDict, PersonName, PubDate
 from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
 from utils.web import unescape_entities
 
@@ -82,7 +83,7 @@ def build_bib(
     """Build bibliography of entries from a Freeplane mindmap."""
     links = set()
     done = set()
-    entries: dict[str, dict] = {}
+    entries: dict[str, EntryDict] = {}
     mm_files = {file_name}
     while mm_files:
         mm_file = mm_files.pop()
@@ -111,7 +112,13 @@ def build_bib(
         emitter_func(args, entries)
 
 
-def walk_freeplane(args, node, mm_file, entries, links):
+def walk_freeplane(
+    args: argparse.Namespace,
+    node: et._Element,
+    mm_file: Path,
+    entries: dict[str, EntryDict],
+    links,
+) -> tuple[dict[str, EntryDict], list[str]]:
     """Walk the freeplane XML tree and build dictionary of entries.
 
     1. a dictionary of bibliographic entries.
@@ -128,7 +135,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
 
     """
     author_node = None
-    entry = {}
+    entry = EntryDict()
 
     parent_map = {c: p for p in node.iter() for c in p}
 
@@ -194,7 +201,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
                 pass
             elif d.get("STYLE_REF") == "title":
                 commit_entry(args, entry, entries)  # new entry, so store previous
-                entry = {}  # and create new one
+                entry = EntryDict()  # and create new one
                 # Because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found.
                 author_node = _get_author_node(d)
@@ -231,7 +238,7 @@ def walk_freeplane(args, node, mm_file, entries, links):
     return entries, links
 
 
-def serve_query(args: argparse.Namespace, entries: dict) -> None:
+def serve_query(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
     """Serve crawl/query results and open browser.
 
     Given the entries resulting from a crawl/query, create a web server and open browser.
@@ -270,7 +277,7 @@ def serve_query(args: argparse.Namespace, entries: dict) -> None:
             server.serve_forever()  # type: ignore[unbound]
 
 
-def show_pretty(args: argparse.Namespace, entries: dict) -> None:
+def show_pretty(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
     """Use pretty format."""
     # results_file_name = config.TMP_DIR / "pretty-print.html"
     results_file_name = Path(args.input_file.with_suffix(".html")).absolute()
@@ -293,7 +300,9 @@ def show_pretty(args: argparse.Namespace, entries: dict) -> None:
         webbrowser.open(f"file://{results_file_name}")
 
 
-def commit_entry(args, entry, entries):
+def commit_entry(
+    args: argparse.Namespace, entry: EntryDict, entries: dict[str, EntryDict]
+) -> dict[str, EntryDict]:
     """Place an entry in the entries dictionary with default values if need be."""
     if entry != {}:
         entry.setdefault("author", [("John", "", "Doe", "")])
@@ -318,7 +327,7 @@ def commit_entry(args, entry, entries):
 #################################################################
 
 
-def pull_citation(args, entry: EntryDict) -> EntryDict:
+def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
     """Modify entry with parsed citation and field-specific heuristics.
 
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
@@ -449,7 +458,7 @@ def identity_add_title(ident: str, title: str) -> str:
     return ident
 
 
-def identity_increment(ident, entries):
+def identity_increment(ident: str, entries: dict[str, EntryDict]) -> str:
     """Increment numerical suffix of identity until no longer collides.
 
     >>> identity_increment('Wikipedia 2008npv',\
@@ -500,7 +509,9 @@ def clean_identifier(ident: str) -> str:
     return clean_id
 
 
-def get_identifier(entry: dict, entries: dict, delim: str = ""):
+def get_identifier(
+    entry: EntryDict, entries: dict[str, EntryDict], delim: str = ""
+) -> str:
     """Create an identifier (key) for the entry based on last names, year, and title."""
     # debug(f"1 {entry=}")
     last_names = []
@@ -521,7 +532,9 @@ def get_identifier(entry: dict, entries: dict, delim: str = ""):
         name_part = f"{last_names[0]}Etal"
 
     if "date" not in entry:
-        entry["date"] = Date(year="0000", month=None, day=None, circa=None, time=None)
+        entry["date"] = PubDate(
+            year="0000", month=None, day=None, circa=None, time=None
+        )
     year_delim = delim if delim else ""
     # debug(f"2 entry['date'] = {entry['date']}")
     ident = year_delim.join((name_part, entry["date"].year))
@@ -537,7 +550,7 @@ def get_identifier(entry: dict, entries: dict, delim: str = ""):
     return ident
 
 
-def parse_date(when: str) -> NamedTuple:
+def parse_date(when: str) -> PubDate:
     """Parse dates that starts with 'YYYY' and returns named tuple.
 
     Without hyphens, strings such as '101210' are ambiguous: years
@@ -571,10 +584,10 @@ def parse_date(when: str) -> NamedTuple:
         year = when[0:4]
     else:
         raise Exception(f"{when} is malformed")
-    return Date(year, month, day, circa, time)
+    return PubDate(year, month, day, circa, time)
 
 
-def parse_names(names):
+def parse_names(names: str) -> list[PersonName]:
     """Do author parsing magic to figure out name components.
 
     http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html

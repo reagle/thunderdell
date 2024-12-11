@@ -16,7 +16,7 @@ import string
 import time
 from urllib.parse import urlparse
 
-import datefinder
+import datefinder  # https://github.com/akoumjian/datefinder
 
 from biblio.fields import SITE_CONTAINER_MAP
 from change_case import sentence_case

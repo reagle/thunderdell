@@ -225,9 +225,10 @@ def twitter_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
     """Update the authenticated Twitter account with a tweet and optional photo."""
-    # https://github.com/trevorhobenshield/twitter-api-client
     import orjson
     from httpx import Client
+
+    # https://github.com/trevorhobenshield/twitter-api-client
     from twitter.account import Account
     from twitter.util import init_session
 
@@ -260,10 +261,19 @@ def twitter_update(
 
     if photo_path:
         shrunk_msg = shrink_message("twitter", comment, title, "", tags)
-        account.tweet(shrunk_msg, media=[{"media": str(photo_path)}])
+        result = account.tweet(
+            shrunk_msg,
+            media=[
+                {
+                    "media": str(photo_path),
+                    "alt": title or "Image",
+                }
+            ],
+        )
     else:
         shrunk_msg = shrink_message("twitter", comment, title, url, tags)
-        account.tweet(shrunk_msg)
+        result = account.tweet(shrunk_msg)
+    log.debug(f"{result=}")
     print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 

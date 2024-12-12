@@ -35,11 +35,12 @@ def emit_results(
         identifier = entry["identifier"]
         title = entry["title"]
         date = entry["date"]
+        cite = entry.get("cite", "")
         url = entry.get("url", "")
         base_mm_file = Path(entry["_mm_file"]).name
         MM_mm_file = get_url_MM(entry["_mm_file"])
 
-        # if I am what was queried, print all of me
+        # If I am what was queried, print all of me
         if entry["identifier"] == query:
             results_file.write(f'{spaces}<li class="li_entry_identifier">\n')
             spaces = spaces + " "
@@ -52,6 +53,8 @@ def emit_results(
             title_mdn = f"{title}"
             if url:
                 title_mdn = f"[{title}]({url})"
+
+            # For ease of use, JavaScript ⧉ button copies
             JS_CLICK_TO_COPY = (
                 """<li class="mdn">"""
                 """<a href="javascript:document.addEventListener("""
@@ -62,22 +65,25 @@ def emit_results(
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
             mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]},  «{title_mdn}»"
             results_file.write(JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote))
+
             results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
             pretty_print(entry["_title_node"], entry, spaces, results_file)
             results_file.write(f"{spaces}</ul><!--tit_tree-->\n")
             results_file.write(f"{spaces}</li>\n")
 
-        # if some nodes were matched, pretty print with citation info reversed
+        # If some nodes were matched, pretty print with citation info reversed
         if "_node_results" in entry:
             print_entry(
                 identifier,
                 title,
                 url,
+                cite,
                 MM_mm_file,
                 base_mm_file,
                 spaces,
                 results_file,
             )
+            results_file.write(f'<li class="cite">{cite}</li>')
             if len(entry["_node_results"]) > 0:
                 results_file.write(f"{spaces}<li>\n")
                 spaces = spaces + " "
@@ -89,23 +95,27 @@ def emit_results(
             results_file.write(f"{spaces}</ul><!--li_node_results-->\n")
             spaces = spaces[0:-1]
             results_file.write(f"{spaces}</li>\n")
-        # if my author or title matched, print biblio w/ link to complete entry
+
+        # If my author or title matched, print biblio w/ link to complete entry
         elif "_author_result" in entry:
             print_entry(
                 identifier,
                 title,
                 url,
+                cite,
                 MM_mm_file,
                 base_mm_file,
                 spaces,
                 results_file,
             )
+            results_file.write(f'<li class="cite">{cite}</li>')
         elif "_title_result" in entry:
             title = entry["_title_result"].get("TEXT")
             print_entry(
                 identifier,
                 title,
                 url,
+                cite,
                 MM_mm_file,
                 base_mm_file,
                 spaces,
@@ -133,7 +143,7 @@ def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file
         "&lt;strong&gt;", "<strong>"
     ).replace("&lt;/strong&gt;", "</strong>")
     quote_mark = "&gt; " if style_ref == "quote" else ""
-    # don't reverse short texts and certain style refs
+    # Don't reverse short texts and certain style refs
     if len(text) < 50 or style_ref in ["author", "title", "cite"]:
         cite = ""
     else:
@@ -161,7 +171,7 @@ def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file
 
     hypertext = text
 
-    # if node has first child <font BOLD="true"/> then embolden
+    # If node has first child <font BOLD="true"/> then embolden
     style = ""
     if len(node) > 0 and node[0].tag == "font" and node[0].get("BOLD") == "true":
         style = "font-weight: bold"
@@ -198,6 +208,7 @@ def print_entry(
     # date,
     title: str,
     url: str,
+    cite: str,
     MM_mm_file: str,
     base_mm_file: str,
     spaces: str,

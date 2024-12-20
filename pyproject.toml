@@ -1,7 +1,22 @@
 [project]
 
 requires-python = ">=3.12"
-
+dependencies = [
+    "arrow",
+    "atproto",
+    "BeautifulSoup",
+    "datefinder",
+    "dotenv",
+    "lxml",
+    "mastodon.py",
+    "pyenchant",
+    "python-dotenv",
+    "requests",
+    "roman",
+    "Send2Trash",
+    "twitter-api-client",
+    "xmltodict"
+]
 [tool.black]
 
 line-length = 88

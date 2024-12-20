@@ -1,3 +1,7 @@
+[project]
+
+requires-python = ">=3.12"
+
 [tool.black]
 
 line-length = 88
@@ -43,7 +47,7 @@ lint.ignore = [
 ]
 
 lint.unfixable = [
-"F401", # keep unused modules as I'm likely to use them shortly
+"F401", # keep unused modules as I'm likely to use them soon
 ]
 
 # Include files

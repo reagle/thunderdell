@@ -155,6 +155,7 @@ def bluesky_update(
     """Update the authenticated Bluesky account with a post and optional photo."""
     # https://docs.bsky.app/docs/advanced-guides/posts#images-embeds
     # https://github.com/MarshalX/atproto
+
     import atproto_core
     from atproto import Client, client_utils, models
 
@@ -168,23 +169,26 @@ def bluesky_update(
     try:
         client = Client()
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
-        # Pass empty string instead of URL, which is added via TextBuilder.link()
-        # Append new line because no separation otherwise
-        skeet_obj = client_utils.TextBuilder().text(skeet_text).link(url, url)
+
+        # Build the skeet text object conditionally adding the link if provided
+        tb = client_utils.TextBuilder().text(skeet_text)
+        if url.strip():
+            tb = tb.link(url, url)
+        skeet_obj = tb
 
         if photo_path and photo_path.is_file():
             photo_desc = get_photo_desc(photo_path)
             img_data = photo_path.read_bytes()
-
-            # Upload image and create skeet with embedded image
             upload = client.upload_blob(img_data)
             images = [
                 models.AppBskyEmbedImages.Image(alt=photo_desc, image=upload.blob)
             ]
             embed = models.AppBskyEmbedImages.Main(images=images)
-            client.send_post(text=skeet_obj, embed=embed, langs=["en-US"])
+            response = client.send_post(text=skeet_obj, embed=embed, langs=["en-US"])
         else:
-            client.send_post(text=skeet_obj, langs=["en-US"])
+            response = client.send_post(text=skeet_obj, langs=["en-US"])
+
+        log.debug(f"{response=}")
     except atproto_core.exceptions.AtProtocolError as err:
         print(err)
         print(f"skeet failed {len(skeet_text + url)}: {skeet_text + url}")
@@ -224,7 +228,11 @@ def mastodon_update(
 def twitter_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
-    """Update the authenticated Twitter account with a tweet and optional photo."""
+    """Update the authenticated Twitter account with a tweet and optional photo.
+
+    Twitter often won't post larger messages (even if within 280 chars) but won't raise an exception.
+    Twitter also only allows ~3 posts a day.
+    """
     import orjson
     from httpx import Client
 
@@ -312,7 +320,7 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
     log.info(f"{len_twitter(title)=}")
     if len_twitter(title) > message_room:
         log.info("title is too long")
-        title = f"{title[:message_room - 1]}…"
+        title = f"{title[: message_room - 1]}…"
         log.info(f"  truncated to {len_twitter(title)}")
     message_room = message_room - len_twitter(title)
     log.info(f"{message_room=} after title = ")
@@ -322,7 +330,7 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
         log.info("comment is too long")
         if message_room > 5:
             log.info(" truncating")
-            comment = f"{comment[:message_room - 1]}…"
+            comment = f"{comment[: message_room - 1]}…"
             log.info(f"  truncated to {len_twitter(comment)}")
             log.info(f"{comment}")
         else:

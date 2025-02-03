@@ -185,11 +185,13 @@ def bluesky_update(
             client.send_post(text=skeet_obj, embed=embed, langs=["en-US"])
         else:
             client.send_post(text=skeet_obj, langs=["en-US"])
-    except atproto_core.exceptions.AtProtocolError as err:
-        print(err)
-        print(f"skeet failed {len(skeet_text + url)}: {skeet_text + url}")
-    else:
         print(f"skeet worked {len(skeet_obj.build_text())}: {skeet_obj.build_text()}")
+    except atproto_core.exceptions.AtProtocolError as err:
+        log.error(f"Failed to post skeet: {err}")
+        print(f"skeet failed: {err}")
+    except Exception as e:
+        log.error(f"Unexpected error during Bluesky update: {e}")
+        print(f"skeet failed: {e}")
 
 
 def mastodon_update(
@@ -259,22 +261,26 @@ def twitter_update(
         cookies_fp.write_bytes(orjson.dumps(cookies))
         log.info(f"using new {cookies=}")
 
-    if photo_path:
-        shrunk_msg = shrink_message("twitter", comment, title, "", tags)
-        result = account.tweet(
-            shrunk_msg,
-            media=[
-                {
-                    "media": str(photo_path),
-                    "alt": title or "Image",
-                }
-            ],
-        )
-    else:
-        shrunk_msg = shrink_message("twitter", comment, title, url, tags)
-        result = account.tweet(shrunk_msg)
-    log.debug(f"{result=}")
-    print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
+    try:
+        if photo_path:
+            shrunk_msg = shrink_message("twitter", comment, title, "", tags)
+            result = account.tweet(
+                shrunk_msg,
+                media=[
+                    {
+                        "media": str(photo_path),
+                        "alt": title or "Image",
+                    }
+                ],
+            )
+        else:
+            shrunk_msg = shrink_message("twitter", comment, title, url, tags)
+            result = account.tweet(shrunk_msg)
+        log.debug(f"{result=}")
+        print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
+    except Exception as e:
+        log.error(f"Failed to post tweet: {e}")
+        print(f"tweet failed: {e}")
 
 
 def get_photo_desc(photo_path: Path) -> str:

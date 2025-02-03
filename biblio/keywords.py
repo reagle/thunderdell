@@ -99,7 +99,7 @@ LH_KEY_SHORTCUTS = {
 RTC_KEY_SHORTCUTS = {
     "ano": "anonymous",
     "ass": "assessment",
-    "aut": "automated",
+    "aut": "authority",
     "cri": "criticism",
     "est": "esteem",
     "fak": "fake",

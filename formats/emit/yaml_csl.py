@@ -170,7 +170,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
 
     for _key, entry in sorted(entries.items()):
         entry_type, genre, medium = guess_csl_type(entry)
-        args.outfd.write(f'- id: {entry["identifier"]}\n')
+        args.outfd.write(f"- id: {entry['identifier']}\n")
         args.outfd.write(f"  type: {entry_type}\n")
         if genre:
             args.outfd.write(f"  genre: {genre}\n")
@@ -236,7 +236,9 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                         elif "pages" in entry:
                             # log.debug("  skipping url, paginated item")
                             continue
-                    # log.debug(f"  writing url WITHOUT escape_yaml")
+                    # log.debug(f"  writing url in pointy brackets WITHOUT escape_yaml")
+                    # Placing URL in pointy brackets is useful and avoids having
+                    # to escape specific characters.
                     args.outfd.write(f'  URL: "<{value}>"\n')
                     continue
                 if (

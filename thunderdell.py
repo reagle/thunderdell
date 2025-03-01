@@ -149,7 +149,7 @@ def walk_freeplane(
             end_index = start_index + len(query_lower)
             result = (
                 f"{text[0:start_index]}"
-                f"<strong>{text[start_index: end_index]}</strong>"
+                f"<strong>{text[start_index:end_index]}</strong>"
                 f"{text[end_index:]}"
             )
             node.set("TEXT", result)
@@ -164,7 +164,7 @@ def walk_freeplane(
                 ancestor = parent_map[ancestor]
             return ancestor
         except KeyError:
-            print(f'''ERROR: author node not found for "{title_node.get('TEXT')}"''')
+            print(f'''ERROR: author node not found for "{title_node.get("TEXT")}"''')
             sys.exit()
 
     def _remove_identity_hints(authors: str) -> str:
@@ -186,12 +186,11 @@ def walk_freeplane(
         )
 
     for d in node.iter():
-        link = d.get("LINK", "")
         if (
-            "LINK" in d.attrib
-            and (link := d.get("LINK")).endswith(".mm")  # other mindmaps
-            and not link.startswith("http")  # local only
+            (link := d.get("LINK", ""))
+            and link.endswith(".mm")  # other mindmaps
             and not link.endswith("-outline.mm")  # no outlines
+            and not link.startswith("http")  # local only
         ):
             links.append(unescape_entities(link))
         # skip nodes that are structure, comment, and empty of text
@@ -205,11 +204,11 @@ def walk_freeplane(
                 # Because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found.
                 author_node = _get_author_node(d)
-                entry["ori_author"] = unescape_entities(author_node.get("TEXT"))
+                entry["ori_author"] = unescape_entities(author_node.get("TEXT", ""))
                 entry["author"] = parse_names(
                     _remove_identity_hints(entry["ori_author"])
                 )
-                entry["title"] = unescape_entities(d.get("TEXT"))
+                entry["title"] = unescape_entities(d.get("TEXT", ""))
                 entry["_mm_file"] = str(mm_file)
                 entry["_title_node"] = d
                 if (url := d.attrib.get("LINK")) and not url.startswith(
@@ -225,9 +224,9 @@ def walk_freeplane(
                         entry["_title_result"] = title_highlighted
             else:
                 if d.get("STYLE_REF") == "cite":
-                    entry["cite"] = unescape_entities(d.get("TEXT"))
+                    entry["cite"] = unescape_entities(d.get("TEXT", ""))
                 elif d.get("STYLE_REF") == "annotation":
-                    entry["annotation"] = unescape_entities(d.get("TEXT").strip())
+                    entry["annotation"] = unescape_entities(d.get("TEXT", "").strip())
                 if args.query:
                     node_highlighted = _query_highlight(d, args.query)
                     if node_highlighted is not None:
@@ -367,9 +366,9 @@ def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
         query = url.split("?", 1)[1]
         queries = parse_qs(query)
         oldid = queries["oldid"][0]
-        entry["shorttitle"] = f'{entry["title"]} (oldid={oldid})'
+        entry["shorttitle"] = f"{entry['title']} (oldid={oldid})"
         if not args.long_url:  # short URLs
-            base = f'http://{url.split("/")[2]}'
+            base = f"http://{url.split('/')[2]}"
             oldid = f"/?oldid={oldid}"
             diff = f"&diff={queries['diff'][0]}" if "diff" in queries else ""
             entry["url"] = f"{base}{oldid}{diff}"

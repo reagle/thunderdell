@@ -3,8 +3,7 @@
 https://github.com/reagle/thunderdell
 """
 
-from collections.abc import Sequence
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 from xml.etree.ElementTree import Element
 
 
@@ -12,10 +11,10 @@ class PubDate(NamedTuple):
     """Date structure."""
 
     year: str
-    month: Optional[str] = None
-    day: Optional[str] = None
-    circa: Optional[bool] = None
-    time: Optional[str] = None
+    month: str | None = None
+    day: str | None = None
+    circa: str | None = None
+    time: str | None = None
 
 
 class PersonName(NamedTuple):

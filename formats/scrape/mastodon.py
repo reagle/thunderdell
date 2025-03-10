@@ -17,11 +17,6 @@ import utils.web as uw
 
 from .default import ScrapeDefault
 
-api = mastodon.Mastodon(
-    access_token=uw.get_credential("OHAI_ACCESS_TOKEN"),
-    api_base_url=uw.get_credential("MASTODON_APP_BASE"),
-)
-
 
 class ScrapeMastodon(ScrapeDefault):
     def __init__(self, url, comment):
@@ -34,6 +29,10 @@ class ScrapeMastodon(ScrapeDefault):
         else:
             raise RuntimeError("cannot identify message ID in {url}")
         try:
+            api = mastodon.Mastodon(
+                access_token=uw.get_credential("OHAI_ACCESS_TOKEN"),
+                api_base_url=uw.get_credential("MASTODON_APP_BASE"),
+            )
             self.status = api.status(id=identity)
         except mastodon.MastodonError as err:
             print(err)

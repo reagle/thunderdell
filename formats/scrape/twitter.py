@@ -14,7 +14,9 @@ import arrow
 
 # https://github.com/trevorhobenshield/twitter-api-client/tree/main
 from twitter.scraper import Scraper
-from twitter.util import init_session
+
+# from twitter.util import init_session
+import utils.web as uw
 
 from .default import ScrapeDefault
 
@@ -23,14 +25,19 @@ class ScrapeTwitter(ScrapeDefault):
     """Scrape Twitter bibliographic data."""
 
     def __init__(self, url: str, comment: str):
+        TW_EMAIL = uw.get_credential("TW_EMAIL")
+        TW_USERNAME = uw.get_credential("TW_USERNAME")
+        TW_PASSWORD = uw.get_credential("TW_PASSWORD")
         print("Scraping X/Twitter")
         # super().__init__(url, comment) # TODO: don't need this 2025-03-10
 
         if "://x.com/" not in url:
             raise RuntimeError(f"Invalid X/Twitter URL: {url}")
 
-        # Initialize session/scraper only when needed
-        scraper = Scraper(session=init_session())
+        # Neither guest nor user/password sessions work reliably 2025-03-10;
+        # library suggests using cookies, which I've yet TODO
+        # scraper = Scraper(session=init_session())
+        scraper = Scraper(TW_EMAIL, TW_USERNAME, TW_PASSWORD)
         identity = url.rsplit("/", 1)[1]
         twitter_result = scraper.tweets_by_id([identity])
 

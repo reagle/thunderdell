@@ -68,14 +68,14 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
         ("doi:", ("formats", "ScrapeDOI")),
         ("isbn:", ("formats", "ScrapeISBN")),
         ("arxiv:", ("formats", "ScrapeArXiv")),
-        ("en.wikipedia.org/w", ("formats", "ScrapeENWP")),
-        ("marc.info/", ("formats", "ScrapeMARC")),
-        ("meta.wikimedia.org/w", ("formats", "ScrapeWMMeta")),
-        ("ohai.social/", ("formats", "ScrapeMastodon")),
-        ("x.com/", ("formats", "ScrapeTwitter")),
-        ("twitter.com/", ("formats", "ScrapeTwitter")),
-        ("www.nytimes.com/", ("formats", "ScrapeNYT")),
-        ("www.reddit.com/", ("formats", "ScrapeReddit")),
+        ("https://en.wikipedia.org/w", ("formats", "ScrapeENWP")),
+        ("https://marc.info/", ("formats", "ScrapeMARC")),
+        ("https://meta.wikimedia.org/w", ("formats", "ScrapeWMMeta")),
+        ("https://ohai.social/", ("formats", "ScrapeMastodon")),
+        ("https://x.com/", ("formats", "ScrapeTwitter")),
+        ("https://twitter.com/", ("formats", "ScrapeTwitter")),
+        ("https://www.nytimes.com/", ("formats", "ScrapeNYT")),
+        ("https://www.reddit.com/", ("formats", "ScrapeReddit")),
     )
 
     for prefix, (module_name, class_name) in url_scrapers:

@@ -24,6 +24,8 @@ scraper = Scraper(session=session)
 
 
 class ScrapeTwitter(ScrapeDefault):
+    """Scrape Twitter bibliographic data."""
+
     def __init__(self, url, comment):
         print("Scraping twitter", end="\n")
         ScrapeDefault.__init__(self, url, comment)

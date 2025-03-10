@@ -25,17 +25,7 @@ from collections.abc import Callable
 from biblio import fields as bf
 from biblio.keywords import LIST_OF_KEYSHORTCUTS
 from formats import (
-    ScrapeArXiv,
     ScrapeDefault,
-    ScrapeDOI,
-    ScrapeENWP,
-    ScrapeISBN,
-    ScrapeMARC,
-    ScrapeMastodon,
-    ScrapeNYT,
-    ScrapeReddit,
-    ScrapeTwitter,
-    ScrapeWMMeta,
     log2console,
     log2goatee,
     log2mm,
@@ -67,33 +57,34 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     busy.py c .test isbn:9780860917137
     busy.py c .test arxiv:2001.08293
     """
+    from importlib import import_module
+
     url = urllib.parse.unquote(url)
     url = canonicalize_url(url)
     log.info(f"url = '{url}'")
-    if url.lower().startswith("doi:"):
-        return ScrapeDOI(url, comment)
-    elif url.lower().startswith("isbn:"):
-        return ScrapeISBN(url, comment)
-    elif url.lower().startswith("arxiv:"):
-        return ScrapeArXiv(url, comment)
-    else:
-        host_path = url.split("//")[1]
-        dispatch_scraper = (
-            ("en.wikipedia.org/w", ScrapeENWP),
-            ("marc.info/", ScrapeMARC),
-            ("meta.wikimedia.org/w", ScrapeWMMeta),
-            ("ohai.social/", ScrapeMastodon),
-            ("twitter.com/", ScrapeTwitter),
-            ("www.nytimes.com/", ScrapeNYT),
-            ("www.reddit.com/", ScrapeReddit),
-        )
 
-        for prefix, scraper in dispatch_scraper:
-            if host_path.startswith(prefix):
-                log.info(f"scrape = {scraper} ")
-                return scraper(url, comment)  # creates instance
+    # Structured dispatch tables with import metadata
+    url_scrapers = (
+        ("doi:", ("formats", "ScrapeDOI")),
+        ("isbn:", ("formats", "ScrapeISBN")),
+        ("arxiv:", ("formats", "ScrapeArXiv")),
+        ("en.wikipedia.org/w", ("formats", "ScrapeENWP")),
+        ("marc.info/", ("formats", "ScrapeMARC")),
+        ("meta.wikimedia.org/w", ("formats", "ScrapeWMMeta")),
+        ("ohai.social/", ("formats", "ScrapeMastodon")),
+        ("x.com/", ("formats", "ScrapeTwitter")),
+        ("twitter.com/", ("formats", "ScrapeTwitter")),
+        ("www.nytimes.com/", ("formats", "ScrapeNYT")),
+        ("www.reddit.com/", ("formats", "ScrapeReddit")),
+    )
 
-    # Return the default scraper if no other scraper is matched
+    for prefix, (module_name, class_name) in url_scrapers:
+        if url.lower().startswith(prefix):
+            log.info(f"Using {class_name} for {prefix} URL")
+            module = import_module(module_name)
+            scraper_class = getattr(module, class_name)
+            return scraper_class(url, comment)
+
     return ScrapeDefault(url, comment)
 
 

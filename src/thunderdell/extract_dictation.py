@@ -392,7 +392,8 @@ def process_args(argv):
     return args
 
 
-if __name__ == "__main__":
+def main():
+    import sys
     args = process_args(sys.argv[1:])
     log.info(f"{args=}")
     for source_fn in args.file_names:
@@ -400,3 +401,6 @@ if __name__ == "__main__":
         mm_file_name = source_fn.with_suffix(".mm")
         create_mm(args, text, mm_file_name)
         subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
+
+if __name__ == "__main__":
+    main()

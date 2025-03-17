@@ -43,9 +43,8 @@ def query(number: int, accept: str = "application/atom+xml"):
         return False
 
 
-if __name__ == "__main__":
+def main():
     import argparse
-
     arg_parser = argparse.ArgumentParser(
         description="Given an arXiv number return bibliographic data."
     )
@@ -92,3 +91,6 @@ if __name__ == "__main__":
     log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))
+
+if __name__ == "__main__":
+    main()

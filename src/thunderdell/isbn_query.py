@@ -127,9 +127,8 @@ def google_query(isbn):
         return False
 
 
-if __name__ == "__main__":
+def main():
     import argparse
-
     arg_parser = argparse.ArgumentParser(
         description="Given a isbn return bibliographic data."
     )
@@ -172,3 +171,6 @@ if __name__ == "__main__":
 
     log.info(args.ISBN[0])
     pprint.pprint(query(args.ISBN[0]))
+
+if __name__ == "__main__":
+    main()

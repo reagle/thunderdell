@@ -131,7 +131,7 @@ def process(entries: dict, fdo):
     fdo.write("""</node>\n</map>\n""")
 
 
-if __name__ == "__main__":
+def main():
     import argparse  # http://docs.python.org/dev/library/argparse.html
 
     arg_parser = argparse.ArgumentParser(
@@ -181,3 +181,6 @@ if __name__ == "__main__":
         entries = regex_parse(bibtex_content.split("\n"))
         process(entries, fdo)
         fdo.close()
+
+if __name__ == "__main__":
+    main()

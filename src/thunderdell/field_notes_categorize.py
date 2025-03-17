@@ -58,7 +58,8 @@ def categorize_mindmap(old_fn: Path) -> None:
     new_doc.write(cat_fn)
 
 
-if __name__ == "__main__":
+def main():
+    import sys
     arg_parser = argparse.ArgumentParser(
         description=(
             "Create a categorized mindmap based on the first `kw=` "
@@ -73,3 +74,6 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     old_fn = Path(args.filename)
     categorize_mindmap(old_fn)
+
+if __name__ == "__main__":
+    main()

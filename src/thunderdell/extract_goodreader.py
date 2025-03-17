@@ -297,7 +297,8 @@ def parse_args(argv: list) -> argparse.Namespace:
     return args
 
 
-if __name__ == "__main__":
+def main():
+    import sys
     args = parse_args(sys.argv[1:])
 
     log.info("==================================")
@@ -357,3 +358,6 @@ if __name__ == "__main__":
                 send2trash(detrius)
         else:
             print(new_text)
+
+if __name__ == "__main__":
+    main()

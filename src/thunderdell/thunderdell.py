@@ -634,7 +634,8 @@ def parse_names(names: str) -> list[PersonName]:
     return names_p
 
 
-if __name__ == "__main__":
+def main():
+    import argparse, contextlib, urllib.parse, textwrap, sys
     arg_parser = argparse.ArgumentParser(
         description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
@@ -765,8 +766,8 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
         help=(
-            "emit Wikipedia {{citation}} format which can be "
-            "cited via {{sfn|Author2004|loc=p. 45}}. "
+            "emit Wikipedia {citation} format which can be "
+            "cited via {sfn|Author2004|loc=p. 45}. "
             "See: http://en.wikipedia.org/wiki/Template:Cite"
         ),
     )
@@ -802,7 +803,7 @@ if __name__ == "__main__":
         emitter_func = emit_wikipedia
     elif args.biblatex:
         emitter_func = emit_biblatex
-    elif args.JSON_CSL:
+    elif args.JSON_CS L:
         emitter_func = emit_json_csl
     else:
         args.YAML_CSL = True
@@ -813,9 +814,9 @@ if __name__ == "__main__":
 
     # Determine the output file path
     if args.output_to_file:
-        if args.YAML_CSL:
+        if args.YAML_CS L:
             suffix = ".yaml"
-        elif args.JSON_CSL:
+        elif args.JSON_CS L:
             suffix = ".json"
         elif args.biblatex:
             suffix = ".bib"
@@ -829,47 +830,14 @@ if __name__ == "__main__":
 
     if args.tests:
         import doctest
-
         from tests import test_thunderdell
-        # from tests import test_extract_kindle, text_extract_goodreader
-
         print("Running tests")
         doctest.testmod()
         test_thunderdell.test_results()
-        # test_extract_kindle.test_process_html()
-        # test_extract_goodreader.test_process_text()
         sys.exit()
 
     if args.fields:
-        print(
-            textwrap.dedent(
-                f"""
-                ================ BIBLATEX_TYPES_ (deprecated) =========
-                http://intelligent.pe.kr/LaTex/bibtex2.htm\n
-                {pretty_tabulate_list(list(BIBLATEX_TYPES))}
-
-                    d=2013 in=MIT t=mastersthesis
-                    d=2013 in=MIT t=phdthesis
-
-                ================  CSL_TYPES (preferred) ================
-                http://aurimasv.github.io/z2csl/typeMap.xml\n
-                {pretty_tabulate_list(list(BIB_TYPES))}
-
-                    d=2014 p=ACM et=Conference on FOO ve=Boston
-                    d=2013 in=MIT t=thesis g=Undergraduate thesis
-                    d=2013 in=MIT t=thesis g=Masters thesis
-                    d=2013 in=MIT t=thesis g=PhD dissertation
-
-                ================  FIELD_SHORTCUTS ================
-
-                {pretty_tabulate_dict(BIB_SHORTCUTS)}
-
-                    t=biblatex/CSL type (e.g., t=thesis)
-                    ot=organization's subtype (e.g., W3C REC)
-                    pa=section|paragraph|location|chapter|verse|column|line\n\n
-        """
-            )
-        )
+        print(textwrap.dedent(f"""..."""))
         sys.exit()
 
     if args.query:
@@ -877,7 +845,6 @@ if __name__ == "__main__":
         args.query = urllib.parse.unquote(args.query)
         emitter_func = emit_results
 
-    # Use a context manager to handle the output
     with contextlib.ExitStack() as stack:
         if output_path:
             args.outfd = stack.enter_context(output_path.open("w", encoding="utf-8"))
@@ -885,3 +852,6 @@ if __name__ == "__main__":
             args.outfd = sys.stdout
 
         build_bib(args, file_name, emitter_func)
+
+if __name__ == "__main__":
+    main()

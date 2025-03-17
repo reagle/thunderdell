@@ -361,6 +361,9 @@ def main(args):
     print(change_case(args.text, case_type))
 
 
-if __name__ == "__main__":
+def main():
     args = parse_args()
     main(args)
+    
+if __name__ == "__main__":
+    main()

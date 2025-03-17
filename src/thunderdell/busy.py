@@ -162,8 +162,8 @@ def print_usage(message: str) -> None:
     print(EPILOG)
 
 
-# Check to see if the script is executing as main.
-if __name__ == "__main__":
+def main():
+    import sys
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
@@ -262,3 +262,6 @@ if __name__ == "__main__":
     biblio["tags"] = params["tags"]
     log.info(f"{biblio=}")
     logger(args, biblio)
+
+if __name__ == "__main__":
+    main()

@@ -81,8 +81,11 @@ def query_sponge(query: str) -> Path:
     return out_file
 
 
-# If the script is from console (main) then open browser.
-if __name__ == "__main__":
+def main():
+    import sys
     query = "".join(sys.argv[1:])
     query_result_file = query_sponge(query)
     webbrowser.open(query_result_file.as_uri())
+
+if __name__ == "__main__":
+    main()

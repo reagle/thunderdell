@@ -60,9 +60,8 @@ def query(doi, accept="application/citeproc+json"):
         #          " style=apa" https://doi.org/10.26300/spsf-tc23
 
 
-if __name__ == "__main__":
+def main():
     import argparse
-
     arg_parser = argparse.ArgumentParser(
         description="Given a doi return bibliographic data."
     )
@@ -109,3 +108,6 @@ if __name__ == "__main__":
     log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))
+
+if __name__ == "__main__":
+    main()

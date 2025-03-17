@@ -803,7 +803,7 @@ def main():
         emitter_func = emit_wikipedia
     elif args.biblatex:
         emitter_func = emit_biblatex
-    elif args.JSON_CS L:
+    elif args.JSON_CSL:
         emitter_func = emit_json_csl
     else:
         args.YAML_CSL = True
@@ -814,9 +814,9 @@ def main():
 
     # Determine the output file path
     if args.output_to_file:
-        if args.YAML_CS L:
+        if args.YAML_CSL:
             suffix = ".yaml"
-        elif args.JSON_CS L:
+        elif args.JSON_CSL:
             suffix = ".json"
         elif args.biblatex:
             suffix = ".bib"

@@ -22,9 +22,9 @@ import time
 import urllib.parse
 from collections.abc import Callable
 
-from biblio import fields as bf
-from biblio.keywords import LIST_OF_KEYSHORTCUTS
-from formats import (
+from thunderdell.biblio import fields as bf
+from thunderdell.biblio.keywords import LIST_OF_KEYSHORTCUTS
+from thunderdell.formats import (
     ScrapeDefault,
     log2console,
     log2goatee,
@@ -33,8 +33,8 @@ from formats import (
     log2opencodex,
     log2work,
 )
-from utils.text import pretty_tabulate_dict
-from utils.web import canonicalize_url
+from thunderdell.utils.text import pretty_tabulate_dict
+from thunderdell.utils.web import canonicalize_url
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"

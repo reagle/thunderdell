@@ -17,10 +17,10 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup  # type:ignore
 
-import change_case
-from extract_dictation import create_mm
-from utils.extract import get_bib_preamble
-from utils.text import smart_to_markdown
+import thunderdell.change_case
+from thunderdell.extract_dictation import create_mm
+from thunderdell.utils.extract import get_bib_preamble
+from thunderdell.utils.text import smart_to_markdown
 
 
 def process_email(file_name: Path) -> str:

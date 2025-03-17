@@ -17,7 +17,7 @@ from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 from send2trash import send2trash  # type: ignore
 
-import busy
+import thunderdell.busy
 
 HOME = Path.home()
 

@@ -27,9 +27,9 @@ import roman
 # https://pypi.org/project/Send2Trash/
 from send2trash import send2trash  # type: ignore
 
-from extract_dictation import create_mm
-from utils.extract import get_bib_preamble
-from utils.text import smart_to_markdown
+from thunderdell.extract_dictation import create_mm
+from thunderdell.utils.extract import get_bib_preamble
+from thunderdell.utils.text import smart_to_markdown
 
 RE_ANNOTATION = re.compile(r"^(?P<kind>\w+) \((?P<color>\w+)\),")
 RE_DOI = re.compile(r"10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.IGNORECASE)

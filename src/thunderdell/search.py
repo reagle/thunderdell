@@ -54,7 +54,7 @@ def cgi_main(args):
 
     # site specific queries
     if site == "BusySponge":
-        import busy_query
+        import thunderdell.busy_query
 
         query_result_file = Path(busy_query.query_sponge(query))
         print(query_result_file.read_text(encoding="utf-8", errors="replace"))

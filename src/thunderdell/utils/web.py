@@ -21,8 +21,8 @@ import dotenv
 import requests  # http://docs.python-requests.org/en/latest/
 from lxml import etree  # type: ignore
 
-import config
-from biblio.keywords import KEY_SHORTCUTS
+from thunderdell import config
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
 
 log = log.getLogger("utils_web")
 

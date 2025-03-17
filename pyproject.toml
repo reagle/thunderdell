@@ -1,10 +1,17 @@
 [project]
-
+name = "thunderdell"
+version = "1.0.0"
+description = "Bibliographic management toolkit"
+readme = "README.md"
+license = {file = "GPLv3"}
+authors = [
+    {name = "Joseph Reagle"}
+]
 requires-python = ">=3.12"
 dependencies = [
     "arrow",
     "atproto",
-    "BeautifulSoup",
+    "BeautifulSoup4",
     "datefinder",
     "dotenv",
     "lxml",
@@ -17,13 +24,29 @@ dependencies = [
     "twitter-api-client",
     "xmltodict"
 ]
-[tool.black]
 
+[project.scripts]
+arxiv-query = "thunderdell.scripts.arxiv_query:main"
+busy = "thunderdell.scripts.busy:main"
+busy-query = "thunderdell.scripts.busy_query:main"
+change-case = "thunderdell.scripts.change_case:main"
+doi-query = "thunderdell.scripts.doi_query:main"
+extract-bibtex = "thunderdell.scripts.extract_bibtex:main"
+extract-dictation = "thunderdell.scripts.extract_dictation:main"
+extract-goodreader = "thunderdell.scripts.extract_goodreader:main"
+extract-kindle = "thunderdell.scripts.extract_kindle:main"
+extract-raindrop = "thunderdell.scripts.extract_raindrop:main"
+field-notes-categorize = "thunderdell.scripts.field_notes_categorize:main"
+fix-mindmaps = "thunderdell.scripts.fix_mindmaps:main"
+isbn-query = "thunderdell.scripts.isbn_query:main"
+search = "thunderdell.scripts.search:main"
+thunderdell = "thunderdell.thunderdell:main"
+
+[tool.black]
 line-length = 88
 preview = true
 
 [tool.ruff]
-
 # Same as Black.
 line-length = 88
 

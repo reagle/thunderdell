@@ -250,7 +250,7 @@ def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
                 del entry[field]
                 continue
 
-        args.outfd.write(f'@{entry_type_copy}{{{entry["identifier"]},\n')
+        args.outfd.write(f"@{entry_type_copy}{{{entry['identifier']},\n")
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:

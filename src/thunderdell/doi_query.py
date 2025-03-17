@@ -62,6 +62,7 @@ def query(doi, accept="application/citeproc+json"):
 
 def main():
     import argparse
+
     arg_parser = argparse.ArgumentParser(
         description="Given a doi return bibliographic data."
     )
@@ -108,6 +109,7 @@ def main():
     log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))
+
 
 if __name__ == "__main__":
     main()

@@ -89,6 +89,7 @@ def print_error(msg):
 
 def main():
     import sys
+
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--in_main", action="store_true", default=False)
     arg_parser.add_argument("-c", "--chase", action="store_true", default=True)
@@ -104,6 +105,7 @@ def main():
         full_traceback = traceback.format_exc()
         print_error(f"{error_message=}")
         print_error(f"{full_traceback=}")
+
 
 if __name__ == "__main__":
     main()

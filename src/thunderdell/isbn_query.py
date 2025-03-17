@@ -129,6 +129,7 @@ def google_query(isbn):
 
 def main():
     import argparse
+
     arg_parser = argparse.ArgumentParser(
         description="Given a isbn return bibliographic data."
     )
@@ -171,6 +172,7 @@ def main():
 
     log.info(args.ISBN[0])
     pprint.pprint(query(args.ISBN[0]))
+
 
 if __name__ == "__main__":
     main()

@@ -15,11 +15,11 @@ import time
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 from typing import TextIO
 
-from biblio.fields import (
+from thunderdell.biblio.fields import (
     BIB_FIELDS,  # dict of field to its shortcut
     BIB_SHORTCUTS,  # dict of shortcuts to a field
 )
-from utils.web import yasn_publish
+from thunderdell.utils.web import yasn_publish
 
 HOME = Path.home()
 

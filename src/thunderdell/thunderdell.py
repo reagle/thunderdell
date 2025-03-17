@@ -24,10 +24,10 @@ from collections.abc import Callable
 from pathlib import Path
 from urllib.parse import parse_qs
 
+import config
+
 # import xml.etree.ElementTree as et
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
-
-import config
 from biblio.fields import (
     BIB_SHORTCUTS,
     BIB_TYPES,
@@ -635,7 +635,9 @@ def parse_names(names: str) -> list[PersonName]:
 
 
 def main():
-    import argparse, contextlib, urllib.parse, textwrap, sys
+    import argparse
+    import sys
+
     arg_parser = argparse.ArgumentParser(
         description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
@@ -830,9 +832,16 @@ def main():
 
     if args.tests:
         import doctest
+
         from tests import test_thunderdell
+
         print("Running tests")
         doctest.testmod()
+        test_thunderdell.test_results()
+        sys.exit()
+
+    if args.fields:
+        print(textwrap.dedent("""..."""))
         test_thunderdell.test_results()
         sys.exit()
 
@@ -852,6 +861,7 @@ def main():
             args.outfd = sys.stdout
 
         build_bib(args, file_name, emitter_func)
+
 
 if __name__ == "__main__":
     main()

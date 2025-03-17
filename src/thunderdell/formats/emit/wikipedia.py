@@ -22,7 +22,7 @@ def output_wp_names(args: argparse.Namespace, field: str, names: list):
         if field == "editor":
             prefix, suffix = f"editor{name_num!s}-", ""
         args.outfd.write(f"| {prefix}first{suffix} = {name[0]}\n")
-        args.outfd.write(f'| {prefix}last{suffix} = {" ".join(name[1:])}\n')
+        args.outfd.write(f"| {prefix}last{suffix} = {' '.join(name[1:])}\n")
 
 
 def emit_wikipedia(args: argparse.Namespace, entries: dict[str, EntryDict]):

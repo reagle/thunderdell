@@ -164,6 +164,7 @@ def print_usage(message: str) -> None:
 
 def main():
     import sys
+
     arg_parser = argparse.ArgumentParser(
         prog="b",
         usage="%(prog)s [options] [URL] logger [keyword] [text]",
@@ -262,6 +263,7 @@ def main():
     biblio["tags"] = params["tags"]
     log.info(f"{biblio=}")
     logger(args, biblio)
+
 
 if __name__ == "__main__":
     main()

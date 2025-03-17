@@ -299,6 +299,7 @@ def parse_args(argv: list) -> argparse.Namespace:
 
 def main():
     import sys
+
     args = parse_args(sys.argv[1:])
 
     log.info("==================================")
@@ -358,6 +359,7 @@ def main():
                 send2trash(detrius)
         else:
             print(new_text)
+
 
 if __name__ == "__main__":
     main()

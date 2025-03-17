@@ -45,6 +45,7 @@ def query(number: int, accept: str = "application/atom+xml"):
 
 def main():
     import argparse
+
     arg_parser = argparse.ArgumentParser(
         description="Given an arXiv number return bibliographic data."
     )
@@ -91,6 +92,7 @@ def main():
     log.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))
+
 
 if __name__ == "__main__":
     main()

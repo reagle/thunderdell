@@ -34,7 +34,7 @@ def do_console_annotation(args, biblio):
         bare = filename.with_suffix("")
         ext = filename.suffix
         for counter in reversed(range(2, maximum + 1)):
-            old_filename = bare.with_name(f"{bare.name}{counter-1}{ext}")
+            old_filename = bare.with_name(f"{bare.name}{counter - 1}{ext}")
             new_filename = bare.with_name(f"{bare.name}{counter}{ext}")
             if old_filename.exists():
                 old_filename.rename(new_filename)

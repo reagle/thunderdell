@@ -37,9 +37,9 @@ def test_results():
         result = output.stdout.decode("utf-8")
         # expect = open(test_fn.with_suffix(".yaml")).read()
         expect = test_fn.with_suffix(".yaml").read_text()
-        assert (
-            result == expect
-        ), f"\nExpected:\n{expect}\n\nGot:\n{result}\n\nDiff:\n{diff_strings(expect, result)}"
+        assert result == expect, (
+            f"\nExpected:\n{expect}\n\nGot:\n{result}\n\nDiff:\n{diff_strings(expect, result)}"
+        )
 
 
 if __name__ == "__main__":

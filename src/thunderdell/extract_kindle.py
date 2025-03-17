@@ -71,7 +71,7 @@ def process_html(content: str) -> str:
         elif "noteText" in str(div):
             note = smart_to_markdown(str(div)[27:-7])
             if color == "blue":
-                note = change_case.title_case(note)
+                note = thunderdell.change_case.title_case(note)
                 text_new.append(f"section. {note}")
             elif color == "yellow":
                 text_new.append(f"{page} excerpt. {note}")
@@ -144,6 +144,7 @@ def parse_args(argv: list) -> argparse.Namespace:
 
 def main():
     import sys
+
     args = parse_args(sys.argv[1:])
     log.info("==================================")
     log.debug(f"{args=}")
@@ -185,6 +186,7 @@ def main():
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
         else:
             print(new_text)
+
 
 if __name__ == "__main__":
     main()

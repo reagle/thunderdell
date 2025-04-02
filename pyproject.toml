@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "arrow",
     "atproto",
-    "BeautifulSoup4",
+    "beautifulsoup4",
     "datefinder",
     "dotenv",
     "lxml",
@@ -41,6 +41,13 @@ fix-mindmaps = "thunderdell.scripts.fix_mindmaps:main"
 isbn-query = "thunderdell.scripts.isbn_query:main"
 search = "thunderdell.scripts.search:main"
 thunderdell = "thunderdell.thunderdell:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0"
+]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 88

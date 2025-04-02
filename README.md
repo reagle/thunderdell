@@ -4,3 +4,15 @@ It has general heuristics, modular site-specific heuristics, and can use DOI and
 `thunderdell.py` is used to create bibtex/biblatex bibliographies from such mindmaps.
 
 See the online [documentation](http://reagle.org/joseph/2009/01/thunderdell.html) for more.
+
+## Installation
+
+Install using [uv](https://github.com/astral-sh/uv):
+
+```bash
+uv venv # Create a virtual environment
+uv pip install -e . # Install in editable mode
+```
+
+This will install the package in development mode, allowing you to modify the code and see changes immediately.
+

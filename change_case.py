@@ -339,13 +339,12 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     """Process arguments and execute."""
     if args.test:
         import doctest
 
         import pytest
-
         from tests import test_change_case
 
         print("Running tests")

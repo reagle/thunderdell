@@ -15,9 +15,9 @@ import unicodedata
 
 from lxml import etree as l_etree
 
-import config
-from biblio.keywords import KEY_SHORTCUTS
-from utils.web import escape_XML, yasn_publish
+from thunderdell import config
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
+from thunderdell.utils.web import escape_XML, yasn_publish
 
 NOW = time.localtime()
 

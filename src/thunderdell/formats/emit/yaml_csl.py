@@ -11,7 +11,7 @@ __version__ = "1.0"
 import argparse
 import re
 
-from biblio.fields import (
+from thunderdell.biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_CSL_FIELD_MAP,
     BIBLATEX_CSL_TYPE_MAP,
@@ -20,7 +20,7 @@ from biblio.fields import (
     CSL_TYPES,
     EXCLUDE_URLS,
 )
-from types_thunderdell import EntryDict, PersonName, PubDate
+from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
 
 
 def guess_csl_type(entry: EntryDict):

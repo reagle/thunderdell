@@ -156,7 +156,7 @@ def main():
         action="version",
         version=f"{__version__} using Python {sys.version}",
     )
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

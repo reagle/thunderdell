@@ -20,9 +20,9 @@ import time
 
 import arrow
 
-import utils.web as uw
-from change_case import sentence_case
-from utils.web import get_JSON
+from thunderdell.change_case import sentence_case
+from thunderdell.utils import web as uw
+from thunderdell.utils.web import get_JSON
 
 from .default import ScrapeDefault
 

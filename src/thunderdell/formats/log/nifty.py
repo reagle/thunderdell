@@ -12,7 +12,7 @@ __version__ = "1.0"
 import re
 import time
 
-import config
+from thunderdell import config
 
 NOW = time.localtime()
 

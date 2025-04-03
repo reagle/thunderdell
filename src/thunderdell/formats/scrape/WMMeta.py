@@ -11,8 +11,8 @@ __version__ = "1.0"
 
 import re
 
-from biblio import fields as bf
-from utils.web import get_HTML, unescape_entities
+from thunderdell.biblio import fields as bf
+from thunderdell.utils.web import get_HTML, unescape_entities
 
 from .default import ScrapeDefault
 

@@ -9,6 +9,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+import argparse
 import json
 import logging as log
 import pprint
@@ -60,9 +61,8 @@ def query(doi, accept="application/citeproc+json"):
         #          " style=apa" https://doi.org/10.26300/spsf-tc23
 
 
-def main():
-    import argparse
-
+def parse_args(args) -> argparse.Namespace:
+    """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="Given a doi return bibliographic data."
     )
@@ -89,7 +89,14 @@ def main():
         action="version",
         version=f"{__version__} using Python {sys.version}",
     )
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
+    return args
+
+
+def main(args: argparse.Namespace | None = None):
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = parse_args(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

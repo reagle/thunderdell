@@ -11,7 +11,7 @@ __version__ = "1.0"
 
 import logging as log
 
-from change_case import sentence_case
+from thunderdell.change_case import sentence_case
 
 from .default import ScrapeDefault
 

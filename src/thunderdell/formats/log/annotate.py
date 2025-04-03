@@ -16,11 +16,11 @@ from collections import namedtuple
 from pathlib import Path
 from subprocess import call
 
-import config
-import thunderdell as td
-from biblio import fields as bf
-from biblio.keywords import KEY_SHORTCUTS
-from change_case import title_case
+from thunderdell import config
+from thunderdell import thunderdell as td
+from thunderdell.biblio import fields as bf
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
+from thunderdell.change_case import title_case
 
 NOW = time.localtime()
 

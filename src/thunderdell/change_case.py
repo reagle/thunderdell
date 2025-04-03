@@ -266,7 +266,7 @@ def is_proper_noun(word):
     return False
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(args) -> argparse.Namespace:
     """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
 
@@ -319,10 +319,18 @@ def parse_args() -> argparse.Namespace:
         action="version",
         version=f"{__version__} using Python {sys.version}",
     )
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
 
     # args.text is a list; make it a string
     args.text = " ".join(args.text)
+
+    return args
+
+
+def main(args: argparse.Namespace | None = None):
+    """Check if testing and execute."""
+    if args is None:
+        args = parse_args(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
@@ -336,11 +344,7 @@ def parse_args() -> argparse.Namespace:
         )
     else:
         log.basicConfig(level=log_level, format=LOG_FORMAT)
-    return args
 
-
-def main(args):
-    """Process arguments and execute."""
     if args.test:
         import doctest
 
@@ -359,11 +363,6 @@ def main(args):
     log.debug(f"{args.text=}")
     log.debug(f"case_type = {case_type}")
     print(change_case(args.text, case_type))
-
-
-def main():
-    args = parse_args()
-    main(args)
 
 
 if __name__ == "__main__":

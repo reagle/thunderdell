@@ -16,7 +16,7 @@ import arrow
 from twitter.scraper import Scraper
 
 # from twitter.util import init_session
-import utils.web as uw
+import thunderdell.utils.web as uw
 
 from .default import ScrapeDefault
 

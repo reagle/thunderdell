@@ -11,8 +11,8 @@ __version__ = "1.0"
 import argparse
 import calendar
 
-from biblio.fields import BIB_SHORTCUTS_ITEMS, BIBLATEX_WP_FIELD_MAP
-from types_thunderdell import EntryDict
+from thunderdell.biblio.fields import BIB_SHORTCUTS_ITEMS, BIBLATEX_WP_FIELD_MAP
+from thunderdell.types_thunderdell import EntryDict
 
 
 def output_wp_names(args: argparse.Namespace, field: str, names: list):

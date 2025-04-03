@@ -96,7 +96,7 @@ def main():
     arg_parser.add_argument("-l", "--long_url", action="store_true", default=False)
     arg_parser.add_argument("-p", "--pretty", action="store_true", default=False)
     arg_parser.add_argument("-q", "--query", action="store_true", default=None)
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
 
     try:
         cgi_main(args)

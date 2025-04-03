@@ -72,7 +72,7 @@ def main():
         metavar="FILENAME",
         help="filename to process",
     )
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
     old_fn = Path(args.filename)
     categorize_mindmap(old_fn)
 

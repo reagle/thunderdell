@@ -11,8 +11,8 @@ __version__ = "1.0"
 
 import logging as log
 
-import doi_query
-from change_case import sentence_case
+from thunderdell import doi_query
+from thunderdell.change_case import sentence_case
 
 from .default import ScrapeDefault
 

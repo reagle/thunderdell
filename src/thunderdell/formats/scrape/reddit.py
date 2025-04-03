@@ -15,8 +15,8 @@ import time
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 
-from change_case import sentence_case
-from utils.web import get_JSON
+from thunderdell.change_case import sentence_case
+from thunderdell.utils.web import get_JSON
 
 from .default import ScrapeDefault
 

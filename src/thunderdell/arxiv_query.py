@@ -11,6 +11,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+import argparse
 import logging as log
 import pprint
 import sys
@@ -23,8 +24,8 @@ ACCEPT_HEADERS = {
 }
 
 
-def query(number: int, accept: str = "application/atom+xml"):
-    """Query the number Web service; returns string."""
+def query(number: int, accept: str = "application/atom+xml") -> dict | bool:
+    """Query the arXiv API with a given number and accept header."""
     log.info(f"{accept=}")
     log.info(f"{number=}")
     headers = {"Accept": accept}
@@ -43,9 +44,8 @@ def query(number: int, accept: str = "application/atom+xml"):
         return False
 
 
-def main():
-    import argparse
-
+def parse_args(args: list[str] = sys.argv[1:]) -> argparse.Namespace:
+    """Parse command-line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="Given an arXiv number return bibliographic data."
     )
@@ -72,7 +72,14 @@ def main():
         action="version",
         version=f"{__version__} using Python {sys.version}",
     )
-    args = arg_parser.parse_args()
+    return arg_parser.parse_args(args)
+
+
+def main(args: argparse.Namespace | None = None) -> None:
+    """Set up logging and execute script."""
+    # Parse arguments if not provided
+    if args is None:
+        args = parse_args()
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
@@ -95,4 +102,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(args)

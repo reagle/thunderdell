@@ -24,11 +24,11 @@ from collections.abc import Callable
 from pathlib import Path
 from urllib.parse import parse_qs
 
-import config
-
 # import xml.etree.ElementTree as et
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
-from biblio.fields import (
+
+from thunderdell import config
+from thunderdell.biblio.fields import (
     BIB_SHORTCUTS,
     BIB_TYPES,
     BIBLATEX_TYPES,
@@ -36,18 +36,23 @@ from biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from formats import (
+from thunderdell.formats import (
     emit_biblatex,
     emit_json_csl,
     emit_results,
     emit_wikipedia,
     emit_yaml_csl,
 )
-from types_thunderdell import EntryDict, PersonName, PubDate
-from utils.text import pretty_tabulate_dict, pretty_tabulate_list, strip_accents
-from utils.web import unescape_entities
+from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
+from thunderdell.utils.text import (
+    pretty_tabulate_dict,
+    pretty_tabulate_list,
+    strip_accents,
+)
+from thunderdell.utils.web import (
+    unescape_entities,
+)
 
-#################################################################
 # Mindmap parsing, bib building, and query emitting
 #################################################################
 
@@ -781,7 +786,7 @@ def main():
         help="emit YAML/CSL for use with pandoc [default]",
     )
 
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args(sys.argv[1:])
     file_name = args.input_file.absolute()
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
@@ -833,20 +838,45 @@ def main():
     if args.tests:
         import doctest
 
-        from tests import test_thunderdell
+        from thunderdell.tests import test_thunderdell
 
         print("Running tests")
         doctest.testmod()
         test_thunderdell.test_results()
+        # test_extract_kindle.test_process_html()
+        # test_extract_goodreader.test_process_text()
         sys.exit()
 
     if args.fields:
-        print(textwrap.dedent("""..."""))
-        test_thunderdell.test_results()
-        sys.exit()
+        print(
+            textwrap.dedent(
+                f"""
+                ================ BIBLATEX_TYPES_ (deprecated) =========
+                http://intelligent.pe.kr/LaTex/bibtex2.htm\n
+                {pretty_tabulate_list(list(BIBLATEX_TYPES))}
 
-    if args.fields:
-        print(textwrap.dedent(f"""..."""))
+                    d=2013 in=MIT t=mastersthesis
+                    d=2013 in=MIT t=phdthesis
+
+                ================  CSL_TYPES (preferred) ================
+                http://aurimasv.github.io/z2csl/typeMap.xml\n
+                {pretty_tabulate_list(list(BIB_TYPES))}
+
+                    d=2014 p=ACM et=Conference on FOO ve=Boston
+                    d=2013 in=MIT t=thesis g=Undergraduate thesis
+                    d=2013 in=MIT t=thesis g=Masters thesis
+                    d=2013 in=MIT t=thesis g=PhD dissertation
+
+                ================  FIELD_SHORTCUTS ================
+
+                {pretty_tabulate_dict(BIB_SHORTCUTS)}
+
+                    t=biblatex/CSL type (e.g., t=thesis)
+                    ot=organization's subtype (e.g., W3C REC)
+                    pa=section|paragraph|location|chapter|verse|column|line\n\n
+        """
+            )
+        )
         sys.exit()
 
     if args.query:

@@ -12,8 +12,8 @@ import logging as log
 import time
 from subprocess import Popen
 
-import config
-from biblio.keywords import KEY_SHORTCUTS
+from thunderdell import config
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
 
 NOW = time.localtime()
 

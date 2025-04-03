@@ -14,7 +14,7 @@ import re
 import time
 from subprocess import Popen
 
-import config
+from thunderdell import config
 
 NOW = time.localtime()
 

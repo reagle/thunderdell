@@ -12,13 +12,13 @@ __version__ = "1.0"
 import logging as log
 import re
 
-from biblio.fields import (
+from thunderdell.biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_CSL_FIELD_MAP,
     CONTAINERS,
     EXCLUDE_URLS,
 )
-from formats.emit.yaml_csl import guess_csl_type
+from thunderdell.formats.emit.yaml_csl import guess_csl_type
 
 
 def emit_json_csl(args, entries):

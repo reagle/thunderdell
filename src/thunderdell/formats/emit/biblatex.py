@@ -13,7 +13,7 @@ import argparse
 import logging as log
 import re
 
-from biblio.fields import (
+from thunderdell.biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
     BIBLATEX_TYPES,
     BORING_WORDS,
@@ -23,8 +23,8 @@ from biblio.fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
-from types_thunderdell import EntryDict, PubDate
-from utils.text import escape_latex, normalize_whitespace
+from thunderdell.types_thunderdell import EntryDict, PubDate
+from thunderdell.utils.text import escape_latex, normalize_whitespace
 
 #################################################################
 # Emitter utils

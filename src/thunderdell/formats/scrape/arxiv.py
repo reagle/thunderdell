@@ -11,14 +11,15 @@ __version__ = "1.0"
 
 import logging as log
 
-import arxiv_query
-from change_case import sentence_case
+from thunderdell import arxiv_query
+from thunderdell.change_case import sentence_case
 
 from .default import ScrapeDefault
 
 
 class ScrapeArXiv(ScrapeDefault):
     """Use arXiv API to get biblio data.
+
     Thank you to arXiv for use of its open access interoperability
     https://arxiv.org/help/api/index
     https://arxiv.org/help/api/basics.

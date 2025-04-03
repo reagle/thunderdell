@@ -16,11 +16,11 @@ from pathlib import Path
 
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
-import config
-from types_thunderdell import EntryDict
+from thunderdell import config
+from thunderdell.types_thunderdell import EntryDict
 
-# from formats.emit.biblatex import create_biblatex_author
-from utils.web import escape_XML, straighten_quotes
+# from thunderdell.formats.emit.biblatex import create_biblatex_author
+from thunderdell.utils.web import escape_XML, straighten_quotes
 
 
 def emit_results(

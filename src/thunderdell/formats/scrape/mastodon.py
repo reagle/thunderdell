@@ -12,8 +12,8 @@ __version__ = "1.0"
 # import textwrap
 import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
-import utils.text as ut
-import utils.web as uw
+import thunderdell.utils.text as ut
+import thunderdell.utils.web as uw
 
 from .default import ScrapeDefault
 

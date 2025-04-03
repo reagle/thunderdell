@@ -18,11 +18,11 @@ from urllib.parse import urlparse
 
 import datefinder  # https://github.com/akoumjian/datefinder
 
-from biblio.fields import SITE_CONTAINER_MAP
-from change_case import sentence_case
-from utils.dates import parse_date
-from utils.text import smart_to_markdown
-from utils.web import get_HTML, get_text, unescape_entities
+from thunderdell.biblio.fields import SITE_CONTAINER_MAP
+from thunderdell.change_case import sentence_case
+from thunderdell.utils.dates import parse_date
+from thunderdell.utils.text import smart_to_markdown
+from thunderdell.utils.web import get_HTML, get_text, unescape_entities
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"

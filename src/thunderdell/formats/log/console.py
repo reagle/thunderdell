@@ -12,8 +12,8 @@ __version__ = "1.0"
 import logging as log
 import time
 
-from biblio.keywords import KEY_SHORTCUTS
-from utils.web import yasn_publish
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
+from thunderdell.utils.web import yasn_publish
 
 NOW = time.localtime()
 

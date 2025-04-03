@@ -13,10 +13,10 @@ import logging as log
 import time
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
 
-import config
-from biblio import fields as bf
-from biblio.keywords import KEY_SHORTCUTS
-from utils.web import yasn_publish
+from thunderdell import config
+from thunderdell.biblio import fields as bf
+from thunderdell.biblio.keywords import KEY_SHORTCUTS
+from thunderdell.utils.web import yasn_publish
 
 from .annotate import do_console_annotation
 

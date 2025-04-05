@@ -6,14 +6,14 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-import argparse  # http://docs.python.org/dev/library/argparse.html
+import argparse
 import logging as log
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
-from typing import TextIO
+from pathlib import Path
+from typing import Any, Dict, List, Optional, TextIO, Tuple, Union, cast
 
 from thunderdell.biblio.fields import (
     BIB_FIELDS,  # dict of field to its shortcut
@@ -22,6 +22,10 @@ from thunderdell.biblio.fields import (
 from thunderdell.utils.web import yasn_publish
 
 HOME = Path.home()
+
+# Type aliases for improved readability
+EntryDict = dict[str, Any]
+MindmapState = tuple[bool, bool, bool, bool, bool]
 
 
 MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
@@ -46,20 +50,17 @@ MINDMAP_PREAMBLE = """<map version="freeplane 1.5.9">
         </hook>
 """
 
-# CL_CO = {'annotation': '#999999', 'author': '#338800', 'title': '#090f6b',
-#     'cite': '#ff33b8', 'author': '#338800',
-#     'quote': '#166799', 'paraphrase': '#8b12d6',
-#     'default': '#000000', None: None}
-# CO_CL = dict([(label, color) for color, label in list(CL_CO.items())])
 
+def clean(text: str) -> str:
+    """Clean and encode text for XML.
 
-def clean(text):
-    """Clean and encode text."""
-    # TODO: Maybe make use of b.smart_punctuation_to_ascii() and
-    # utils_web.escape_XML()
-
+    >>> clean('Test & "quotes"')
+    'Test &amp; &quot;quotes&quot;'
+    >>> clean('Test – dash')
+    'Test -- dash'
+    """
     text = text.strip(", \f\r\n")
-    REPLACEMENTS = [
+    replacements = [
         ("&", "&amp;"),
         ("\N{APOSTROPHE}", "&apos;"),
         ("\N{QUOTATION MARK}", "&quot;"),
@@ -70,17 +71,213 @@ def clean(text):
         (" \N{EN DASH} ", " -- "),
         ("\N{EN DASH}", " -- "),
     ]
-    for v1, v2 in REPLACEMENTS:
-        text = text.replace(v1, v2)
+    for old, new in replacements:
+        text = text.replace(old, new)
     return text
 
 
-def get_date():
-    now = time.localtime()
-    # year = time.strftime("%Y", now).lower()
-    # month = time.strftime("%m", now).lower()
-    date_token = time.strftime("%Y%m%d", now)
-    return date_token
+def get_date() -> str:
+    """Return the current date as a string in YYYYMMDD format."""
+    return time.strftime("%Y%m%d")
+
+
+def close_sections(
+    mm_fd: TextIO,
+    close_subsection: bool = False,
+    close_section: bool = False,
+    close_chapter: bool = False,
+    close_part: bool = False,
+) -> None:
+    """Close open section nodes in the mindmap."""
+    if close_subsection:
+        mm_fd.write("        </node>\n")
+    if close_section:
+        mm_fd.write("      </node>\n")
+    if close_chapter:
+        mm_fd.write("    </node>\n")
+    if close_part:
+        mm_fd.write("  </node>\n")
+
+
+def parse_citation_pairs(line: str) -> list[tuple[str, str]]:
+    """Parse citation key-value pairs from a line."""
+    cites = re.split(r"(\w+) =", line)[1:]
+    return list(zip(*[iter(cites)] * 2, strict=True))
+
+
+def update_entry_with_citations(
+    entry: EntryDict, cite_pairs: list[tuple[str, str]]
+) -> EntryDict:
+    """Update entry dictionary with citation information."""
+    for token, value in cite_pairs:
+        log.info(f"{token=}, {value=}")
+        match token.lower():
+            case "keyword":
+                if isinstance(entry.get("keyword"), list):
+                    entry["keyword"].append(value.strip())
+                else:
+                    entry["keyword"] = [value.strip()]
+            case _:
+                entry[token.lower()] = value.strip()
+
+    # Ensure required fields exist
+    if "author" not in entry:
+        entry["author"] = "Unknown"
+    if "title" not in entry:
+        entry["title"] = "Untitled"
+
+    # Process subtitle
+    if "subtitle" in entry:
+        entry["title"] = f"{entry['title']}: {entry['subtitle']}"
+        del entry["subtitle"]
+
+    return entry
+
+
+def build_citation_text(entry: EntryDict) -> str:
+    """Build citation text from entry dictionary."""
+    citation_parts = []
+
+    for token, value in sorted(entry.items()):
+        if token not in ("author", "title", "url", "keyword"):
+            value_str = str(value)
+            match token:
+                case _ if token in BIB_SHORTCUTS:
+                    t, v = token.lower(), value_str
+                case _ if token.lower() in BIB_FIELDS:
+                    t, v = BIB_FIELDS[token.lower()], value_str
+                case _:
+                    raise ValueError(f"{token=} not in BIB_FIELDS")
+            citation_parts.append(f"{t}={v}")
+        elif token == "keyword" and isinstance(value, list):
+            citation_parts.extend([f"kw={kw!s}" for kw in value])
+
+    citation = " ".join(citation_parts)
+    citation += f" r={get_date()}"
+    return citation
+
+
+def process_author_line(
+    mm_fd: TextIO, line: str, entry: EntryDict, state: MindmapState
+) -> tuple[EntryDict, MindmapState]:
+    """Process an author line and update entry data."""
+    started, in_part, in_chapter, in_section, in_subsection = state
+
+    # Close previous entry if needed
+    if started:
+        close_sections(mm_fd, in_subsection, in_section, in_chapter, in_part)
+        mm_fd.write("</node>\n</node>\n")
+        started = in_part = in_chapter = in_section = in_subsection = False
+
+    started = True
+
+    # Parse and process citation data
+    cite_pairs = parse_citation_pairs(line)
+    entry = update_entry_with_citations(entry, cite_pairs)
+
+    # Ensure values are strings
+    author = str(entry["author"])
+    title = str(entry["title"])
+
+    # Write author node
+    mm_fd.write(
+        f"""<node STYLE_REF="author" TEXT="{clean(author.title())}" POSITION="RIGHT">\n"""
+    )
+
+    # Write title node with optional hyperlink
+    if "url" in entry:
+        url = str(entry["url"])
+        mm_fd.write(
+            f"""  <node STYLE_REF="title" LINK="{clean(url)}" TEXT="{clean(title)}">\n"""
+        )
+    else:
+        mm_fd.write(f"""  <node STYLE_REF="title" TEXT="{clean(title)}">\n""")
+
+    # Add citation node
+    citation = build_citation_text(entry)
+    mm_fd.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
+
+    return entry, (started, in_part, in_chapter, in_section, in_subsection)
+
+
+def process_structure_element(
+    mm_fd: TextIO, element_type: str, content: str, state: MindmapState
+) -> MindmapState:
+    """Process structural elements (part, chapter, section, subsection)."""
+    started, in_part, in_chapter, in_section, in_subsection = state
+
+    match element_type.lower():
+        case "part":
+            if in_part:
+                close_sections(mm_fd, in_subsection, in_section, in_chapter, True)
+                in_subsection = in_section = in_chapter = False
+                in_part = False
+            full_content = f"part{content}"
+            mm_fd.write(
+                f"""  <node STYLE_REF="quote" TEXT="{clean(full_content)}">\n"""
+            )
+            in_part = True
+
+        case "chapter":
+            if in_chapter:
+                close_sections(mm_fd, in_subsection, in_section, True, False)
+                in_subsection = in_section = False
+                in_chapter = False
+            full_content = f"chapter{content}"
+            mm_fd.write(
+                f"""    <node STYLE_REF="quote" TEXT="{clean(full_content)}">\n"""
+            )
+            in_chapter = True
+
+        case "section":
+            if in_subsection:
+                close_sections(mm_fd, True, False, False, False)
+                in_subsection = False
+            if in_section:
+                close_sections(mm_fd, False, True, False, False)
+                in_section = False
+            mm_fd.write(f"""      <node STYLE_REF="quote" TEXT="{clean(content)}">\n""")
+            in_section = True
+
+        case "subsection":
+            if in_subsection:
+                close_sections(mm_fd, True, False, False, False)
+                in_subsection = False
+            mm_fd.write(
+                f"""        <node STYLE_REF="quote" TEXT="{clean(content)}">\n"""
+            )
+            in_subsection = True
+
+    return started, in_part, in_chapter, in_section, in_subsection
+
+
+def process_content_line(mm_fd: TextIO, line: str) -> None:
+    """Process general content lines."""
+    node_color = "paraphrase"
+    line_text = line
+    line_no = ""
+
+    # Process page numbers
+    page_pattern = r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
+    if match := re.match(page_pattern, line, re.I):
+        line_no = match.group(1)
+        line_no += match.group(2) or ""
+        line_no += match.group(4) or ""
+        line_no = line_no.lower()  # lower case roman numbers
+        line_text = match.group(3).strip()
+
+    # Process excerpts
+    if line_text.startswith("excerpt."):
+        node_color = "quote"
+        line_text = line_text[8:].strip()
+    elif line_text.strip().endswith("excerpt."):
+        node_color = "quote"
+        line_text = line_text[:-8].strip()
+
+    text_content = " ".join(filter(None, [line_no, line_text]))
+    mm_fd.write(
+        f"""          <node STYLE_REF="{node_color}" TEXT="{clean(text_content)}"/>\n"""
+    )
 
 
 def build_mm_from_txt(
@@ -91,257 +288,126 @@ def build_mm_from_txt(
     in_chapter: bool,
     in_section: bool,
     in_subsection: bool,
-    entry: dict,
-) -> tuple[bool, bool, bool, bool, bool, dict]:
-    citation = ""
+    entry: EntryDict,
+) -> tuple[bool, bool, bool, bool, bool, EntryDict]:
+    """Build a mindmap from text."""
+    if not line or line in ("\r", "\n"):
+        return started, in_part, in_chapter, in_section, in_subsection, entry
 
-    if line not in ("", "\r", "\n"):
-        # print(f"{line=}")
-        if line.lower().startswith("author ="):
-            # and re.match('([^=]+ = (?=[^=]+)){2,}', line, re.I)
-            if started:  # Do I need to close a previous entry
-                if in_subsection:
-                    mm_fd.write("""        </node>\n""")
-                    in_subsection = False
-                if in_section:
-                    mm_fd.write("""      </node>\n""")
-                    in_section = False
-                if in_chapter:
-                    mm_fd.write("""    </node>\n""")
-                    in_chapter = False
-                if in_part:
-                    mm_fd.write("""    </node>\n""")
-                    in_part = False
+    state = (started, in_part, in_chapter, in_section, in_subsection)
 
-                mm_fd.write("""</node>\n</node>\n""")
-                started = False
-            started = True
-            # should space be optional '(\w+) ?='
-            cites = re.split(r"(\w+) =", line)[1:]
-            # 2 references to an iterable object that are
-            # unpacked with '*' and rezipped
-            cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))
-            for token, value in cite_pairs:
-                log.info(f"{token=}, {value=}")
-                if token == "keyword":
-                    log.info(f"{entry=}")
-                    entry.setdefault("keyword", []).append(value.strip())
-                else:
-                    entry[token.lower()] = value.strip()
+    # Process line based on content type
+    if line.lower().startswith("author ="):
+        entry, state = process_author_line(mm_fd, line, entry, state)
 
-            if "author" not in entry:
-                entry["author"] = "Unknown"
-            if "title" not in entry:
-                entry["title"] = "Untitled"
-            if "subtitle" in entry:
-                entry["title"] += ": " + entry["subtitle"]
-                del entry["subtitle"]
+    elif match := re.match(r"summary\.(.*)", line, re.I):
+        entry["summary"] = match.group(1)
+        mm_fd.write(
+            f"""  <node STYLE_REF="annotation" TEXT="{clean(str(entry["summary"]))}"/>\n"""
+        )
 
-            mm_fd.write(
-                """<node STYLE_REF="{}" TEXT="{}" POSITION="RIGHT">\n""".format(
-                    "author", clean(entry["author"].title())
-                )
-            )
-            if "url" in entry:  # write title with hyperlink
-                mm_fd.write(
-                    """  <node STYLE_REF="{}" LINK="{}" TEXT="{}">\n""".format(
-                        "title", clean(entry["url"]), clean(entry["title"])
-                    )
-                )
-            else:
-                mm_fd.write(  # write plain title
-                    """  <node STYLE_REF="{}" TEXT="{}">\n""".format(
-                        "title", clean(entry["title"])
-                    )
-                )
+    elif match := re.match(r"(part|chapter|section|subsection)(.*)", line, re.I):
+        element_type, content = match.groups()
+        state = process_structure_element(mm_fd, element_type, content, state)
 
-            for token, value in sorted(entry.items()):
-                if token not in ("author", "title", "url", "keyword"):
-                    if token in BIB_SHORTCUTS:
-                        t, v = token.lower(), value
-                    elif token.lower() in BIB_FIELDS:
-                        t, v = BIB_FIELDS[token.lower()], value
-                    else:
-                        raise Exception(f"{token=} not in BIB_FIELDS")
-                    citation_add = f" {t}={v}"
-                    citation += citation_add
-                if token == "keyword":
-                    citation += " kw=" + " kw=".join(value)
-            if citation != "":
-                clean(citation)
-            citation += f" r={get_date()}"
-            mm_fd.write(f"""  <node STYLE_REF="cite" TEXT="{clean(citation)}"/>\n""")
+    elif line.startswith("--"):
+        mm_fd.write(f"""          <node STYLE_REF="default" TEXT="{clean(line)}"/>\n""")
 
-        elif re.match(r"summary\.(.*)", line, re.I):
-            matches = re.match(r"summary\.(.*)", line, re.I)
-            entry["summary"] = matches.groups()[0]
-            mm_fd.write(
-                """  <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
-                    "annotation", clean(entry["summary"])
-                )
-            )
+    else:
+        process_content_line(mm_fd, line)
 
-        elif re.match("part.*", line, re.I):
-            if in_part:
-                if in_chapter:
-                    mm_fd.write("""    </node>\n""")  # close chapter
-                    in_chapter = False
-                if in_section:
-                    mm_fd.write("""      </node>\n""")  # close section
-                    in_section = False
-                if in_subsection:
-                    mm_fd.write("""      </node>\n""")  # close section
-                    in_subsection = False
-                mm_fd.write("""  </node>\n""")  # close part
-                in_part = False
-            mm_fd.write(
-                """  <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
-            )
-            in_part = True
-
-        elif re.match("chapter.*", line, re.I):
-            if in_chapter:
-                if in_section:
-                    mm_fd.write("""      </node>\n""")  # close section
-                    in_section = False
-                if in_subsection:
-                    mm_fd.write("""      </node>\n""")  # close section
-                    in_subsection = False
-                mm_fd.write("""    </node>\n""")  # close chapter
-                in_chapter = False
-            mm_fd.write(
-                """    <node STYLE_REF="{}" TEXT="{}">\n""".format("quote", clean(line))
-            )
-            in_chapter = True
-
-        elif re.match("section.*", line, re.I):
-            if in_subsection:
-                mm_fd.write("""      </node>\n""")  # close section
-                in_subsection = False
-            if in_section:
-                mm_fd.write("""    </node>\n""")
-                in_section = False
-            mm_fd.write(
-                """      <node STYLE_REF="{}" TEXT="{}">\n""".format(
-                    "quote", clean(line[9:])
-                )
-            )
-            in_section = True
-
-        elif re.match("subsection.*", line, re.I):
-            if in_subsection:
-                mm_fd.write("""    </node>\n""")
-                in_subsection = False
-            mm_fd.write(
-                """      <node STYLE_REF="{}" TEXT="{}">\n""".format(
-                    "quote", clean(line[12:])
-                )
-            )
-            in_subsection = True
-
-        elif re.match("(--.*)", line, re.I):
-            mm_fd.write(
-                """          <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
-                    "default", clean(line)
-                )
-            )
-
-        else:
-            node_color = "paraphrase"
-            line_text = line
-            line_no = ""
-            # DIGIT_CHARS = '[\dcdilmxv]'  # arabic and roman numbers
-            PAGE_NUM_PAT = r"^([\dcdilmxv]+)(\-[\dcdilmxv]+)? (.*?)(-[\dcdilmxv]+)?$"
-            matches = re.match(PAGE_NUM_PAT, line, re.I)
-            if matches:
-                line_no = matches.group(1)
-                if matches.group(2):
-                    line_no += matches.group(2)
-                if matches.group(4):
-                    line_no += matches.group(4)
-                line_no = line_no.lower()  # lower case roman numbers
-                line_text = matches.group(3).strip()
-
-            if line_text.startswith("excerpt."):
-                node_color = "quote"
-                line_text = line_text[9:]
-            if line_text.strip().endswith("excerpt."):
-                node_color = "quote"
-                line_text = line_text[0:-9]
-
-            mm_fd.write(
-                """          <node STYLE_REF="{}" TEXT="{}"/>\n""".format(
-                    node_color, clean(" ".join((line_no, line_text)))
-                )
-            )
-
-    return started, in_part, in_chapter, in_section, in_subsection, entry
+    return *state, entry
 
 
 def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
-    import traceback
-
+    """Create a mindmap file from the given text."""
     with mm_file_name.open("w", encoding="utf-8", errors="replace") as mm_fd:
-        entry = {}  # a bibliographic entry for yasn_publish
-        entry["keyword"] = []  # there might not be any
+        entry: EntryDict = {"keyword": []}
+
+        # Initialize state variables
         started = False
         in_part = False
         in_chapter = False
         in_section = False
         in_subsection = False
-        line_number = 0
 
-        mm_fd.write(f"""{MINDMAP_PREAMBLE}\n<node TEXT="Readings">\n""")
+        mm_fd.write(f'{MINDMAP_PREAMBLE}\n<node TEXT="Readings">\n')
 
-        for line_number, line in enumerate(text.split("\n")):
-            line = line.strip()
-            try:
-                (
-                    started,
-                    in_part,
-                    in_chapter,
-                    in_section,
-                    in_subsection,
-                    entry,
-                ) = build_mm_from_txt(
-                    mm_fd,
-                    line,
-                    started,
-                    in_part,
-                    in_chapter,
-                    in_section,
-                    in_subsection,
-                    entry,
-                )
-            except KeyError as err:
-                print(err)
-                print(traceback.print_tb(sys.exc_info()[2]), "\n", line_number, line)
-                sys.exit()
+        line = ""
 
+        try:
+            for _line_number, line in enumerate(text.split("\n")):
+                if processed_line := line.strip():
+                    (
+                        started,
+                        in_part,
+                        in_chapter,
+                        in_section,
+                        in_subsection,
+                        entry,
+                    ) = build_mm_from_txt(
+                        mm_fd,
+                        processed_line,
+                        started,
+                        in_part,
+                        in_chapter,
+                        in_section,
+                        in_subsection,
+                        entry,
+                    )
+        except (ValueError, KeyError, IndexError) as err:
+            import traceback
+
+            print(f"Error processing line: {line}")
+            print(f"Error: {err}")
+            print(traceback.format_exc())
+            sys.exit(1)
+        except FileNotFoundError as err:
+            print(f"File not found error: {err}")
+            sys.exit(1)
+        except PermissionError as err:
+            print(f"Permission error: {err}")
+            sys.exit(1)
+
+        # Close any open nodes
         if in_subsection:
-            mm_fd.write("""</node>""")  # close the last subsection
+            mm_fd.write("        </node>\n")
         if in_section:
-            mm_fd.write("""</node>""")  # close the last section
+            mm_fd.write("      </node>\n")
         if in_chapter:
-            mm_fd.write("""</node>""")  # close the last chapter
+            mm_fd.write("    </node>\n")
         if in_part:
-            mm_fd.write("""</node>""")  # close the last part
-        mm_fd.write("""</node>\n</node>\n</node>\n""")  # close the last entry
-        mm_fd.write("""</node>\n</map>\n""")  # close the document
+            mm_fd.write("  </node>\n")
+
+        # Close entry nodes
+        mm_fd.write("</node>\n</node>\n</node>\n")
+
+        # Close document
+        mm_fd.write("</node>\n</map>\n")
+
         log.info(f"{entry=}")
-        if args.publish:
+        # Publish if requested and required fields are present
+        if args.publish and all(k in entry for k in ["summary", "title", "url"]):
+            summary = str(entry.get("summary", ""))
+            title = str(entry.get("title", ""))
+            url = str(entry.get("url", ""))
+            keywords = entry.get("keyword", [])
+            if isinstance(keywords, list):
+                keyword_str = " ".join(str(k) for k in keywords)
+            else:
+                keyword_str = str(keywords)
+
             yasn_publish(
-                entry["summary"],
-                entry["title"],
-                None,
-                entry["url"],
-                " ".join(entry["keyword"]),
+                summary,
+                title,
+                "",  # Empty string instead of None for subtitle
+                url,
+                keyword_str,
             )
 
 
-def process_args(argv):
-    """Process arguments."""
-    # https://docs.python.org/3/library/argparse.html
+def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Process command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="""Convert dictated notes to mindmap.
 
@@ -375,33 +441,46 @@ def process_args(argv):
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])(argv)
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    # Parse arguments
+    args = arg_parser.parse_args(argv if argv is not None else sys.argv[1:])
+
+    # Configure logging based on verbosity
+    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)
+
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    if args.log_to_file:
-        log.basicConfig(
-            filename="extract-dictation.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
-        )
-    else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+    log.basicConfig(
+        filename="extract-dictation.log" if args.log_to_file else None,
+        filemode="w" if args.log_to_file else "a",
+        level=log_level,
+        format=LOG_FORMAT,
+    )
 
     return args
 
 
-def main():
-    import sys
+def main(args: argparse.Namespace | None = None) -> None:
+    """Process dictation files and convert to mindmaps."""
+    if args is None:
+        args = parse_arguments()
 
-    args = process_args(sys.argv[1:])
     log.info(f"{args=}")
+
+    # Process each input file
     for source_fn in args.file_names:
-        text = source_fn.read_text(encoding="utf-8-sig")
-        mm_file_name = source_fn.with_suffix(".mm")
-        create_mm(args, text, mm_file_name)
-        subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
+        try:
+            if not source_fn.exists():
+                log.error(f"File not found: {source_fn}")
+                continue
+
+            if text := source_fn.read_text(encoding="utf-8-sig"):
+                mm_file_name = source_fn.with_suffix(".mm")
+                create_mm(args, text, mm_file_name)
+                subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
+            else:
+                log.warning(f"Empty file: {source_fn}")
+        except Exception as e:
+            log.exception(f"Error processing {source_fn}: {e}")
 
 
 if __name__ == "__main__":

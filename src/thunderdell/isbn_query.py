@@ -6,174 +6,344 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+import argparse
 import json
 import logging as log
 import pprint
 import sys
+from pathlib import Path
+from typing import Any
 
 import arrow
-import requests  # type: ignore
+import requests
+
+# Type alias for bibliography dictionary
+BibDict = dict[str, Any]
 
 
-def query(isbn: str):
-    """Query available ISBN services."""
-    bib = {}
+def _normalize_isbn(isbn: str) -> str:
+    """Remove 'isbn:' prefix and hyphens."""
+    if isbn.lower().startswith("isbn:"):
+        isbn = isbn[5:]
+    return isbn.replace("-", "").strip()
+
+
+def open_query(isbn: str, session: requests.Session) -> BibDict | None:
+    """Query the Open Library Books API."""
+    # https://openlibrary.org/dev/docs/api/books
+    isbn_norm = _normalize_isbn(isbn)
+    url = (
+        f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn_norm}"
+        "&jscmd=details&format=json"
+    )
+    log.info(f"Querying Open Library: {url}")
+    try:
+        response = session.get(url, timeout=10)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+    except requests.exceptions.RequestException as e:
+        log.error(f"Open Library request failed for ISBN {isbn_norm}: {e}")
+        return None
+
+    content_type = response.headers.get("content-type", "")
+    if not content_type.startswith("application/json"):
+        log.warning(
+            f"Open Library did not return JSON for ISBN {isbn_norm}. "
+            f"Content-Type: {content_type}"
+        )
+        return None
+
+    try:
+        json_result = response.json()
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to decode JSON from Open Library for ISBN {isbn_norm}: {e}")
+        log.debug(f"Response content: {response.text}")
+        return None
+
+    if not json_result:  # Check for empty JSON response {}
+        log.warning(f"Open Library returned empty result for ISBN {isbn_norm}")
+        return None
+
+    result_key = f"ISBN:{isbn_norm}"
+    if result_key not in json_result:
+        log.warning(f"ISBN {isbn_norm} not found in Open Library response.")
+        return None
+
+    json_vol = json_result[result_key]
+    if "details" not in json_vol:
+        log.warning(f"No 'details' found in Open Library response for ISBN {isbn_norm}")
+        return None
+
+    json_details = json_vol["details"]
+    bib_entry: BibDict = {"isbn": isbn_norm}  # Start with normalized ISBN
+
+    # Extract fields carefully
+    if authors := json_details.get("authors"):
+        bib_entry["author"] = ", ".join(
+            author.get("name", "Unknown Author") for author in authors
+        )
+    elif by_statement := json_details.get("by_statement"):
+        bib_entry["author"] = by_statement.strip().rstrip(".").strip() # Clean up
+
+    if publishers := json_details.get("publishers"):
+        bib_entry["publisher"] = publishers[0]
+    if places := json_details.get("publish_places"):
+        bib_entry["address"] = places[0]
+
+    if pub_date := json_details.get("publish_date"):
+        try:
+            # Attempt to parse various date formats flexibly
+            bib_entry["date"] = arrow.get(pub_date).format("YYYYMMDD")
+        except arrow.parser.ParserError:
+            log.warning(
+                f"Could not parse Open Library date '{pub_date}' for ISBN {isbn_norm}. "
+                "Attempting year extraction."
+            )
+            # Fallback: try to extract just the year if parsing fails
+            year_match = arrow.get(pub_date, ["YYYY", "YYYY-MM", "MM-YYYY"])
+            if year_match:
+                 bib_entry["date"] = year_match.format("YYYY")
+            else:
+                 log.error(f"Failed to extract year from '{pub_date}'")
+
+
+    if title := json_details.get("title"):
+         bib_entry["title"] = str(title).strip() # Ensure string and strip
+
+    # Combine title and subtitle if both exist
+    if "title" in bib_entry and (subtitle := json_details.get("subtitle")):
+        subtitle_str = str(subtitle).strip()
+        bib_entry["title"] += f": {subtitle_str[:1].upper()}{subtitle_str[1:]}"
+
+    # Add other string fields directly
+    for key, value in json_details.items():
+        if key not in bib_entry and isinstance(value, str):
+             bib_entry[key] = value.strip()
+
+    bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}" # Default URL
+
+    log.debug(f"Open Library result for {isbn_norm}: {bib_entry}")
+    return bib_entry
+
+
+def google_query(isbn: str, session: requests.Session) -> BibDict | None:
+    """Query the Google Books API."""
+    isbn_norm = _normalize_isbn(isbn)
+    url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn_norm}"
+    log.info(f"Querying Google Books API: {url}")
+
+    try:
+        response = session.get(url, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        log.error(f"Google Books API request failed for ISBN {isbn_norm}: {e}")
+        return None
+
+    content_type = response.headers.get("content-type", "")
+    if not content_type.startswith("application/json"):
+        log.warning(
+            f"Google Books API did not return JSON for ISBN {isbn_norm}. "
+            f"Content-Type: {content_type}"
+        )
+        return None
+
+    try:
+        json_result = response.json()
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to decode JSON from Google Books API for ISBN {isbn_norm}: {e}")
+        log.debug(f"Response content: {response.text}")
+        return None
+
+    if json_result.get("totalItems", 0) == 0 or not json_result.get("items"):
+        log.warning(f"Google Books API found no items for ISBN {isbn_norm}")
+        return None
+
+    # Assume the first item is the best match
+    json_vol_info = json_result["items"][0].get("volumeInfo", {})
+    bib_entry: BibDict = {"isbn": isbn_norm}
+
+    if authors := json_vol_info.get("authors"):
+        bib_entry["author"] = ", ".join(authors)
+    if pub_date := json_vol_info.get("publishedDate"):
+        # Google dates are usually YYYY or YYYY-MM-DD
+        try:
+            arrow_date = arrow.get(pub_date)
+            # Format based on precision
+            if len(pub_date) == 4: # YYYY
+                bib_entry["date"] = arrow_date.format("YYYY")
+            elif len(pub_date) == 7: # YYYY-MM
+                 bib_entry["date"] = arrow_date.format("YYYYMM")
+            else: # Assume YYYY-MM-DD or similar
+                 bib_entry["date"] = arrow_date.format("YYYYMMDD")
+        except arrow.parser.ParserError:
+            log.warning(f"Could not parse Google date '{pub_date}' for ISBN {isbn_norm}. Storing as is.")
+            bib_entry["date"] = pub_date # Store raw if unparseable
+
+    if title := json_vol_info.get("title"):
+        bib_entry["title"] = str(title).strip()
+
+    # Combine title and subtitle
+    if "title" in bib_entry and (subtitle := json_vol_info.get("subtitle")):
+         subtitle_str = str(subtitle).strip()
+         bib_entry["title"] += f": {subtitle_str[:1].upper()}{subtitle_str[1:]}"
+
+    # Add other relevant string fields
+    for key in ["publisher", "description", "language"]:
+        if value := json_vol_info.get(key):
+            if isinstance(value, str):
+                 bib_entry[key] = value.strip()
+
+    bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}"
+
+    log.debug(f"Google Books API result for {isbn_norm}: {bib_entry}")
+    return bib_entry
+
+
+def query(isbn: str, session: requests.Session) -> BibDict:
+    """Query available ISBN services and merge results."""
+    log.info(f"Starting query for ISBN: {isbn}")
+    bib: BibDict = {}
     bib_open = bib_google = None
 
-    bib_open = open_query(isbn)
-    if not bib_open or "author" not in bib_open:
-        bib_google = google_query(isbn)
-    if not (bib_open or bib_google):
-        raise Exception("All ISBN queries failed")
-    if bib_open:
-        bib.update(bib_open)
+    # Try Open Library first
+    bib_open = open_query(isbn, session)
+
+    # Try Google if Open Library failed or lacks author/title
+    needs_google = not bib_open or not all(k in bib_open for k in ["author", "title"])
+    if needs_google:
+        log.info(f"Querying Google as Open Library result was insufficient for {isbn}")
+        bib_google = google_query(isbn, session)
+
+    if not bib_open and not bib_google:
+        raise ValueError(f"All ISBN queries failed for {isbn}")
+
+    # Merge results: Google data preferred for core fields if available,
+    # then Open Library, ensuring essential fields are present.
     if bib_google:
         bib.update(bib_google)
+    if bib_open:
+        # Update with Open Library data only if the key doesn't exist from Google
+        for key, value in bib_open.items():
+            bib.setdefault(key, value)
+
+    # Final check for essential fields
+    if not all(k in bib for k in ["author", "title", "date", "isbn", "url"]):
+         log.warning(f"Query result for {isbn} might be incomplete: {bib}")
+         # Ensure defaults if absolutely necessary, though upstream should provide
+         bib.setdefault("author", "Unknown Author")
+         bib.setdefault("title", "Unknown Title")
+         bib.setdefault("date", "Unknown Date")
+         # isbn and url should always be set by the query functions
+
+    log.info(f"Completed query for ISBN {isbn}")
     return bib
 
 
-def open_query(isbn: str):
-    """Query the ISBN Web service; returns string."""
-    # https://openlibrary.org/dev/docs/api/books
-    # https://openlibrary.org/api/books?bibkeys=ISBN:0472069322&jscmd=details&format=json
-
-    if isbn.startswith("isbn:"):
-        isbn = isbn[5:]
-    isbn = isbn.replace("-", "")
-    log.info(f"{isbn=}")
-    URL = (
-        f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}"
-        "&jscmd=details&format=json"
-    )
-    log.info(f"{URL=}")
-    r = requests.get(URL)
-    returned_content_type = r.headers["content-type"]
-    log.info(f"r.content = '{r.content!r}'")
-    if returned_content_type.startswith("application/json"):
-        if r.content != b"{}":
-            json_bib = {"isbn": str(isbn)}
-            json_result = json.loads(r.content)
-            json_vol = json_result[f"ISBN:{isbn}"]
-            json_details = json_vol["details"]
-            for key, value in list(json_details.items()):
-                if key == "authors":
-                    json_bib["author"] = ", ".join(
-                        [author["name"] for author in json_details["authors"]]
-                    )
-                if key == "by_statement":
-                    json_bib["author"] = json_details["by_statement"]
-                elif key == "publishers":
-                    json_bib["publisher"] = json_details[key][0]
-                elif key == "publish_places":
-                    json_bib["address"] = json_details[key][0]
-                elif key == "publish_date":
-                    try:
-                        json_bib["date"] = arrow.get(json_details[key]).format(
-                            "YYYYMMDD"
-                        )
-                    except arrow.parser.ParserError as error:
-                        print(f"Failed to parse time string: {error}")
-                        return False
-                elif isinstance(value, str):
-                    json_bib[key] = value.strip()
-                    log.info(f"  value = '{json_bib[key]}'")
-            json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
-            if "title" in json_bib and "subtitle" in json_bib:
-                subtitle = json_bib["subtitle"]
-                json_bib["title"] += ": " + subtitle[:1].upper() + subtitle[1:]
-                del json_bib["subtitle"]
-            return json_bib
-        else:
-            print(f"Open Library unknown ISBN {isbn}")
-            return False
-    else:
-        print("Open Library ISBN API did not return application/json")
-        return False
-
-
-def google_query(isbn: str):
-    """Query the ISBN Web service; returns string."""
-    # https://books.google.com/books?isbn=0472069322
-
-    if isbn.startswith("isbn:"):
-        isbn = isbn[5:]
-    isbn = isbn.replace("-", "")
-    log.info(f"{isbn=}")
-    URL = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-    log.info(f"{URL=}")
-    r = requests.get(URL)
-    returned_content_type = r.headers["content-type"]
-    # info(f"r.content = '{r.content}'")
-    json_bib = {"isbn": str(isbn)}
-    if returned_content_type.startswith("application/json"):
-        json_result = json.loads(r.content)
-        log.info(f"json_result['totalItems']={json_result['totalItems']}")
-        if json_result["totalItems"] == 0:
-            print(f"Google unknown ISBN for {isbn}")
-            return False
-        json_vol = json_result["items"][0]["volumeInfo"]
-        for key, value in list(json_vol.items()):
-            if key == "authors":
-                json_bib["author"] = ", ".join(value)
-            if key == "publishedDate":
-                json_bib["date"] = value.replace("-", "")
-            elif isinstance(value, str):
-                json_bib[key] = value.strip()
-                log.info(f"  value = '{json_bib[key]}'")
-        json_bib["url"] = f"https://books.google.com/books?isbn={isbn}"
-        return json_bib
-    else:
-        print("Google ISBN API did not return application/json")
-        return False
-
-
-def main():
-    """Query ISBN and print bibliographic data."""
-    import argparse
-
+def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
-        description="Given a isbn return bibliographic data."
+        description="Given one or more ISBNs, return bibliographic data."
     )
-    # positional arguments
-    arg_parser.add_argument("ISBN", nargs="+")
-    # optional arguments
-    arg_parser.add_argument("-s", "--style", help="style of bibliography data")
     arg_parser.add_argument(
-        "-l",
+        "isbns",
+        metavar="ISBN",
+        nargs="+",
+        help="One or more ISBNs to query.",
+    )
+    # Optional arguments
+    arg_parser.add_argument(
+        "-s",
+        "--style",
+        help="Style of bibliography data (Currently unused, placeholder).",
+    )
+    arg_parser.add_argument(
+        "-L",
         "--log-to-file",
         action="store_true",
         default=False,
-        help="log to file %(prog)s.log",
+        help="Log messages to %(prog)s.log instead of stderr.",
     )
     arg_parser.add_argument(
         "-V",
         "--verbose",
         action="count",
         default=0,
-        help="increase verbosity from critical though error, warning, info, and debug",
+        help="Increase verbosity (-V: INFO, -VV: DEBUG).",
     )
     arg_parser.add_argument(
-        "--version",
-        action="version",
-        version=f"{__version__} using Python {sys.version}",
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    args = arg_parser.parse_args(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
-    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    if args.log_to_file:
+    args = arg_parser.parse_args(argv)
+
+    # Configure logging
+    log_level = log.WARNING  # Default
+    if args.verbose == 1:
+        log_level = log.INFO
+    elif args.verbose >= 2:
+        log_level = log.DEBUG
+
+    log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
+    log_mode = "w" if args.log_to_file else None
+
+    # Use basicConfig with stream for stderr or filename for file
+    if log_file:
         log.basicConfig(
-            filename="isbn_query.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
+            filename=log_file, filemode=log_mode, level=log_level, format=log_format
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
-    log.info(args.ISBN[0])
-    pprint.pprint(query(args.ISBN[0]))
+    # Configure requests logging level based on verbosity
+    logging.getLogger("requests").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
+    logging.getLogger("urllib3").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
+
+
+    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
+    log.debug(f"Parsed arguments: {args}")
+
+    return args
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Query ISBNs and print bibliographic data."""
+    args = parse_arguments(argv)
+
+    results = {}
+    # Use a session for potential connection reuse
+    with requests.Session() as session:
+        # Set a user-agent
+        session.headers.update({'User-Agent': f'thunderdell/{__version__} (Python-requests)'})
+
+        for isbn_input in args.isbns:
+            try:
+                result = query(isbn_input, session)
+                results[isbn_input] = result
+                log.info(f"Successfully retrieved data for ISBN: {isbn_input}")
+                # Pretty print individual result immediately
+                print(f"--- Result for ISBN: {isbn_input} ---")
+                pprint.pprint(result)
+                print("-" * (25 + len(isbn_input))) # Separator
+            except ValueError as e:
+                log.error(f"Query failed for ISBN {isbn_input}: {e}")
+                results[isbn_input] = {"error": str(e)}
+                print(f"--- Error for ISBN: {isbn_input} ---")
+                print(f"    {e}")
+                print("-" * (23 + len(isbn_input)))
+            except Exception as e:
+                log.exception(f"An unexpected error occurred for ISBN {isbn_input}: {e}")
+                results[isbn_input] = {"error": f"Unexpected error: {e}"}
+                print(f"--- Unexpected Error for ISBN: {isbn_input} ---")
+                print(f"    {e}")
+                print("-" * (32 + len(isbn_input)))
+
+
+    # Optionally, print all results at the end (might be redundant with above)
+    # print("\n--- All Results ---")
+    # pprint.pprint(results)
+
+    log.info("ISBN query process finished.")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

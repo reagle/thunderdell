@@ -91,7 +91,7 @@ def open_query(isbn: str):
         return False
 
 
-def google_query(isbn):
+def google_query(isbn: str):
     """Query the ISBN Web service; returns string."""
     # https://books.google.com/books?isbn=0472069322
 
@@ -128,6 +128,7 @@ def google_query(isbn):
 
 
 def main():
+    """Query ISBN and print bibliographic data."""
     import argparse
 
     arg_parser = argparse.ArgumentParser(

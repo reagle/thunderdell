@@ -286,7 +286,7 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = "w" if args.log_to_file else None
+    log_mode = "w"
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
@@ -323,28 +323,17 @@ def main(argv: list[str] | None = None) -> None:
                 result = query(isbn_input, session)
                 results[isbn_input] = result
                 log.info(f"Successfully retrieved data for ISBN: {isbn_input}")
-                # Pretty print individual result immediately
-                print(f"--- Result for ISBN: {isbn_input} ---")
-                pprint.pprint(result)
-                print("-" * (25 + len(isbn_input)))  # Separator
+                print(f"ISBN: {isbn_input} | Result: {result}")
             except ValueError as e:
                 log.error(f"Query failed for ISBN {isbn_input}: {e}")
                 results[isbn_input] = {"error": str(e)}
-                print(f"--- Error for ISBN: {isbn_input} ---")
-                print(f"    {e}")
-                print("-" * (23 + len(isbn_input)))
+                print(f"ISBN: {isbn_input} | Error: {e}")
             except Exception as e:
                 log.exception(
                     f"An unexpected error occurred for ISBN {isbn_input}: {e}"
                 )
                 results[isbn_input] = {"error": f"Unexpected error: {e}"}
-                print(f"--- Unexpected Error for ISBN: {isbn_input} ---")
-                print(f"    {e}")
-                print("-" * (32 + len(isbn_input)))
-
-    # Optionally, print all results at the end (might be redundant with above)
-    # print("\n--- All Results ---")
-    # pprint.pprint(results)
+                print(f"ISBN: {isbn_input} | Unexpected Error: {e}")
 
     log.info("ISBN query process finished.")
 

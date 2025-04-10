@@ -17,7 +17,7 @@ from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 from send2trash import send2trash  # type: ignore
 
-import thunderdell.busy
+from thunderdell import busy
 
 HOME = Path.home()
 
@@ -57,7 +57,7 @@ def main(argv: list[str]) -> argparse.Namespace:
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])(argv)
+    args = arg_parser.parse_args(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

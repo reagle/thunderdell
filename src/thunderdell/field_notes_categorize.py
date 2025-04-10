@@ -12,7 +12,6 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict
 
 import lxml.etree as et
 
@@ -56,7 +55,7 @@ def categorize_mindmap(old_fn: Path) -> None:
     old_map = old_doc.getroot()
 
     # Use defaultdict for cleaner grouping
-    categorized_nodes: DefaultDict[str, NodeList] = defaultdict(list)
+    categorized_nodes: defaultdict[str, NodeList] = defaultdict(list)
 
     # Iterate through all nodes to find 'cite' nodes
     for node in old_map.iterfind(".//node[@STYLE_REF='cite']"):
@@ -71,7 +70,9 @@ def categorize_mindmap(old_fn: Path) -> None:
         # Navigate up to the ancestor 'author' node (assuming structure: author > title > cite)
         title_node = node.getparent()
         if title_node is None:
-            log.warning(f"Parent (title) node missing for cite node: {node_text[:50]}...")
+            log.warning(
+                f"Parent (title) node missing for cite node: {node_text[:50]}..."
+            )
             continue
         author_node = title_node.getparent()
         if author_node is None:
@@ -80,15 +81,21 @@ def categorize_mindmap(old_fn: Path) -> None:
             )
             continue
 
-        log.debug(f"Assigning node (author: {author_node.get('TEXT', '')[:30]}...) to category: {keyword}")
+        log.debug(
+            f"Assigning node (author: {author_node.get('TEXT', '')[:30]}...) to category: {keyword}"
+        )
         categorized_nodes[keyword].append(author_node)
 
     if not categorized_nodes:
-        log.warning(f"No cite nodes found or processed in {old_fn}. No output generated.")
+        log.warning(
+            f"No cite nodes found or processed in {old_fn}. No output generated."
+        )
         return
 
     # Create the new mindmap structure
-    new_map = et.Element("map", version="freeplane 1.12.1") # Consider updating version if needed
+    new_map = et.Element(
+        "map", version="freeplane 1.12.1"
+    )  # Consider updating version if needed
     new_doc = et.ElementTree(new_map)
     # Use the output filename as the root node text
     root_node = et.SubElement(new_map, "node", TEXT=str(cat_fn.name))
@@ -110,7 +117,7 @@ def categorize_mindmap(old_fn: Path) -> None:
             str(cat_fn), encoding="utf-8", xml_declaration=True, pretty_print=True
         )
         log.info(f"Successfully created categorized mindmap: {cat_fn}")
-    except IOError as e:
+    except OSError as e:
         log.error(f"Failed to write output file {cat_fn}: {e}")
     except Exception as e:
         log.exception(f"An unexpected error occurred while writing {cat_fn}: {e}")
@@ -150,10 +157,10 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         "--version", action="version", version=f"%(prog)s {__version__}"
     )
 
-    args = arg_parser.parse_args(argv) # Use provided argv or sys.argv[1:]
+    args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging
-    log_level = log.WARNING # Default
+    log_level = log.WARNING  # Default
     if args.verbose == 1:
         log_level = log.INFO
     elif args.verbose >= 2:
@@ -161,11 +168,15 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = "w" if args.log_to_file else None # Overwrite log file if logging to file
+    log_mode = (
+        "w" if args.log_to_file else None
+    )  # Overwrite log file if logging to file
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(filename=log_file, filemode=log_mode, level=log_level, format=log_format)
+        log.basicConfig(
+            filename=log_file, filemode=log_mode, level=log_level, format=log_format
+        )
     else:
         log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
@@ -180,7 +191,7 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_arguments(argv)
     if not args.filename.is_file():
         log.error(f"Input file not found or is not a file: {args.filename}")
-        sys.exit(1) # Exit if the input file doesn't exist
+        sys.exit(1)  # Exit if the input file doesn't exist
 
     categorize_mindmap(args.filename)
     log.info("Categorization process finished.")
@@ -188,4 +199,4 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     # Pass command line arguments (excluding script name) to main
-    main(sys.argv[1:])
+    main()

@@ -55,7 +55,7 @@ def categorize_mindmap(old_fn: Path) -> None:
     old_map = old_doc.getroot()
 
     # Use defaultdict for cleaner grouping
-    categorized_nodes: defaultdict[str, NodeList] = defaultdict(list)
+    categorized_nodes = defaultdict(list)
 
     # Iterate through all nodes to find 'cite' nodes
     for node in old_map.iterfind(".//node[@STYLE_REF='cite']"):

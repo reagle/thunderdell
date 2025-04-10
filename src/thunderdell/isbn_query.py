@@ -82,7 +82,7 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
             author.get("name", "Unknown Author") for author in authors
         )
     elif by_statement := json_details.get("by_statement"):
-        bib_entry["author"] = by_statement.strip().rstrip(".").strip() # Clean up
+        bib_entry["author"] = by_statement.strip().rstrip(".").strip()  # Clean up
 
     if publishers := json_details.get("publishers"):
         bib_entry["publisher"] = publishers[0]
@@ -101,13 +101,12 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
             # Fallback: try to extract just the year if parsing fails
             year_match = arrow.get(pub_date, ["YYYY", "YYYY-MM", "MM-YYYY"])
             if year_match:
-                 bib_entry["date"] = year_match.format("YYYY")
+                bib_entry["date"] = year_match.format("YYYY")
             else:
-                 log.error(f"Failed to extract year from '{pub_date}'")
-
+                log.error(f"Failed to extract year from '{pub_date}'")
 
     if title := json_details.get("title"):
-         bib_entry["title"] = str(title).strip() # Ensure string and strip
+        bib_entry["title"] = str(title).strip()  # Ensure string and strip
 
     # Combine title and subtitle if both exist
     if "title" in bib_entry and (subtitle := json_details.get("subtitle")):
@@ -117,9 +116,9 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
     # Add other string fields directly
     for key, value in json_details.items():
         if key not in bib_entry and isinstance(value, str):
-             bib_entry[key] = value.strip()
+            bib_entry[key] = value.strip()
 
-    bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}" # Default URL
+    bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}"  # Default URL
 
     log.debug(f"Open Library result for {isbn_norm}: {bib_entry}")
     return bib_entry
@@ -149,7 +148,9 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
     try:
         json_result = response.json()
     except json.JSONDecodeError as e:
-        log.error(f"Failed to decode JSON from Google Books API for ISBN {isbn_norm}: {e}")
+        log.error(
+            f"Failed to decode JSON from Google Books API for ISBN {isbn_norm}: {e}"
+        )
         log.debug(f"Response content: {response.text}")
         return None
 
@@ -168,29 +169,30 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
         try:
             arrow_date = arrow.get(pub_date)
             # Format based on precision
-            if len(pub_date) == 4: # YYYY
+            if len(pub_date) == 4:  # YYYY
                 bib_entry["date"] = arrow_date.format("YYYY")
-            elif len(pub_date) == 7: # YYYY-MM
-                 bib_entry["date"] = arrow_date.format("YYYYMM")
-            else: # Assume YYYY-MM-DD or similar
-                 bib_entry["date"] = arrow_date.format("YYYYMMDD")
+            elif len(pub_date) == 7:  # YYYY-MM
+                bib_entry["date"] = arrow_date.format("YYYYMM")
+            else:  # Assume YYYY-MM-DD or similar
+                bib_entry["date"] = arrow_date.format("YYYYMMDD")
         except arrow.parser.ParserError:
-            log.warning(f"Could not parse Google date '{pub_date}' for ISBN {isbn_norm}. Storing as is.")
-            bib_entry["date"] = pub_date # Store raw if unparseable
+            log.warning(
+                f"Could not parse Google date '{pub_date}' for ISBN {isbn_norm}. Storing as is."
+            )
+            bib_entry["date"] = pub_date  # Store raw if unparseable
 
     if title := json_vol_info.get("title"):
         bib_entry["title"] = str(title).strip()
 
     # Combine title and subtitle
     if "title" in bib_entry and (subtitle := json_vol_info.get("subtitle")):
-         subtitle_str = str(subtitle).strip()
-         bib_entry["title"] += f": {subtitle_str[:1].upper()}{subtitle_str[1:]}"
+        subtitle_str = str(subtitle).strip()
+        bib_entry["title"] += f": {subtitle_str[:1].upper()}{subtitle_str[1:]}"
 
     # Add other relevant string fields
     for key in ["publisher", "description", "language"]:
-        if value := json_vol_info.get(key):
-            if isinstance(value, str):
-                 bib_entry[key] = value.strip()
+        if (value := json_vol_info.get(key)) and isinstance(value, str):
+            bib_entry[key] = value.strip()
 
     bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}"
 
@@ -227,12 +229,12 @@ def query(isbn: str, session: requests.Session) -> BibDict:
 
     # Final check for essential fields
     if not all(k in bib for k in ["author", "title", "date", "isbn", "url"]):
-         log.warning(f"Query result for {isbn} might be incomplete: {bib}")
-         # Ensure defaults if absolutely necessary, though upstream should provide
-         bib.setdefault("author", "Unknown Author")
-         bib.setdefault("title", "Unknown Title")
-         bib.setdefault("date", "Unknown Date")
-         # isbn and url should always be set by the query functions
+        log.warning(f"Query result for {isbn} might be incomplete: {bib}")
+        # Ensure defaults if absolutely necessary, though upstream should provide
+        bib.setdefault("author", "Unknown Author")
+        bib.setdefault("title", "Unknown Title")
+        bib.setdefault("date", "Unknown Date")
+        # isbn and url should always be set by the query functions
 
     log.info(f"Completed query for ISBN {isbn}")
     return bib
@@ -295,9 +297,8 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
     # Configure requests logging level based on verbosity
-    logging.getLogger("requests").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
-    logging.getLogger("urllib3").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
-
+    log.getLogger("requests").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
+    log.getLogger("urllib3").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
 
     log.debug(f"Log level set to: {log.getLevelName(log_level)}")
     log.debug(f"Parsed arguments: {args}")
@@ -313,7 +314,9 @@ def main(argv: list[str] | None = None) -> None:
     # Use a session for potential connection reuse
     with requests.Session() as session:
         # Set a user-agent
-        session.headers.update({'User-Agent': f'thunderdell/{__version__} (Python-requests)'})
+        session.headers.update(
+            {"User-Agent": f"thunderdell/{__version__} (Python-requests)"}
+        )
 
         for isbn_input in args.isbns:
             try:
@@ -323,7 +326,7 @@ def main(argv: list[str] | None = None) -> None:
                 # Pretty print individual result immediately
                 print(f"--- Result for ISBN: {isbn_input} ---")
                 pprint.pprint(result)
-                print("-" * (25 + len(isbn_input))) # Separator
+                print("-" * (25 + len(isbn_input)))  # Separator
             except ValueError as e:
                 log.error(f"Query failed for ISBN {isbn_input}: {e}")
                 results[isbn_input] = {"error": str(e)}
@@ -331,12 +334,13 @@ def main(argv: list[str] | None = None) -> None:
                 print(f"    {e}")
                 print("-" * (23 + len(isbn_input)))
             except Exception as e:
-                log.exception(f"An unexpected error occurred for ISBN {isbn_input}: {e}")
+                log.exception(
+                    f"An unexpected error occurred for ISBN {isbn_input}: {e}"
+                )
                 results[isbn_input] = {"error": f"Unexpected error: {e}"}
                 print(f"--- Unexpected Error for ISBN: {isbn_input} ---")
                 print(f"    {e}")
                 print("-" * (32 + len(isbn_input)))
-
 
     # Optionally, print all results at the end (might be redundant with above)
     # print("\n--- All Results ---")

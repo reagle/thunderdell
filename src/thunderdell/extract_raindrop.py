@@ -8,122 +8,165 @@ __version__ = "1.0"
 
 # TODO: 2024-10-18 : add DOI ability since some papers are web pages
 
-import argparse  # http://docs.python.org/dev/library/argparse.html
+import argparse
 import logging as log
 import re
 import sys
 import webbrowser
-from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
+from pathlib import Path
 
 from send2trash import send2trash  # type: ignore
 
 from thunderdell import busy
 
 HOME = Path.home()
+URL_RE = re.compile(r"https?://\S+")
 
 
-def main(argv: list[str]) -> argparse.Namespace:
-    """Process arguments."""
-    # https://docs.python.org/3/library/argparse.html
+def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="""Format raindrop.io annotations for use with
-        dictation-extract.py in
-            https://github.com/reagle/thunderdell
-        """
+        extract_dictation.py in https://github.com/reagle/thunderdell
+        """,
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     arg_parser.add_argument(
         "-p",
         "--publish",
         action="store_true",
         default=False,
-        help="publish to social networks (can also `-p` in editor)",
+        help="Publish to social networks (can also `-p` in editor).",
     )
 
     # positional arguments
-    arg_parser.add_argument("file_names", nargs="+", type=Path, metavar="FILE_NAMES")
+    arg_parser.add_argument(
+        "file_names",
+        nargs="+",
+        type=Path,
+        metavar="FILE_NAMES",
+        help="One or more raindrop.io export files to process.",
+    )
     # optional arguments
     arg_parser.add_argument(
         "-L",
         "--log-to-file",
         action="store_true",
         default=False,
-        help="log to file %(prog)s.log",
+        help="Log messages to %(prog)s.log instead of stderr.",
     )
     arg_parser.add_argument(
         "-V",
         "--verbose",
         action="count",
         default=0,
-        help="increase verbosity from critical though error, warning, info, and debug",
+        help="Increase verbosity (can be used multiple times). -V for WARNING, -VV for INFO, -VVV for DEBUG.",
     )
-    arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])
+    arg_parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
+    args = arg_parser.parse_args(argv) # Use provided argv or sys.argv[1:]
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
-    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    if args.log_to_file:
-        log.basicConfig(
-            filename="extract-raindrop.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
-        )
+    # Configure logging
+    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG) # Default: CRITICAL
+    log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
+    log_mode = "w" if args.log_to_file else None # Overwrite log file if logging to file
+
+    # Use basicConfig with stream for stderr or filename for file
+    if log_file:
+        log.basicConfig(filename=log_file, filemode=log_mode, level=log_level, format=log_format)
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+
+    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
+    log.debug(f"Parsed arguments: {args}")
 
     return args
 
 
-def process_files(args: argparse.Namespace, file_paths: list[Path]) -> None:
-    """Process files for highlights and annotations using console annotation syntax.
+def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
+    """Process a single file for highlights and annotations."""
+    log.info(f"Processing file: {file_path}")
+    url = ""
+    comment_lines: list[str] = [""]  # Start with an empty line for potential summary
 
-    .summary
-    excerpt
-    , annotation.
-    """
-    URL_RE = re.compile(r"https?://\S+")
-    for file_path in file_paths:
-        log.info(f"{file_path=}")
-        url_found = False
-        url = ""
-        comment = [""]  # initial line for summary
+    try:
+        file_content = file_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        log.error(f"File not found: {file_path}. Skipping.")
+        return
+    except Exception as e:
+        log.exception(f"Error reading file {file_path}: {e}")
+        return
 
-        for line in file_path.read_text().splitlines():
-            line = line.strip()
+    # First pass: find the URL
+    for line in file_content.splitlines():
+        if match := URL_RE.search(line):
+            url = match.group()
+            log.info(f"URL found: {url}")
+            break  # Stop after finding the first URL
+    else:
+        log.warning(f"No URL found in {file_path}. Skipping processing logic.")
+        return # Cannot proceed without a URL
 
-            if not url_found:
-                if match := URL_RE.search(line):
-                    url = match.group()
-                    url_found = True
-                    print(f"URL found in {file_path}: {url}")
-                continue
+    # Second pass: process lines for comments/excerpts
+    for line in file_content.splitlines():
+        line = line.strip()
+        if not line or URL_RE.search(line): # Skip empty lines and lines containing the URL
+            continue
 
-            if not line:
-                continue
+        # Lines starting with "- " are treated as excerpts
+        if line.startswith("- "):
+            comment_lines.append(line[2:].strip())
+        # Other non-empty lines are treated as annotations, marked with ", "
+        else:
+            comment_lines.append(f", {line}")
 
-            # lines are presumed to be excerpts, so remove list marker
-            if line.startswith("- "):
-                comment.append(line[2:].strip())
-            # else, mark with comma as it's a user annotation
-            else:
-                comment.append(f", {line}")
+    text = "\n".join(comment_lines)
+    log.debug(f"Generated comment text:\n{text}")
 
-        text = "\n".join(comment)
-
+    # Open URL in browser and process with busy.py logic
+    try:
         webbrowser.open(url)
-        params = {"scheme": "c", "url": url, "comment": ""}
-        scraper = busy.get_scraper(params["url"].strip(), text)
+        log.info(f"Opened URL in browser: {url}")
+        # Assuming busy.get_scraper and log2mm handle their own errors/logging
+        scraper = busy.get_scraper(url, text) # Pass URL and formatted text
         biblio = scraper.get_biblio()
         biblio["tags"] = "misc"  # default keyword
-        del biblio["excerpt"]  # no need for auto excerpt
-        busy.log2mm(args, biblio)
+        if "excerpt" in biblio:
+             del biblio["excerpt"]  # remove auto excerpt if present
+        busy.log2mm(args, biblio) # Pass args for potential publish flag etc.
+        log.info(f"Successfully processed and logged to mindmap for {url}")
+    except Exception as e:
+        log.exception(f"Error during scraping or mindmap logging for {url}: {e}")
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Main execution function."""
+    args = parse_arguments(argv)
+
+    log.info("==================================")
+    log.info(f"Starting processing with args: {args}")
+
+    files_to_process = args.file_names
+    for file_path in files_to_process:
+        process_single_file(args, file_path)
+
+    # Ask user about trashing processed files *after* all files are processed
+    try:
+        user_input = input(f"\nTrash processed file(s) ({len(files_to_process)} files)? [y/N]: ").lower()
+        if user_input == "y":
+            log.info(f"Sending {len(files_to_process)} file(s) to trash: {files_to_process}")
+            send2trash(files_to_process)
+            log.info("File(s) sent to trash.")
+        else:
+            log.info("Files were not sent to trash.")
+    except Exception as e:
+        log.exception(f"Error during file trashing operation: {e}")
+
+    log.info("Processing finished.")
 
 
 if __name__ == "__main__":
-    args = main(sys.argv[1:])
-    log.info("==================================")
-    log.info(f"{args=}")
-    process_files(args, args.file_names)
-    user_input = input("\nTrash processed file? 'y' for yes,\n")
-    if user_input == "y":
-        send2trash(args.file_names)
+    main()

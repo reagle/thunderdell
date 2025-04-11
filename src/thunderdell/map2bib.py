@@ -27,16 +27,8 @@ from urllib.parse import parse_qs
 # import xml.etree.ElementTree as et
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
 
-from thunderdell.formats import (
-    emit_biblatex,
-    emit_json_csl,
-    emit_results,
-    emit_wikipedia,
-    emit_yaml_csl,
-)
-
-from . import config
-from .biblio.fields import (
+from thunderdell import config
+from thunderdell.biblio.fields import (
     BIB_SHORTCUTS,
     BIB_TYPES,
     BIBLATEX_TYPES,
@@ -44,13 +36,20 @@ from .biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from .types_thunderdell import EntryDict, PersonName, PubDate
-from .utils.text import (
+from thunderdell.formats import (
+    emit_biblatex,
+    emit_json_csl,
+    emit_results,
+    emit_wikipedia,
+    emit_yaml_csl,
+)
+from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
+from thunderdell.utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
     strip_accents,
 )
-from .utils.web import (
+from thunderdell.utils.web import (
     unescape_entities,
 )
 

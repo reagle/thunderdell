@@ -291,9 +291,6 @@ def parse_args(args) -> argparse.Namespace:
         help="Capitalize safely, e.g., preserve abbreviations",
     )
     arg_parser.add_argument(
-        "-T", "--test", action="store_true", default=False, help="Test"
-    )
-    arg_parser.add_argument(
         "-o",
         "--out-filename",
         type=Path,

@@ -43,6 +43,7 @@ from .biblio.fields import (
     BORING_WORDS,
     PARTICLES,
     SUFFIXES,
+)
 from .types_thunderdell import EntryDict, PersonName, PubDate
 from .utils.text import (
     pretty_tabulate_dict,

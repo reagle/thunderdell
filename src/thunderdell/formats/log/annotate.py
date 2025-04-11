@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
+import argparse
 import logging as log
 import re
 import time
@@ -16,16 +16,14 @@ from collections import namedtuple
 from pathlib import Path
 from subprocess import call
 
-from thunderdell import config
-from thunderdell import thunderdell as td
-from thunderdell.biblio import fields as bf
+from thunderdell import config, map2bib
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
 from thunderdell.change_case import title_case
 
 NOW = time.localtime()
 
 
-def do_console_annotation(args, biblio):
+def do_console_annotation(args: argparse.Namespace, biblio):
     """Augment biblio with console annotations."""
     Date = namedtuple("Date", ["year", "month", "day", "circa", "time"])
 
@@ -43,9 +41,9 @@ def do_console_annotation(args, biblio):
 
     def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
         log.info(biblio)
-        return td.get_identifier(
+        return map2bib.get_identifier(
             {
-                "author": td.parse_names(biblio["author"]),
+                "author": map2bib.parse_names(biblio["author"]),
                 "title": biblio["title"],
                 # 'date': biblio['date'][0:4],
                 "date": Date(

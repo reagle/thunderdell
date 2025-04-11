@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
+import argparse
 import logging as log
 import time
 from xml.etree.ElementTree import ElementTree, SubElement, parse  # Element,
@@ -24,7 +24,7 @@ NOW = time.localtime()
 CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
-def log2mm(args, biblio):
+def log2mm(args: argparse.Namespace, biblio: dict):
     """Log to bibliographic mindmap.
 
     http://reagle.org/joseph/2009/01/thunderdell.html.

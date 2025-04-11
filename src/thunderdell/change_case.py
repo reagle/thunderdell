@@ -345,19 +345,7 @@ def main(args: argparse.Namespace | None = None):
     else:
         log.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    if args.test:
-        import doctest
-
-        import pytest
-
-        from thunderdell.tests import test_change_case
-
-        print("Running tests")
-        doctest.testmod()
-        pytest.main(["-v", "-k", "change_case"])
-
-        test_change_case.test_change_case()
-        sys.exit()
+    # Test execution should be handled by pytest from the project root, not here.
 
     case_type = "title" if args.title_case else "sentence"
     log.debug(f"{args.text=}")

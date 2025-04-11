@@ -111,13 +111,6 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="log to file %(prog)s.log",
     )
     arg_parser.add_argument(
-        "-T",
-        "--test",
-        action="store_true",
-        default=False,
-        help="run doc tests",
-    )
-    arg_parser.add_argument(
         "-V",
         "--verbose",
         action="count",
@@ -125,7 +118,7 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])(argv)
+    args = arg_parser.parse_args(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

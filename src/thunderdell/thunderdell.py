@@ -27,6 +27,14 @@ from urllib.parse import parse_qs
 # import xml.etree.ElementTree as et
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
 
+from thunderdell.formats import (
+    emit_biblatex,
+    emit_json_csl,
+    emit_results,
+    emit_wikipedia,
+    emit_yaml_csl,
+)
+
 from . import config
 from .biblio.fields import (
     BIB_SHORTCUTS,
@@ -35,14 +43,6 @@ from .biblio.fields import (
     BORING_WORDS,
     PARTICLES,
     SUFFIXES,
-)
-from thunderdell.formats import (
-    emit_biblatex,
-    emit_json_csl,
-    emit_results,
-    emit_wikipedia,
-    emit_yaml_csl,
-)
 from .types_thunderdell import EntryDict, PersonName, PubDate
 from .utils.text import (
     pretty_tabulate_dict,
@@ -738,9 +738,6 @@ def main():
         metavar="BST",
     )
     arg_parser.add_argument(
-        "-T", "--tests", action="store_true", default=False, help="run tests"
-    )
-    arg_parser.add_argument(
         "-u",
         "--urls_online_only",
         action="store_true",
@@ -834,18 +831,6 @@ def main():
         output_path = file_name.with_suffix(suffix)
     else:
         output_path = None
-
-    if args.tests:
-        import doctest
-
-        # from thunderdell.tests import test_thunderdell # This will likely fail if run directly
-
-        print("Running tests")
-        doctest.testmod() # Runs doctests in this file
-        # test_thunderdell.test_results() # Commenting out as it might cause issues when run directly
-        # test_extract_kindle.test_process_html()
-        # test_extract_goodreader.test_process_text()
-        sys.exit()
 
     if args.fields:
         print(

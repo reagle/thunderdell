@@ -173,13 +173,6 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
     )
     arg_parser.add_argument(
-        "-T",
-        "--tests",
-        action="store_true",
-        default=False,
-        help="run doc tests",
-    )
-    arg_parser.add_argument(
         "-C",
         "--container-shortcuts",
         action="store_true",
@@ -235,12 +228,6 @@ def main():
     else:
         log.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    if args.tests:
-        print("Running doctests")
-        import doctest
-
-        doctest.testmod()
-        sys.exit()
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
             print(pretty_tabulate_dict(dictionary, 4))

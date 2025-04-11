@@ -9,16 +9,21 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import textwrap
+import warnings
 
 import arrow
 
-# https://github.com/trevorhobenshield/twitter-api-client/tree/main
+# https://github.com/trevorhobenshield/twitter-api-client/
 from twitter.scraper import Scraper
 
 # from twitter.util import init_session
 import thunderdell.utils.web as uw
 
 from .default import ScrapeDefault
+
+# twitter-api-client has some regex syntax warnings; should be raw strings
+# ... site-packages/twitter/scraper.py:549: SyntaxWarning: invalid escape sequence '\d'
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 class ScrapeTwitter(ScrapeDefault):

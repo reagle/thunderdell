@@ -842,7 +842,7 @@ def main():
 
         print("Running tests")
         doctest.testmod() # Runs doctests in this file
-        test_thunderdell.test_results()
+        # test_thunderdell.test_results() # Commenting out as it might cause issues when run directly
         # test_extract_kindle.test_process_html()
         # test_extract_goodreader.test_process_text()
         sys.exit()

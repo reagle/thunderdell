@@ -27,8 +27,8 @@ from urllib.parse import parse_qs
 # import xml.etree.ElementTree as et
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
 
-from thunderdell import config
-from thunderdell.biblio.fields import (
+from . import config
+from .biblio.fields import (
     BIB_SHORTCUTS,
     BIB_TYPES,
     BIBLATEX_TYPES,
@@ -43,13 +43,13 @@ from thunderdell.formats import (
     emit_wikipedia,
     emit_yaml_csl,
 )
-from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
-from thunderdell.utils.text import (
+from .types_thunderdell import EntryDict, PersonName, PubDate
+from .utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
     strip_accents,
 )
-from thunderdell.utils.web import (
+from .utils.web import (
     unescape_entities,
 )
 
@@ -838,10 +838,10 @@ def main():
     if args.tests:
         import doctest
 
-        from thunderdell.tests import test_thunderdell
+        # from thunderdell.tests import test_thunderdell # This will likely fail if run directly
 
         print("Running tests")
-        doctest.testmod()
+        doctest.testmod() # Runs doctests in this file
         test_thunderdell.test_results()
         # test_extract_kindle.test_process_html()
         # test_extract_goodreader.test_process_text()

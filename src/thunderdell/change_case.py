@@ -350,7 +350,7 @@ def main(args: argparse.Namespace | None = None):
 
         import pytest
 
-        from tests import test_change_case
+        from thunderdell.tests import test_change_case
 
         print("Running tests")
         doctest.testmod()

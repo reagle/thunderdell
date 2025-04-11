@@ -40,7 +40,7 @@ field-notes-categorize = "thunderdell.field_notes_categorize:main"
 fix-mindmaps = "thunderdell.fix_mindmaps:main"
 isbn-query = "thunderdell.isbn_query:main"
 search = "thunderdell.search:main"
-thunderdell = "thunderdell.thunderdell:main"
+thunderdell = "thunderdell.core:main"
 
 [tool.black]
 line-length = 88

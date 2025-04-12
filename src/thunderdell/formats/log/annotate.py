@@ -17,6 +17,7 @@ from pathlib import Path
 from subprocess import call
 
 from thunderdell import config, map2bib
+from thunderdell.biblio import fields as bf
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
 from thunderdell.change_case import title_case
 
@@ -146,7 +147,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
         if key == "tags" and biblio["tags"]:
             tags = " ".join(
                 [
-                    "kw=" + KEY_SHORTCUTS.get(tag, tag)
+                    f"kw={KEY_SHORTCUTS.get(tag, tag) or tag}"  # Using or to prevent None
                     for tag in biblio["tags"].strip().split(" ")
                 ]
             )

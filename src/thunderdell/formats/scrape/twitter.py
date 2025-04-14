@@ -16,7 +16,6 @@ import arrow
 # https://github.com/trevorhobenshield/twitter-api-client/
 from twitter.scraper import Scraper
 
-# from twitter.util import init_session
 import thunderdell.utils.web as uw
 
 from .default import ScrapeDefault

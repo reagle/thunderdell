@@ -5,7 +5,7 @@ references:
   author:
   - family: "Gosh"
     given: "Daniel"
-  custom2: "/Users/reagle/bin/td/tests/case.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/case.mm"
   issued:
     year: 2012
     month: 07
@@ -23,7 +23,7 @@ references:
   author:
   - family: "Suitable_Zucchini674"
   container-title: "<span class='nocase'>r/AmItheButtface</span>"
-  custom2: "/Users/reagle/bin/td/tests/case.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/case.mm"
   issued:
     year: 2020
     month: 11

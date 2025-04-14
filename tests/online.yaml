@@ -4,7 +4,7 @@ references:
   type: article
   author:
   - family: "A1"
-  custom2: "/Users/reagle/bin/td/tests/online.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/online.mm"
   issued:
     year: 1991
   title: "Title one"
@@ -13,7 +13,7 @@ references:
   type: webpage
   author:
   - family: "A2"
-  custom2: "/Users/reagle/bin/td/tests/online.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/online.mm"
   issued:
     year: 1992
   title: "Title two"
@@ -23,7 +23,7 @@ references:
   author:
   - family: "Reagle"
     given: "Joseph"
-  custom2: "/Users/reagle/bin/td/tests/online.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/online.mm"
   issued:
     year: 2004
     month: 07

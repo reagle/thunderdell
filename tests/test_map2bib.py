@@ -40,6 +40,13 @@ class CaptureOutput:
         pass
 
 
+def filter_custom2_lines(text):
+    """Remove custom2 lines from text."""
+    return "\n".join(
+        line for line in text.splitlines() if not line.strip().startswith("custom2:")
+    )
+
+
 def test_results():
     """Test results of direct function calls to map2bib functionality.
 
@@ -75,8 +82,12 @@ def test_results():
         result = output_capture.captured_output
         expect = test_fn.with_suffix(".yaml").read_text()
 
-        assert result == expect, (
-            f"\nExpected:\n{expect}\n\nGot:\n{result}\n\nDiff:\n{diff_strings(expect, result)}"
+        result_filtered, expect_filtered = [
+            filter_custom2_lines(text) for text in (result, expect)
+        ]
+
+        assert result_filtered == expect_filtered, (
+            f"\nExpected:\n{expect_filtered}\n\nGot:\n{result_filtered}\n\nDiff:\n{diff_strings(expect_filtered, result_filtered)}"
         )
 
 

@@ -211,9 +211,13 @@ def query(isbn: str) -> BibDict:
         bib_open = open_query(isbn, session)
 
         # Try Google if Open Library failed or lacks author/title
-        needs_google = not bib_open or not all(k in bib_open for k in ["author", "title"])
+        needs_google = not bib_open or not all(
+            k in bib_open for k in ["author", "title"]
+        )
         if needs_google:
-            log.info(f"Querying Google as Open Library result was insufficient for {isbn}")
+            log.info(
+                f"Querying Google as Open Library result was insufficient for {isbn}"
+            )
             bib_google = google_query(isbn, session)
 
     if not bib_open and not bib_google:
@@ -341,4 +345,4 @@ def main(args: argparse.Namespace | None = None) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

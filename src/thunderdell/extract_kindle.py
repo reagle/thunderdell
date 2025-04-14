@@ -38,8 +38,6 @@ def process_email(file_name: Path) -> str:
         raise Exception("There's no HTML attachment to process.")
 
 
-import requests
-
 def process_html(content: str) -> str:
     """Process text for annotation kind, color, and page number."""
     RE_ISBN = re.compile(r"978(?:-?\d){10}")

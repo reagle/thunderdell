@@ -60,8 +60,7 @@ def process_html(content: str) -> str:
     if isbn_match := RE_ISBN.search(content):
         ISBN = isbn_match.group(0)
         log.info(f"{ISBN=}")
-        with requests.Session() as session:
-            text_new = get_bib_preamble(ISBN, session)
+        text_new = get_bib_preamble(ISBN)
 
     text_new.append("edition = Kindle")
     if pagination_type == "Location":

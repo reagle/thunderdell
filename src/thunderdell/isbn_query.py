@@ -200,20 +200,21 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
     return bib_entry
 
 
-def query(isbn: str, session: requests.Session) -> BibDict:
+def query(isbn: str) -> BibDict:
     """Query available ISBN services and merge results."""
     log.info(f"Starting query for ISBN: {isbn}")
     bib: BibDict = {}
     bib_open = bib_google = None
 
-    # Try Open Library first
-    bib_open = open_query(isbn, session)
+    with requests.Session() as session:
+        # Try Open Library first
+        bib_open = open_query(isbn, session)
 
-    # Try Google if Open Library failed or lacks author/title
-    needs_google = not bib_open or not all(k in bib_open for k in ["author", "title"])
-    if needs_google:
-        log.info(f"Querying Google as Open Library result was insufficient for {isbn}")
-        bib_google = google_query(isbn, session)
+        # Try Google if Open Library failed or lacks author/title
+        needs_google = not bib_open or not all(k in bib_open for k in ["author", "title"])
+        if needs_google:
+            log.info(f"Querying Google as Open Library result was insufficient for {isbn}")
+            bib_google = google_query(isbn, session)
 
     if not bib_open and not bib_google:
         raise ValueError(f"All ISBN queries failed for {isbn}")

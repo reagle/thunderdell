@@ -11,7 +11,7 @@ __version__ = "1.0"
 
 import logging as log
 
-import thunderdell.formats as formats
+from thunderdell import formats
 
 
 class args:

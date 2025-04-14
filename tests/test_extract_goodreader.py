@@ -10,8 +10,8 @@
 Run in parent folder as `pytest tests`.
 """
 
-from config import TESTS_FOLDER  # Pathlib object
-from extract_goodreader import parse_args, process_text
+from thunderdell.config import TESTS_FOLDER  # Pathlib object
+from thunderdell.extract_goodreader import parse_args, process_text
 
 
 def test_process_text():

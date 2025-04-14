@@ -38,6 +38,8 @@ def process_email(file_name: Path) -> str:
         raise Exception("There's no HTML attachment to process.")
 
 
+import requests
+
 def process_html(content: str) -> str:
     """Process text for annotation kind, color, and page number."""
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
@@ -58,7 +60,8 @@ def process_html(content: str) -> str:
     if isbn_match := RE_ISBN.search(content):
         ISBN = isbn_match.group(0)
         log.info(f"{ISBN=}")
-        text_new = get_bib_preamble(ISBN)
+        with requests.Session() as session:
+            text_new = get_bib_preamble(ISBN, session)
 
     text_new.append("edition = Kindle")
     if pagination_type == "Location":

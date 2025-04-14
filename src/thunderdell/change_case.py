@@ -43,7 +43,7 @@ JUNK_WORDS = {
 }
 BORING_WORDS = ARTICLES | CONJUNCTIONS | SHORT_PREPOSITIONS | JUNK_WORDS
 # BORING_WORDS is used in safe_capwords() and change_case() below.
-# Not used by thunderdell.py because it doesn't require slow
+# Not used by map2bib.py because it doesn't require slow
 # wordset processing below
 
 

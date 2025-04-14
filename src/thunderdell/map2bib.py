@@ -639,7 +639,8 @@ def parse_names(names: str) -> list[PersonName]:
     return names_p
 
 
-def main():
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
     import argparse
 
     arg_parser = argparse.ArgumentParser(
@@ -782,7 +783,15 @@ def main():
         help="emit YAML/CSL for use with pandoc [default]",
     )
 
-    args = arg_parser.parse_args(sys.argv[1:])
+    args = arg_parser.parse_args(argv)
+    return args
+
+
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
+
     file_name = args.input_file.absolute()
 
     log_level = (log.CRITICAL) - (args.verbose * 10)

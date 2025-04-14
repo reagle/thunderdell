@@ -11,7 +11,7 @@ CLIENT_HOME = Path("/Users/reagle")  # for opening local results pages
 DEFAULT_MAP = HOME / "joseph" / "readings.mm"
 DEFAULT_PRETTY_MAP = HOME / "joseph" / "2005" / "ethno" / "field-notes.mm"
 TESTS_FOLDER = HOME / "bin" / "td" / "tests"
-THUNDERDELL_EXE = BIN_DIR / "thunderdell.py"
+THUNDERDELL_EXE = BIN_DIR / "map2bib.py"
 
 TMP_DIR = HOME / "tmp" / ".td"
 TMP_DIR.mkdir(parents=True, exist_ok=True)

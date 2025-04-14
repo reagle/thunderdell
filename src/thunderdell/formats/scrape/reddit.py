@@ -24,6 +24,8 @@ NOW = time.localtime()
 
 
 class ScrapeReddit(ScrapeDefault):
+    """Scrape Reddit class."""
+
     def __init__(self, url_clean, comment):
         print("Scraping reddit", end="\n")
         ScrapeDefault.__init__(self, url_clean, comment)

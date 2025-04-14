@@ -11,6 +11,8 @@ __version__ = "1.0"
 
 import logging as log
 
+import requests
+
 from thunderdell import formats
 
 
@@ -19,8 +21,6 @@ class args:
 
     publish = False  # don't tweet at this level
 
-
-import requests
 
 def get_bib_preamble(token: str, session: requests.Session) -> list[str]:
     """Call out to get and format biblio information using ISBN/DOI APIs."""

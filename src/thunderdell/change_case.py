@@ -17,7 +17,8 @@ import string
 import sys
 from pathlib import Path
 
-from thunderdell.config import BIN_DIR
+# from thunderdell.config import PROJECT_ROOT
+from thunderdell.config import PROPER_NOUNS_FN, WORD_LIST_FN
 
 ARTICLES = {"a", "an", "the"}
 CONJUNCTIONS = {"and", "but", "nor", "or"}
@@ -60,14 +61,13 @@ def create_wordset(file_path: Path) -> set:
 
 
 # TODO find alternative to hardcoded path that also works with import
-LIST_PATH = BIN_DIR / "biblio"
-WORD_LIST_FN = LIST_PATH / "wordlist-american.txt"
+# WORD_LIST_FN = PROJECT_ROOT / "biblio" / "wordlist-american.txt"
 wordset = create_wordset(WORD_LIST_FN)
 wordset_lower = {word for word in wordset if word[0].islower()}
 wordset_upper = {word for word in wordset if word[0].isupper()}
 wordset_nocase = {word.lower() for word in wordset}  # used in is_proper_noun()
 
-PROPER_NOUNS_FN = LIST_PATH / "wordlist-proper-nouns.txt"
+# PROPER_NOUNS_FN = PROJECT_ROOT / "biblio" / "wordlist-proper-nouns.txt"
 custom_proper_nouns = create_wordset(PROPER_NOUNS_FN)
 wordset_proper_nouns = {
     word for word in wordset_upper if word.lower() not in wordset_lower

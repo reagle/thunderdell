@@ -230,7 +230,7 @@ def _get_group_n(regex: re.Pattern, text: str, number: int) -> str | None:
     return match.group(number) if match else None
 
 
-def parse_args(argv: list) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
@@ -280,7 +280,7 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])(argv)
+    args = arg_parser.parse_args(argv)
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
@@ -297,10 +297,10 @@ def parse_args(argv: list) -> argparse.Namespace:
     return args
 
 
-def main():
-    import sys
-
-    args = parse_args(sys.argv[1:])
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
 
     log.info("==================================")
     log.info(f"{args=}")

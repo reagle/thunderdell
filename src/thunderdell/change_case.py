@@ -266,7 +266,7 @@ def is_proper_noun(word):
     return False
 
 
-def parse_args(args) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Process arguments."""
     # https://docs.python.org/3/library/argparse.html
 
@@ -327,7 +327,7 @@ def parse_args(args) -> argparse.Namespace:
 def main(args: argparse.Namespace | None = None):
     """Set up logging and execute."""
     if args is None:
-        args = parse_args(sys.argv[1:])
+        args = process_arguments(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

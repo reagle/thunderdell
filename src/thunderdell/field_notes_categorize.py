@@ -123,7 +123,7 @@ def categorize_mindmap(old_fn: Path) -> None:
         log.exception(f"An unexpected error occurred while writing {cat_fn}: {e}")
 
 
-def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description=(
@@ -186,9 +186,11 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Parse arguments and run the categorization."""
-    args = parse_arguments(argv)
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
+
     if not args.filename.is_file():
         log.error(f"Input file not found or is not a file: {args.filename}")
         sys.exit(1)  # Exit if the input file doesn't exist
@@ -198,5 +200,4 @@ def main(argv: list[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    # Pass command line arguments (excluding script name) to main
     main()

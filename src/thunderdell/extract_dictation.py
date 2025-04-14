@@ -104,7 +104,10 @@ def parse_citation_pairs(line: str) -> list[tuple[str, str]]:
     # Split by "key =", keeping delimiters; filter out empty strings
     parts = [p.strip() for p in re.split(r"(\w+\s*=)", line) if p]
     # Group keys and values
-    return [(parts[i].replace("=", "").strip(), parts[i + 1]) for i in range(0, len(parts), 2)]
+    return [
+        (parts[i].replace("=", "").strip(), parts[i + 1])
+        for i in range(0, len(parts), 2)
+    ]
 
 
 def update_entry_with_citations(
@@ -211,7 +214,7 @@ def process_structure_element(
 ) -> MindmapState:
     """Process structural elements (part, chapter, section, subsection)."""
     started, in_part, in_chapter, in_section, in_subsection = state
-    content = content.strip() # Clean content whitespace
+    content = content.strip()  # Clean content whitespace
 
     match element_type.lower():
         case "part":
@@ -244,7 +247,9 @@ def process_structure_element(
             if in_section:
                 close_sections(mm_fd, False, True, False, False)
             full_content = f"section {content}" if content else "section"
-            mm_fd.write(f"""      <node STYLE_REF="quote" TEXT="{clean(full_content)}">\n""")
+            mm_fd.write(
+                f"""      <node STYLE_REF="quote" TEXT="{clean(full_content)}">\n"""
+            )
             in_section = True
             # Reset lower level as we start a new section
             in_subsection = False
@@ -271,10 +276,10 @@ def process_content_line(mm_fd: TextIO, line: str) -> None:
     page_pattern = r"^([\dcdilmxv]+(?:-[\dcdilmxv]+)?)\s+(.*?)(?:-([\dcdilmxv]+))?$"
     if match := re.match(page_pattern, line, re.I):
         line_no = match.group(1)
-        if end_range := match.group(3): # Handle optional end range like '1-2' or '1-x'
-             line_no += f"-{end_range}"
+        if end_range := match.group(3):  # Handle optional end range like '1-2' or '1-x'
+            line_no += f"-{end_range}"
         line_no = line_no.lower()  # lower case roman numbers
-        line_text = match.group(2).strip() # Content is group 2
+        line_text = match.group(2).strip()  # Content is group 2
 
     # Process excerpts (case-insensitive and flexible position)
     if line_text.lower().startswith("excerpt."):
@@ -320,10 +325,10 @@ def build_mm_from_txt(
         element_type, content = match.groups()
         new_state = process_structure_element(mm_fd, element_type, content, state)
 
-    elif line.startswith("--"): # Treat as a literal separator/note
+    elif line.startswith("--"):  # Treat as a literal separator/note
         mm_fd.write(f"""          <node STYLE_REF="default" TEXT="{clean(line)}"/>\n""")
 
-    else: # Default case: process as content (page number, excerpt, paraphrase)
+    else:  # Default case: process as content (page number, excerpt, paraphrase)
         # Ensure content is placed within the current structure level
         indent = "  " * (2 + sum([in_part, in_chapter, in_section, in_subsection]))
         # Temporarily adjust process_content_line or add logic here if needed
@@ -334,7 +339,6 @@ def build_mm_from_txt(
         # For now, we'll keep the original fixed indent in process_content_line.
         process_content_line(mm_fd, line)
 
-
     return new_state, new_entry
 
 
@@ -344,11 +348,19 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         entry: EntryDict = {"keyword": []}
 
         # Initialize state variables
-        state: MindmapState = (False, False, False, False, False) # started, part, chapter, section, subsection
+        state: MindmapState = (
+            False,
+            False,
+            False,
+            False,
+            False,
+        )  # started, part, chapter, section, subsection
 
         mm_fd.write(f'{MINDMAP_PREAMBLE}\n<node TEXT="Readings">\n')
 
-        current_entry: EntryDict = {"keyword": []} # Holds data for the current citation block
+        current_entry: EntryDict = {
+            "keyword": []
+        }  # Holds data for the current citation block
 
         try:
             for line_number, line in enumerate(text.split("\n")):
@@ -361,7 +373,8 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
                     )
         except (ValueError, KeyError, IndexError, TypeError) as err:
             import traceback
-            print(f"Error processing line {line_number+1}: '{line}'")
+
+            print(f"Error processing line {line_number + 1}: '{line}'")
             print(f"Current state: {state}")
             print(f"Current entry: {current_entry}")
             print(f"Error: {err}")
@@ -378,22 +391,28 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         started, in_part, in_chapter, in_section, in_subsection = state
 
         # Close any open section nodes at the end of the file
-        if started: # Ensure the last entry's nodes are closed
-             close_sections(mm_fd, in_subsection, in_section, in_chapter, in_part)
-             mm_fd.write("</node>\n</node>\n") # Close title and author nodes
+        if started:  # Ensure the last entry's nodes are closed
+            close_sections(mm_fd, in_subsection, in_section, in_chapter, in_part)
+            mm_fd.write("</node>\n</node>\n")  # Close title and author nodes
 
         # Close document structure
-        mm_fd.write("</node>\n") # Close "Readings" node
-        mm_fd.write("</node>\n</map>\n") # Close root node and map
+        mm_fd.write("</node>\n")  # Close "Readings" node
+        mm_fd.write("</node>\n</map>\n")  # Close root node and map
 
         log.info(f"Final entry state before potential publish: {current_entry=}")
         # Publish if requested and required fields are present in the *last* entry processed
-        if args.publish and all(k in current_entry for k in ["summary", "title", "url"]):
+        if args.publish and all(
+            k in current_entry for k in ["summary", "title", "url"]
+        ):
             summary = str(current_entry.get("summary", ""))
             title = str(current_entry.get("title", ""))
             url = str(current_entry.get("url", ""))
             keywords = current_entry.get("keyword", [])
-            keyword_str = " ".join(map(str, keywords)) if isinstance(keywords, list) else str(keywords)
+            keyword_str = (
+                " ".join(map(str, keywords))
+                if isinstance(keywords, list)
+                else str(keywords)
+            )
 
             yasn_publish(
                 summary,
@@ -404,7 +423,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
             )
 
 
-def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="""Convert dictated notes to mindmap.
@@ -415,8 +434,13 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     )
 
     # positional arguments
-    arg_parser.add_argument("file_names", nargs="+", type=Path, metavar="FILE_NAMES",
-                            help="One or more text files to process.")
+    arg_parser.add_argument(
+        "file_names",
+        nargs="+",
+        type=Path,
+        metavar="FILE_NAMES",
+        help="One or more text files to process.",
+    )
 
     # optional arguments
     arg_parser.add_argument(
@@ -445,20 +469,23 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     )
 
     # Parse arguments
-    args = arg_parser.parse_args(argv) # Use provided argv or sys.argv[1:]
+    args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging based on verbosity
-    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG) # Default: CRITICAL
+    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)  # Default: CRITICAL
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = "w" if args.log_to_file else None # Overwrite log file if logging to file
+    log_mode = (
+        "w" if args.log_to_file else None
+    )  # Overwrite log file if logging to file
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(filename=log_file, filemode=log_mode, level=log_level, format=log_format)
+        log.basicConfig(
+            filename=log_file, filemode=log_mode, level=log_level, format=log_format
+        )
     else:
         log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
-
 
     log.debug(f"Log level set to: {log.getLevelName(log_level)}")
     log.debug(f"Parsed arguments: {args}")
@@ -468,7 +495,7 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> None:
     """Process dictation files and convert to mindmaps."""
-    args = parse_arguments(argv)
+    args = process_arguments(argv)
 
     log.info(f"Starting processing for files: {args.file_names}")
 
@@ -490,7 +517,9 @@ def main(argv: list[str] | None = None) -> None:
                 log.info(f"Mindmap created: {mm_file_name}")
                 # Attempt to open with Freeplane
                 try:
-                    subprocess.run(["open", "-a", "Freeplane.app", mm_file_name], check=True)
+                    subprocess.run(
+                        ["open", "-a", "Freeplane.app", mm_file_name], check=True
+                    )
                     log.info(f"Opened {mm_file_name} in Freeplane.")
                 except FileNotFoundError:
                     log.warning("Could not find 'open' command. Is this macOS?")
@@ -500,7 +529,9 @@ def main(argv: list[str] | None = None) -> None:
             else:
                 log.warning(f"File is empty: {source_fn}. Skipping.")
         except Exception as e:
-            log.exception(f"An unexpected error occurred while processing {source_fn}: {e}")
+            log.exception(
+                f"An unexpected error occurred while processing {source_fn}: {e}"
+            )
             # Optionally continue to next file or re-raise/exit
             # continue
 

@@ -641,7 +641,6 @@ def parse_names(names: str) -> list[PersonName]:
 
 def main():
     import argparse
-    import sys
 
     arg_parser = argparse.ArgumentParser(
         description="""Outputs YAML/CSL bibliography.\n

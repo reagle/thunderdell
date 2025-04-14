@@ -90,7 +90,7 @@ def process_html(content: str) -> str:
     return "\n".join(text_new)
 
 
-def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Process command line arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
@@ -143,9 +143,10 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Set up argument parsing and execute main program flow."""
-    args = parse_arguments(argv)
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
     log.info("==================================")
     log.debug(f"{args=}")
 

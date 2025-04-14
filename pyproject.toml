@@ -42,6 +42,15 @@ isbn-query = "thunderdell.isbn_query:main"
 search = "thunderdell.search:main"
 map2bib = "thunderdell.map2bib:main"
 
+[tool.setuptools]
+# Add this line because your package code seems to be inside the 'src' directory
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+# This line tells setuptools to include all .txt files
+# within the thunderdell.biblio package directory.
+"thunderdell.biblio" = ["*.txt"]
+
 [tool.black]
 line-length = 88
 preview = true

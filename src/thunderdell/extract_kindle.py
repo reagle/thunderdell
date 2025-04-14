@@ -135,10 +135,9 @@ def parse_args(argv: list) -> argparse.Namespace:
     return args
 
 
-def main():
-    import sys
-
-    args = parse_args(sys.argv[1:])
+def main(argv: list[str] | None = None) -> None:
+    """Setup argparse and execute."""
+    args = parse_arguments(argv)
     log.info("==================================")
     log.debug(f"{args=}")
 

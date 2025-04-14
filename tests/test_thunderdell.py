@@ -13,7 +13,7 @@ Run in parent folder as `pytest tests`.
 import difflib
 import subprocess
 
-from config import TESTS_FOLDER, THUNDERDELL_EXE
+from thunderdell.config import TESTS_FOLDER, THUNDERDELL_EXE
 
 
 def diff_strings(a: str, b: str) -> str:

@@ -4,7 +4,7 @@ references:
   type: webpage
   author:
   - family: "Wikipedia"
-  custom2: "/Users/reagle/bin/td/tests/title-escapes.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/title-escapes.mm"
   issued:
     year: 2009
     month: 06

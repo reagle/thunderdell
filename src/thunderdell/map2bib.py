@@ -561,15 +561,15 @@ def parse_date(when: str) -> PubDate:
     have precedence.
 
     >>> parse_date('20190820 22:24 UTC')
-    Date(year='2019', month='08', day='20', circa=None, time='22:24 UTC')
+    PubDate(year='2019', month='08', day='20', circa=None, time='22:24 UTC')
     >>> parse_date('20190820')
-    Date(year='2019', month='08', day='20', circa=None, time=None)
+    PubDate(year='2019', month='08', day='20', circa=None, time=None)
     >>> parse_date('101210')
-    Date(year='1012', month='10', day=None, circa=None, time=None)
+    PubDate(year='1012', month='10', day=None, circa=None, time=None)
     >>> parse_date('-5')
-    Date(year='-5', month=None, day=None, circa=None, time=None)
+    PubDate(year='-5', month=None, day=None, circa=None, time=None)
     >>> parse_date('130~')
-    Date(year='130', month=None, day=None, circa=True, time=None)
+    PubDate(year='130', month=None, day=None, circa=True, time=None)
     """
     year = month = day = circa = time = None
     if " " in when:

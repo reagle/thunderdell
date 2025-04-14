@@ -17,7 +17,7 @@ import string
 import sys
 from pathlib import Path
 
-from .config import BIN_DIR
+from thunderdell.config import BIN_DIR
 
 ARTICLES = {"a", "an", "the"}
 CONJUNCTIONS = {"and", "but", "nor", "or"}

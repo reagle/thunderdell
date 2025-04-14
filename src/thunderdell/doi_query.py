@@ -61,7 +61,7 @@ def query(doi, accept="application/citeproc+json"):
         #          " style=apa" https://doi.org/10.26300/spsf-tc23
 
 
-def parse_args(args) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="Given a doi return bibliographic data."
@@ -89,14 +89,14 @@ def parse_args(args) -> argparse.Namespace:
         action="version",
         version=f"{__version__} using Python {sys.version}",
     )
-    args = arg_parser.parse_args(sys.argv[1:])
+    args = arg_parser.parse_args(argv)
     return args
 
 
-def main(args: argparse.Namespace | None = None):
+def main(args: argparse.Namespace | None = None) -> None:
     """Parse arguments, setup logging, and run."""
     if args is None:
-        args = parse_args(sys.argv[1:])
+        args = process_arguments(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

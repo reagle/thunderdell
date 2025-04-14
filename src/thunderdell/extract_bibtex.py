@@ -164,7 +164,7 @@ def process(entries: dict, file_path: Path) -> None:
         fdo.write("""</node>\n</map>\n""")
 
 
-def parse_args(args) -> argparse.Namespace:
+def process_arguments(args) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="Converts bibtex files to mindmap."
@@ -198,7 +198,7 @@ def parse_args(args) -> argparse.Namespace:
 def main(args: argparse.Namespace | None = None):
     """Parse arguments, setup logging, and process bibtex files."""
     if args is None:
-        args = parse_args(sys.argv[1:])
+        args = process_arguments(sys.argv[1:])
 
     log_level = (log.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

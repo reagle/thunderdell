@@ -23,7 +23,7 @@ HOME = Path.home()
 URL_RE = re.compile(r"https?://\S+")
 
 
-def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="""Format raindrop.io annotations for use with
@@ -65,17 +65,21 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     arg_parser.add_argument(
         "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    args = arg_parser.parse_args(argv) # Use provided argv or sys.argv[1:]
+    args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging
-    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG) # Default: CRITICAL
+    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)  # Default: CRITICAL
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = "w" if args.log_to_file else None # Overwrite log file if logging to file
+    log_mode = (
+        "w" if args.log_to_file else None
+    )  # Overwrite log file if logging to file
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(filename=log_file, filemode=log_mode, level=log_level, format=log_format)
+        log.basicConfig(
+            filename=log_file, filemode=log_mode, level=log_level, format=log_format
+        )
     else:
         log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
@@ -108,12 +112,14 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
             break  # Stop after finding the first URL
     else:
         log.warning(f"No URL found in {file_path}. Skipping processing logic.")
-        return # Cannot proceed without a URL
+        return  # Cannot proceed without a URL
 
     # Second pass: process lines for comments/excerpts
     for line in file_content.splitlines():
         line = line.strip()
-        if not line or URL_RE.search(line): # Skip empty lines and lines containing the URL
+        if not line or URL_RE.search(
+            line
+        ):  # Skip empty lines and lines containing the URL
             continue
 
         # Lines starting with "- " are treated as excerpts
@@ -131,20 +137,21 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
         webbrowser.open(url)
         log.info(f"Opened URL in browser: {url}")
         # Assuming busy.get_scraper and log2mm handle their own errors/logging
-        scraper = busy.get_scraper(url, text) # Pass URL and formatted text
+        scraper = busy.get_scraper(url, text)  # Pass URL and formatted text
         biblio = scraper.get_biblio()
         biblio["tags"] = "misc"  # default keyword
         if "excerpt" in biblio:
-             del biblio["excerpt"]  # remove auto excerpt if present
-        busy.log2mm(args, biblio) # Pass args for potential publish flag etc.
+            del biblio["excerpt"]  # remove auto excerpt if present
+        busy.log2mm(args, biblio)  # Pass args for potential publish flag etc.
         log.info(f"Successfully processed and logged to mindmap for {url}")
     except Exception as e:
         log.exception(f"Error during scraping or mindmap logging for {url}: {e}")
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Main execution function."""
-    args = parse_arguments(argv)
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
 
     log.info("==================================")
     log.info(f"Starting processing with args: {args}")
@@ -155,9 +162,13 @@ def main(argv: list[str] | None = None) -> None:
 
     # Ask user about trashing processed files *after* all files are processed
     try:
-        user_input = input(f"\nTrash processed file(s) ({len(files_to_process)} files)? [y/N]: ").lower()
+        user_input = input(
+            f"\nTrash processed file(s) ({len(files_to_process)} files)? [y/N]: "
+        ).lower()
         if user_input == "y":
-            log.info(f"Sending {len(files_to_process)} file(s) to trash: {files_to_process}")
+            log.info(
+                f"Sending {len(files_to_process)} file(s) to trash: {files_to_process}"
+            )
             send2trash(files_to_process)
             log.info("File(s) sent to trash.")
         else:

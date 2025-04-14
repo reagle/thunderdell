@@ -15,6 +15,7 @@ import traceback
 import urllib.parse as up
 from pathlib import Path
 
+# TODO: replace with values from config
 HOME = Path.home()
 TD_DIR = HOME / "bin" / "td"
 TMP_DIR = HOME / "tmp" / ".td"
@@ -54,21 +55,21 @@ def cgi_main(args):
 
     # site specific queries
     if site == "BusySponge":
-        import thunderdell.busy_query
+        from thunderdell import busy_query
 
         query_result_file = Path(busy_query.query_sponge(query))
         print(query_result_file.read_text(encoding="utf-8", errors="replace"))
     else:
         MINDMAP = HOME / "joseph" / "readings.mm"
 
-        import thunderdell as td
+        import map2bib as mb
 
         args.query = query
         args.query_c = re.compile(re.escape(query), re.IGNORECASE)
         args.chase = True
         args.cgi = True
 
-        td.build_bib(args, MINDMAP, td.emit_results)
+        mb.build_bib(args, MINDMAP, mb.emit_results)
 
         result_file = TMP_DIR / "query-thunderdell.html"
         print(result_file.read_text(encoding="utf-8"))
@@ -88,8 +89,7 @@ def print_error(msg):
 
 
 def main():
-    import sys
-
+    """Parse arguments, setup exceptions, and run."""
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--in_main", action="store_true", default=False)
     arg_parser.add_argument("-c", "--chase", action="store_true", default=True)

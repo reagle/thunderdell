@@ -240,7 +240,7 @@ def query(isbn: str, session: requests.Session) -> BibDict:
     return bib
 
 
-def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     arg_parser = argparse.ArgumentParser(
         description="Given one or more ISBNs, return bibliographic data."
@@ -306,9 +306,10 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Query ISBNs and print bibliographic data."""
-    args = parse_arguments(argv)
+def main(args: argparse.Namespace | None = None) -> None:
+    """Parse arguments, setup logging, and run."""
+    if args is None:
+        args = process_arguments(sys.argv[1:])
 
     results = {}
     # Use a session for potential connection reuse

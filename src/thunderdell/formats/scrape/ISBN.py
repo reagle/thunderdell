@@ -23,7 +23,7 @@ class ScrapeISBN(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-        import isbn_query
+        from thunderdell import isbn_query
 
         log.info(f"url = {self.url}")
         json_bib = isbn_query.query(self.url)

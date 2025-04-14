@@ -6,7 +6,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-import argparse  # http://docs.python.org/dev/library/argparse.html
+import argparse
 import logging as log
 import re
 import subprocess
@@ -15,9 +15,9 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 
-from bs4 import BeautifulSoup  # type:ignore
+from bs4 import BeautifulSoup  # type: ignore
 
-import thunderdell.change_case
+from thunderdell.change_case import title_case
 from thunderdell.extract_dictation import create_mm
 from thunderdell.utils.extract import get_bib_preamble
 from thunderdell.utils.text import smart_to_markdown
@@ -49,12 +49,17 @@ def process_html(content: str) -> str:
     color = ""
     page = ""
     text_new = []
-    _, pagination_type, _ = RE_COLOR_PAGE.search(content).groupdict().values()
 
-    if RE_ISBN.search(content):
-        ISBN = RE_ISBN.search(content).group(0)
+    if match := RE_COLOR_PAGE.search(content):
+        _, pagination_type, _ = match.groupdict().values()
+    else:
+        pagination_type = ""
+
+    if isbn_match := RE_ISBN.search(content):
+        ISBN = isbn_match.group(0)
         log.info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
+
     text_new.append("edition = Kindle")
     if pagination_type == "Location":
         text_new.append("pagination = location")
@@ -65,26 +70,28 @@ def process_html(content: str) -> str:
         log.debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
-                color, _, page = RE_COLOR_PAGE.search(str(div)).groupdict().values()
+                if color_page_match := RE_COLOR_PAGE.search(str(div)):
+                    color, _, page = color_page_match.groupdict().values()
+                else:
+                    color = "black"
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
             note = smart_to_markdown(str(div)[27:-7])
-            if color == "blue":
-                note = thunderdell.change_case.title_case(note)
-                text_new.append(f"section. {note}")
-            elif color == "yellow":
-                text_new.append(f"{page} excerpt. {note}")
-            elif color == "black":
-                text_new.append(f"-- {note}")
+            match color:
+                case "blue":
+                    note = title_case(note)
+                    text_new.append(f"section. {note}")
+                case "yellow":
+                    text_new.append(f"{page} excerpt. {note}")
+                case "black":
+                    text_new.append(f"-- {note}")
 
     return "\n".join(text_new)
 
 
-def parse_args(argv: list) -> argparse.Namespace:
-    """Process arguments."""
-    # https://docs.python.org/3/library/argparse.html
-    """Process arguments"""
+def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Process command line arguments."""
     # https://docs.python.org/3/library/argparse.html
     arg_parser = argparse.ArgumentParser(
         description="""Format Kindle annotations (sent via HTML notes shared in
@@ -118,9 +125,10 @@ def parse_args(argv: list) -> argparse.Namespace:
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     arg_parser.add_argument("--version", action="version", version="0.1")
-    args = arg_parser.parse_args(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    args = arg_parser.parse_args(argv if argv is not None else sys.argv[1:])
+
+    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         log.basicConfig(
@@ -136,25 +144,26 @@ def parse_args(argv: list) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Setup argparse and execute."""
+    """Set up argument parsing and execute main program flow."""
     args = parse_arguments(argv)
     log.info("==================================")
     log.debug(f"{args=}")
 
-    file_names = args.file_names
-    for file_name in file_names:
+    for file_name in args.file_names:
         log.debug(f"{file_name=}")
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
-        if file_name.suffix == ".eml":
-            log.info(f"processing {file_name} as eml")
-            html_content = process_email(file_name)
-        elif file_name.suffix == ".html":
-            log.info(f"processing {file_name} as html")
-            html_content = file_name.read_text()
-        else:
-            raise OSError(
-                "Do not recognize file type: {file_name} {splitext(file_name)[1]}."
-            )
+
+        match file_name.suffix:
+            case ".eml":
+                log.info(f"processing {file_name} as eml")
+                html_content = process_email(file_name)
+            case ".html":
+                log.info(f"processing {file_name} as html")
+                html_content = file_name.read_text()
+            case _:
+                raise OSError(
+                    f"Do not recognize file type: {file_name} {file_name.suffix}."
+                )
 
         new_text = process_html(html_content)
 
@@ -169,9 +178,7 @@ def main(argv: list[str] | None = None) -> None:
             )
 
             if user_input.startswith("y"):
-                args.publish = False
-                if user_input == "yp":
-                    args.publish = True
+                args.publish = user_input == "yp"
                 mm_file_name = file_name.with_suffix(".mm")
                 edited_text = fixed_fn.read_text()
                 create_mm(args, edited_text, mm_file_name)

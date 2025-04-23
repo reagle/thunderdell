@@ -19,7 +19,6 @@ def query_sponge(query: str) -> Path:
     in_files = [
         HOME / "joseph/plan/index.html",
         HOME / "joseph/plan/done.html",
-        HOME / "joseph/plan/2010/s10.html",
         HOME / "joseph/plan/2009/f09.html",
         HOME / "joseph/plan/2009/s09.html",
         HOME / "joseph/plan/2008/f08.html",

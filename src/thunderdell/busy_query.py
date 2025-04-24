@@ -19,20 +19,6 @@ def query_sponge(query: str) -> Path:
     in_files = [
         HOME / "joseph/plan/index.html",
         HOME / "joseph/plan/done.html",
-        HOME / "joseph/plan/2010/s10.html",
-        HOME / "joseph/plan/2009/f09.html",
-        HOME / "joseph/plan/2009/s09.html",
-        HOME / "joseph/plan/2008/f08.html",
-        HOME / "joseph/plan/2008/s08.html",
-        HOME / "joseph/plan/2007/f07.html",
-        HOME / "joseph/plan/2007/s07.html",
-        HOME / "joseph/plan/2006/f06.html",
-        HOME / "joseph/plan/2006/s06.html",
-        HOME / "joseph/plan/2005/f05.html",
-        HOME / "joseph/plan/2005/s05.html",
-        HOME / "joseph/plan/2004/f04.html",
-        HOME / "joseph/plan/2004/s04.html",
-        HOME / "joseph/plan/2003/f03.html",
     ]
 
     out_file = HOME / "tmp/.td/query-sponge-result.html"

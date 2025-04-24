@@ -84,7 +84,7 @@ def build_bib(
     args: argparse.Namespace,
     file_name: Path,
     emitter_func: Callable[[argparse.Namespace, dict], None],
-) -> None:
+) -> dict[str, EntryDict]:
     """Build bibliography of entries from a Freeplane mindmap."""
     links = set()
     done = set()
@@ -102,19 +102,22 @@ def build_bib(
         done.add(mm_file)
         if args.chase:
             new_links = {
-                # (mm_file.parent / link).resolve()
                 (Path(mm_file).parent / link).resolve()
                 for link in links
                 if not any(word in link for word in ("syllabus", "readings"))
             }
             mm_files.update(new_links - done)
 
-    if args.query:
-        serve_query(args, entries)
-    elif args.pretty:
-        show_pretty(args, entries)
-    else:
-        emitter_func(args, entries)
+    # Only emit directly if not called from query_serve.py
+    if not hasattr(args, "direct_query") or not args.direct_query:
+        if args.query:
+            pass  # Let query_serve.py handle this
+        elif args.pretty:
+            show_pretty(args, entries)
+        else:
+            emitter_func(args, entries)
+
+    return entries
 
 
 def walk_freeplane(
@@ -240,45 +243,6 @@ def walk_freeplane(
     # commit the last entry as no new titles left
     entries = commit_entry(args, entry, entries)
     return entries, links
-
-
-def serve_query(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
-    """Serve crawl/query results and open browser.
-
-    Given the entries resulting from a crawl/query, create a web server and open browser.
-    """
-    # debug("querying")
-    results_file_name = config.TMP_DIR / "query-thunderdell.html"
-
-    if results_file_name.exists():
-        results_file_name.unlink()
-    try:
-        with results_file_name.open(mode="w", encoding="utf-8") as results_file:
-            args.results_file = results_file
-            results_file.write(RESULT_FILE_HEADER)
-            results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
-            emit_results(args, entries)
-            results_file.write("</ul></body></html>\n")
-    except OSError as err:
-        print(f"{err}\nThere was an error writing to {results_file_name}")
-        raise
-    # debug(f"{results_file=}")
-    if args.in_main:
-        ADDRESS_IN_USE = False
-        os.chdir(config.CGI_DIR.parent)
-        handler = http.server.CGIHTTPRequestHandler
-        handler.cgi_directories = ["/cgi-bin"]
-        try:
-            server = http.server.HTTPServer(("localhost", 8000), handler)
-        except OSError as error:
-            if error.errno == errno.EADDRINUSE:
-                ADDRESS_IN_USE = True
-                print("address in use")
-            else:
-                raise
-        webbrowser.open(f"http://localhost:8000/cgi-bin/search.cgi?query={args.query}")
-        if not ADDRESS_IN_USE:
-            server.serve_forever()  # type: ignore[unbound]
 
 
 def show_pretty(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:

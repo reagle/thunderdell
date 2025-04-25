@@ -38,7 +38,7 @@ INITIAL_FILE_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
 </head>
 <body xml:lang="en" lang="en">
 <div>
-    <form method="get" action="search.cgi">
+    <form method="get" action="bq">
     <input value="Go" name="Go" type="submit" />
     <input size="25" name="query" maxlength="80" type="text" />
     <input name="sitesearch" value="BusySponge" type="radio" /> BS

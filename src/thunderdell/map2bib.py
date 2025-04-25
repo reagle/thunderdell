@@ -66,7 +66,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 </head>
 <body>
 <div>
-    <form method="get" action="search.cgi">
+    <form method="get" action="bq">
     <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
     name="query" maxlength="80" /> <input type="radio" name="sitesearch"
     value="BusySponge" /> BS <input type="radio" name="sitesearch"

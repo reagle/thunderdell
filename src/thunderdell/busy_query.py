@@ -50,40 +50,43 @@ HTML_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
 
 def query_mindmap(args):
     """Query mindmap and generate HTML results file."""
+    logging.info("Starting query_mindmap")
     results_file_name = config.TMP_DIR / "query-thunderdell.html"
 
     if results_file_name.exists():
+        logging.debug(f"Removing existing results file {results_file_name}")
         results_file_name.unlink()
 
     try:
         with results_file_name.open(mode="w", encoding="utf-8") as results_file:
             args.results_file = results_file
 
-            # Write HTML header
+            logging.debug("Writing HTML header")
             results_file.write(RESULT_FILE_HEADER)
             results_file.write(RESULT_FILE_QUERY_BOX % (args.query, args.query))
 
-            # Build and emit results
             file_name = Path(args.input_file).absolute()
+            logging.debug(f"Building bibliography from {file_name}")
 
-            # Set direct_query flag to avoid circular calls
             args.direct_query = True
             entries = build_bib(args, file_name, emit_results)
 
-            # Generate results directly
+            logging.debug("Emitting results")
             emit_results(args, entries)
 
-            # Close HTML
+            logging.debug("Closing HTML")
             results_file.write("</ul></body></html>\n")
     except OSError as err:
-        print(f"{err}\nThere was an error writing to {results_file_name}")
+        logging.error(f"Error writing to {results_file_name}: {err}")
         raise
 
+    logging.info(f"query_mindmap completed, results at {results_file_name}")
     return results_file_name
 
 
 def query_busysponge(query):
     """Query items logged to planning page made by Busy Sponge."""
+    logging.info(f"Starting query_busysponge with query: {query}")
     in_files = [
         config.HOME / "joseph/plan/index.html",
         config.HOME / "joseph/plan/done.html",
@@ -97,25 +100,30 @@ def query_busysponge(query):
     li_pattern = re.compile(li_expression, re.DOTALL | re.IGNORECASE)
 
     for file in in_files:
+        logging.debug(f"Reading file {file}")
         content = file.read_text(encoding="utf-8", errors="replace")
         lis = li_pattern.findall(content)
         for li in lis:
             if query_pattern.search(li):
+                logging.debug(f"Match found in list item: {li[:60]}...")
                 out_str += li
 
     if out_str:
         out_str = f"<ol>{out_str}</ol>"
     else:
+        logging.info(f"No results found for query '{query}'")
         out_str = f"<p>No results for query '{query}'</p>"
 
     HTMLPage = f"{HTML_HEADER}{out_str}</body></html>"
     out_file.write_text(HTMLPage, encoding="utf-8")
+    logging.info(f"query_busysponge completed, results at {out_file}")
 
     return out_file
 
 
 def serve_local(port=8000):
     """Start a local HTTP server for development."""
+    logging.info(f"Starting local server on port {port}")
     os.chdir(config.CGI_DIR.parent)
     handler = http.server.CGIHTTPRequestHandler
     handler.cgi_directories = ["/cgi-bin"]
@@ -127,15 +135,19 @@ def serve_local(port=8000):
         server.serve_forever()
     except OSError as error:
         if error.errno == errno.EADDRINUSE:
+            logging.error(f"Port {port} already in use")
             print(f"Port {port} already in use")
         else:
+            logging.error(f"Server error: {error}")
             raise
     except KeyboardInterrupt:
+        logging.info("Server stopped by user")
         print("\nServer stopped")
 
 
 def handle_cgi():
     """Handle CGI requests for a2hosting."""
+    logging.info("Handling CGI request")
     # Set stdout encoding for proper UTF-8 output
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
 
@@ -144,22 +156,27 @@ def handle_cgi():
 
     # Get and parse query parameters
     query_string = os.environ.get("QUERY_STRING", "")
+    logging.debug(f"QUERY_STRING: {query_string}")
     form_data = dict(urllib.parse.parse_qsl(query_string))
 
     site = form_data.get("sitesearch", "MindMap")
     query = form_data.get("query", "Wikipedia2008npv")
     query = urllib.parse.unquote(query)
+    logging.info(f"Site: {site}, Query: {query}")
 
     # Remove "@" prefix if present (for citation keys)
     if query.startswith("@"):
         query = query[1:]
+        logging.debug("Removed '@' prefix from query")
 
     try:
         # Handle site-specific queries
         if site == "BusySponge":
+            logging.info("Querying BusySponge")
             result_file = query_busysponge(query)
             print(result_file.read_text(encoding="utf-8", errors="replace"))
         else:
+            logging.info("Querying MindMap")
             # Set up args for mindmap query
             args = argparse.Namespace()
             args.query = query
@@ -177,6 +194,7 @@ def handle_cgi():
             result_file = config.TMP_DIR / "query-thunderdell.html"
             print(result_file.read_text(encoding="utf-8"))
     except Exception as e:
+        logging.error(f"Exception in handle_cgi: {e}", exc_info=True)
         print(
             f"<h1>Error</h1><pre>{type(e).__name__}: {e!s}\n\n{traceback.format_exc()}</pre>"
         )
@@ -184,6 +202,7 @@ def handle_cgi():
 
 def main():
     """Parse command-line arguments and run in appropriate mode."""
+    logging.info("Starting main()")
     parser = argparse.ArgumentParser(
         description="Unified server for thunderdell queries"
     )
@@ -247,18 +266,25 @@ def main():
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
+    logging.debug(f"Arguments parsed: {args}")
+
     # Determine execution mode
     if "SCRIPT_NAME" in os.environ:
+        logging.info("Detected CGI environment")
         # CGI mode (running on web server)
         handle_cgi()
     elif args.local:
+        logging.info("Running in local server mode")
         # Local server mode
         serve_local(args.port)
     elif args.query:
+        logging.info(f"Running CLI query mode with query: {args.query}")
         # CLI query mode
         if args.site == "BusySponge":
+            logging.info("Querying BusySponge site")
             result_file = query_busysponge(args.query)
         else:
+            logging.info("Querying MindMap site")
             query_args = argparse.Namespace()
             query_args.query = args.query
             query_args.query_c = re.compile(re.escape(args.query), re.IGNORECASE)
@@ -270,10 +296,13 @@ def main():
 
         # Open in browser if requested
         if args.browser:
+            logging.info("Opening results in browser")
             webbrowser.open(result_file.as_uri())
         else:
+            logging.info(f"Results written to {result_file}")
             print(f"Results written to {result_file}")
     else:
+        logging.warning("No valid mode specified, printing help")
         # No valid mode specified
         parser.print_help()
 

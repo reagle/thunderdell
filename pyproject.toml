@@ -130,14 +130,16 @@ lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.mccabe] # enabled via "C90" above
 max-complexity = 10
 
+
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-r a -q --doctest-modules"
-testpaths = [
-    "biblio", "formats", "tests"
-]
+# all test summary; quiet; use importlib import mode for src layout
+addopts = "-r a -q --doctest-modules --import-mode=importlib"
+pythonpath = ["src"]  # adds the src directory to Python's import path
+# doctests in src/thunderdell and regular tests in tests/
+testpaths = ["src/thunderdell", "tests"]
+python_files = ["test_*.py"]
 filterwarnings = "ignore::DeprecationWarning"
-enable_assertion_pass_hook = true
 
 [tool.pyright]
 reportMissingImports = false

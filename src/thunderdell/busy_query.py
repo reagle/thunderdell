@@ -200,6 +200,23 @@ def handle_cgi():
         )
 
 
+import socket
+import threading
+import time
+
+def is_port_in_use(port: int) -> bool:
+    """Check if a TCP port is in use on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(0.5)
+        result = sock.connect_ex(("localhost", port))
+        return result == 0
+
+def start_server_in_thread(port: int) -> threading.Thread:
+    """Start the local server in a background thread."""
+    server_thread = threading.Thread(target=serve_local, args=(port,), daemon=True)
+    server_thread.start()
+    return server_thread
+
 def main():
     """Parse command-line arguments and run in appropriate mode."""
     logging.info("Starting main()")
@@ -283,24 +300,29 @@ def main():
         if args.site == "BusySponge":
             logging.info("Querying BusySponge site")
             result_file = query_busysponge(args.query)
+            if args.browser:
+                logging.info("Opening results in browser")
+                webbrowser.open(result_file.as_uri())
+            else:
+                logging.info(f"Results written to {result_file}")
+                print(f"Results written to {result_file}")
         else:
             logging.info("Querying MindMap site")
-            query_args = argparse.Namespace()
-            query_args.query = args.query
-            query_args.query_c = re.compile(re.escape(args.query), re.IGNORECASE)
-            query_args.chase = args.chase
-            query_args.input_file = config.DEFAULT_MAP
-            query_args.long_url = False
-            query_args.pretty = False
-            result_file = query_mindmap(query_args)
 
-        # Open in browser if requested
-        if args.browser:
-            logging.info("Opening results in browser")
-            webbrowser.open(result_file.as_uri())
-        else:
-            logging.info(f"Results written to {result_file}")
-            print(f"Results written to {result_file}")
+            # Check if local server is running on the specified port
+            if not is_port_in_use(args.port):
+                logging.info(f"Local server not running on port {args.port}, starting it")
+                start_server_in_thread(args.port)
+                # Wait briefly for server to start
+                time.sleep(1)
+            else:
+                logging.info(f"Local server already running on port {args.port}")
+
+            # Open browser to local server CGI with query
+            query_encoded = urllib.parse.quote(args.query)
+            url = f"http://localhost:{args.port}/cgi-bin/search.cgi?query={query_encoded}"
+            logging.info(f"Opening browser to {url}")
+            webbrowser.open(url)
     else:
         logging.warning("No valid mode specified, printing help")
         # No valid mode specified

@@ -222,9 +222,14 @@ def wait_for_port(port: int, timeout=5.0):
     while time.time() - start < timeout:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(0.5)
-            if sock.connect_ex(("localhost", port)) == 0:
+            result = sock.connect_ex(("localhost", port))
+            if result == 0:
+                logging.info(f"Port {port} is open and accepting connections")
                 return True
+            else:
+                logging.debug(f"Port {port} not open yet (connect_ex returned {result})")
         time.sleep(0.1)
+    logging.error(f"Timeout waiting for port {port} to open")
     return False
 
 

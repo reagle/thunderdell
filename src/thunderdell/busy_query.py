@@ -219,9 +219,74 @@ def start_server_in_thread(port: int) -> threading.Thread:
             logging.error(f"Server error: {e}", exc_info=True)
         logging.info("Server thread exiting")
 
-    server_thread = threading.Thread(target=run_server, daemon=True)
+    # Use non-daemon thread to keep server alive after main thread exits
+    server_thread = threading.Thread(target=run_server, daemon=False)
     server_thread.start()
     return server_thread
+```
+
+src/thunderdell/busy_query.py
+```python
+<<<<<<< SEARCH
+    # Determine execution mode
+    if "SCRIPT_NAME" in os.environ:
+        logging.info("Detected CGI environment")
+        # CGI mode (running on web server)
+        handle_cgi()
+    elif args.local:
+        logging.info("Running in local server mode")
+        # Local server mode
+        try:
+            server = serve_local(args.port)
+        except Exception as e:
+            logging.error(f"Failed to start local server: {e}", exc_info=True)
+            sys.exit(1)
+        try:
+            logging.info(f"Serving local server on port {args.port}")
+            server.serve_forever()
+        except KeyboardInterrupt:
+            logging.info("Server stopped by user")
+            print("\nServer stopped")
+    elif args.query:
+        logging.info(f"Running CLI query mode with query: {args.query}")
+        # CLI query mode
+        if args.site == "BusySponge":
+            logging.info("Querying BusySponge site")
+            result_file = query_busysponge(args.query)
+            if args.browser:
+                logging.info("Opening results in browser")
+                webbrowser.open(result_file.as_uri())
+            else:
+                logging.info(f"Results written to {result_file}")
+                print(f"Results written to {result_file}")
+        else:
+            logging.info("Querying MindMap site")
+
+            # Check if local server is running on the specified port
+            if not is_port_in_use(args.port):
+                logging.info(
+                    f"Local server not running on port {args.port}, starting it"
+                )
+                start_server_in_thread(args.port)
+                if not wait_for_port(args.port, timeout=10):
+                    logging.error(
+                        f"Server did not start listening on port {args.port} within timeout"
+                    )
+                    sys.exit(1)
+            else:
+                logging.info(f"Local server already running on port {args.port}")
+
+            # Open browser to local server CGI with query
+            query_encoded = urllib.parse.quote(args.query)
+            url = (
+                f"http://localhost:{args.port}/cgi-bin/search.cgi?query={query_encoded}"
+            )
+            logging.info(f"Opening browser to {url}")
+            webbrowser.open(url)
+    else:
+        logging.warning("No valid mode specified, printing help")
+        # No valid mode specified
+        parser.print_help()
 
 
 def wait_for_port(port: int, timeout=5.0):

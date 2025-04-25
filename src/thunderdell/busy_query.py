@@ -217,6 +217,7 @@ def start_server_in_thread(port: int) -> threading.Thread:
             logging.error(f"Server error: {e}", exc_info=True)
         logging.info("Server thread exiting")
 
+    breakpoint()
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
     return server_thread
@@ -235,7 +236,9 @@ def wait_for_port(port: int, timeout=5.0):
                 logging.info(f"Port {port} is open and accepting connections")
                 return True
             else:
-                logging.debug(f"Port {port} not open yet (connect_ex returned {result})")
+                logging.debug(
+                    f"Port {port} not open yet (connect_ex returned {result})"
+                )
         time.sleep(0.1)
     logging.error(f"Timeout waiting for port {port} to open")
     return False

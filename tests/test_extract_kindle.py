@@ -10,8 +10,8 @@
 Run in parent folder as `pytest tests`.
 """
 
-from config import TESTS_FOLDER  # Path object
-from extract_kindle import process_html  # parse_args
+from thunderdell.config import TESTS_FOLDER  # Path object
+from thunderdell.extract_kindle import process_html  # parse_args
 
 
 def test_process_html():

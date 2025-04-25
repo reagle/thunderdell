@@ -137,7 +137,7 @@ def serve_local(port=8000):
 def handle_cgi():
     """Handle CGI requests for a2hosting."""
     # Set stdout encoding for proper UTF-8 output
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
 
     # Print HTTP headers
     print("Content-Type: text/html; charset=utf-8\n\n")

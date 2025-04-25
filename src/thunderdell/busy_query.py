@@ -260,9 +260,8 @@ def run_local_server(port: int):
         print("\nServer stopped")
 
 
-def main():
-    """Parse command-line arguments and run in appropriate mode."""
-    logging.info("Starting main()")
+def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments and return Namespace."""
     parser = argparse.ArgumentParser(
         description="Unified server for thunderdell queries"
     )
@@ -314,7 +313,12 @@ def main():
         help="log to file td.log",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    return args
+
+
+def main(argv: list[str] | None = None):
+    args = process_arguments(argv)
 
     log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"

@@ -142,7 +142,6 @@ def serve_local(port=8000):
     server = http.server.HTTPServer(("127.0.0.1", port), handler)
     logging.info(f"Server bound to {server.server_address}")
     return server
-```
 
 src/thunderdell/busy_query.py
 ```python

@@ -8,13 +8,11 @@ __version__ = "1.0"
 
 import argparse
 import logging
-import os
 import re
 import socket
 import sys
 import threading
 import time
-import traceback
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -141,7 +139,6 @@ class BusyRequestHandler(BaseHTTPRequestHandler):
                 args.query = query
                 args.query_c = re.compile(re.escape(query), re.IGNORECASE)
                 args.chase = True
-                args.cgi = True
                 args.input_file = config.DEFAULT_MAP
                 args.long_url = False
                 args.pretty = False
@@ -181,61 +178,6 @@ def serve_local(port=8000):
     server = HTTPServer(("127.0.0.1", port), handler)
     logging.info(f"Server bound to {server.server_address}")
     return server
-
-
-def handle_cgi():
-    """Handle CGI requests for a2hosting."""
-    logging.info("Handling CGI request")
-    # Set stdout encoding for proper UTF-8 output
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
-
-    # Print HTTP headers
-    print("Content-Type: text/html; charset=utf-8\n\n")
-
-    # Get and parse query parameters
-    query_string = os.environ.get("QUERY_STRING", "")
-    logging.debug(f"QUERY_STRING: {query_string}")
-    form_data = dict(urllib.parse.parse_qsl(query_string))
-
-    site = form_data.get("sitesearch", "MindMap")
-    query = form_data.get("query", "Wikipedia2008npv")
-    query = urllib.parse.unquote(query)
-    logging.info(f"Site: {site}, Query: {query}")
-
-    # Remove "@" prefix if present (for citation keys)
-    if query.startswith("@"):
-        query = query[1:]
-        logging.debug("Removed '@' prefix from query")
-
-    try:
-        # Handle site-specific queries
-        if site == "BusySponge":
-            logging.info("Querying BusySponge")
-            result_file = query_busysponge(query)
-            print(result_file.read_text(encoding="utf-8", errors="replace"))
-        else:
-            logging.info("Querying MindMap")
-            # Set up args for mindmap query
-            args = argparse.Namespace()
-            args.query = query
-            args.query_c = re.compile(re.escape(query), re.IGNORECASE)
-            args.chase = True
-            args.cgi = True
-            args.input_file = config.DEFAULT_MAP
-            args.long_url = False
-            args.pretty = False
-
-            # Generate results
-            query_mindmap(args)
-
-            # Output results
-            result_file = config.TMP_DIR / "query-thunderdell.html"
-            print(result_file.read_text(encoding="utf-8"))
-    except Exception as e:
-        logging.error(f"Exception in handle_cgi: {e}", exc_info=True)
-        print(
-            f"<h1>Error</h1><pre>{type(e).__name__}: {e!s}\n\n{traceback.format_exc()}</pre>"
-        )
 
 
 def is_port_in_use(port: int) -> bool:
@@ -377,14 +319,8 @@ def main(argv: list[str] | None = None):
 
     logging.debug(f"Arguments parsed: {args}")
 
-    # Determine execution mode
-    if "SCRIPT_NAME" in os.environ:
-        logging.info("Detected CGI environment")
-        # CGI mode (running on web server)
-        handle_cgi()
-    elif args.local:
-        run_local_server(args.port)
-    elif args.query:
+    run_local_server(args.port)
+    if args.query:
         logging.info(f"Running CLI query mode with query: {args.query}")
         # CLI query mode
         if args.site == "BusySponge":
@@ -415,9 +351,7 @@ def main(argv: list[str] | None = None):
 
             # Open browser to local server CGI with query
             query_encoded = urllib.parse.quote(args.query)
-            url = (
-                f"http://localhost:{args.port}/bq?query={query_encoded}"
-            )
+            url = f"http://localhost:{args.port}/bq?query={query_encoded}"
             logging.info(f"Opening browser to {url}")
             webbrowser.open(url)
     else:

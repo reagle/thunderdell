@@ -11,7 +11,10 @@ import http.server
 import logging
 import os
 import re
+import socket
 import sys
+import threading
+import time
 import traceback
 import urllib.parse
 import webbrowser
@@ -186,11 +189,6 @@ def handle_cgi():
         )
 
 
-import socket
-import threading
-import time
-
-
 def is_port_in_use(port: int) -> bool:
     """Check if a TCP port is in use on localhost."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -219,7 +217,6 @@ def start_server_in_thread(port: int) -> threading.Thread:
 def wait_for_port(port: int, timeout=5.0):
     """Wait until the port is open or timeout."""
     import socket
-    import time
 
     start = time.time()
     while time.time() - start < timeout:

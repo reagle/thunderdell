@@ -97,6 +97,9 @@ lint.unfixable = [
 "F401", # keep unused modules as I'm likely to use them soon
 ]
 
+# Allow unused variables when underscore-prefixed.
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
 # Include files
 extend-include = ["*.cgi"]
 
@@ -124,9 +127,6 @@ exclude = [
     "_old",
 ]
 
-# Allow unused variables when underscore-prefixed.
-lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [tool.ruff.lint.mccabe] # enabled via "C90" above
 max-complexity = 10
 
@@ -145,3 +145,8 @@ filterwarnings = "ignore::DeprecationWarning"
 reportMissingImports = false
 reportMissingTypeStubs = false
 pythonVersion = '3.12'
+
+[dependency-groups]
+dev = [
+    "ipdb>=0.13.13",
+]

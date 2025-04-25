@@ -10,14 +10,14 @@
 Run in parent folder as `pytest tests`.
 """
 
-from config import TESTS_FOLDER  # Pathlib object
-from extract_goodreader import parse_args, process_text
+from thunderdell.config import TESTS_FOLDER  # Pathlib object
+from thunderdell.extract_goodreader import process_arguments, process_text
 
 
 def test_process_text():
     """Tests the processing of a GoodReader export."""
     test_args = ["--first", 0]
-    args = parse_args(test_args)
+    args = process_arguments(test_args)
 
     given_fn = TESTS_FOLDER / "goodreader-given.txt"
     given = given_fn.read_text()

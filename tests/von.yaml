@@ -7,7 +7,7 @@ references:
   - family: "Krogh"
     given: "George"
     non-dropping-particle: "Von"
-  custom2: "/Users/reagle/bin/td/tests/von.mm"
+  custom2: "/Users/reagle/dev/thunderdell/tests/von.mm"
   issued:
     year: 1998
     season: Spring

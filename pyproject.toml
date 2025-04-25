@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "arrow",
     "atproto",
-    "beautifulsoup4",
+    "BeautifulSoup4",
     "datefinder",
     "dotenv",
     "lxml",
@@ -26,28 +26,30 @@ dependencies = [
 ]
 
 [project.scripts]
-arxiv-query = "thunderdell.scripts.arxiv_query:main"
-busy = "thunderdell.scripts.busy:main"
-busy-query = "thunderdell.scripts.busy_query:main"
-change-case = "thunderdell.scripts.change_case:main"
-doi-query = "thunderdell.scripts.doi_query:main"
-extract-bibtex = "thunderdell.scripts.extract_bibtex:main"
-extract-dictation = "thunderdell.scripts.extract_dictation:main"
-extract-goodreader = "thunderdell.scripts.extract_goodreader:main"
-extract-kindle = "thunderdell.scripts.extract_kindle:main"
-extract-raindrop = "thunderdell.scripts.extract_raindrop:main"
-field-notes-categorize = "thunderdell.scripts.field_notes_categorize:main"
-fix-mindmaps = "thunderdell.scripts.fix_mindmaps:main"
-isbn-query = "thunderdell.scripts.isbn_query:main"
-search = "thunderdell.scripts.search:main"
-thunderdell = "thunderdell.thunderdell:main"
+arxiv-query = "thunderdell.arxiv_query:main"
+busy = "thunderdell.busy:main"
+busy-query = "thunderdell.busy_query:main"
+change-case = "thunderdell.change_case:main"
+doi-query = "thunderdell.doi_query:main"
+extract-bibtex = "thunderdell.extract_bibtex:main"
+extract-dictation = "thunderdell.extract_dictation:main"
+extract-goodreader = "thunderdell.extract_goodreader:main"
+extract-kindle = "thunderdell.extract_kindle:main"
+extract-raindrop = "thunderdell.extract_raindrop:main"
+field-notes-categorize = "thunderdell.field_notes_categorize:main"
+fix-mindmaps = "thunderdell.fix_mindmaps:main"
+isbn-query = "thunderdell.isbn_query:main"
+map-query = "thunderdell.map_query:main"
+search = "thunderdell.search:main"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=6.0"
-]
-[tool.pytest.ini_options]
-testpaths = ["tests"]
+[tool.setuptools]
+# Add this line because your package code seems to be inside the 'src' directory
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+# This line tells setuptools to include all .txt files
+# within the thunderdell.biblio package directory.
+"thunderdell.biblio" = ["*.txt"]
 
 [tool.black]
 line-length = 88
@@ -95,6 +97,9 @@ lint.unfixable = [
 "F401", # keep unused modules as I'm likely to use them soon
 ]
 
+# Allow unused variables when underscore-prefixed.
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
 # Include files
 extend-include = ["*.cgi"]
 
@@ -122,22 +127,26 @@ exclude = [
     "_old",
 ]
 
-# Allow unused variables when underscore-prefixed.
-lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [tool.ruff.lint.mccabe] # enabled via "C90" above
 max-complexity = 10
 
+
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-r a -q --doctest-modules"
-testpaths = [
-    "biblio", "formats", "tests"
-]
+# all test summary; quiet; use importlib import mode for src layout
+addopts = "-r a -q --doctest-modules --import-mode=importlib"
+pythonpath = ["src"]  # adds the src directory to Python's import path
+# doctests in src/thunderdell and regular tests in tests/
+testpaths = ["src/thunderdell", "tests"]
+python_files = ["test_*.py"]
 filterwarnings = "ignore::DeprecationWarning"
-enable_assertion_pass_hook = true
 
 [tool.pyright]
 reportMissingImports = false
 reportMissingTypeStubs = false
 pythonVersion = '3.12'
+
+[dependency-groups]
+dev = [
+    "ipdb>=0.13.13",
+]

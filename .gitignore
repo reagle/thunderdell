@@ -1,2 +1,5 @@
-.aider.*
-src/
+src/thunderdell.egg-info/
+.aider*
+.envrc
+.DS_Store
+add

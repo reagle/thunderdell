@@ -188,7 +188,7 @@ def main():
         description="Unified server for thunderdell queries"
     )
     parser.add_argument(
-        "-L", "--local", action="store_true", help="Run as a local server"
+        "-l", "--local", action="store_true", help="Run as a local server"
     )
     parser.add_argument(
         "-p",
@@ -228,7 +228,7 @@ def main():
         help="increase verbosity from critical though error, warning, info, and debug",
     )
     parser.add_argument(
-        "-l",
+        "-L",
         "--log-to-file",
         action="store_true",
         default=False,

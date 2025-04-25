@@ -28,7 +28,7 @@ from thunderdell.map2bib import (
     emit_results,
 )
 
-HTML_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
+INITIAL_FILE_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -113,7 +113,7 @@ def query_busysponge(query):
         logging.info(f"No results found for query '{query}'")
         out_str = f"<p>No results for query '{query}'</p>"
 
-    HTMLPage = f"{HTML_HEADER}{out_str}</body></html>"
+    HTMLPage = f"{INITIAL_FILE_HEADER}{out_str}</body></html>"
     out_file.write_text(HTMLPage, encoding="utf-8")
     logging.info(f"query_busysponge completed, results at {out_file}")
 
@@ -224,8 +224,6 @@ def start_server_in_thread(port: int) -> threading.Thread:
 
 def wait_for_port(port: int, timeout=5.0):
     """Wait until the port is open or timeout."""
-    import socket
-
     start = time.time()
     while time.time() - start < timeout:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -288,7 +286,7 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         "--chase",
         action="store_true",
         default=True,
-        help="Chase links between MMs",
+        help="Chase links between mindmaps",
     )
     parser.add_argument(
         "-b",
@@ -383,7 +381,10 @@ def main(argv: list[str] | None = None):
     else:
         logging.warning("No valid mode specified, printing help")
         # No valid mode specified
-        parser.print_help()
+        # parser is not defined here, so replace with print_help call on a new parser
+        argparse.ArgumentParser(
+            description="Unified server for thunderdell queries"
+        ).print_help()
 
 
 if __name__ == "__main__":

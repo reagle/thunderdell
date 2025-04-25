@@ -7,7 +7,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import http.server
 import logging
 import os
 import re
@@ -18,6 +17,7 @@ import time
 import traceback
 import urllib.parse
 import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 from thunderdell import config
@@ -120,10 +120,9 @@ def query_busysponge(query):
     return out_file
 
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import urllib.parse
-
 class BusyRequestHandler(BaseHTTPRequestHandler):
+    """Handle HTTP requests for BusySponge queries."""
+
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
         if parsed_path.path == "/busy":
@@ -139,7 +138,9 @@ class BusyRequestHandler(BaseHTTPRequestHandler):
             result_file = query_busysponge(query)
 
             # Read the generated HTML
-            content = result_file.read_text(encoding="utf-8", errors="replace").encode("utf-8")
+            content = result_file.read_text(encoding="utf-8", errors="replace").encode(
+                "utf-8"
+            )
 
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -150,6 +151,7 @@ class BusyRequestHandler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b"Not Found")
+
 
 def serve_local(port=8000):
     """Create and return an HTTPServer instance."""

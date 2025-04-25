@@ -11,16 +11,16 @@ __version__ = "1.0"
 
 import argparse
 import json
-import logging as log
+import logging
 import pprint
 import sys
 
 import requests
 
 log_level = 100  # default
-log.critical = log.critical
-log.info = log.info
-log.debug = log.debug
+logging.critical = logging.critical
+logging.info = logging.info
+logging.debug = logging.debug
 
 # https://citation.crosscite.org/docs.html
 # Types available to output to the CLI
@@ -38,17 +38,17 @@ ACCEPTABLE_TYPES = (
 
 def query(doi, accept="application/citeproc+json"):
     """Query the DOI Web service; returns string."""
-    log.info(f"{accept=}")
-    log.info(f"{doi=}")
+    logging.info(f"{accept=}")
+    logging.info(f"{doi=}")
     headers = {"Accept": accept}
     url = f"http://dx.doi.org/{doi}"
-    log.info(f"{url=}")
+    logging.info(f"{url=}")
     r = requests.get(url, headers=headers)
-    log.debug(f"{r=} {r.content=}")
+    logging.debug(f"{r=} {r.content=}")
     returned_content_type = r.headers["content-type"].split(";")[0].strip()
     if returned_content_type in ACCEPTABLE_TYPES:
         json_bib = json.loads(r.content)
-        log.info(f"{json_bib=}")
+        logging.info(f"{json_bib=}")
         return json_bib
     else:
         raise RuntimeError(
@@ -98,22 +98,22 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename="doi_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     accept = ACCEPT_HEADERS["json"]
     if args.style:
         accept = ACCEPT_HEADERS.get(args.style, args.style)
-    log.info(f"accept = {accept} ")
+    logging.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))
 

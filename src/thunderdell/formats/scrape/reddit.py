@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 import re
 import time
 from datetime import datetime
@@ -46,7 +46,7 @@ class ScrapeReddit(ScrapeDefault):
         self.json = get_JSON(f"{url_clean}.json")
         if match := RE_REDDIT_URL.match(url_clean):
             self.url_dict = match.groupdict()
-            log.info(f"{self.url_dict=}")
+            logging.info(f"{self.url_dict=}")
             if self.url_dict["cid"]:
                 self.type = "comment"
             elif self.url_dict["pid"]:
@@ -60,7 +60,7 @@ class ScrapeReddit(ScrapeDefault):
                     self.type = "wiki"
         else:
             raise TypeError("Unknown type of Reddit resource.")
-        log.info(f"{self.type=}")
+        logging.info(f"{self.type=}")
 
     def get_biblio(self):
         biblio = {
@@ -80,12 +80,12 @@ class ScrapeReddit(ScrapeDefault):
         return biblio
 
     def get_org(self):
-        log.info("GETTING ORG")
+        logging.info("GETTING ORG")
         organization = "Reddit"
-        log.info(f"{self.type=}")
+        logging.info(f"{self.type=}")
         if self.type in ["post", "comment"]:
             organization = self.url_dict["root"]
-        log.info(f"{organization=}")
+        logging.info(f"{organization=}")
         return organization.strip()
 
     def get_author(self):
@@ -93,9 +93,9 @@ class ScrapeReddit(ScrapeDefault):
         if self.type == "post":
             author = self.json[0]["data"]["children"][0]["data"]["author"]
         if self.type == "comment":
-            log.info(f"{self.json[1]=}")
+            logging.info(f"{self.json[1]=}")
             author = self.json[1]["data"]["children"][0]["data"]["author"]
-        log.info(f"{author=}")
+        logging.info(f"{author=}")
         return author.strip()
 
     def get_title(self):
@@ -104,7 +104,7 @@ class ScrapeReddit(ScrapeDefault):
             title = self.url_dict["root"]
         elif self.type in ["post", "comment"]:
             title = sentence_case(self.json[0]["data"]["children"][0]["data"]["title"])
-        log.info(f"{title=}")
+        logging.info(f"{title=}")
         return title.strip()
 
     def get_date(self):
@@ -127,5 +127,5 @@ class ScrapeReddit(ScrapeDefault):
                 excerpt = post_data["url_overridden_by_dest"]  # link post
         elif self.type == "comment":
             excerpt = self.json[1]["data"]["children"][0]["data"]["body"]
-        log.info(f"returning {excerpt}")
+        logging.info(f"returning {excerpt}")
         return excerpt.strip()

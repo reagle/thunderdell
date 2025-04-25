@@ -11,7 +11,7 @@ __version__ = "1.0"
 # - handle name variances (e.g., "First Last" without comma)
 
 import argparse
-import logging as log
+import logging
 import re
 import sys
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
@@ -157,7 +157,7 @@ def process(entries: dict, file_path: Path) -> None:
 
         # Process each entry
         for entry in entries.values():
-            log.info(f"entry = '{entry}'")
+            logging.info(f"entry = '{entry}'")
             write_entry(fdo, entry)
 
         # Write footer
@@ -200,17 +200,17 @@ def main(args: argparse.Namespace | None = None):
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename="extract_bibtex.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     for file_path in args.file_names:
         try:

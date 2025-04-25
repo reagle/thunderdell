@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 import time
 import unicodedata
 
@@ -27,9 +27,9 @@ def log2work(args, biblio):
     import hashlib
 
     print("to log2work\n")
-    log.info(f"biblio = '{biblio}'")
+    logging.info(f"biblio = '{biblio}'")
     ofile = config.HOME / "data/2web/reagle.org/joseph/plan/index.html"
-    log.info(f"{ofile=}")
+    logging.info(f"{ofile=}")
     subtitle = biblio["subtitle"].strip() if "subtitle" in biblio else ""
     title = biblio["title"].strip() + subtitle
     url = biblio["url"].strip()
@@ -41,7 +41,7 @@ def log2work(args, biblio):
         hashtags = hashtags.strip()
     else:
         hashtags = "#misc"
-    log.info(f"hashtags = '{hashtags}'")
+    logging.info(f"hashtags = '{hashtags}'")
     html_comment = f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
@@ -49,13 +49,13 @@ def log2work(args, biblio):
     log_item = (
         f'<li class="event" id="{uid}">{date_token}: {hashtags}] {html_comment}</li>'
     )
-    log.info(f"{log_item=}")
+    logging.info(f"{log_item=}")
 
     plan_tree = l_etree.parse(
         str(ofile), l_etree.XMLParser(ns_clean=True, recover=True)
     )
     ul_found = plan_tree.xpath("""//div[@id='Done']/ul""")
-    log.info(f"ul_found = {ul_found}")
+    logging.info(f"ul_found = {ul_found}")
     if ul_found:
         ul_found[0].text = "\n              "
         try:  # lxml bug https://bugs.launchpad.net/lxml/+bug/1902364

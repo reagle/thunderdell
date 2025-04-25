@@ -35,7 +35,7 @@ def guess_csl_type(entry: EntryDict):
     ('paper-conference', None, None)
 
     """
-    # log.info(f"{entry=}")
+    # logging.info(f"{entry=}")
     genre = None
     medium = None
     e_t = "no-type"
@@ -84,9 +84,9 @@ def guess_csl_type(entry: EntryDict):
     )
 
     for bib_type, fields in types_from_fields:
-        # log.info(f"testing {bib_type=:15} which needs {fields=} ")
+        # logging.info(f"testing {bib_type=:15} which needs {fields=} ")
         if all(field in entry for field in fields):
-            # log.info("FOUND IT: {bib_type=")
+            # logging.info("FOUND IT: {bib_type=")
             e_t = bib_type
             break
 
@@ -188,7 +188,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:
                 value = entry[field]
-                # log.debug(f"short, field = '{short} , {field}'")
+                # logging.debug(f"short, field = '{short} , {field}'")
                 # skipped fields
                 if field in ("identifier", "entry_type", "issue"):
                     continue
@@ -203,16 +203,16 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     emit_yaml_people(value)
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # log.debug(f'field = {field}')
+                    # logging.debug(f'field = {field}')
                     if value == "0000":
                         continue
                     if field == "date":
-                        # log.debug(f"value = '{value}'")
+                        # logging.debug(f"value = '{value}'")
                         season = entry.get("issue", None)
                         args.outfd.write("  issued:\n")
                         emit_yaml_date(value, season)
                     if field == "origdate":
-                        # log.debug(f"value = '{value}'")
+                        # logging.debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")
                         emit_yaml_date(value)
                     if field == "urldate":
@@ -223,20 +223,20 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                 if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
                 if field == "url":
-                    # log.debug(f"url = {value}")
+                    # logging.debug(f"url = {value}")
                     if any(ban in value for ban in EXCLUDE_URLS):
-                        # log.debug("banned")
+                        # logging.debug("banned")
                         continue
                     # skip articles+URL w/ no pagination & other offline types
                     if args.urls_online_only:
-                        # log.debug("urls_online_only TRUE")
+                        # logging.debug("urls_online_only TRUE")
                         if entry_type in {"post", "post-weblog", "webpage"}:
-                            # log.debug(f"  not skipping online types")
+                            # logging.debug(f"  not skipping online types")
                             pass
                         elif "pages" in entry:
-                            # log.debug("  skipping url, paginated item")
+                            # logging.debug("  skipping url, paginated item")
                             continue
-                    # log.debug(f"  writing url in pointy brackets WITHOUT escape_yaml")
+                    # logging.debug(f"  writing url in pointy brackets WITHOUT escape_yaml")
                     # Placing URL in pointy brackets is useful and avoids having
                     # to escape specific characters.
                     args.outfd.write(f'  URL: "<{value}>"\n')
@@ -255,15 +255,15 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     #     f'  container-title: "Personal"\n')
                     continue
 
-                # log.debug(f"{field=}")
+                # logging.debug(f"{field=}")
                 if field in CONTAINERS:
-                    # log.debug(f"in CONTAINERS")
+                    # logging.debug(f"in CONTAINERS")
                     field = "container-title"
                     value = yaml_protect_case(value)
-                    # log.debug(f"{value=}")
+                    # logging.debug(f"{value=}")
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    # log.debug(f"bib2csl field FROM =  {field}")
+                    # logging.debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    # log.debug(f"bib2csl field TO   = {field}")
+                    # logging.debug(f"bib2csl field TO   = {field}")
                 args.outfd.write(f"  {field}: {escape_yaml(value)}\n")
     args.outfd.write("...\n")

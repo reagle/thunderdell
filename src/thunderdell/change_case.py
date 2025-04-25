@@ -11,7 +11,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
-import logging as log
+import logging
 import re
 import string
 import sys
@@ -101,7 +101,7 @@ def change_case(text, case_direction="sentence"):
     'I am a sentence.'
     """
     text = text.strip().replace("  ", " ")
-    log.debug(f"** sentence_case: {type(text)} text = '{text}'")
+    logging.debug(f"** sentence_case: {type(text)} text = '{text}'")
 
     # Determine if text is in title-case or all-caps
     # Create abbreviation sans BORING words for title case detection
@@ -109,15 +109,15 @@ def change_case(text, case_direction="sentence"):
         [word[0] for word in set(text.split()).difference(BORING_WORDS)]
     )
     text_is_titlecase = text_abbreviated.isupper()
-    log.debug(f"  '{text_abbreviated=}' ")
-    log.debug(f"  '{text_is_titlecase=}'")
-    log.debug(f"  '{text.isupper()=}'")
+    logging.debug(f"  '{text_abbreviated=}' ")
+    logging.debug(f"  '{text_is_titlecase=}'")
+    logging.debug(f"  '{text.isupper()=}'")
 
     text = f": {text}"
     PUNCTUATION = ":.?"  # characters that need capitalization afterwards
     PUNCTUATION_RE = r"(:|\.|\?) "  # use parens to keep matched punctuation in split
     phrases = [phrase.strip() for phrase in re.split(PUNCTUATION_RE, text)]
-    log.debug(f"  phrases = '{phrases}'")
+    logging.debug(f"  phrases = '{phrases}'")
     new_text = []
     for phrase in phrases:
         if phrase == "":
@@ -127,11 +127,11 @@ def change_case(text, case_direction="sentence"):
             continue
 
         words = phrase.split(" ")
-        log.debug(f"words = '{words}'")
+        logging.debug(f"words = '{words}'")
         is_first = True
         for word in words:
-            log.debug("----------------")
-            log.debug(f"word = '{word}'")
+            logging.debug("----------------")
+            logging.debug(f"word = '{word}'")
 
             new_word = change_case_word(word, is_first, case_direction)
             new_text.append(new_word)
@@ -149,27 +149,27 @@ def change_case_word(word: str, is_first: bool, case_direction: str) -> str:
     """Change the case of a lone word."""
     word_capitalized = word.capitalize()
     if is_proper_noun(word):
-        log.debug("  word is_proper_noun, not changing")
+        logging.debug("  word is_proper_noun, not changing")
         new_word = word
     elif is_proper_noun(word_capitalized):
-        log.debug("  word_capitalized is_proper_noun")
+        logging.debug("  word_capitalized is_proper_noun")
         new_word = word_capitalized
     else:
-        log.debug(f"  changing case of '{word}'")
+        logging.debug(f"  changing case of '{word}'")
         if case_direction == "sentence":
             new_word = word.lower()
-            log.debug(f"  ... to '{new_word}'")
+            logging.debug(f"  ... to '{new_word}'")
         elif case_direction == "title":
             if word.isupper():
-                log.debug("   lowering word because word.isupper()")
+                logging.debug("   lowering word because word.isupper()")
                 word = safe_lower(word)
-            log.debug(f"  adding '{word}' as is")
+            logging.debug(f"  adding '{word}' as is")
             new_word = safe_capwords(word)
         else:
             raise Exception(f"Unknown {case_direction=}")
 
         if word and is_first:  # capitalize first word in a phrase
-            log.debug("  capitalize it as first word in phrase")
+            logging.debug("  capitalize it as first word in phrase")
             new_word = new_word[0].capitalize() + new_word[1:]
 
     return new_word
@@ -186,11 +186,11 @@ def safe_capwords(text):
     'the'
 
     """
-    log.debug(f"  safe_capwords: {type(text)} text = '{text}'")
+    logging.debug(f"  safe_capwords: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
     for word in words:
-        log.debug(f"word = '{word}'")
+        logging.debug(f"word = '{word}'")
         if word:  # this split will remove multiple white-spaces
             if word.lower() in BORING_WORDS:
                 new_text.append(word.lower())
@@ -212,25 +212,25 @@ def safe_lower(text):
     'America'
 
     """
-    log.debug(f"  safe_lower: {type(text)} text = '{text}'")
+    logging.debug(f"  safe_lower: {type(text)} text = '{text}'")
     new_text = []
     words = text.split(" ")
     for word in words:
-        log.debug(f"  word = '{word}'")
+        logging.debug(f"  word = '{word}'")
         if word:  # this split will remove multiple white-spaces
             word_capitalized = word.capitalize()
-            log.debug(f"  word_capitalized = '{word_capitalized}'")
+            logging.debug(f"  word_capitalized = '{word_capitalized}'")
             if word in proper_nouns:
                 new_text.append(word)
             elif word.isupper():
-                log.debug("    word.isupper(): True")
+                logging.debug("    word.isupper(): True")
                 if word_capitalized in proper_nouns:
                     new_text.append(word_capitalized)
                 else:
                     new_text.append(word.lower())
             else:
                 new_text.append(word.lower())
-    log.debug(f"  new_text = '{new_text}'")
+    logging.debug(f"  new_text = '{new_text}'")
     return " ".join(new_text)
 
 
@@ -248,21 +248,21 @@ def is_proper_noun(word):
     True
 
     """
-    log.debug(f"    word = '{word}'")
+    logging.debug(f"    word = '{word}'")
     parts = word.split("-")  # '([\W]+)'
     # debug("parts = '%s'" %parts)
     if len(parts) > 1:
-        log.debug("    recursing")
+        logging.debug("    recursing")
         return any(is_proper_noun(part) for part in parts)
     word = "".join(ch for ch in word if ch not in set(string.punctuation))
     if word in proper_nouns:  # in list of proper nouns?
-        log.debug("    word in proper_nouns: True")
+        logging.debug("    word in proper_nouns: True")
         return True
     if word.lower() not in wordset_nocase:  # not known to me at all: proper
-        log.debug(f"    word.lower() = '{word.lower()}'")
-        log.debug("    word.lower() not in wordset_nocase: True")
+        logging.debug(f"    word.lower() = '{word.lower()}'")
+        logging.debug("    word.lower() not in wordset_nocase: True")
         return True
-    log.debug(f"    '{word}' is_proper_noun: False")
+    logging.debug(f"    '{word}' is_proper_noun: False")
     return False
 
 
@@ -329,22 +329,22 @@ def main(args: argparse.Namespace | None = None):
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
-        log.debug("logging to file")
-        log.basicConfig(
+        logging.debug("logging to file")
+        logging.basicConfig(
             filename="change_case.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     case_type = "title" if args.title_case else "sentence"
-    log.debug(f"{args.text=}")
-    log.debug(f"case_type = {case_type}")
+    logging.debug(f"{args.text=}")
+    logging.debug(f"case_type = {case_type}")
     print(change_case(args.text, case_type))
 
 

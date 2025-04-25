@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import logging as log
+import logging
 import re
 import subprocess
 import sys
@@ -115,7 +115,7 @@ def update_entry_with_citations(
 ) -> EntryDict:
     """Update entry dictionary with citation information."""
     for token, value in cite_pairs:
-        log.info(f"{token=}, {value=}")
+        logging.info(f"{token=}, {value=}")
         token_lower = token.lower()
         match token_lower:
             case "keyword":
@@ -154,7 +154,7 @@ def build_citation_text(entry: EntryDict) -> str:
                 t, v = BIB_FIELDS[token_lower], value_str
             else:
                 # Log or handle unknown tokens if necessary, but don't raise error here
-                log.warning(f"Token '{token}' not in BIB_FIELDS or BIB_SHORTCUTS")
+                logging.warning(f"Token '{token}' not in BIB_FIELDS or BIB_SHORTCUTS")
                 continue  # Skip unknown tokens for citation string
             citation_parts.append(f"{t}={v}")
         elif token == "keyword" and isinstance(value, list):
@@ -399,7 +399,7 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         mm_fd.write("</node>\n")  # Close "Readings" node
         mm_fd.write("</node>\n</map>\n")  # Close root node and map
 
-        log.info(f"Final entry state before potential publish: {current_entry=}")
+        logging.info(f"Final entry state before potential publish: {current_entry=}")
         # Publish if requested and required fields are present in the *last* entry processed
         if args.publish and all(
             k in current_entry for k in ["summary", "title", "url"]
@@ -472,7 +472,9 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging based on verbosity
-    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)  # Default: CRITICAL
+    log_level = max(
+        logging.CRITICAL - (args.verbose * 10), logging.DEBUG
+    )  # Default: CRITICAL
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
     log_mode = (
@@ -481,14 +483,14 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename=log_file, filemode=log_mode, level=log_level, format=log_format
         )
     else:
-        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
-    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
-    log.debug(f"Parsed arguments: {args}")
+    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+    logging.debug(f"Parsed arguments: {args}")
 
     return args
 
@@ -497,45 +499,45 @@ def main(argv: list[str] | None = None) -> None:
     """Process dictation files and convert to mindmaps."""
     args = process_arguments(argv)
 
-    log.info(f"Starting processing for files: {args.file_names}")
+    logging.info(f"Starting processing for files: {args.file_names}")
 
     # Process each input file
     for source_fn in args.file_names:
-        log.info(f"Processing file: {source_fn}")
+        logging.info(f"Processing file: {source_fn}")
         try:
             if not source_fn.exists():
-                log.error(f"File not found: {source_fn}. Skipping.")
+                logging.error(f"File not found: {source_fn}. Skipping.")
                 continue
             if not source_fn.is_file():
-                log.error(f"Path is not a file: {source_fn}. Skipping.")
+                logging.error(f"Path is not a file: {source_fn}. Skipping.")
                 continue
 
             if text := source_fn.read_text(encoding="utf-8-sig"):
                 mm_file_name = source_fn.with_suffix(".mm")
-                log.info(f"Creating mindmap: {mm_file_name}")
+                logging.info(f"Creating mindmap: {mm_file_name}")
                 create_mm(args, text, mm_file_name)
-                log.info(f"Mindmap created: {mm_file_name}")
+                logging.info(f"Mindmap created: {mm_file_name}")
                 # Attempt to open with Freeplane
                 try:
                     subprocess.run(
                         ["open", "-a", "Freeplane.app", mm_file_name], check=True
                     )
-                    log.info(f"Opened {mm_file_name} in Freeplane.")
+                    logging.info(f"Opened {mm_file_name} in Freeplane.")
                 except FileNotFoundError:
-                    log.warning("Could not find 'open' command. Is this macOS?")
+                    logging.warning("Could not find 'open' command. Is this macOS?")
                 except subprocess.CalledProcessError as e:
-                    log.warning(f"Could not open {mm_file_name} in Freeplane: {e}")
+                    logging.warning(f"Could not open {mm_file_name} in Freeplane: {e}")
 
             else:
-                log.warning(f"File is empty: {source_fn}. Skipping.")
+                logging.warning(f"File is empty: {source_fn}. Skipping.")
         except Exception as e:
-            log.exception(
+            logging.exception(
                 f"An unexpected error occurred while processing {source_fn}: {e}"
             )
             # Optionally continue to next file or re-raise/exit
             # continue
 
-    log.info("Processing finished.")
+    logging.info("Processing finished.")
 
 
 if __name__ == "__main__":

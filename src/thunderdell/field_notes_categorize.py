@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import logging as log
+import logging
 import re
 import sys
 from collections import defaultdict
@@ -30,26 +30,28 @@ def extract_first_keyword(node_text: str) -> str | None:
             return matches[0]  # Return the value part of the first match
     except IndexError:
         # This should theoretically not happen with the 'kw=' check, but safety first
-        log.warning(f"Regex found 'kw=' but failed to extract value from: {node_text}")
+        logging.warning(
+            f"Regex found 'kw=' but failed to extract value from: {node_text}"
+        )
     return None
 
 
 def categorize_mindmap(old_fn: Path) -> None:
     """Create a categorized mindmap based on the first `kw=` declaration."""
-    log.info(f"Processing mindmap file: {old_fn}")
+    logging.info(f"Processing mindmap file: {old_fn}")
     cat_fn = old_fn.with_stem(old_fn.stem + "-cat").with_suffix(".mm")
-    log.info(f"Output categorized mindmap will be: {cat_fn}")
+    logging.info(f"Output categorized mindmap will be: {cat_fn}")
 
     try:
         old_doc = et.parse(old_fn)
     except et.XMLSyntaxError as e:
-        log.error(f"Failed to parse XML file {old_fn}: {e}")
+        logging.error(f"Failed to parse XML file {old_fn}: {e}")
         return
     except FileNotFoundError:
-        log.error(f"Input mindmap file not found: {old_fn}")
+        logging.error(f"Input mindmap file not found: {old_fn}")
         return
     except Exception as e:
-        log.exception(f"An unexpected error occurred while parsing {old_fn}: {e}")
+        logging.exception(f"An unexpected error occurred while parsing {old_fn}: {e}")
         return
 
     old_map = old_doc.getroot()
@@ -65,29 +67,31 @@ def categorize_mindmap(old_fn: Path) -> None:
         if extracted_kw := extract_first_keyword(node_text):
             keyword = extracted_kw
         else:
-            log.warning(f"No 'kw=' found or extracted for node: {node_text[:50]}...")
+            logging.warning(
+                f"No 'kw=' found or extracted for node: {node_text[:50]}..."
+            )
 
         # Navigate up to the ancestor 'author' node (assuming structure: author > title > cite)
         title_node = node.getparent()
         if title_node is None:
-            log.warning(
+            logging.warning(
                 f"Parent (title) node missing for cite node: {node_text[:50]}..."
             )
             continue
         author_node = title_node.getparent()
         if author_node is None:
-            log.warning(
+            logging.warning(
                 f"Grandparent (author) node missing for cite node: {node_text[:50]}..."
             )
             continue
 
-        log.debug(
+        logging.debug(
             f"Assigning node (author: {author_node.get('TEXT', '')[:30]}...) to category: {keyword}"
         )
         categorized_nodes[keyword].append(author_node)
 
     if not categorized_nodes:
-        log.warning(
+        logging.warning(
             f"No cite nodes found or processed in {old_fn}. No output generated."
         )
         return
@@ -105,7 +109,7 @@ def categorize_mindmap(old_fn: Path) -> None:
     for keyword, node_list in sorted(
         categorized_nodes.items(), key=lambda item: item[0].lower()
     ):
-        log.debug(f"Adding category '{keyword}' with {len(node_list)} nodes.")
+        logging.debug(f"Adding category '{keyword}' with {len(node_list)} nodes.")
         cat_node = et.SubElement(root_node, "node", TEXT=keyword)
         # Add all author nodes belonging to this category
         cat_node.extend(node_list)
@@ -116,11 +120,11 @@ def categorize_mindmap(old_fn: Path) -> None:
         new_doc.write(
             str(cat_fn), encoding="utf-8", xml_declaration=True, pretty_print=True
         )
-        log.info(f"Successfully created categorized mindmap: {cat_fn}")
+        logging.info(f"Successfully created categorized mindmap: {cat_fn}")
     except OSError as e:
-        log.error(f"Failed to write output file {cat_fn}: {e}")
+        logging.error(f"Failed to write output file {cat_fn}: {e}")
     except Exception as e:
-        log.exception(f"An unexpected error occurred while writing {cat_fn}: {e}")
+        logging.exception(f"An unexpected error occurred while writing {cat_fn}: {e}")
 
 
 def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
@@ -160,11 +164,11 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging
-    log_level = log.WARNING  # Default
+    log_level = logging.WARNING  # Default
     if args.verbose == 1:
-        log_level = log.INFO
+        log_level = logging.INFO
     elif args.verbose >= 2:
-        log_level = log.DEBUG
+        log_level = logging.DEBUG
 
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
@@ -174,14 +178,14 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename=log_file, filemode=log_mode, level=log_level, format=log_format
         )
     else:
-        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
-    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
-    log.debug(f"Parsed arguments: {args}")
+    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+    logging.debug(f"Parsed arguments: {args}")
 
     return args
 
@@ -192,11 +196,11 @@ def main(args: argparse.Namespace | None = None) -> None:
         args = process_arguments(sys.argv[1:])
 
     if not args.filename.is_file():
-        log.error(f"Input file not found or is not a file: {args.filename}")
+        logging.error(f"Input file not found or is not a file: {args.filename}")
         sys.exit(1)  # Exit if the input file doesn't exist
 
     categorize_mindmap(args.filename)
-    log.info("Categorization process finished.")
+    logging.info("Categorization process finished.")
 
 
 if __name__ == "__main__":

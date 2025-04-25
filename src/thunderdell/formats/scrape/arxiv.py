@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 
 from thunderdell import arxiv_query
 from thunderdell.change_case import sentence_case
@@ -32,9 +32,9 @@ class ScrapeArXiv(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self):
-        log.info(f"url = {self.url}")
+        logging.info(f"url = {self.url}")
         dict_bib = arxiv_query.query(self.identifier)
-        log.info(f"{dict_bib=}")
+        logging.info(f"{dict_bib=}")
         biblio = {
             "entry_type": "report",
             "permalink": self.url,
@@ -44,7 +44,7 @@ class ScrapeArXiv(ScrapeDefault):
             "comment": self.comment,
         }
         for key, value in list(dict_bib.items()):
-            log.info(f"{key=} {value=} {type(value)=}")
+            logging.info(f"{key=} {value=} {type(value)=}")
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -59,7 +59,7 @@ class ScrapeArXiv(ScrapeDefault):
             biblio["title"] = "UNKNOWN"
         else:
             biblio["title"] = sentence_case(" ".join(biblio["title"].split()))
-        log.info(f"{biblio=}")
+        logging.info(f"{biblio=}")
         return biblio
 
     def get_author(self, bib_dict):
@@ -70,5 +70,5 @@ class ScrapeArXiv(ScrapeDefault):
 
     def get_date(self, bib_dict):
         date = bib_dict["published"][0:10].replace("-", "")
-        log.info(f"{date=}")
+        logging.info(f"{date=}")
         return date

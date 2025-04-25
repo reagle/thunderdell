@@ -8,7 +8,7 @@ __version__ = "1.0"
 
 import argparse
 import json
-import logging as log
+import logging
 import pprint
 import sys
 from pathlib import Path
@@ -36,17 +36,17 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
         f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn_norm}"
         "&jscmd=details&format=json"
     )
-    log.info(f"Querying Open Library: {url}")
+    logging.info(f"Querying Open Library: {url}")
     try:
         response = session.get(url, timeout=10)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
     except requests.exceptions.RequestException as e:
-        log.error(f"Open Library request failed for ISBN {isbn_norm}: {e}")
+        logging.error(f"Open Library request failed for ISBN {isbn_norm}: {e}")
         return None
 
     content_type = response.headers.get("content-type", "")
     if not content_type.startswith("application/json"):
-        log.warning(
+        logging.warning(
             f"Open Library did not return JSON for ISBN {isbn_norm}. "
             f"Content-Type: {content_type}"
         )
@@ -55,22 +55,26 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
     try:
         json_result = response.json()
     except json.JSONDecodeError as e:
-        log.error(f"Failed to decode JSON from Open Library for ISBN {isbn_norm}: {e}")
-        log.debug(f"Response content: {response.text}")
+        logging.error(
+            f"Failed to decode JSON from Open Library for ISBN {isbn_norm}: {e}"
+        )
+        logging.debug(f"Response content: {response.text}")
         return None
 
     if not json_result:  # Check for empty JSON response {}
-        log.warning(f"Open Library returned empty result for ISBN {isbn_norm}")
+        logging.warning(f"Open Library returned empty result for ISBN {isbn_norm}")
         return None
 
     result_key = f"ISBN:{isbn_norm}"
     if result_key not in json_result:
-        log.warning(f"ISBN {isbn_norm} not found in Open Library response.")
+        logging.warning(f"ISBN {isbn_norm} not found in Open Library response.")
         return None
 
     json_vol = json_result[result_key]
     if "details" not in json_vol:
-        log.warning(f"No 'details' found in Open Library response for ISBN {isbn_norm}")
+        logging.warning(
+            f"No 'details' found in Open Library response for ISBN {isbn_norm}"
+        )
         return None
 
     json_details = json_vol["details"]
@@ -94,7 +98,7 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
             # Attempt to parse various date formats flexibly
             bib_entry["date"] = arrow.get(pub_date).format("YYYYMMDD")
         except arrow.parser.ParserError:
-            log.warning(
+            logging.warning(
                 f"Could not parse Open Library date '{pub_date}' for ISBN {isbn_norm}. "
                 "Attempting year extraction."
             )
@@ -103,7 +107,7 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
             if year_match:
                 bib_entry["date"] = year_match.format("YYYY")
             else:
-                log.error(f"Failed to extract year from '{pub_date}'")
+                logging.error(f"Failed to extract year from '{pub_date}'")
 
     if title := json_details.get("title"):
         bib_entry["title"] = str(title).strip()  # Ensure string and strip
@@ -120,7 +124,7 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
 
     bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}"  # Default URL
 
-    log.debug(f"Open Library result for {isbn_norm}: {bib_entry}")
+    logging.debug(f"Open Library result for {isbn_norm}: {bib_entry}")
     return bib_entry
 
 
@@ -128,18 +132,18 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
     """Query the Google Books API."""
     isbn_norm = _normalize_isbn(isbn)
     url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn_norm}"
-    log.info(f"Querying Google Books API: {url}")
+    logging.info(f"Querying Google Books API: {url}")
 
     try:
         response = session.get(url, timeout=10)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        log.error(f"Google Books API request failed for ISBN {isbn_norm}: {e}")
+        logging.error(f"Google Books API request failed for ISBN {isbn_norm}: {e}")
         return None
 
     content_type = response.headers.get("content-type", "")
     if not content_type.startswith("application/json"):
-        log.warning(
+        logging.warning(
             f"Google Books API did not return JSON for ISBN {isbn_norm}. "
             f"Content-Type: {content_type}"
         )
@@ -148,14 +152,14 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
     try:
         json_result = response.json()
     except json.JSONDecodeError as e:
-        log.error(
+        logging.error(
             f"Failed to decode JSON from Google Books API for ISBN {isbn_norm}: {e}"
         )
-        log.debug(f"Response content: {response.text}")
+        logging.debug(f"Response content: {response.text}")
         return None
 
     if json_result.get("totalItems", 0) == 0 or not json_result.get("items"):
-        log.warning(f"Google Books API found no items for ISBN {isbn_norm}")
+        logging.warning(f"Google Books API found no items for ISBN {isbn_norm}")
         return None
 
     # Assume the first item is the best match
@@ -176,7 +180,7 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
             else:  # Assume YYYY-MM-DD or similar
                 bib_entry["date"] = arrow_date.format("YYYYMMDD")
         except arrow.parser.ParserError:
-            log.warning(
+            logging.warning(
                 f"Could not parse Google date '{pub_date}' for ISBN {isbn_norm}. Storing as is."
             )
             bib_entry["date"] = pub_date  # Store raw if unparseable
@@ -196,13 +200,13 @@ def google_query(isbn: str, session: requests.Session) -> BibDict | None:
 
     bib_entry["url"] = f"https://books.google.com/books?isbn={isbn_norm}"
 
-    log.debug(f"Google Books API result for {isbn_norm}: {bib_entry}")
+    logging.debug(f"Google Books API result for {isbn_norm}: {bib_entry}")
     return bib_entry
 
 
 def query(isbn: str) -> BibDict:
     """Query available ISBN services and merge results."""
-    log.info(f"Starting query for ISBN: {isbn}")
+    logging.info(f"Starting query for ISBN: {isbn}")
     bib: BibDict = {}
     bib_open = bib_google = None
 
@@ -215,7 +219,7 @@ def query(isbn: str) -> BibDict:
             k in bib_open for k in ["author", "title"]
         )
         if needs_google:
-            log.info(
+            logging.info(
                 f"Querying Google as Open Library result was insufficient for {isbn}"
             )
             bib_google = google_query(isbn, session)
@@ -234,14 +238,14 @@ def query(isbn: str) -> BibDict:
 
     # Final check for essential fields
     if not all(k in bib for k in ["author", "title", "date", "isbn", "url"]):
-        log.warning(f"Query result for {isbn} might be incomplete: {bib}")
+        logging.warning(f"Query result for {isbn} might be incomplete: {bib}")
         # Ensure defaults if absolutely necessary, though upstream should provide
         bib.setdefault("author", "Unknown Author")
         bib.setdefault("title", "Unknown Title")
         bib.setdefault("date", "Unknown Date")
         # isbn and url should always be set by the query functions
 
-    log.info(f"Completed query for ISBN {isbn}")
+    logging.info(f"Completed query for ISBN {isbn}")
     return bib
 
 
@@ -283,11 +287,11 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     args = arg_parser.parse_args(argv)
 
     # Configure logging
-    log_level = log.WARNING  # Default
+    log_level = logging.WARNING  # Default
     if args.verbose == 1:
-        log_level = log.INFO
+        log_level = logging.INFO
     elif args.verbose >= 2:
-        log_level = log.DEBUG
+        log_level = logging.DEBUG
 
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
@@ -295,18 +299,22 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename=log_file, filemode=log_mode, level=log_level, format=log_format
         )
     else:
-        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
     # Configure requests logging level based on verbosity
-    log.getLogger("requests").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
-    log.getLogger("urllib3").setLevel(log.WARNING if args.verbose < 2 else log.DEBUG)
+    logging.getLogger("requests").setLevel(
+        logging.WARNING if args.verbose < 2 else logging.DEBUG
+    )
+    logging.getLogger("urllib3").setLevel(
+        logging.WARNING if args.verbose < 2 else logging.DEBUG
+    )
 
-    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
-    log.debug(f"Parsed arguments: {args}")
+    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+    logging.debug(f"Parsed arguments: {args}")
 
     return args
 
@@ -328,20 +336,20 @@ def main(args: argparse.Namespace | None = None) -> None:
             try:
                 result = query(isbn_input, session)
                 results[isbn_input] = result
-                log.info(f"Successfully retrieved data for ISBN: {isbn_input}")
+                logging.info(f"Successfully retrieved data for ISBN: {isbn_input}")
                 print(f"ISBN: {isbn_input} | Result: {result}")
             except ValueError as e:
-                log.error(f"Query failed for ISBN {isbn_input}: {e}")
+                logging.error(f"Query failed for ISBN {isbn_input}: {e}")
                 results[isbn_input] = {"error": str(e)}
                 print(f"ISBN: {isbn_input} | Error: {e}")
             except Exception as e:
-                log.exception(
+                logging.exception(
                     f"An unexpected error occurred for ISBN {isbn_input}: {e}"
                 )
                 results[isbn_input] = {"error": f"Unexpected error: {e}"}
                 print(f"ISBN: {isbn_input} | Unexpected Error: {e}")
 
-    log.info("ISBN query process finished.")
+    logging.info("ISBN query process finished.")
 
 
 if __name__ == "__main__":

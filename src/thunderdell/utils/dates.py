@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 from datetime import datetime
 
 import dateutil.parser as du  # type: ignore

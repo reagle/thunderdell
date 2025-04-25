@@ -9,7 +9,7 @@ __version__ = "1.0"
 import argparse
 import errno
 import http.server
-import logging as log
+import logging
 import os
 import re
 import sys
@@ -237,15 +237,15 @@ def main():
 
     args = parser.parse_args()
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         print("logging to file")
-        log.basicConfig(
+        logging.basicConfig(
             filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     # Determine execution mode
     if "SCRIPT_NAME" in os.environ:

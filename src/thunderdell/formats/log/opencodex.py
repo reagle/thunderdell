@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-import logging as log
+import logging
 import time
 from subprocess import Popen
 
@@ -39,11 +39,11 @@ def log2opencodex(args, biblio):
 
     if entry:
         blog_title, sep, blog_body = entry.partition(".")
-        log.info(
+        logging.info(
             f"blog_title='{blog_title.strip()}' sep='{sep}' "
             f"blog_body='{blog_body.strip()}'"
         )
-    log.info(f"blog_title='{blog_title}'")
+    logging.info(f"blog_title='{blog_title}'")
 
     filename = (
         blog_title.lower()
@@ -53,7 +53,7 @@ def log2opencodex(args, biblio):
         .replace("/", "-")
     )
     filename = CODEX_ROOT / category / f"{this_year}-{filename}.md"
-    log.info(f"{filename=}")
+    logging.info(f"{filename=}")
     if filename.exists():
         raise FileExistsError(f"\nfilename {filename} already exists")
 

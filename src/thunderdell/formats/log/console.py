@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 import time
 
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
@@ -37,7 +37,7 @@ def log2console(args, biblio):
         "excerpt",
         "url",
     )
-    log.info(f"biblio = '{biblio}'")
+    logging.info(f"biblio = '{biblio}'")
     if biblio["tags"]:
         tags = biblio["tags"].strip().split(" ")
         tags_expanded = ""
@@ -47,7 +47,7 @@ def log2console(args, biblio):
         # biblio['keywords'] = tags_expanded[0:-1]  # removes last space
     bib_in_single_line = ""
     for token in TOKENS:
-        log.info(f"token = '{token}'")
+        logging.info(f"token = '{token}'")
         if token not in biblio:
             if token == "url":  # I want these printed even if don't exist
                 biblio["url"] = ""

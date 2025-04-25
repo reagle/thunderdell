@@ -15,7 +15,7 @@ __version__ = "1.0"
 # - archive URLs to f/old/`r=`
 
 import argparse
-import logging as log
+import logging
 import re
 import sys
 import time
@@ -61,7 +61,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
     url = urllib.parse.unquote(url)
     url = canonicalize_url(url)
-    log.info(f"url = '{url}'")
+    logging.info(f"url = '{url}'")
 
     # Structured dispatch tables with import metadata
     url_scrapers = (
@@ -80,7 +80,7 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
     for prefix, (module_name, class_name) in url_scrapers:
         if url.lower().startswith(prefix):
-            log.info(f"Using {class_name} for {prefix} URL")
+            logging.info(f"Using {class_name} for {prefix} URL")
             module = import_module(module_name)
             scraper_class = getattr(module, class_name)
             return scraper_class(url, comment)
@@ -113,7 +113,7 @@ def get_logger(text: str) -> tuple[Callable, dict]:
                 .replace(r"\=", "=")
             )
 
-        log.info(f"params = '{params}'")
+        logging.info(f"params = '{params}'")
         function_map = {
             "n": log2nifty,
             "j": log2work,
@@ -215,18 +215,18 @@ def main():
     )
     args = arg_parser.parse_args(sys.argv[1:])
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         print("logging to file")
-        log.basicConfig(
+        logging.basicConfig(
             filename="busy.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     if args.keyword_shortcuts:
         for dictionary in LIST_OF_KEYSHORTCUTS:
@@ -237,10 +237,10 @@ def main():
         sys.exit()
 
     logger, params = get_logger(" ".join(args.text))
-    log.info("-------------------------------------------------------")
-    log.info("-------------------------------------------------------")
-    log.info(f"{logger=}")
-    log.info(f"{params=}")
+    logging.info("-------------------------------------------------------")
+    logging.info("-------------------------------------------------------")
+    logging.info(f"{logger=}")
+    logging.info(f"{params=}")
     comment = "" if not params["comment"] else params["comment"]
     if params["url"]:  # not all log2work entries have urls
         scraper = get_scraper(params["url"].strip(), comment)
@@ -248,7 +248,7 @@ def main():
     else:
         biblio = {"title": "", "url": "", "comment": comment}
     biblio["tags"] = params["tags"]
-    log.info(f"{biblio=}")
+    logging.info(f"{biblio=}")
     logger(args, biblio)
 
 

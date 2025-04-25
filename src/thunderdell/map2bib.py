@@ -11,10 +11,7 @@ __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import contextlib  # https://docs.python.org/3/library/contextlib.html
-import errno
-import http.server
-import logging as log
-import os
+import logging
 import re
 import sys
 import textwrap
@@ -92,11 +89,11 @@ def build_bib(
     mm_files = {file_name}
     while mm_files:
         mm_file = mm_files.pop()
-        log.debug(f"   parsing {mm_file}")
+        logging.debug(f"   parsing {mm_file}")
         try:
             doc = et.parse(mm_file).getroot()
         except (OSError, et.ParseError) as err:
-            log.debug(f"    failed to parse {mm_file} because of {err}")
+            logging.debug(f"    failed to parse {mm_file} because of {err}")
             continue
         entries, links = walk_freeplane(args, doc, mm_file, entries, links=[])
         done.add(mm_file)
@@ -510,7 +507,9 @@ def get_identifier(
     ident = clean_identifier(ident)
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
-        log.debug(f"collision on {ident}: {entry['title']} & {entries[ident]['title']}")
+        logging.debug(
+            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
+        )
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident
@@ -756,15 +755,15 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     file_name = args.input_file.absolute()
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         print("logging to file")
-        log.basicConfig(
+        logging.basicConfig(
             filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     args.in_main = True
     args.outfd = sys.stdout

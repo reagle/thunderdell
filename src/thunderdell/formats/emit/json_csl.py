@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 import re
 
 from thunderdell.biblio.fields import (
@@ -85,7 +85,7 @@ def emit_json_csl(args, entries):
             date_buffer.append(f'        "season": "{season}",\n')
         date_buffer.append("    },\n")
 
-        log.debug(f"{date_buffer=}")
+        logging.debug(f"{date_buffer=}")
         return date_buffer
 
     def csl_protect_case(title):

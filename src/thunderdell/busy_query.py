@@ -143,29 +143,6 @@ def serve_local(port=8000):
     logging.info(f"Server bound to {server.server_address}")
     return server
 
-src/thunderdell/busy_query.py
-```python
-<<<<<<< SEARCH
-def wait_for_port(port: int, timeout=5.0):
-    """Wait until the port is open or timeout."""
-    import socket
-
-    start = time.time()
-    while time.time() - start < timeout:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(0.5)
-            result = sock.connect_ex(("localhost", port))
-            if result == 0:
-                logging.info(f"Port {port} is open and accepting connections")
-                return True
-            else:
-                logging.debug(
-                    f"Port {port} not open yet (connect_ex returned {result})"
-                )
-        time.sleep(0.1)
-    logging.error(f"Timeout waiting for port {port} to open")
-    return False
-
 
 def handle_cgi():
     """Handle CGI requests for a2hosting."""
@@ -242,7 +219,6 @@ def start_server_in_thread(port: int) -> threading.Thread:
             logging.error(f"Server error: {e}", exc_info=True)
         logging.info("Server thread exiting")
 
-    breakpoint()
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
     return server_thread

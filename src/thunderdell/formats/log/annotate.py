@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import logging as log
+import logging
 import re
 import time
 from collections import namedtuple
@@ -41,7 +41,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
             filename.rename(bare.with_name(f"{bare.name}1{ext}"))
 
     def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
-        log.info(biblio)
+        logging.info(biblio)
         return map2bib.get_identifier(
             {
                 "author": map2bib.parse_names(biblio["author"]),
@@ -83,30 +83,30 @@ def do_console_annotation(args: argparse.Namespace, biblio):
         print(f"@{tentative_id}\n")
         EQUAL_PAT = re.compile(r"(\w{1,3})=")
         for line in edited_text:
-            log.info(f"{line=}")
+            logging.info(f"{line=}")
             line = line.replace("\u200b", "")  # Instapaper export artifact
             line = line.strip()
             if line == "":
                 continue
             if line.startswith("# ["):
                 from_Instapaper = True
-                log.info(f"{from_Instapaper=}")
+                logging.info(f"{from_Instapaper=}")
                 continue
             if line == "-p":
                 do_publish = True
-                log.warning(f"{do_publish=}")
+                logging.warning(f"{do_publish=}")
             elif line.startswith("s."):
                 biblio["comment"] = line[2:].strip()
-                log.info(f"{biblio['comment']=}")
+                logging.info(f"{biblio['comment']=}")
             elif "=" in line[0:3]:  # citation only if near start of line
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))
-                log.info(f"{cite_pairs=}")
+                logging.info(f"{cite_pairs=}")
                 for short, value in cite_pairs:
-                    log.info(f"{bf.BIB_SHORTCUTS=}")
-                    log.info(f"{bf.BIB_TYPES=}")
-                    log.info(f"short,value = {short},{value}")
+                    logging.info(f"{bf.BIB_SHORTCUTS=}")
+                    logging.info(f"{bf.BIB_TYPES=}")
+                    logging.info(f"short,value = {short},{value}")
                     # if short == "t":  # 't=phdthesis'
                     # biblio[bf.BIB_SHORTCUTS[value]] = biblio["c_web"]
                     if short == "kw":  # 'kw=complicity
@@ -123,8 +123,10 @@ def do_console_annotation(args: argparse.Namespace, biblio):
                         line = ", " + line  # prepend paraphrase mark
                 console_annotations += "\n\n" + line.strip()
 
-        log.info("biblio.get('excerpt', '') = '{}'".format(biblio.get("excerpt", "")))
-        log.info(f"console_annotations = '{console_annotations}'")
+        logging.info(
+            "biblio.get('excerpt', '') = '{}'".format(biblio.get("excerpt", ""))
+        )
+        logging.info(f"console_annotations = '{console_annotations}'")
         if console_annotations.strip():  # don't bother with default excerpt
             biblio["excerpt"] = console_annotations
 
@@ -138,7 +140,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
         return biblio, do_publish
 
     # Setup initial id and bibliographic information including keywords
-    log.info(f"{biblio['author']=}")
+    logging.info(f"{biblio['author']=}")
     tentative_id = get_tentative_ident(biblio)
     initial_text = [f"d={biblio['date']} au={biblio['author']} ti={biblio['title']}"]
     for key in biblio:
@@ -153,7 +155,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
             )
             initial_text.append(tags)
     if args.publish:
-        log.warning("appending -p to text")
+        logging.warning("appending -p to text")
         initial_text.append("-p")
     if "comment" in biblio and biblio["comment"].strip():
         initial_text.append("s. " + biblio["comment"])

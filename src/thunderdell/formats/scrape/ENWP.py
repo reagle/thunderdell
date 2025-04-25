@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 import re
 import time
 
@@ -34,7 +34,7 @@ class ScrapeENWP(ScrapeDefault):
 
     def get_title(self):
         title = ScrapeDefault.get_title(self)  # use super()?
-        log.info(f"title = '{title}'")
+        logging.info(f"title = '{title}'")
         return title.replace(" - Wikipedia", "")
 
     def get_permalink(self):

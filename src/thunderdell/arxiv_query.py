@@ -12,7 +12,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import logging as log
+import logging
 import pprint
 import sys
 
@@ -26,16 +26,16 @@ ACCEPT_HEADERS = {
 
 def query(number: int, accept: str = "application/atom+xml") -> dict | bool:
     """Query the arXiv API with a given number and accept header."""
-    log.info(f"{accept=}")
-    log.info(f"{number=}")
+    logging.info(f"{accept=}")
+    logging.info(f"{number=}")
     headers = {"Accept": accept}
     url = f"http://export.arxiv.org/api/query?id_list={number}"
-    log.info(f"{url=}")
+    logging.info(f"{url=}")
     r = requests.get(url, headers=headers)
     requested_content_type = accept.split(";")[0]
-    log.debug(f"{r=}")
+    logging.debug(f"{r=}")
     returned_content_type = r.headers["content-type"]
-    log.info("{returned_content_type=}; {requested_content_type=}")
+    logging.info("{returned_content_type=}; {requested_content_type=}")
     if requested_content_type in returned_content_type:
         xml_bib = r.content
         return xmltodict.parse(xml_bib)["feed"]["entry"]
@@ -81,22 +81,22 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = parse_args()
 
-    log_level = (log.CRITICAL) - (args.verbose * 10)
+    log_level = (logging.CRITICAL) - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename="arxiv_query.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     accept = ACCEPT_HEADERS["atom"]
     if args.style:
         accept = ACCEPT_HEADERS.get(args.style, args.style)
-    log.info(f"accept = {accept} ")
+    logging.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))
 

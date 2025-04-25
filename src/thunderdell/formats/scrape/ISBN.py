@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 
 from thunderdell.change_case import sentence_case
 
@@ -25,20 +25,22 @@ class ScrapeISBN(ScrapeDefault):
     def get_biblio(self):
         from thunderdell import isbn_query
 
-        log.info(f"url = {self.url}")
+        logging.info(f"url = {self.url}")
         json_bib = isbn_query.query(self.url)
-        log.info(f"json_bib = '{json_bib}'")
+        logging.info(f"json_bib = '{json_bib}'")
         biblio = {
             "permalink": self.url,
             "excerpt": "",
             "comment": self.comment,
         }
-        log.info("### json_bib.items()")
+        logging.info("### json_bib.items()")
         for key, value in list(json_bib.items()):
-            log.info(f"key = '{key}'")
+            logging.info(f"key = '{key}'")
             if key.startswith("subject"):
                 continue
-            log.info(f"key = '{key}' value = '{value}' type(value) = '{type(value)}'\n")
+            logging.info(
+                f"key = '{key}' value = '{value}' type(value) = '{type(value)}'\n"
+            )
             if value in (None, [], ""):
                 pass
             elif key == "author":
@@ -70,14 +72,14 @@ class ScrapeISBN(ScrapeDefault):
     def get_author(self, bib_dict):
         names = "UNKNOWN"
         if "author" in bib_dict:
-            log.info(f"{bib_dict['author']=}")
+            logging.info(f"{bib_dict['author']=}")
             names = bib_dict["author"]
         return names
 
     def get_date(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
-        log.info(f"{date_parts=}")
+        logging.info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
             date = "%d%02d%02d" % (int(year), int(month), int(day))
@@ -88,5 +90,5 @@ class ScrapeISBN(ScrapeDefault):
             date = str(date_parts[0])
         else:
             date = "0000"
-        log.info(f"{date=}")
+        logging.info(f"{date=}")
         return date

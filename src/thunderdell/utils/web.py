@@ -10,7 +10,7 @@ __version__ = "1.0"
 
 import html.entities
 import json
-import logging as log
+import logging
 import os
 import re
 from pathlib import Path
@@ -24,7 +24,7 @@ from lxml import etree  # type: ignore
 from thunderdell import config
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
 
-log = log.getLogger("utils_web")
+log = logging.getLogger("utils_web")
 
 
 def get_credential(key: str) -> str:
@@ -108,7 +108,7 @@ def get_text(url: str) -> str:
 
 def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:
     """Send annotated URL to social networks."""
-    log.info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
+    logging.info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
     photo_path = None
 
     if tags and tags[0] != "#":  # they've not yet been hashified
@@ -136,7 +136,7 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     if url.startswith("file://"):
         url = ""
     total_len = len(comment) + len(tags) + len(title) + len(url)
-    log.info(
+    logging.info(
         f"""comment = {len(comment)}: {comment}
          title = {len(title)}: {title}
          url = {len(url)}: {url}
@@ -188,7 +188,7 @@ def bluesky_update(
         else:
             response = client.send_post(text=skeet_obj, langs=["en-US"])
 
-        log.debug(f"{response=}")
+        logging.debug(f"{response=}")
     except atproto_core.exceptions.AtProtocolError as err:
         print(err)
         print(f"skeet failed {len(skeet_text + url)}: {skeet_text + url}")
@@ -253,7 +253,7 @@ def twitter_update(
         cookies = orjson.loads(cookies_fp.read_bytes())
         session = Client(cookies=cookies)
         account = Account(session=session)
-        log.info(f"using existing {cookies=}")
+        logging.info(f"using existing {cookies=}")
     else:
         session = init_session()
         account = Account(
@@ -265,7 +265,7 @@ def twitter_update(
             if k in {"ct0", "auth_token"}
         }
         cookies_fp.write_bytes(orjson.dumps(cookies))
-        log.info(f"using new {cookies=}")
+        logging.info(f"using new {cookies=}")
 
     if photo_path:
         shrunk_msg = shrink_message("twitter", comment, title, "", tags)
@@ -281,7 +281,7 @@ def twitter_update(
     else:
         shrunk_msg = shrink_message("twitter", comment, title, url, tags)
         result = account.tweet(shrunk_msg)
-    log.debug(f"{result=}")
+    logging.debug(f"{result=}")
     print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 
@@ -300,49 +300,49 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
         limit = 280
     elif service == "bluesky":
         limit = 300
-    log.info(f"{comment=}")
+    logging.info(f"{comment=}")
     PADDING = 7  # = comment_delim + title quotes + spaces
     TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
     limit -= PADDING
 
-    log.info(f"{limit=}")
+    logging.info(f"{limit=}")
     message_room = limit - len_twitter(tags)
-    log.info(f"message_room - len(tags) = {message_room}")
+    logging.info(f"message_room - len(tags) = {message_room}")
 
-    log.info(f"{len_twitter(url)=}")
+    logging.info(f"{len_twitter(url)=}")
     if service == "twitter" and len_twitter(url) > TWITTER_SHORTENER_LEN:
         message_room = message_room - TWITTER_SHORTENER_LEN
-        log.info(f"  shortened to {TWITTER_SHORTENER_LEN}")
+        logging.info(f"  shortened to {TWITTER_SHORTENER_LEN}")
     else:
         message_room = message_room - len_twitter(url)
-    log.info(f"message_room after url = {message_room}")
+    logging.info(f"message_room after url = {message_room}")
 
-    log.info(f"{len_twitter(title)=}")
+    logging.info(f"{len_twitter(title)=}")
     if len_twitter(title) > message_room:
-        log.info("title is too long")
+        logging.info("title is too long")
         title = f"{title[: message_room - 1]}…"
-        log.info(f"  truncated to {len_twitter(title)}")
+        logging.info(f"  truncated to {len_twitter(title)}")
     message_room = message_room - len_twitter(title)
-    log.info(f"{message_room=} after title = ")
+    logging.info(f"{message_room=} after title = ")
 
-    log.info(f"{len_twitter(comment)=}")
+    logging.info(f"{len_twitter(comment)=}")
     if len_twitter(comment) > message_room:
-        log.info("comment is too long")
+        logging.info("comment is too long")
         if message_room > 5:
-            log.info(" truncating")
+            logging.info(" truncating")
             comment = f"{comment[: message_room - 1]}…"
-            log.info(f"  truncated to {len_twitter(comment)}")
-            log.info(f"{comment}")
+            logging.info(f"  truncated to {len_twitter(comment)}")
+            logging.info(f"{comment}")
         else:
-            log.info(" skipping")
+            logging.info(" skipping")
             comment = ""
     message_room = message_room - len_twitter(comment)
-    log.info(f"message_room after comment = {message_room}")
+    logging.info(f"message_room after comment = {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
     message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-    log.info(f"{len_twitter(message)=}: {message=}")
+    logging.info(f"{len_twitter(message)=}: {message=}")
     return message
 
 

@@ -9,7 +9,7 @@ __version__ = "1.0"
 # TODO: 2024-10-18 : add DOI ability since some papers are web pages
 
 import argparse
-import logging as log
+import logging
 import re
 import sys
 import webbrowser
@@ -68,7 +68,9 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
     # Configure logging
-    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)  # Default: CRITICAL
+    log_level = max(
+        logging.CRITICAL - (args.verbose * 10), logging.DEBUG
+    )  # Default: CRITICAL
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
     log_mode = (
@@ -77,41 +79,41 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Use basicConfig with stream for stderr or filename for file
     if log_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename=log_file, filemode=log_mode, level=log_level, format=log_format
         )
     else:
-        log.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
-    log.debug(f"Log level set to: {log.getLevelName(log_level)}")
-    log.debug(f"Parsed arguments: {args}")
+    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+    logging.debug(f"Parsed arguments: {args}")
 
     return args
 
 
 def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
     """Process a single file for highlights and annotations."""
-    log.info(f"Processing file: {file_path}")
+    logging.info(f"Processing file: {file_path}")
     url = ""
     comment_lines: list[str] = [""]  # Start with an empty line for potential summary
 
     try:
         file_content = file_path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        log.error(f"File not found: {file_path}. Skipping.")
+        logging.error(f"File not found: {file_path}. Skipping.")
         return
     except Exception as e:
-        log.exception(f"Error reading file {file_path}: {e}")
+        logging.exception(f"Error reading file {file_path}: {e}")
         return
 
     # First pass: find the URL
     for line in file_content.splitlines():
         if match := URL_RE.search(line):
             url = match.group()
-            log.info(f"URL found: {url}")
+            logging.info(f"URL found: {url}")
             break  # Stop after finding the first URL
     else:
-        log.warning(f"No URL found in {file_path}. Skipping processing logic.")
+        logging.warning(f"No URL found in {file_path}. Skipping processing logic.")
         return  # Cannot proceed without a URL
 
     # Second pass: process lines for comments/excerpts
@@ -130,12 +132,12 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
             comment_lines.append(f", {line}")
 
     text = "\n".join(comment_lines)
-    log.debug(f"Generated comment text:\n{text}")
+    logging.debug(f"Generated comment text:\n{text}")
 
     # Open URL in browser and process with busy.py logic
     try:
         webbrowser.open(url)
-        log.info(f"Opened URL in browser: {url}")
+        logging.info(f"Opened URL in browser: {url}")
         # Assuming busy.get_scraper and log2mm handle their own errors/logging
         scraper = busy.get_scraper(url, text)  # Pass URL and formatted text
         biblio = scraper.get_biblio()
@@ -143,9 +145,9 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
         if "excerpt" in biblio:
             del biblio["excerpt"]  # remove auto excerpt if present
         busy.log2mm(args, biblio)  # Pass args for potential publish flag etc.
-        log.info(f"Successfully processed and logged to mindmap for {url}")
+        logging.info(f"Successfully processed and logged to mindmap for {url}")
     except Exception as e:
-        log.exception(f"Error during scraping or mindmap logging for {url}: {e}")
+        logging.exception(f"Error during scraping or mindmap logging for {url}: {e}")
 
 
 def main(args: argparse.Namespace | None = None) -> None:
@@ -153,8 +155,8 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    log.info("==================================")
-    log.info(f"Starting processing with args: {args}")
+    logging.info("==================================")
+    logging.info(f"Starting processing with args: {args}")
 
     files_to_process = args.file_names
     for file_path in files_to_process:
@@ -166,17 +168,17 @@ def main(args: argparse.Namespace | None = None) -> None:
             f"\nTrash processed file(s) ({len(files_to_process)} files)? [y/N]: "
         ).lower()
         if user_input == "y":
-            log.info(
+            logging.info(
                 f"Sending {len(files_to_process)} file(s) to trash: {files_to_process}"
             )
             send2trash(files_to_process)
-            log.info("File(s) sent to trash.")
+            logging.info("File(s) sent to trash.")
         else:
-            log.info("Files were not sent to trash.")
+            logging.info("Files were not sent to trash.")
     except Exception as e:
-        log.exception(f"Error during file trashing operation: {e}")
+        logging.exception(f"Error during file trashing operation: {e}")
 
-    log.info("Processing finished.")
+    logging.info("Processing finished.")
 
 
 if __name__ == "__main__":

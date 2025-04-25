@@ -10,7 +10,7 @@ __version__ = "1.0"
 
 
 import argparse
-import logging as log
+import logging
 import re
 
 from thunderdell.biblio.fields import (
@@ -214,7 +214,7 @@ def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
         entry_type_copy = entry_type
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
-        log.info(f"{entry=}")
+        logging.info(f"{entry=}")
         if entry["ori_author"] in container_values:
             if not args.author_create:
                 del entry["author"]

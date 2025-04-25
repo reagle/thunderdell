@@ -7,7 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import logging as log
+import logging
 import re
 import subprocess
 import sys
@@ -29,9 +29,9 @@ def process_email(file_name: Path) -> str:
         msg = BytesParser(policy=policy.default).parse(fp)
         for part in msg.walk():
             msg_content_type = part.get_content_subtype()
-            log.debug(f"{part=}, {msg_content_type=}")
+            logging.debug(f"{part=}, {msg_content_type=}")
             if msg_content_type == "html":
-                log.debug(f"part is HTML: {msg_content_type}")
+                logging.debug(f"part is HTML: {msg_content_type}")
                 charset = part.get_content_charset(failobj="utf-8")
                 content = part.get_payload(decode=True).decode(charset, "replace")  # type: ignore
                 return content
@@ -57,7 +57,7 @@ def process_html(content: str) -> str:
 
     if isbn_match := RE_ISBN.search(content):
         ISBN = isbn_match.group(0)
-        log.info(f"{ISBN=}")
+        logging.info(f"{ISBN=}")
         text_new = get_bib_preamble(ISBN)
 
     text_new.append("edition = Kindle")
@@ -65,9 +65,9 @@ def process_html(content: str) -> str:
         text_new.append("pagination = location")
 
     soup = BeautifulSoup(content, "html.parser")
-    divs = soup.findAll("div")
+    divs = soup.find_all("div")
     for div in divs:
-        log.debug(f"{div=}")
+        logging.debug(f"{div=}")
         if "noteHeading" in str(div):
             try:
                 if color_page_match := RE_COLOR_PAGE.search(str(div)):
@@ -128,17 +128,17 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     args = arg_parser.parse_args(argv if argv is not None else sys.argv[1:])
 
-    log_level = max(log.CRITICAL - (args.verbose * 10), log.DEBUG)
+    log_level = max(logging.CRITICAL - (args.verbose * 10), logging.DEBUG)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
-        log.basicConfig(
+        logging.basicConfig(
             filename="extract-kindle.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,
         )
     else:
-        log.basicConfig(level=log_level, format=LOG_FORMAT)
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     return args
 
@@ -147,19 +147,19 @@ def main(args: argparse.Namespace | None = None) -> None:
     """Parse arguments, setup logging, and run."""
     if args is None:
         args = process_arguments(sys.argv[1:])
-    log.info("==================================")
-    log.debug(f"{args=}")
+    logging.info("==================================")
+    logging.debug(f"{args=}")
 
     for file_name in args.file_names:
-        log.debug(f"{file_name=}")
+        logging.debug(f"{file_name=}")
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
 
         match file_name.suffix:
             case ".eml":
-                log.info(f"processing {file_name} as eml")
+                logging.info(f"processing {file_name} as eml")
                 html_content = process_email(file_name)
             case ".html":
-                log.info(f"processing {file_name} as html")
+                logging.info(f"processing {file_name} as html")
                 html_content = file_name.read_text()
             case _:
                 raise OSError(

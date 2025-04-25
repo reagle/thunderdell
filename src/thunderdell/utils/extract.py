@@ -9,7 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
-import logging as log
+import logging
 
 import requests
 
@@ -24,7 +24,7 @@ class args:
 
 def get_bib_preamble(token: str) -> list[str]:
     """Call out to get and format biblio information using ISBN/DOI APIs."""
-    log.info(f"{token=}")
+    logging.info(f"{token=}")
     scrape_token = formats.ScrapeDOI if token.startswith("10") else formats.ScrapeISBN
     biblio = scrape_token(f"{token}", "").get_biblio()
     biblio["tags"] = ""

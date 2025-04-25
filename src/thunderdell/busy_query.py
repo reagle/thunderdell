@@ -223,7 +223,6 @@ def start_server_in_thread(port: int) -> threading.Thread:
     server_thread = threading.Thread(target=run_server, daemon=False)
     server_thread.start()
     return server_thread
-```
 
 src/thunderdell/busy_query.py
 ```python

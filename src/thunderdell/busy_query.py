@@ -120,23 +120,45 @@ def query_busysponge(query):
     return out_file
 
 
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import urllib.parse
+
+class BusyRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        parsed_path = urllib.parse.urlparse(self.path)
+        if parsed_path.path == "/busy":
+            params = urllib.parse.parse_qs(parsed_path.query)
+            query = params.get("query", [""])[0]
+            if not query:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b"Missing 'query' parameter")
+                return
+
+            # Call your existing function to generate results
+            result_file = query_busysponge(query)
+
+            # Read the generated HTML
+            content = result_file.read_text(encoding="utf-8", errors="replace").encode("utf-8")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"Not Found")
+
 def serve_local(port=8000):
     """Create and return an HTTPServer instance."""
     logging.info(f"Starting local server on port {port}")
-    # Ensure CGI_DIR exists and is accessible
-    if not config.CGI_DIR.exists():
-        logging.error(f"CGI_DIR {config.CGI_DIR} does not exist")
-        raise FileNotFoundError(f"CGI_DIR {config.CGI_DIR} does not exist")
-    if not config.CGI_DIR.is_dir():
-        logging.error(f"CGI_DIR {config.CGI_DIR} is not a directory")
-        raise NotADirectoryError(f"CGI_DIR {config.CGI_DIR} is not a directory")
 
-    os.chdir(config.CGI_DIR.parent)
-    handler = http.server.CGIHTTPRequestHandler
-    handler.cgi_directories = ["/cgi-bin"]
+    handler = BusyRequestHandler
 
     # Bind explicitly to IPv4 localhost to avoid IPv6 issues
-    server = http.server.HTTPServer(("127.0.0.1", port), handler)
+    server = HTTPServer(("127.0.0.1", port), handler)
     logging.info(f"Server bound to {server.server_address}")
     return server
 

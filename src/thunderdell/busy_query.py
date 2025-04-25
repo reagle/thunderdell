@@ -125,7 +125,7 @@ class BusyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
-        if parsed_path.path == "/busy":
+        if parsed_path.path == "/bq":
             params = urllib.parse.parse_qs(parsed_path.query)
             query = params.get("query", [""])[0]
             if not query:
@@ -398,7 +398,7 @@ def main(argv: list[str] | None = None):
             # Open browser to local server CGI with query
             query_encoded = urllib.parse.quote(args.query)
             url = (
-                f"http://localhost:{args.port}/cgi-bin/search.cgi?query={query_encoded}"
+                f"http://localhost:{args.port}/bq?query={query_encoded}"
             )
             logging.info(f"Opening browser to {url}")
             webbrowser.open(url)

@@ -510,9 +510,7 @@ def get_identifier(
     ident = clean_identifier(ident)
     ident = identity_add_title(ident, entry["title"])  # get title suffix
     if ident in entries:  # there is a collision
-        log.warning(
-            f"collision on {ident}: {entry['title']} & {entries[ident]['title']}"
-        )
+        log.debug(f"collision on {ident}: {entry['title']} & {entries[ident]['title']}")
         ident = identity_increment(ident, entries)
     # debug(f"5 ident = {type(ident)} '{ident}' in {entry['_mm_file']}")
     return ident

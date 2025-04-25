@@ -187,21 +187,33 @@ def main():
     parser = argparse.ArgumentParser(
         description="Unified server for thunderdell queries"
     )
-    parser.add_argument("--local", action="store_true", help="Run as a local server")
     parser.add_argument(
-        "--port", type=int, default=8000, help="Port for local server (default: 8000)"
+        "-L", "--local", action="store_true", help="Run as a local server"
     )
-    parser.add_argument("--query", help="Query string (for CLI mode)")
     parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=8000,
+        help="Port for local server (default: 8000)",
+    )
+    parser.add_argument("-q", "--query", help="Query string (for CLI mode)")
+    parser.add_argument(
+        "-s",
         "--site",
         choices=["MindMap", "BusySponge"],
         default="MindMap",
         help="Site to query (default: MindMap)",
     )
     parser.add_argument(
-        "--chase", action="store_true", default=True, help="Chase links between MMs"
+        "-c",
+        "--chase",
+        action="store_true",
+        default=True,
+        help="Chase links between MMs",
     )
     parser.add_argument(
+        "-b",
         "--browser",
         action="store_true",
         default=False,

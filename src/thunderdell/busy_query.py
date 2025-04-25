@@ -292,7 +292,11 @@ def main():
             filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
         )
     else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        # Force logging to stderr and reset handlers to ensure output
+        root_logger = logging.getLogger()
+        if root_logger.hasHandlers():
+            root_logger.handlers.clear()
+        logging.basicConfig(level=log_level, format=LOG_FORMAT, stream=sys.stderr)
 
     logging.debug(f"Arguments parsed: {args}")
 

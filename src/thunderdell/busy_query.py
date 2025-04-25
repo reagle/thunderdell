@@ -128,14 +128,32 @@ class BusyRequestHandler(BaseHTTPRequestHandler):
         if parsed_path.path == "/bq":
             params = urllib.parse.parse_qs(parsed_path.query)
             query = params.get("query", [""])[0]
+            site = params.get("sitesearch", ["MindMap"])[0]
             if not query:
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b"Missing 'query' parameter")
                 return
 
-            # Call your existing function to generate results
-            result_file = query_busysponge(query)
+            if site == "MindMap":
+                # Use query_mindmap to generate results
+                args = argparse.Namespace()
+                args.query = query
+                args.query_c = re.compile(re.escape(query), re.IGNORECASE)
+                args.chase = True
+                args.cgi = True
+                args.input_file = config.DEFAULT_MAP
+                args.long_url = False
+                args.pretty = False
+
+                result_file = config.TMP_DIR / "query-thunderdell.html"
+                if result_file.exists():
+                    result_file.unlink()
+                # Generate the results file
+                query_mindmap(args)
+            else:
+                # Default to BusySponge query
+                result_file = query_busysponge(query)
 
             # Read the generated HTML
             content = result_file.read_text(encoding="utf-8", errors="replace").encode(

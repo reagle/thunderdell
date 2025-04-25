@@ -248,9 +248,6 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         description="Unified server for thunderdell queries"
     )
     parser.add_argument(
-        "-l", "--local", action="store_true", help="Run as a local server"
-    )
-    parser.add_argument(
         "-p",
         "--port",
         type=int,
@@ -319,10 +316,20 @@ def main(argv: list[str] | None = None):
 
     logging.debug(f"Arguments parsed: {args}")
 
-    run_local_server(args.port)
+    # Always run as local server mode (no --local flag)
+    if not is_port_in_use(args.port):
+        logging.info(f"Local server not running on port {args.port}, starting it")
+        start_server_in_thread(args.port)
+        if not wait_for_port(args.port, timeout=10):
+            logging.error(
+                f"Server did not start listening on port {args.port} within timeout"
+            )
+            sys.exit(1)
+    else:
+        logging.info(f"Local server already running on port {args.port}")
+
     if args.query:
         logging.info(f"Running CLI query mode with query: {args.query}")
-        # CLI query mode
         if args.site == "BusySponge":
             logging.info("Querying BusySponge site")
             result_file = query_busysponge(args.query)
@@ -334,30 +341,12 @@ def main(argv: list[str] | None = None):
                 print(f"Results written to {result_file}")
         else:
             logging.info("Querying MindMap site")
-
-            # Check if local server is running on the specified port
-            if not is_port_in_use(args.port):
-                logging.info(
-                    f"Local server not running on port {args.port}, starting it"
-                )
-                start_server_in_thread(args.port)
-                if not wait_for_port(args.port, timeout=10):
-                    logging.error(
-                        f"Server did not start listening on port {args.port} within timeout"
-                    )
-                    sys.exit(1)
-            else:
-                logging.info(f"Local server already running on port {args.port}")
-
-            # Open browser to local server CGI with query
             query_encoded = urllib.parse.quote(args.query)
             url = f"http://localhost:{args.port}/bq?query={query_encoded}"
             logging.info(f"Opening browser to {url}")
             webbrowser.open(url)
     else:
-        logging.warning("No valid mode specified, printing help")
-        # No valid mode specified
-        # parser is not defined here, so replace with print_help call on a new parser
+        logging.warning("No query specified, printing help")
         argparse.ArgumentParser(
             description="Unified server for thunderdell queries"
         ).print_help()

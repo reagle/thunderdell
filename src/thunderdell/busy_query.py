@@ -318,6 +318,7 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None):
+    """Detect running mode."""
     args = process_arguments(argv)
 
     log_level = (logging.CRITICAL) - (args.verbose * 10)

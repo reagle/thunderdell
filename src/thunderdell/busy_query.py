@@ -7,7 +7,6 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
-import errno
 import http.server
 import logging
 import os
@@ -122,27 +121,14 @@ def query_busysponge(query):
 
 
 def serve_local(port=8000):
-    """Start a local HTTP server for development."""
+    """Create and return an HTTPServer instance."""
     logging.info(f"Starting local server on port {port}")
     os.chdir(config.CGI_DIR.parent)
     handler = http.server.CGIHTTPRequestHandler
     handler.cgi_directories = ["/cgi-bin"]
 
-    try:
-        server = http.server.HTTPServer(("localhost", port), handler)
-        print(f"Starting local server on http://localhost:{port}")
-        print("Press Ctrl+C to stop")
-        server.serve_forever()
-    except OSError as error:
-        if error.errno == errno.EADDRINUSE:
-            logging.error(f"Port {port} already in use")
-            print(f"Port {port} already in use")
-        else:
-            logging.error(f"Server error: {error}")
-            raise
-    except KeyboardInterrupt:
-        logging.info("Server stopped by user")
-        print("\nServer stopped")
+    server = http.server.HTTPServer(("localhost", port), handler)
+    return server
 
 
 def handle_cgi():
@@ -204,6 +190,7 @@ import socket
 import threading
 import time
 
+
 def is_port_in_use(port: int) -> bool:
     """Check if a TCP port is in use on localhost."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -211,11 +198,38 @@ def is_port_in_use(port: int) -> bool:
         result = sock.connect_ex(("localhost", port))
         return result == 0
 
+
 def start_server_in_thread(port: int) -> threading.Thread:
     """Start the local server in a background thread."""
-    server_thread = threading.Thread(target=serve_local, args=(port,), daemon=True)
+    server = serve_local(port)
+
+    def run_server():
+        logging.info(f"Server thread starting on port {port}")
+        try:
+            server.serve_forever()
+        except Exception as e:
+            logging.error(f"Server error: {e}", exc_info=True)
+        logging.info("Server thread exiting")
+
+    server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
     return server_thread
+
+
+def wait_for_port(port: int, timeout=5.0):
+    """Wait until the port is open or timeout."""
+    import socket
+    import time
+
+    start = time.time()
+    while time.time() - start < timeout:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.5)
+            if sock.connect_ex(("localhost", port)) == 0:
+                return True
+        time.sleep(0.1)
+    return False
+
 
 def main():
     """Parse command-line arguments and run in appropriate mode."""
@@ -293,7 +307,13 @@ def main():
     elif args.local:
         logging.info("Running in local server mode")
         # Local server mode
-        serve_local(args.port)
+        server = serve_local(args.port)
+        try:
+            logging.info(f"Serving local server on port {args.port}")
+            server.serve_forever()
+        except KeyboardInterrupt:
+            logging.info("Server stopped by user")
+            print("\nServer stopped")
     elif args.query:
         logging.info(f"Running CLI query mode with query: {args.query}")
         # CLI query mode
@@ -311,16 +331,23 @@ def main():
 
             # Check if local server is running on the specified port
             if not is_port_in_use(args.port):
-                logging.info(f"Local server not running on port {args.port}, starting it")
+                logging.info(
+                    f"Local server not running on port {args.port}, starting it"
+                )
                 start_server_in_thread(args.port)
-                # Wait briefly for server to start
-                time.sleep(1)
+                if not wait_for_port(args.port, timeout=10):
+                    logging.error(
+                        f"Server did not start listening on port {args.port} within timeout"
+                    )
+                    sys.exit(1)
             else:
                 logging.info(f"Local server already running on port {args.port}")
 
             # Open browser to local server CGI with query
             query_encoded = urllib.parse.quote(args.query)
-            url = f"http://localhost:{args.port}/cgi-bin/search.cgi?query={query_encoded}"
+            url = (
+                f"http://localhost:{args.port}/cgi-bin/search.cgi?query={query_encoded}"
+            )
             logging.info(f"Opening browser to {url}")
             webbrowser.open(url)
     else:

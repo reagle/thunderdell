@@ -10,7 +10,6 @@ PROJECT_ROOT = Path(
     __file__
 ).parent.parent.parent  # Adjusted to point to the actual project root
 TESTS_FOLDER = PROJECT_ROOT / "tests"
-CGI_DIR = HOME / "joseph" / "plan" / "cgi-bin"  # for local server
 CLIENT_HOME = Path("/Users/reagle")  # for opening local results pages
 DEFAULT_MAP = HOME / "joseph" / "readings.mm"
 DEFAULT_PRETTY_MAP = HOME / "joseph" / "2005" / "ethno" / "field-notes.mm"

@@ -207,18 +207,33 @@ def main():
         default=False,
         help="Open results in browser (for CLI mode)",
     )
+    parser.add_argument(
+        "-V",
+        "--verbose",
+        dest="verbose",
+        action="count",
+        default=0,
+        help="increase verbosity from critical though error, warning, info, and debug",
+    )
+    parser.add_argument(
+        "-l",
+        "--log-to-file",
+        action="store_true",
+        default=False,
+        help="log to file td.log",
+    )
 
     args = parser.parse_args()
 
-    # Set up logging
-    log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    log.basicConfig(level=log.ERROR, format=log_format)
-
-    # Determine execution mode
-    if "SCRIPT_NAME" in os.environ:
-        # Set up logging
-        log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-        log.basicConfig(level=log.ERROR, format=log_format)
+    log_level = (log.CRITICAL) - (args.verbose * 10)
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    if args.log_to_file:
+        print("logging to file")
+        log.basicConfig(
+            filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
+        )
+    else:
+        log.basicConfig(level=log_level, format=LOG_FORMAT)
 
     # Determine execution mode
     if "SCRIPT_NAME" in os.environ:

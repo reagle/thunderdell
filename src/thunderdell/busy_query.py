@@ -243,6 +243,23 @@ def wait_for_port(port: int, timeout=5.0):
     return False
 
 
+def run_local_server(port: int):
+    """Run the local server in a blocking manner."""
+    logging.info("Running in local server mode")
+    # Local server mode
+    try:
+        server = serve_local(port)
+    except Exception as e:
+        logging.error(f"Failed to start local server: {e}", exc_info=True)
+        sys.exit(1)
+    try:
+        logging.info(f"Serving local server on port {port}")
+        server.serve_forever()
+    except KeyboardInterrupt:
+        logging.info("Server stopped by user")
+        print("\nServer stopped")
+
+
 def main():
     """Parse command-line arguments and run in appropriate mode."""
     logging.info("Starting main()")
@@ -322,22 +339,6 @@ def main():
         handle_cgi()
     elif args.local:
         run_local_server(args.port)
-
-
-def run_local_server(port: int):
-    logging.info("Running in local server mode")
-    # Local server mode
-    try:
-        server = serve_local(port)
-    except Exception as e:
-        logging.error(f"Failed to start local server: {e}", exc_info=True)
-        sys.exit(1)
-    try:
-        logging.info(f"Serving local server on port {port}")
-        server.serve_forever()
-    except KeyboardInterrupt:
-        logging.info("Server stopped by user")
-        print("\nServer stopped")
     elif args.query:
         logging.info(f"Running CLI query mode with query: {args.query}")
         # CLI query mode

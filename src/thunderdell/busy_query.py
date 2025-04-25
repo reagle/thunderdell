@@ -126,6 +126,14 @@ def query_busysponge(query):
 def serve_local(port=8000):
     """Create and return an HTTPServer instance."""
     logging.info(f"Starting local server on port {port}")
+    # Ensure CGI_DIR exists and is accessible
+    if not config.CGI_DIR.exists():
+        logging.error(f"CGI_DIR {config.CGI_DIR} does not exist")
+        raise FileNotFoundError(f"CGI_DIR {config.CGI_DIR} does not exist")
+    if not config.CGI_DIR.is_dir():
+        logging.error(f"CGI_DIR {config.CGI_DIR} is not a directory")
+        raise NotADirectoryError(f"CGI_DIR {config.CGI_DIR} is not a directory")
+
     os.chdir(config.CGI_DIR.parent)
     handler = http.server.CGIHTTPRequestHandler
     handler.cgi_directories = ["/cgi-bin"]
@@ -313,7 +321,11 @@ def main():
     elif args.local:
         logging.info("Running in local server mode")
         # Local server mode
-        server = serve_local(args.port)
+        try:
+            server = serve_local(args.port)
+        except Exception as e:
+            logging.error(f"Failed to start local server: {e}", exc_info=True)
+            sys.exit(1)
         try:
             logging.info(f"Serving local server on port {args.port}")
             server.serve_forever()

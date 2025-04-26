@@ -159,10 +159,8 @@ def bluesky_update(
     import atproto_core
     from atproto import Client, client_utils, models
 
-    import utils.web as uw
-
-    BLUESKY_APP_PASSWORD = uw.get_credential("BLUESKY_APP_PASSWORD")
-    BLUESKY_HANDLE = uw.get_credential("BLUESKY_HANDLE")
+    BLUESKY_APP_PASSWORD = get_credential("BLUESKY_APP_PASSWORD")
+    BLUESKY_HANDLE = get_credential("BLUESKY_HANDLE")
 
     skeet_text = shrink_message("bluesky", comment, title, "", tags) + "\n"
 
@@ -189,7 +187,7 @@ def bluesky_update(
             response = client.send_post(text=skeet_obj, langs=["en-US"])
 
         logging.debug(f"{response=}")
-    except atproto_core.exceptions.AtProtocolError as err:
+    except atproto_core.exceptions.AtProtocolError as err:  # type: ignore
         print(err)
         print(f"skeet failed {len(skeet_text + url)}: {skeet_text + url}")
     else:
@@ -202,10 +200,8 @@ def mastodon_update(
     """Update the authenticated Mastodon account with a tweet and optional photo."""
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
-    import utils.web as uw
-
-    MASTODON_APP_BASE = uw.get_credential("MASTODON_APP_BASE")
-    OHAI_ACCESS_TOKEN = uw.get_credential("OHAI_ACCESS_TOKEN")
+    MASTODON_APP_BASE = get_credential("MASTODON_APP_BASE")
+    OHAI_ACCESS_TOKEN = get_credential("OHAI_ACCESS_TOKEN")
 
     ohai = mastodon.Mastodon(
         access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
@@ -240,11 +236,9 @@ def twitter_update(
     from twitter.account import Account
     from twitter.util import init_session
 
-    import utils.web as uw
-
-    TW_EMAIL = uw.get_credential("TW_EMAIL")
-    TW_PASSWORD = uw.get_credential("TW_PASSWORD")
-    TW_USERNAME = uw.get_credential("TW_USERNAME")
+    TW_EMAIL = get_credential("TW_EMAIL")
+    TW_PASSWORD = get_credential("TW_PASSWORD")
+    TW_USERNAME = get_credential("TW_USERNAME")
 
     # https://github.com/trevorhobenshield/twitter-api-client/issues/64
     cookies_fp = config.TMP_DIR / "twitter.cookies"

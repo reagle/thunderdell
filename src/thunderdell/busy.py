@@ -65,23 +65,27 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
 
     # Structured dispatch tables with import metadata
     url_scrapers = (
-        ("doi:", ("formats", "ScrapeDOI")),
-        ("isbn:", ("formats", "ScrapeISBN")),
-        ("arxiv:", ("formats", "ScrapeArXiv")),
-        ("https://en.wikipedia.org/w", ("formats", "ScrapeENWP")),
-        ("https://marc.info/", ("formats", "ScrapeMARC")),
-        ("https://meta.wikimedia.org/w", ("formats", "ScrapeWMMeta")),
-        ("https://ohai.social/", ("formats", "ScrapeMastodon")),
-        ("https://x.com/", ("formats", "ScrapeTwitter")),
-        ("https://twitter.com/", ("formats", "ScrapeTwitter")),
-        ("https://www.nytimes.com/", ("formats", "ScrapeNYT")),
-        ("https://www.reddit.com/", ("formats", "ScrapeReddit")),
+        ("doi:", ("thunderdell.formats", "ScrapeDOI")),
+        ("isbn:", ("thunderdell.formats", "ScrapeISBN")),
+        ("arxiv:", ("thunderdell.formats", "ScrapeArXiv")),
+        ("https://en.wikipedia.org/w", ("thunderdell.formats", "ScrapeENWP")),
+        ("https://marc.info/", ("thunderdell.formats", "ScrapeMARC")),
+        ("https://meta.wikimedia.org/w", ("thunderdell.formats", "ScrapeWMMeta")),
+        ("https://ohai.social/", ("thunderdell.formats", "ScrapeMastodon")),
+        ("https://x.com/", ("thunderdell.formats", "ScrapeTwitter")),
+        ("https://twitter.com/", ("thunderdell.formats", "ScrapeTwitter")),
+        ("https://www.nytimes.com/", ("thunderdell.formats", "ScrapeNYT")),
+        ("https://www.reddit.com/", ("thunderdell.formats", "ScrapeReddit")),
     )
 
+    # Iterate through the dispatch table and check URL prefix and dynamically import
+    # This prevents unnecessary imports and slowdowns
     for prefix, (module_name, class_name) in url_scrapers:
         if url.lower().startswith(prefix):
             logging.info(f"Using {class_name} for {prefix} URL")
+            # Import the module dynamically
             module = import_module(module_name)
+            # Get the class from the module
             scraper_class = getattr(module, class_name)
             return scraper_class(url, comment)
 

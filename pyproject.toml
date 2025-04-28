@@ -39,6 +39,7 @@ extract-raindrop = "thunderdell.extract_raindrop:main"
 field-notes-categorize = "thunderdell.field_notes_categorize:main"
 fix-mindmaps = "thunderdell.fix_mindmaps:main"
 isbn-query = "thunderdell.isbn_query:main"
+map2bib = "thunderdell.map2bib:main"
 map-query = "thunderdell.map_query:main"
 search = "thunderdell.search:main"
 

@@ -42,6 +42,7 @@ def escape_csl(s: str | None) -> str | int | None:
         return None
     if s.isdigit():
         return int(s)
+    # A few replaces(s) are sufficient and faster than json.dumps(s)
     s = s.replace("\n", "\\n")
     s = s.replace('"', r"'")
     # s = s.replace("#", r"\#") # this was introducing slashes in URLs
@@ -63,9 +64,6 @@ def do_csl_person(person: Sequence[str]) -> list[str]:
     person_buffer.append(f'"family": {escape_csl(family)}, ')
     if given:
         person_buffer.append(f'"given": {escape_csl(given)}, ')
-        # person_buffer.append('    given:\n')
-        # for given_part in given.split(' '):
-        #     person_buffer.append('    - %s\n' % escape_csl(given_part))
     if suffix:
         person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
     if particle:

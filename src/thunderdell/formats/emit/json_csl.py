@@ -11,6 +11,7 @@ __version__ = "1.0"
 
 import logging
 import re
+import json
 from collections.abc import Sequence
 from typing import Any
 
@@ -42,12 +43,7 @@ def escape_csl(s: str | None) -> str | int | None:
         return None
     if s.isdigit():
         return int(s)
-    # A few replaces(s) are sufficient and faster than json.dumps(s)
-    s = s.replace("\n", "\\n")
-    s = s.replace('"', r"'")
-    # s = s.replace("#", r"\#") # this was introducing slashes in URLs
-    s = s.replace("@", r"\\@")  # single slash caused bugs in past
-    return f'"{s}"'
+    return json.dumps(s)
 
 
 def do_csl_person(person: Sequence[str]) -> list[str]:

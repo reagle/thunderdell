@@ -31,9 +31,9 @@ def escape_csl(s: str | None) -> str | int | None:
     >>> escape_csl("Hello\nWorld")
     '"Hello\\nWorld"'
     >>> escape_csl('He said "yes"')
-    '"He said \\'yes\\'"'
+    '"He said \\"yes\\""'
     >>> escape_csl("email@example.com")
-    '"email\\\\@example.com"'
+    '"email@example.com"'
     >>> escape_csl("12345")
     12345
     >>> escape_csl(None) is None
@@ -64,49 +64,6 @@ def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     if particle:
         person_dict["non-dropping-particle"] = particle
     return person_dict
-
-src/thunderdell/formats/emit/json_csl.py
-def do_csl_date(date: Any, season: str | None = None) -> list[str]:
-    r"""CSL writer for dates.
-
-    >>> class DummyDate:
-    ...     def __init__(self):
-    ...         self.year = 2023
-    ...         self.month = 4
-    ...         self.day = 29
-    ...         self.circa = False
-    >>> do_csl_date(DummyDate())
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '    },\n']
-
-    >>> class DummyDateCirca:
-    ...     def __init__(self):
-    ...         self.year = 2023
-    ...         self.month = 4
-    ...         self.day = 29
-    ...         self.circa = True
-    >>> do_csl_date(DummyDateCirca(), season="spring")
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '        "circa": true,\n', '        "season": "spring",\n', '    },\n']
-
-    """
-    date_buffer: list[str] = []
-    date_buffer.append("{")
-    date_buffer.append('"date-parts": [ [ ')
-    # int() removes leading 0 for json
-    if date.year:
-        date_buffer.append(f"{int(date.year)}, ")
-    if date.month:
-        date_buffer.append(f"{int(date.month)}, ")
-    if date.day:
-        date_buffer.append(f"{int(date.day)}, ")
-    date_buffer.append("] ],\n")
-    if date.circa:
-        date_buffer.append('        "circa": true,\n')
-    if season:
-        date_buffer.append(f'        "season": "{season}",\n')
-    date_buffer.append("    },\n")
-
-    logging.debug(f"{date_buffer=}")
-    return date_buffer
 
 
 def do_csl_date(date: Any, season: str | None = None) -> list[str]:
@@ -218,7 +175,9 @@ def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
                         title = csl_protect_case(escaped_value)
                     else:
                         title = str(escaped_value)
-                    obj["title"] = json.loads(title) if isinstance(title, str) else title
+                    obj["title"] = (
+                        json.loads(title) if isinstance(title, str) else title
+                    )
                     continue
                 if field in ("author", "editor", "translator"):
                     obj[field] = [do_csl_person(person) for person in value]

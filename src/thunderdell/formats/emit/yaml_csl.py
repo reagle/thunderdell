@@ -102,7 +102,7 @@ def escape_yaml(s: str) -> str:
     return s
 
 
-def emit_yaml_people(people: list[PersonName]) -> None:
+def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None:
     """Yaml writer for authors and editors."""
     for person in people:
         # biblatex ('First Middle', 'von', 'Last', 'Jr.')
@@ -118,7 +118,7 @@ def emit_yaml_people(people: list[PersonName]) -> None:
             args.outfd.write(f"    non-dropping-particle: {escape_yaml(particle)}\n")
 
 
-def emit_yaml_date(date: PubDate, season: str | None = None):
+def emit_yaml_date(args: argparse.Namespace, date: PubDate, season: str | None = None):
     """Yaml writer for dates."""
     if date.year:
         args.outfd.write(f"    year: {date.year}\n")

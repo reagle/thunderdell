@@ -66,7 +66,7 @@ def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     return person_dict
 
 
-def do_csl_date(date: Any, season: str | None = None) -> list[str]:
+def do_csl_date(date: Any, season: str | None = None) -> dict[str, Any]:
     r"""CSL writer for dates.
 
     >>> class DummyDate:
@@ -76,7 +76,7 @@ def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     ...         self.day = 29
     ...         self.circa = False
     >>> do_csl_date(DummyDate())
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '    },\n']
+    {'date-parts': [[2023, 4, 29]]}
 
     >>> class DummyDateCirca:
     ...     def __init__(self):
@@ -85,28 +85,25 @@ def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     ...         self.day = 29
     ...         self.circa = True
     >>> do_csl_date(DummyDateCirca(), season="spring")
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '        "circa": true,\n', '        "season": "spring",\n', '    },\n']
+    {'date-parts': [[2023, 4, 29]], 'circa': True, 'season': 'spring'}
 
     """
-    date_buffer: list[str] = []
-    date_buffer.append("{")
-    date_buffer.append('"date-parts": [ [ ')
-    # int() removes leading 0 for json
+    date_parts = []
     if date.year:
-        date_buffer.append(f"{int(date.year)}, ")
+        date_parts.append(int(date.year))
     if date.month:
-        date_buffer.append(f"{int(date.month)}, ")
+        date_parts.append(int(date.month))
     if date.day:
-        date_buffer.append(f"{int(date.day)}, ")
-    date_buffer.append("] ],\n")
-    if date.circa:
-        date_buffer.append('        "circa": true,\n')
-    if season:
-        date_buffer.append(f'        "season": "{season}",\n')
-    date_buffer.append("    },\n")
+        date_parts.append(int(date.day))
 
-    logging.debug(f"{date_buffer=}")
-    return date_buffer
+    date_dict: dict[str, Any] = {"date-parts": [date_parts]}
+    if getattr(date, "circa", False):
+        date_dict["circa"] = True
+    if season:
+        date_dict["season"] = season
+
+    logging.debug(f"{date_dict=}")
+    return date_dict
 
 
 PROTECT_PAT = re.compile(

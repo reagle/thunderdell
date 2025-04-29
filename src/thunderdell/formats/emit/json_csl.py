@@ -11,6 +11,8 @@ __version__ = "1.0"
 
 import logging
 import re
+from collections.abc import Sequence
+from typing import Any, List, Optional, Union
 
 from thunderdell.biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
@@ -21,17 +23,8 @@ from thunderdell.biblio.fields import (
 from thunderdell.formats.emit.yaml_csl import guess_csl_type
 
 
-from typing import Any, List, Optional, Sequence, Union
-
-def escape_csl(s: Union[str, None]) -> Union[str, int, None]:
-    """Escape CSL string for JSON output.
-
-    Args:
-        s: The string to escape.
-
-    Returns:
-        The escaped string or integer if s is digit.
-    """
+def escape_csl(s: str | None) -> str | int | None:
+    """Escape CSL string for JSON output."""
     if s:  # faster to just quote than testing for tokens
         s = s.replace("\n", "\\n")
         s = s.replace('"', r"'")
@@ -44,21 +37,14 @@ def escape_csl(s: Union[str, None]) -> Union[str, int, None]:
         return s
 
 
-def do_csl_person(person: Sequence[str]) -> List[str]:
-    """CSL writer for authors and editors.
-
-    Args:
-        person: A tuple/list of (given, particle, family, suffix).
-
-    Returns:
-        List of strings representing the CSL JSON person object.
-    """
+def do_csl_person(person: Sequence[str]) -> list[str]:
+    """CSL writer for authors and editors."""
     # biblatex ('First Middle', 'von', 'Last', 'Jr.')
     # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
     #      'dropping-particle')
     # debug("person = '%s'" % (' '.join(person)))
     given, particle, family, suffix = person
-    person_buffer: List[str] = []
+    person_buffer: list[str] = []
     person_buffer.append("        { ")
     person_buffer.append(f'"family": {escape_csl(family)}, ')
     if given:
@@ -74,17 +60,9 @@ def do_csl_person(person: Sequence[str]) -> List[str]:
     return person_buffer
 
 
-def do_csl_date(date: Any, season: Optional[str] = None) -> List[str]:
-    """CSL writer for dates.
-
-    Args:
-        date: Date object with attributes year, month, day, circa.
-        season: Optional season string.
-
-    Returns:
-        List of strings representing the CSL JSON date object.
-    """
-    date_buffer: List[str] = []
+def do_csl_date(date: Any, season: str | None = None) -> list[str]:
+    """CSL writer for dates."""
+    date_buffer: list[str] = []
     date_buffer.append("{")
     date_buffer.append('"date-parts": [ [ ')
     # int() removes leading 0 for json
@@ -110,12 +88,6 @@ def csl_protect_case(title: str) -> str:
 
     See:
     https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
-
-    Args:
-        title: The title string to protect case in.
-
-    Returns:
-        The title string with proper names bracketed.
     """
     PROTECT_PAT = re.compile(
         r"""
@@ -133,15 +105,7 @@ def csl_protect_case(title: str) -> str:
 
 
 def emit_json_csl(args: Any, entries: dict[str, dict[str, Any]]) -> None:
-    """Emit citations in CSL/JSON format for input to pandoc.
-
-    Args:
-        args: Namespace with output file descriptor and options.
-        entries: Dictionary of bibliographic entries.
-
-    Returns:
-        None
-    """
+    """Emit citations in CSL/JSON format for input to pandoc."""
     # NOTE: csljson can NOT be included as markdown document yaml metadata
     # TODO: reduce redundancies with emit_yasn
     # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>

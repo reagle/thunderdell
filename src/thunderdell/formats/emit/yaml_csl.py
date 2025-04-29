@@ -94,7 +94,13 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
 
 
 def escape_yaml(s: str) -> str:
-    """Escape YAML strings."""
+    r"""Escape YAML strings.
+
+    >>> escape_yaml('hello "world"')
+    '"hello \'world\'"'
+    >>> escape_yaml('')
+    ''
+    """
     if s:  # faster to just quote than testing for tokens
         s = s.replace('"', r"'")
         # s = s.replace("#", r"\#") # this was introducing slashes in URLs
@@ -104,7 +110,23 @@ def escape_yaml(s: str) -> str:
 
 
 def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None:
-    """Yaml writer for authors and editors."""
+    """Yaml writer for authors and editors.
+
+    >>> import io, argparse
+    >>> class Args:
+    ...     def __init__(self):
+    ...         self.outfd = io.StringIO()
+    >>> args = Args()
+    >>> people = [("John", "van", "Doe", ""), ("Jane", "", "Smith", "Jr.")]
+    >>> emit_yaml_people(args, people)
+    >>> output = args.outfd.getvalue()
+    >>> print(output.strip())
+    - family: "Doe"
+      given: "John"
+      non-dropping-particle: "van"
+    - family: "Smith"
+      suffix: "Jr."
+    """
     for person in people:
         # biblatex ('First Middle', 'von', 'Last', 'Jr.')
         # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
@@ -123,7 +145,9 @@ def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None
             args.outfd.write(f"    non-dropping-particle: {escape_yaml(particle)}\n")
 
 
-def emit_yaml_date(args: argparse.Namespace, date: PubDate, season: str | None = None) -> None:
+def emit_yaml_date(
+    args: argparse.Namespace, date: PubDate, season: str | None = None
+) -> None:
     """Yaml writer for dates."""
     if date.year:
         args.outfd.write(f"    year: {date.year}\n")

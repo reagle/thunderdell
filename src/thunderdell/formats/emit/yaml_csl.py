@@ -117,7 +117,7 @@ def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None
     ...     def __init__(self):
     ...         self.outfd = io.StringIO()
     >>> args = Args()
-    >>> people = [("John", "van", "Doe", ""), ("Jane", "", "Smith", "Jr.")]
+    >>> people = [("John", "van", "Doe", ""), ("Jim", "", "Smith", "Jr.")]
     >>> emit_yaml_people(args, people)
     >>> output = args.outfd.getvalue()
     >>> print(output.strip())
@@ -125,6 +125,7 @@ def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None
       given: "John"
       non-dropping-particle: "van"
     - family: "Smith"
+      given: "Jim"
       suffix: "Jr."
     """
     for person in people:

@@ -139,7 +139,7 @@ def yaml_protect_case(title: str) -> str:
     https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
 
     >>> yaml_protect_case("The iKettle – a world off its rocker")
-    "The <span class='nocase'>iKettle</span> – a world off its rocker".
+    "The <span class='nocase'>iKettle</span> – a world off its rocker"
     """
     return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 

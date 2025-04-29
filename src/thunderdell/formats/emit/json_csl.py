@@ -21,6 +21,86 @@ from thunderdell.biblio.fields import (
 from thunderdell.formats.emit.yaml_csl import guess_csl_type
 
 
+def escape_csl(s):
+    if s:  # faster to just quote than testing for tokens
+        s = s.replace("\n", "\\n")
+        s = s.replace('"', r"'")
+        # s = s.replace("#", r"\#") # this was introducing slashes in URLs
+        s = s.replace("@", r"\\@")  # single slash caused bugs in past
+        s = f'"{s}"'
+    if s.isdigit():
+        return int(s)
+    else:
+        return s
+
+
+def do_csl_person(person):
+    """Csl writer for authors and editors."""
+    # biblatex ('First Middle', 'von', 'Last', 'Jr.')
+    # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
+    #      'dropping-particle')
+    # debug("person = '%s'" % (' '.join(person)))
+    given, particle, family, suffix = person
+    person_buffer = []
+    person_buffer.append("        { ")
+    person_buffer.append(f'"family": {escape_csl(family)}, ')
+    if given:
+        person_buffer.append(f'"given": {escape_csl(given)}, ')
+        # person_buffer.append('    given:\n')
+        # for given_part in given.split(' '):
+        #     person_buffer.append('    - %s\n' % escape_csl(given_part))
+    if suffix:
+        person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
+    if particle:
+        person_buffer.append(f'"non-dropping-particle": {escape_csl(particle)}, ')
+    person_buffer.append("},\n")
+    return person_buffer
+
+
+def do_csl_date(date, season=None):
+    """Csl writer for dates."""
+    date_buffer = []
+    date_buffer.append("{")
+    date_buffer.append('"date-parts": [ [ ')
+    # int() removes leading 0 for json
+    if date.year:
+        date_buffer.append(f"{int(date.year)}, ")
+    if date.month:
+        date_buffer.append(f"{int(date.month)}, ")
+    if date.day:
+        date_buffer.append(f"{int(date.day)}, ")
+    date_buffer.append("] ],\n")
+    if date.circa:
+        date_buffer.append('        "circa": true,\n')
+    if season:
+        date_buffer.append(f'        "season": "{season}",\n')
+    date_buffer.append("    },\n")
+
+    logging.debug(f"{date_buffer=}")
+    return date_buffer
+
+
+def csl_protect_case(title):
+    """Preserve/bracket proper names/nouns
+    https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+    >>> csl_protect_case("The iKettle – a world off its rocker")
+    "The <span class='nocase'>iKettle</span> – a world off its rocker".
+    """
+    PROTECT_PAT = re.compile(
+        r"""
+        \b # empty string at beginning or end of word
+        (
+        [a-z]+ # one or more lower case
+        [A-Z\./] # capital, period, or forward slash
+        \S+ # one or more non-whitespace
+        )
+        \b # empty string at beginning or end of word
+        """,
+        re.VERBOSE,
+    )
+    return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
+
+
 def emit_json_csl(args, entries):
     """Emit citations in CSL/JSON for input to pandoc.
 
@@ -28,85 +108,9 @@ def emit_json_csl(args, entries):
         https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html
 
     """
-    # NOTE: csljson can NOT be including as md doc yaml metadata
+    # NOTE: csljson can NOT be included as markdown document yaml metadata
     # TODO: reduce redundancies with emit_yasn
     # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>
-
-    def escape_csl(s):
-        if s:  # faster to just quote than testing for tokens
-            s = s.replace("\n", "\\n")
-            s = s.replace('"', r"'")
-            # s = s.replace("#", r"\#") # this was introducing slashes in URLs
-            s = s.replace("@", r"\\@")  # single slash caused bugs in past
-            s = f'"{s}"'
-        if s.isdigit():
-            return int(s)
-        else:
-            return s
-
-    def do_csl_person(person):
-        """Csl writer for authors and editors."""
-        # biblatex ('First Middle', 'von', 'Last', 'Jr.')
-        # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
-        #      'dropping-particle')
-        # debug("person = '%s'" % (' '.join(person)))
-        given, particle, family, suffix = person
-        person_buffer = []
-        person_buffer.append("        { ")
-        person_buffer.append(f'"family": {escape_csl(family)}, ')
-        if given:
-            person_buffer.append(f'"given": {escape_csl(given)}, ')
-            # person_buffer.append('    given:\n')
-            # for given_part in given.split(' '):
-            #     person_buffer.append('    - %s\n' % escape_csl(given_part))
-        if suffix:
-            person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
-        if particle:
-            person_buffer.append(f'"non-dropping-particle": {escape_csl(particle)}, ')
-        person_buffer.append("},\n")
-        return person_buffer
-
-    def do_csl_date(date, season=None):
-        """Csl writer for dates."""
-        date_buffer = []
-        date_buffer.append("{")
-        date_buffer.append('"date-parts": [ [ ')
-        # int() removes leading 0 for json
-        if date.year:
-            date_buffer.append(f"{int(date.year)}, ")
-        if date.month:
-            date_buffer.append(f"{int(date.month)}, ")
-        if date.day:
-            date_buffer.append(f"{int(date.day)}, ")
-        date_buffer.append("] ],\n")
-        if date.circa:
-            date_buffer.append('        "circa": true,\n')
-        if season:
-            date_buffer.append(f'        "season": "{season}",\n')
-        date_buffer.append("    },\n")
-
-        logging.debug(f"{date_buffer=}")
-        return date_buffer
-
-    def csl_protect_case(title):
-        """Preserve/bracket proper names/nouns
-        https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
-        >>> csl_protect_case("The iKettle – a world off its rocker")
-        "The <span class='nocase'>iKettle</span> – a world off its rocker".
-        """
-        PROTECT_PAT = re.compile(
-            r"""
-            \b # empty string at beginning or end of word
-            (
-            [a-z]+ # one or more lower case
-            [A-Z\./] # capital, period, or forward slash
-            \S+ # one or more non-whitespace
-            )
-            \b # empty string at beginning or end of word
-            """,
-            re.VERBOSE,
-        )
-        return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
     # Start of json buffer, to be written out after comma cleanup
     # NOTE: f-string interpolation does not happen immediately

@@ -66,8 +66,6 @@ def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     return person_dict
 
 src/thunderdell/formats/emit/json_csl.py
-```python
-<<<<<<< SEARCH
 def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     r"""CSL writer for dates.
 

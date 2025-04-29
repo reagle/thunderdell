@@ -93,6 +93,70 @@ def guess_csl_type(entry: EntryDict):
     return e_t, genre, medium
 
 
+def escape_yaml(s: str) -> str:
+    if s:  # faster to just quote than testing for tokens
+        s = s.replace('"', r"'")
+        # s = s.replace("#", r"\#") # this was introducing slashes in URLs
+        s = s.replace("@", r"\\@")  # single slash caused bugs in past
+        s = f'"{s}"'
+    return s
+
+
+def emit_yaml_people(people: list[PersonName]) -> None:
+    """Yaml writer for authors and editors."""
+    for person in people:
+        # biblatex ('First Middle', 'von', 'Last', 'Jr.')
+        # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
+        #      'dropping-particle')
+        given, particle, family, suffix = person
+        args.outfd.write(f"  - family: {escape_yaml(family)}\n")
+        if given:
+            args.outfd.write(f"    given: {escape_yaml(given)}\n")
+        if suffix:
+            args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
+        if particle:
+            args.outfd.write(f"    non-dropping-particle: {escape_yaml(particle)}\n")
+
+
+def emit_yaml_date(date: PubDate, season: str | None = None):
+    """Yaml writer for dates."""
+    if date.year:
+        args.outfd.write(f"    year: {date.year}\n")
+    if date.month:
+        args.outfd.write(f"    month: {date.month}\n")
+    if date.day:
+        args.outfd.write(f"    day: {date.day}\n")
+    if date.circa:
+        args.outfd.write("    circa: true\n")
+    if season:
+        args.outfd.write(f"    season: {season}\n")
+
+
+def yaml_protect_case(title: str) -> str:
+    """Preserve/bracket proper names/nouns.
+
+    https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+
+    >>> yaml_protect_case("The iKettle – a world off its rocker")
+    "The <span class='nocase'>iKettle</span> – a world off its rocker".
+    """
+    return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
+
+
+PROTECT_PAT = re.compile(
+    r"""
+    \b # empty string at beginning or end of word
+    (
+    [a-z]+ # one or more lower case
+    [A-Z\./] # capital, period, or forward slash
+    \S+ # one or more non-whitespace
+    )
+    \b # empty string at beginning or end of word
+    """,
+    re.VERBOSE,
+)
+
+
 def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
     """Emit citations in YAML/CSL for input to pandoc.
 
@@ -101,68 +165,6 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
         http://jessenoller.com/blog/2009/04/13/yaml-aint-markup-language-completely-different
 
     """
-    # import yaml
-
-    def escape_yaml(s: str) -> str:
-        if s:  # faster to just quote than testing for tokens
-            s = s.replace('"', r"'")
-            # s = s.replace("#", r"\#") # this was introducing slashes in URLs
-            s = s.replace("@", r"\\@")  # single slash caused bugs in past
-            s = f'"{s}"'
-        return s
-
-    def emit_yaml_people(people: list[PersonName]) -> None:
-        """Yaml writer for authors and editors."""
-        for person in people:
-            # biblatex ('First Middle', 'von', 'Last', 'Jr.')
-            # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
-            #      'dropping-particle')
-            given, particle, family, suffix = person
-            args.outfd.write(f"  - family: {escape_yaml(family)}\n")
-            if given:
-                args.outfd.write(f"    given: {escape_yaml(given)}\n")
-            if suffix:
-                args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
-            if particle:
-                args.outfd.write(
-                    f"    non-dropping-particle: {escape_yaml(particle)}\n"
-                )
-
-    def emit_yaml_date(date: PubDate, season: str | None = None):
-        """Yaml writer for dates."""
-        if date.year:
-            args.outfd.write(f"    year: {date.year}\n")
-        if date.month:
-            args.outfd.write(f"    month: {date.month}\n")
-        if date.day:
-            args.outfd.write(f"    day: {date.day}\n")
-        if date.circa:
-            args.outfd.write("    circa: true\n")
-        if season:
-            args.outfd.write(f"    season: {season}\n")
-
-    def yaml_protect_case(title: str) -> str:
-        """Preserve/bracket proper names/nouns.
-
-        https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
-
-        >>> yaml_protect_case("The iKettle – a world off its rocker")
-        "The <span class='nocase'>iKettle</span> – a world off its rocker".
-        """
-        return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
-
-    PROTECT_PAT = re.compile(
-        r"""
-        \b # empty string at beginning or end of word
-        (
-        [a-z]+ # one or more lower case
-        [A-Z\./] # capital, period, or forward slash
-        \S+ # one or more non-whitespace
-        )
-        \b # empty string at beginning or end of word
-        """,
-        re.VERBOSE,
-    )
     # begin YAML file
     # http://blog.martinfenner.org/2013/07/30/citeproc-yaml-for-bibliographies/#citeproc-yaml
     args.outfd.write("---\n")

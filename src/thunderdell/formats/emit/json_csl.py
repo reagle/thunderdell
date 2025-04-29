@@ -25,12 +25,12 @@ from thunderdell.types_thunderdell import EntryDict
 
 
 def escape_csl(s: str | None) -> str | int | None:
-    """Escape CSL string for JSON output.
+    r"""Escape CSL string for JSON output.
 
     >>> escape_csl("Hello\nWorld")
     '"Hello\\nWorld"'
     >>> escape_csl('He said "yes"')
-    "'He said 'yes''"
+    '"He said \'yes\'"'
     >>> escape_csl("email@example.com")
     '"email\\\\@example.com"'
     >>> escape_csl("12345")
@@ -51,10 +51,12 @@ def escape_csl(s: str | None) -> str | int | None:
 
 
 def do_csl_person(person: Sequence[str]) -> list[str]:
-    """CSL writer for authors and editors."""
-    # biblatex ('First Middle', 'von', 'Last', 'Jr.')
-    # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
-    #      'dropping-particle')
+    """CSL writer for authors and editors.
+
+    biblatex: ('First Middle', 'von', 'Last', 'Jr.')
+    CSL: ('family', 'given', 'suffix' 'non-dropping-particle',
+          'dropping-particle')
+    """
     # debug("person = '%s'" % (' '.join(person)))
     given, particle, family, suffix = person
     person_buffer: list[str] = []
@@ -74,7 +76,7 @@ def do_csl_person(person: Sequence[str]) -> list[str]:
 
 
 def do_csl_date(date: Any, season: str | None = None) -> list[str]:
-    """CSL writer for dates.
+    r"""CSL writer for dates.
 
     >>> class DummyDate:
     ...     def __init__(self):
@@ -83,7 +85,7 @@ def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     ...         self.day = 29
     ...         self.circa = False
     >>> do_csl_date(DummyDate())
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\\n', '    },\\n']
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '    },\n']
 
     >>> class DummyDateCirca:
     ...     def __init__(self):
@@ -92,7 +94,7 @@ def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     ...         self.day = 29
     ...         self.circa = True
     >>> do_csl_date(DummyDateCirca(), season="spring")
-    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\\n', '        "circa": true,\\n', '        "season": "spring",\\n', '    },\\n']
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '        "circa": true,\n', '        "season": "spring",\n', '    },\n']
 
     """
     date_buffer: list[str] = []

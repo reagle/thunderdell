@@ -64,7 +64,6 @@ def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     if particle:
         person_dict["non-dropping-particle"] = particle
     return person_dict
-```
 
 src/thunderdell/formats/emit/json_csl.py
 ```python

@@ -104,7 +104,9 @@ def csl_protect_case(title: str) -> str:
     return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
 
-def emit_json_csl(args: Any, entries: dict[str, dict[str, Any]]) -> None:
+from thunderdell.types_thunderdell import EntryDict
+
+def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
     """Emit citations in CSL/JSON format for input to pandoc."""
     # NOTE: csljson can NOT be included as markdown document yaml metadata
     # TODO: reduce redundancies with emit_yasn
@@ -143,7 +145,11 @@ def emit_json_csl(args: Any, entries: dict[str, dict[str, Any]]) -> None:
 
                 # special format fields
                 if field == "title":
-                    title = csl_protect_case(escape_csl(value))
+                    escaped_value = escape_csl(value)
+                    if isinstance(escaped_value, str):
+                        title = csl_protect_case(escaped_value)
+                    else:
+                        title = str(escaped_value)
                     file_buffer.append(f'    "title": {title},\n')
                     continue
                 if field in ("author", "editor", "translator"):

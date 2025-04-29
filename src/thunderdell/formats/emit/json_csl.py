@@ -46,26 +46,70 @@ def escape_csl(s: str | None) -> str | int | None:
     return json.dumps(s)
 
 
-def do_csl_person(person: Sequence[str]) -> list[str]:
+def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     """CSL writer for authors and editors.
 
     biblatex: ('First Middle', 'von', 'Last', 'Jr.')
     CSL: ('family', 'given', 'suffix' 'non-dropping-particle',
           'dropping-particle')
     """
-    # debug("person = '%s'" % (' '.join(person)))
     given, particle, family, suffix = person
-    person_buffer: list[str] = []
-    person_buffer.append("        { ")
-    person_buffer.append(f'"family": {escape_csl(family)}, ')
+    person_dict: dict[str, str] = {}
+    if family:
+        person_dict["family"] = family
     if given:
-        person_buffer.append(f'"given": {escape_csl(given)}, ')
+        person_dict["given"] = given
     if suffix:
-        person_buffer.append(f'"suffix": {escape_csl(suffix)}, ')
+        person_dict["suffix"] = suffix
     if particle:
-        person_buffer.append(f'"non-dropping-particle": {escape_csl(particle)}, ')
-    person_buffer.append("},\n")
-    return person_buffer
+        person_dict["non-dropping-particle"] = particle
+    return person_dict
+```
+
+src/thunderdell/formats/emit/json_csl.py
+```python
+<<<<<<< SEARCH
+def do_csl_date(date: Any, season: str | None = None) -> list[str]:
+    r"""CSL writer for dates.
+
+    >>> class DummyDate:
+    ...     def __init__(self):
+    ...         self.year = 2023
+    ...         self.month = 4
+    ...         self.day = 29
+    ...         self.circa = False
+    >>> do_csl_date(DummyDate())
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '    },\n']
+
+    >>> class DummyDateCirca:
+    ...     def __init__(self):
+    ...         self.year = 2023
+    ...         self.month = 4
+    ...         self.day = 29
+    ...         self.circa = True
+    >>> do_csl_date(DummyDateCirca(), season="spring")
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\n', '        "circa": true,\n', '        "season": "spring",\n', '    },\n']
+
+    """
+    date_buffer: list[str] = []
+    date_buffer.append("{")
+    date_buffer.append('"date-parts": [ [ ')
+    # int() removes leading 0 for json
+    if date.year:
+        date_buffer.append(f"{int(date.year)}, ")
+    if date.month:
+        date_buffer.append(f"{int(date.month)}, ")
+    if date.day:
+        date_buffer.append(f"{int(date.day)}, ")
+    date_buffer.append("] ],\n")
+    if date.circa:
+        date_buffer.append('        "circa": true,\n')
+    if season:
+        date_buffer.append(f'        "season": "{season}",\n')
+    date_buffer.append("    },\n")
+
+    logging.debug(f"{date_buffer=}")
+    return date_buffer
 
 
 def do_csl_date(date: Any, season: str | None = None) -> list[str]:
@@ -143,122 +187,86 @@ def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
     # TODO: reduce redundancies with emit_yasn
     # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>
 
-    # Start of json buffer, to be written out after comma cleanup
-    # NOTE: f-string interpolation does not happen immediately
-    # when the string is appended to the list 2024-05-02
-    file_buffer = ["[\n"]
+    output_list = []
     for _key, entry in sorted(entries.items()):
-        # debug(f"{_key=}")
         entry_type, genre, medium = guess_csl_type(entry)
-        file_buffer.append(f'  {{ "id": "{entry["identifier"]}",\n')
-        file_buffer.append(f'    "type": "{entry_type}",\n')
+        obj: dict[str, Any] = {
+            "id": entry["identifier"],
+            "type": entry_type,
+        }
         if genre:
-            file_buffer.append(f'    "genre": "{genre}",\n')
+            obj["genre"] = genre
         if medium:
-            file_buffer.append(f'    "medium": "{medium}",\n')
+            obj["medium"] = medium
 
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry["ori_author"] in container_values:
             if not args.author_create:
-                del entry["author"]
+                entry.pop("author", None)
             else:
                 entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if entry.get(field):
                 value = entry[field]
-                # debug(f"short, field = '{short} , {field}'")
                 if field in ("identifier", "entry_type"):  # already done above
                     continue
                 if field in ("issue"):  # done below with date/season
                     continue
 
-                # special format fields
                 if field == "title":
                     escaped_value = escape_csl(value)
                     if isinstance(escaped_value, str):
                         title = csl_protect_case(escaped_value)
                     else:
                         title = str(escaped_value)
-                    file_buffer.append(f'    "title": {title},\n')
+                    obj["title"] = json.loads(title) if isinstance(title, str) else title
                     continue
                 if field in ("author", "editor", "translator"):
-                    file_buffer.append(f'    "{field}": [\n')
-                    for person in value:
-                        # debug(f"{person=} in {value=}")
-                        # debug(f"{file_buffer=}")
-                        file_buffer.extend(do_csl_person(person))
-                    file_buffer.append("      ],\n")
-                    # debug(f"done people")
+                    obj[field] = [do_csl_person(person) for person in value]
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # debug(f"field = {field}")
                     if value == "0000":
                         continue
                     if field == "date":
-                        # debug(f"value = '{value}'")
                         season = entry.get("issue", None)
-                        file_buffer.append('    "issued": ')
-                        file_buffer.extend(do_csl_date(value, season))
+                        obj["issued"] = do_csl_date(value, season)
                     if field == "origdate":
-                        # debug(f"value = '{value}'")
-                        file_buffer.append('    "original-date": ')
-                        file_buffer.extend(do_csl_date(value))
+                        obj["original-date"] = do_csl_date(value)
                     if field == "urldate":
-                        file_buffer.append('    "accessed": ')
-                        file_buffer.extend(do_csl_date(value))
+                        obj["accessed"] = do_csl_date(value)
                     continue
 
                 if field == "urldate" and "url" not in entry:
                     continue  # no url, no 'read on'
                 if field == "url":
-                    # debug(f"url = {value}")
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
-                        # debug("banned")
                         continue
-                    # skip articles+URL w/ no pagination & other offline types
                     if args.urls_online_only:
-                        # debug("urls_online_only TRUE")
                         if entry_type in {"post", "post-weblog", "webpage"}:
-                            # debug(f"  not skipping online types")
                             pass
                         elif "pages" in entry:
-                            # debug("  skipping url, paginated item")
                             continue
-                    # debug(f"  writing url WITHOUT escape_csl")
-                    file_buffer.append(f'    "URL": "{value}",\n')
+                    obj["URL"] = value
                     continue
                 if (
                     field == "eventtitle"
                     and "container-title" not in entry
                     and "booktitle" not in entry
                 ):
-                    file_buffer.append(
-                        f'    "container-title": "Proceedings of {value}",\n'
-                    )
+                    obj["container-title"] = f"Proceedings of {value}"
                     continue
-                # 'Blog' is the null value I use in the mindmap
                 if field == "c_blog" and entry[field] == "Blog":
-                    # netloc = urllib.parse.urlparse(entry['url']).netloc
-                    # file_buffer.append(
-                    #     f'  container-title: "Personal"\n')
                     continue
 
-                # debug(f"{field=}")
                 if field in CONTAINERS:
-                    # debug(f"in CONTAINERS")
                     field = "container-title"
                     value = csl_protect_case(value)
-                    # debug(f"{value=}")
                 if field in BIBLATEX_CSL_FIELD_MAP:
-                    # debug(f"bib2csl field FROM =  {field}")
                     field = BIBLATEX_CSL_FIELD_MAP[field]
-                    # debug(f"bib2csl field TO   = {field}")
-                file_buffer.append(f'    "{field}": {escape_csl(value)},\n')
-        file_buffer.append("  },\n")
+                obj[field] = value
+        output_list.append(obj)
 
-    file_buffer = "".join(file_buffer) + "]\n"
-    # remove trailing commas with a regex
-    file_buffer = re.sub(r""",(?=\s*[}\]])""", "", file_buffer)
-    args.outfd.write(file_buffer)
+    json.dump(output_list, args.outfd, indent=2)
+    args.outfd.write("\n")

@@ -12,7 +12,7 @@ __version__ = "1.0"
 import logging
 import re
 from collections.abc import Sequence
-from typing import Any, List, Optional, Union
+from typing import Any
 
 from thunderdell.biblio.fields import (
     BIB_SHORTCUTS_ITEMS,
@@ -21,6 +21,7 @@ from thunderdell.biblio.fields import (
     EXCLUDE_URLS,
 )
 from thunderdell.formats.emit.yaml_csl import guess_csl_type
+from thunderdell.types_thunderdell import EntryDict
 
 
 def escape_csl(s: str | None) -> str | int | None:
@@ -103,8 +104,6 @@ def csl_protect_case(title: str) -> str:
     )
     return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
-
-from thunderdell.types_thunderdell import EntryDict
 
 def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
     """Emit citations in CSL/JSON format for input to pandoc."""

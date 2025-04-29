@@ -38,16 +38,15 @@ def escape_csl(s: str | None) -> str | int | None:
     >>> escape_csl(None) is None
     True
     """
-    if s:  # faster to just quote than testing for tokens
-        s = s.replace("\n", "\\n")
-        s = s.replace('"', r"'")
-        # s = s.replace("#", r"\#") # this was introducing slashes in URLs
-        s = s.replace("@", r"\\@")  # single slash caused bugs in past
-        s = f'"{s}"'
-    if s and s.isdigit():
+    if s is None:
+        return None
+    if s.isdigit():
         return int(s)
-    else:
-        return s
+    s = s.replace("\n", "\\n")
+    s = s.replace('"', r"'")
+    # s = s.replace("#", r"\#") # this was introducing slashes in URLs
+    s = s.replace("@", r"\\@")  # single slash caused bugs in past
+    return f'"{s}"'
 
 
 def do_csl_person(person: Sequence[str]) -> list[str]:

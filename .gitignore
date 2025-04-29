@@ -3,3 +3,4 @@ src/thunderdell.egg-info/
 .envrc
 .DS_Store
 add
+build/

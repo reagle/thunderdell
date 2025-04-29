@@ -213,7 +213,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                         # logging.debug(f"value = '{value}'")
                         season = entry.get("issue", None)
                         args.outfd.write("  issued:\n")
-                        emit_yaml_date(value, season)
+                        emit_yaml_date(args, value, season)
                     if field == "origdate":
                         # logging.debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")

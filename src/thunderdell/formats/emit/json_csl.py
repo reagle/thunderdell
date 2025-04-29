@@ -111,6 +111,20 @@ def do_csl_date(date: Any, season: str | None = None) -> list[str]:
     return date_buffer
 
 
+PROTECT_PAT = re.compile(
+    r"""
+    \b # empty string at beginning or end of word
+    (
+    [a-z]+ # one or more lower case
+    [A-Z\./] # capital, period, or forward slash
+    \S+ # one or more non-whitespace
+    )
+    \b # empty string at beginning or end of word
+    """,
+    re.VERBOSE,
+)
+
+
 def csl_protect_case(title: str) -> str:
     """Preserve/bracket proper names/nouns in title.
 
@@ -120,18 +134,6 @@ def csl_protect_case(title: str) -> str:
     >>> csl_protect_case("The iKettle – a world off its rocker")
     "The <span class='nocase'>iKettle</span> – a world off its rocker"
     """
-    PROTECT_PAT = re.compile(
-        r"""
-        \b # empty string at beginning or end of word
-        (
-        [a-z]+ # one or more lower case
-        [A-Z\./] # capital, period, or forward slash
-        \S+ # one or more non-whitespace
-        )
-        \b # empty string at beginning or end of word
-        """,
-        re.VERBOSE,
-    )
     return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
 

@@ -25,7 +25,19 @@ from thunderdell.types_thunderdell import EntryDict
 
 
 def escape_csl(s: str | None) -> str | int | None:
-    """Escape CSL string for JSON output."""
+    """Escape CSL string for JSON output.
+
+    >>> escape_csl("Hello\nWorld")
+    '"Hello\\nWorld"'
+    >>> escape_csl('He said "yes"')
+    "'He said 'yes''"
+    >>> escape_csl("email@example.com")
+    '"email\\\\@example.com"'
+    >>> escape_csl("12345")
+    12345
+    >>> escape_csl(None) is None
+    True
+    """
     if s:  # faster to just quote than testing for tokens
         s = s.replace("\n", "\\n")
         s = s.replace('"', r"'")
@@ -62,7 +74,27 @@ def do_csl_person(person: Sequence[str]) -> list[str]:
 
 
 def do_csl_date(date: Any, season: str | None = None) -> list[str]:
-    """CSL writer for dates."""
+    """CSL writer for dates.
+
+    >>> class DummyDate:
+    ...     def __init__(self):
+    ...         self.year = 2023
+    ...         self.month = 4
+    ...         self.day = 29
+    ...         self.circa = False
+    >>> do_csl_date(DummyDate())
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\\n', '    },\\n']
+
+    >>> class DummyDateCirca:
+    ...     def __init__(self):
+    ...         self.year = 2023
+    ...         self.month = 4
+    ...         self.day = 29
+    ...         self.circa = True
+    >>> do_csl_date(DummyDateCirca(), season="spring")
+    ['{', '"date-parts": [ [ ', '2023, ', '4, ', '29, ', '] ],\\n', '        "circa": true,\\n', '        "season": "spring",\\n', '    },\\n']
+
+    """
     date_buffer: list[str] = []
     date_buffer.append("{")
     date_buffer.append('"date-parts": [ [ ')
@@ -89,6 +121,9 @@ def csl_protect_case(title: str) -> str:
 
     See:
     https://github.com/jgm/pandoc-citeproc/blob/master/man/pandoc-citeproc.1.md
+
+    >>> csl_protect_case("The iKettle – a world off its rocker")
+    "The <span class='nocase'>iKettle</span> – a world off its rocker"
     """
     PROTECT_PAT = re.compile(
         r"""

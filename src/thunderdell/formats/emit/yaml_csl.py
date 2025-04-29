@@ -94,6 +94,7 @@ def guess_csl_type(entry: EntryDict):
 
 
 def escape_yaml(s: str) -> str:
+    """Escape YAML strings."""
     if s:  # faster to just quote than testing for tokens
         s = s.replace('"', r"'")
         # s = s.replace("#", r"\#") # this was introducing slashes in URLs
@@ -202,7 +203,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     continue
                 if field in ("author", "editor", "translator"):
                     args.outfd.write(f"  {field}:\n")
-                    emit_yaml_people(value)
+                    emit_yaml_people(args, value)
                     continue
                 if field in ("date", "origdate", "urldate"):
                     # logging.debug(f'field = {field}')
@@ -216,10 +217,10 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     if field == "origdate":
                         # logging.debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")
-                        emit_yaml_date(value)
+                        emit_yaml_date(args, value)
                     if field == "urldate":
                         args.outfd.write("  accessed:\n")
-                        emit_yaml_date(value)
+                        emit_yaml_date(args, value)
                     continue
 
                 if field == "urldate" and "url" not in entry:

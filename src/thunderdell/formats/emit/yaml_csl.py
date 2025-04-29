@@ -1,5 +1,8 @@
 """Emit YAML/CSL bibliographic data.
 
+This modules uses strings because pyyaml is slow.
+This constrained YAML is fast and works with pandoc-wrappers.md2bib().
+
 https://github.com/reagle/thunderdell
 """
 
@@ -109,57 +112,53 @@ def escape_yaml(s: str) -> str:
     return s
 
 
-def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None:
+def emit_yaml_people(people: list[PersonName]) -> str:
     """Yaml writer for authors and editors.
 
-    >>> import io, argparse
-    >>> class Args:
-    ...     def __init__(self):
-    ...         self.outfd = io.StringIO()
-    >>> args = Args()
     >>> people = [("John", "van", "Doe", ""), ("Jim", "", "Smith", "Jr.")]
-    >>> emit_yaml_people(args, people)
-    >>> output = args.outfd.getvalue()
-    >>> print(output.strip())
-    - family: "Doe"
-      given: "John"
-      non-dropping-particle: "van"
-    - family: "Smith"
-      given: "Jim"
-      suffix: "Jr."
+    >>> print(emit_yaml_people(people))
+      - family: "Doe"
+        given: "John"
+        non-dropping-particle: "van"
+      - family: "Smith"
+        given: "Jim"
+        suffix: "Jr."
     """
+    lines = []
     for person in people:
-        # biblatex ('First Middle', 'von', 'Last', 'Jr.')
-        # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
-        #      'dropping-particle')
-        given: str
-        particle: str
-        family: str
-        suffix: str
         given, particle, family, suffix = person
-        args.outfd.write(f"  - family: {escape_yaml(family)}\n")
+        lines.append(f"  - family: {escape_yaml(family)}")
         if given:
-            args.outfd.write(f"    given: {escape_yaml(given)}\n")
+            lines.append(f"    given: {escape_yaml(given)}")
         if suffix:
-            args.outfd.write(f"    suffix: {escape_yaml(suffix)}\n")
+            lines.append(f"    suffix: {escape_yaml(suffix)}")
         if particle:
-            args.outfd.write(f"    non-dropping-particle: {escape_yaml(particle)}\n")
+            lines.append(f"    non-dropping-particle: {escape_yaml(particle)}")
+    return "\n".join(lines)
 
 
-def emit_yaml_date(
-    args: argparse.Namespace, date: PubDate, season: str | None = None
-) -> None:
-    """Yaml writer for dates."""
+def emit_yaml_date(date: PubDate, season: str | None = None) -> str:
+    """Yaml writer for dates.
+
+    >>> from thunderdell.types_thunderdell import PubDate
+    >>> d = PubDate(year=2023, month=6, day=15, circa=False)
+    >>> print(emit_yaml_date(d))
+        year: 2023
+        month: 6
+        day: 15
+    """
+    lines = []
     if date.year:
-        args.outfd.write(f"    year: {date.year}\n")
+        lines.append(f"    year: {date.year}")
     if date.month:
-        args.outfd.write(f"    month: {date.month}\n")
+        lines.append(f"    month: {date.month}")
     if date.day:
-        args.outfd.write(f"    day: {date.day}\n")
+        lines.append(f"    day: {date.day}")
     if date.circa:
-        args.outfd.write("    circa: true\n")
+        lines.append("    circa: true")
     if season:
-        args.outfd.write(f"    season: {season}\n")
+        lines.append(f"    season: {season}")
+    return "\n".join(lines)
 
 
 def yaml_protect_case(title: str) -> str:
@@ -232,7 +231,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     continue
                 if field in ("author", "editor", "translator"):
                     args.outfd.write(f"  {field}:\n")
-                    emit_yaml_people(args, value)
+                    args.outfd.write(emit_yaml_people(value) + "\n")
                     continue
                 if field in ("date", "origdate", "urldate"):
                     # logging.debug(f'field = {field}')
@@ -242,14 +241,14 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                         # logging.debug(f"value = '{value}'")
                         season = entry.get("issue", None)
                         args.outfd.write("  issued:\n")
-                        emit_yaml_date(args, value, season)
+                        args.outfd.write(emit_yaml_date(value, season) + "\n")
                     if field == "origdate":
                         # logging.debug(f"value = '{value}'")
                         args.outfd.write("  original-date:\n")
-                        emit_yaml_date(args, value)
+                        args.outfd.write(emit_yaml_date(value) + "\n")
                     if field == "urldate":
                         args.outfd.write("  accessed:\n")
-                        emit_yaml_date(args, value)
+                        args.outfd.write(emit_yaml_date(value) + "\n")
                     continue
 
                 if field == "urldate" and "url" not in entry:

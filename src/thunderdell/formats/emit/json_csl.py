@@ -9,9 +9,9 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
+import json
 import logging
 import re
-import json
 from collections.abc import Sequence
 from typing import Any
 
@@ -31,7 +31,7 @@ def escape_csl(s: str | None) -> str | int | None:
     >>> escape_csl("Hello\nWorld")
     '"Hello\\nWorld"'
     >>> escape_csl('He said "yes"')
-    '"He said \'yes\'"'
+    '"He said \\'yes\\'"'
     >>> escape_csl("email@example.com")
     '"email\\\\@example.com"'
     >>> escape_csl("12345")

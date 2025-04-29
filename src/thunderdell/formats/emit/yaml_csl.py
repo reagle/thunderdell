@@ -23,7 +23,7 @@ from thunderdell.biblio.fields import (
 from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
 
 
-def guess_csl_type(entry: EntryDict):
+def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
     """Guess whether the type of this entry is book, article, etc.
 
     >>> guess_csl_type({'author': [('', '', 'Smith', '')],\
@@ -36,9 +36,9 @@ def guess_csl_type(entry: EntryDict):
 
     """
     # logging.info(f"{entry=}")
-    genre = None
-    medium = None
-    e_t = "no-type"
+    genre: str | None = None
+    medium: str | None = None
+    e_t: str = "no-type"
 
     ## Validate exiting entry_type using CSL or BibLaTeX types
     if "entry_type" in entry:
@@ -109,6 +109,10 @@ def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None
         # biblatex ('First Middle', 'von', 'Last', 'Jr.')
         # CSL ('family', 'given', 'suffix' 'non-dropping-particle',
         #      'dropping-particle')
+        given: str
+        particle: str
+        family: str
+        suffix: str
         given, particle, family, suffix = person
         args.outfd.write(f"  - family: {escape_yaml(family)}\n")
         if given:
@@ -119,7 +123,7 @@ def emit_yaml_people(args: argparse.Namespace, people: list[PersonName]) -> None
             args.outfd.write(f"    non-dropping-particle: {escape_yaml(particle)}\n")
 
 
-def emit_yaml_date(args: argparse.Namespace, date: PubDate, season: str | None = None):
+def emit_yaml_date(args: argparse.Namespace, date: PubDate, season: str | None = None) -> None:
     """Yaml writer for dates."""
     if date.year:
         args.outfd.write(f"    year: {date.year}\n")

@@ -300,47 +300,47 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
     limit -= PADDING
 
     logging.info(f"{limit=}")
-    message_room = limit - len_twitter(tags)
+    message_room = limit - codepoints_len(tags)
     logging.info(f"message_room - len(tags) = {message_room}")
 
-    logging.info(f"{len_twitter(url)=}")
-    if service == "twitter" and len_twitter(url) > TWITTER_SHORTENER_LEN:
+    logging.info(f"{codepoints_len(url)=}")
+    if service == "twitter" and codepoints_len(url) > TWITTER_SHORTENER_LEN:
         message_room = message_room - TWITTER_SHORTENER_LEN
         logging.info(f"  shortened to {TWITTER_SHORTENER_LEN}")
     else:
-        message_room = message_room - len_twitter(url)
+        message_room = message_room - codepoints_len(url)
     logging.info(f"message_room after url = {message_room}")
 
-    logging.info(f"{len_twitter(title)=}")
-    if len_twitter(title) > message_room:
+    logging.info(f"{codepoints_len(title)=}")
+    if codepoints_len(title) > message_room:
         logging.info("title is too long")
         title = f"{title[: message_room - 1]}…"
-        logging.info(f"  truncated to {len_twitter(title)}")
-    message_room = message_room - len_twitter(title)
+        logging.info(f"  truncated to {codepoints_len(title)}")
+    message_room = message_room - codepoints_len(title)
     logging.info(f"{message_room=} after title = ")
 
-    logging.info(f"{len_twitter(comment)=}")
-    if len_twitter(comment) > message_room:
+    logging.info(f"{codepoints_len(comment)=}")
+    if codepoints_len(comment) > message_room:
         logging.info("comment is too long")
         if message_room > 5:
             logging.info(" truncating")
             comment = f"{comment[: message_room - 1]}…"
-            logging.info(f"  truncated to {len_twitter(comment)}")
+            logging.info(f"  truncated to {codepoints_len(comment)}")
             logging.info(f"{comment}")
         else:
             logging.info(" skipping")
             comment = ""
-    message_room = message_room - len_twitter(comment)
+    message_room = message_room - codepoints_len(comment)
     logging.info(f"message_room after comment = {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
     message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-    logging.info(f"{len_twitter(message)=}: {message=}")
+    logging.info(f"{codepoints_len(message)=}: {message=}")
     return message
 
 
-def len_twitter(text: str) -> int:
+def codepoints_len(text: str) -> int:
     """Twitter counts code units not code points as part of its character limit.
 
     https://developer.twitter.com/en/docs/counting-characters

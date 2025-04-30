@@ -162,7 +162,7 @@ def bluesky_update(
     BLUESKY_APP_PASSWORD = get_credential("BLUESKY_APP_PASSWORD")
     BLUESKY_HANDLE = get_credential("BLUESKY_HANDLE")
 
-    skeet_text = shrink_message("bluesky", comment, title, "", tags) + "\n"
+    skeet_text = shrink_message("bluesky", comment, title, "", tags).rstrip() + "\n"
 
     try:
         client = Client()
@@ -320,17 +320,37 @@ def generate_countable_string(length: int) -> str:
 
 
 def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
-    """Shrink message to fit into character limit.
+    """Shrink message to fit into service specific character limit.
 
-    Apply service specific character limits and URL shortening rules and use codepoint counts
-    TODO: Add doctests to verify strings near the service limits, including use of multi-codepoint graphemes. Use strings from generate_countable_string() as needed.
+    Use URL shortening rules and codepoint counts.
+
+    >>> long_comment = long_title = generate_countable_string(501)
+    >>> shrink_message("twitter", "Comment", long_title, "http://url.com", "#tag")
+    '“¹²³⁴⁵⁶⁷⁸⁹1¹²³⁴⁵⁶⁷⁸⁹2¹²³⁴⁵⁶⁷⁸⁹3¹²³⁴⁵⁶⁷⁸⁹4¹²³⁴⁵⁶⁷⁸⁹5¹²³⁴⁵⁶⁷⁸⁹6¹²³⁴⁵⁶⁷⁸⁹7¹²³⁴⁵⁶⁷⁸⁹8¹²³⁴⁵⁶⁷⁸⁹9¹²³⁴⁵⁶⁷⁸⁹10²³⁴⁵⁶⁷⁸⁹11²³⁴⁵⁶⁷⁸⁹12²³⁴⁵⁶⁷⁸⁹13²³⁴⁵⁶⁷⁸⁹14²³⁴⁵⁶⁷⁸⁹15²³⁴⁵⁶⁷⁸⁹16²³⁴⁵⁶⁷⁸⁹17²³⁴⁵⁶⁷⁸⁹18²³⁴⁵⁶⁷⁸⁹19²³⁴⁵⁶⁷⁸⁹20²³⁴⁵⁶⁷⁸⁹21²³⁴⁵⁶⁷⁸⁹22²³⁴⁵⁶⁷⁸⁹23²³⁴⁵⁶⁷⁸⁹24²³⁴⁵⁶⁷⁸⁹25²³⁴…” http://url.com #tag'
+
+    >>> result = shrink_message("twitter", "Comment", long_title, "http://url.com", "#tag")
+    >>> len(result) <= 280 and '…' in result
+    True
+
+    >>> msg = shrink_message("bluesky", long_comment, long_title, "http://url.com", "#tag")
+    >>> len(msg) <= 300
+    True
+
+    >>> msg = shrink_message("ohai", "comment", long_title, "http://url.com", "#tag")
+    >>> len(msg) <= 500
+    True
+
+    >>> emoji = "👩‍👩‍👧‍👦" * 280  # family emoji with multiple codepoints
+    >>> msg = shrink_message("twitter", emoji, "Title", "http://url.com", "#tag")
+    >>> len(msg) <= 280
+    True
     """
     limits = {
-        "ohai": 500,  # Mastodon instance
         "twitter": 280,
         "bluesky": 300,
+        "ohai": 500,  # Mastodon instance
     }
-    limit = limits["service"]
+    limit = limits[service]
     logging.info(f"Service: {service}, limit: {limit}")
 
     PADDING = 7  # for comment delimiter, title quotes, and spaces
@@ -374,32 +394,15 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
     message_room -= codepoints_len(comment)
     logging.info(f"Message room after subtracting comment: {message_room}")
 
-    comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
-    message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-
-    final_len = codepoints_len(message)
-    if final_len > limits["service"]:
-        logging.warning(
-            f"Final message length {final_len} exceeds limit {limits['service']}"
-        )
-        # As a fallback, truncate comment aggressively
-        excess = final_len - limits["service"]
-        if len(comment) > excess:
-            comment = comment[:-excess] + "…"
-            comment_delim = ": " if comment and title else ""
-            message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-            logging.info(f"Message truncated to fit limit: {codepoints_len(message)}")
-        else:
-            # If still too long, truncate title as well
-            title = title[: max(0, len(title) - excess)] + "…"
-            comment_delim = ": " if comment and title else ""
-            message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-            logging.info(
-                f"Message truncated title to fit limit: {codepoints_len(message)}"
-            )
+    message_parts = [part for part in [comment, title, url, tags] if part]
+    message = " ".join(message_parts)
 
     logging.info(f"Final message length: {codepoints_len(message)}: {message}")
+    if codepoints_len(message) > limits[service]:
+        raise ValueError(
+            f"{service} {codepoints_len(message)} exceeds limit {limits[service]}"
+        )
     return message
 
 

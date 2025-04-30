@@ -275,7 +275,7 @@ def twitter_update(
     else:
         shrunk_msg = shrink_message("twitter", comment, title, url, tags)
         result = account.tweet(shrunk_msg)
-    logging.debug(f"{result=}")
+    logging.critical(f"{result=}")
     print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 
@@ -354,59 +354,48 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
     logging.info(f"Service: {service}, limit: {limit}")
 
     PADDING = 7  # for comment delimiter, title quotes, and spaces
-    TWITTER_SHORTENER_LEN = 23  # Twitter uses t.co for URLs
 
     limit -= PADDING
     logging.info(f"Adjusted limit after removing padding: {limit}")
 
-    message_room = limit - codepoints_len(tags)
+    message_room = limit - len_cp(tags)
     logging.info(
-        f"Message room after subtracting tags ({codepoints_len(tags)}): {message_room}"
+        f"Message room after subtracting tags length ({len_cp(tags)}): {message_room}"
     )
 
-    url_len = codepoints_len(url)
+    url_len = len_cp(url)
     logging.info(f"URL length in codepoints: {url_len}")
 
-    if service == "twitter" and url_len > TWITTER_SHORTENER_LEN:
-        message_room -= TWITTER_SHORTENER_LEN
-        logging.info(f"Twitter URL shortened to {TWITTER_SHORTENER_LEN} codepoints")
-    else:
-        message_room -= url_len
+    message_room -= url_len
     logging.info(f"Message room after subtracting URL: {message_room}")
 
-    title_len = codepoints_len(title)
+    title_len = len_cp(title)
     if title_len > message_room:
         logging.info(f"Title too long ({title_len}), truncating to {message_room - 1}")
         title = f"{title[: message_room - 1]}…"
-        logging.info(f"Truncated title length: {codepoints_len(title)}")
-    message_room -= codepoints_len(title)
+        logging.info(f"Truncated title length: {len_cp(title)}")
+    message_room -= len_cp(title)
     logging.info(f"Message room after subtracting title: {message_room}")
 
-    comment_len = codepoints_len(comment)
+    comment_len = len_cp(comment)
     if comment_len > message_room:
         logging.info(f"Comment too long ({comment_len}), truncating or skipping")
         if message_room > 5:
             comment = f"{comment[: message_room - 1]}…"
-            logging.info(f"Truncated comment length: {codepoints_len(comment)}")
+            logging.info(f"Truncated comment length: {len_cp(comment)}")
         else:
             comment = ""
             logging.info("Comment skipped due to insufficient room")
-    message_room -= codepoints_len(comment)
+    message_room -= len_cp(comment)
     logging.info(f"Message room after subtracting comment: {message_room}")
-
     title = f"“{title}”" if title else ""
+
     message_parts = [part for part in [comment, title, url, tags] if part]
     message = " ".join(message_parts)
-
-    logging.info(f"Final message length: {codepoints_len(message)}: {message}")
-    if codepoints_len(message) > limits[service]:
-        raise ValueError(
-            f"{service} {codepoints_len(message)} exceeds limit {limits[service]}"
-        )
     return message
 
 
-def codepoints_len(text: str) -> int:
+def len_cp(text: str) -> int:
     """Twitter counts code units not code points as part of its character limit.
 
     https://developer.twitter.com/en/docs/counting-characters

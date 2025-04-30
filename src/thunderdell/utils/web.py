@@ -286,57 +286,86 @@ def get_photo_desc(photo_path: Path) -> str:
 
 
 def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
-    """Shrink message to fit into character limit."""
-    limit = 500
-    if service == "ohai":  # mastodon instance
-        limit = 500
-    elif service == "twitter":
-        limit = 280
-    elif service == "bluesky":
-        limit = 300
-    logging.info(f"{comment=}")
-    PADDING = 7  # = comment_delim + title quotes + spaces
-    TWITTER_SHORTENER_LEN = 23  # twitter uses t.co
+    """Shrink message to fit into character limit.
+
+    Apply service specific character limits and URL shortening rules and use codepoint counts
+    TODO: Add doctests to verify boundary conditions, truncation, and multi-codepoint graphemes.
+    """
+    limits = {
+        "ohai": 500,  # Mastodon instance
+        "twitter": 280,
+        "bluesky": 300,
+    }
+    limit = limits["service"]
+    logging.info(f"Service: {service}, limit: {limit}")
+
+    PADDING = 7  # for comment delimiter, title quotes, and spaces
+    TWITTER_SHORTENER_LEN = 23  # Twitter uses t.co for URLs
+
     limit -= PADDING
+    logging.info(f"Adjusted limit after removing padding: {limit}")
 
-    logging.info(f"{limit=}")
     message_room = limit - codepoints_len(tags)
-    logging.info(f"message_room - len(tags) = {message_room}")
+    logging.info(
+        f"Message room after subtracting tags ({codepoints_len(tags)}): {message_room}"
+    )
 
-    logging.info(f"{codepoints_len(url)=}")
-    if service == "twitter" and codepoints_len(url) > TWITTER_SHORTENER_LEN:
-        message_room = message_room - TWITTER_SHORTENER_LEN
-        logging.info(f"  shortened to {TWITTER_SHORTENER_LEN}")
+    url_len = codepoints_len(url)
+    logging.info(f"URL length in codepoints: {url_len}")
+
+    if service == "twitter" and url_len > TWITTER_SHORTENER_LEN:
+        message_room -= TWITTER_SHORTENER_LEN
+        logging.info(f"Twitter URL shortened to {TWITTER_SHORTENER_LEN} codepoints")
     else:
-        message_room = message_room - codepoints_len(url)
-    logging.info(f"message_room after url = {message_room}")
+        message_room -= url_len
+    logging.info(f"Message room after subtracting URL: {message_room}")
 
-    logging.info(f"{codepoints_len(title)=}")
-    if codepoints_len(title) > message_room:
-        logging.info("title is too long")
+    title_len = codepoints_len(title)
+    if title_len > message_room:
+        logging.info(f"Title too long ({title_len}), truncating to {message_room - 1}")
         title = f"{title[: message_room - 1]}…"
-        logging.info(f"  truncated to {codepoints_len(title)}")
-    message_room = message_room - codepoints_len(title)
-    logging.info(f"{message_room=} after title = ")
+        logging.info(f"Truncated title length: {codepoints_len(title)}")
+    message_room -= codepoints_len(title)
+    logging.info(f"Message room after subtracting title: {message_room}")
 
-    logging.info(f"{codepoints_len(comment)=}")
-    if codepoints_len(comment) > message_room:
-        logging.info("comment is too long")
+    comment_len = codepoints_len(comment)
+    if comment_len > message_room:
+        logging.info(f"Comment too long ({comment_len}), truncating or skipping")
         if message_room > 5:
-            logging.info(" truncating")
             comment = f"{comment[: message_room - 1]}…"
-            logging.info(f"  truncated to {codepoints_len(comment)}")
-            logging.info(f"{comment}")
+            logging.info(f"Truncated comment length: {codepoints_len(comment)}")
         else:
-            logging.info(" skipping")
             comment = ""
-    message_room = message_room - codepoints_len(comment)
-    logging.info(f"message_room after comment = {message_room}")
+            logging.info("Comment skipped due to insufficient room")
+    message_room -= codepoints_len(comment)
+    logging.info(f"Message room after subtracting comment: {message_room}")
 
     comment_delim = ": " if comment and title else ""
     title = f"“{title}”" if title else ""
     message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
-    logging.info(f"{codepoints_len(message)=}: {message=}")
+
+    final_len = codepoints_len(message)
+    if final_len > limits["service"]:
+        logging.warning(
+            f"Final message length {final_len} exceeds limit {limits['service']}"
+        )
+        # As a fallback, truncate comment aggressively
+        excess = final_len - limits["service"]
+        if len(comment) > excess:
+            comment = comment[:-excess] + "…"
+            comment_delim = ": " if comment and title else ""
+            message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
+            logging.info(f"Message truncated to fit limit: {codepoints_len(message)}")
+        else:
+            # If still too long, truncate title as well
+            title = title[: max(0, len(title) - excess)] + "…"
+            comment_delim = ": " if comment and title else ""
+            message = f"{comment}{comment_delim}{title} {url} {tags}".strip()
+            logging.info(
+                f"Message truncated title to fit limit: {codepoints_len(message)}"
+            )
+
+    logging.info(f"Final message length: {codepoints_len(message)}: {message}")
     return message
 
 

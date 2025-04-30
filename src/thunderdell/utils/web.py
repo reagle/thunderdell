@@ -285,11 +285,45 @@ def get_photo_desc(photo_path: Path) -> str:
     return " ".join(chunk for chunk in photo_fn.split("-") if not chunk.isdigit())
 
 
+def generate_countable_string(length: int) -> str:
+    """Generate a string of specified length with a visual counting system.
+
+    >>> len(generate_countable_string(8))
+    8
+    >>> generate_countable_string(8)
+    '¹²³⁴⁵⁶⁷⁸'
+    >>> len(generate_countable_string(117))
+    117
+    >>> len('¹²³⁴⁵⁶⁷⁸⁹1¹²³⁴⁵⁶⁷⁸⁹2¹²³⁴⁵⁶⁷⁸⁹3¹²³⁴⁵⁶⁷⁸⁹4¹²³⁴⁵⁶⁷⁸⁹5¹²³⁴⁵⁶⁷⁸⁹6¹²³⁴⁵⁶⁷⁸⁹7¹²³⁴⁵⁶⁷⁸⁹8¹²³⁴⁵⁶⁷⁸⁹9¹²³⁴⁵⁶⁷⁸⁹10²³⁴⁵⁶⁷⁸⁹11²³⁴⁵⁶⁷⁸⁹12²³⁴⁵⁶⁷⁸⁹13²³⁴⁵⁶⁷⁸⁹14²³⁴⁵⁶⁷⁸⁹15²³⁴⁵⁶⁷⁸⁹16²³⁴⁵⁶⁷⁸⁹17²³⁴⁵⁶⁷⁸⁹18²³⁴⁵⁶⁷⁸⁹19²³⁴⁵⁶⁷⁸⁹20²³⁴⁵⁶⁷⁸⁹21²³⁴⁵⁶⁷⁸⁹22²³⁴⁵')
+    225
+    """
+    superscripts = "¹²³⁴⁵⁶⁷⁸⁹"
+    result = ""
+    tens = 0
+
+    while len(result) < length:
+        if tens == 0:
+            result += superscripts[: min(9, length)]
+        else:
+            tens_str = str(tens)
+            if len(result) + len(tens_str) > length:
+                break
+            result += tens_str
+
+            skip = len(tens_str) - 1
+            remaining = length - len(result)
+            result += superscripts[skip : skip + min(9 - skip, remaining)]
+
+        tens += 1
+
+    return result
+
+
 def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
     """Shrink message to fit into character limit.
 
     Apply service specific character limits and URL shortening rules and use codepoint counts
-    TODO: Add doctests to verify boundary conditions, truncation, and multi-codepoint graphemes.
+    TODO: Add doctests to verify strings near the service limits, including use of multi-codepoint graphemes. Use strings from generate_countable_string() as needed.
     """
     limits = {
         "ohai": 500,  # Mastodon instance

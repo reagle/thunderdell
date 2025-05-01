@@ -145,8 +145,8 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     )
 
     bluesky_update(comment, title, url, tags, photo_path)
-    mastodon_update(comment, title, url, tags, photo_path)
-    twitter_update(comment, title, url, tags, photo_path)
+    # mastodon_update(comment, title, url, tags, photo_path)
+    # twitter_update(comment, title, url, tags, photo_path)
 
 
 def bluesky_update(
@@ -162,7 +162,9 @@ def bluesky_update(
     BLUESKY_APP_PASSWORD = get_credential("BLUESKY_APP_PASSWORD")
     BLUESKY_HANDLE = get_credential("BLUESKY_HANDLE")
 
-    skeet_text = shrink_message("bluesky", comment, title, "", tags).rstrip() + "\n"
+    skeet_text = (
+        shrink_message("bluesky", comment, title, len(url), tags).rstrip() + "\n"
+    )
 
     try:
         client = Client()
@@ -319,10 +321,13 @@ def generate_countable_string(length: int) -> str:
     return result
 
 
-def shrink_message(service: str, comment: str, title: str, url: str, tags: str) -> str:
+def shrink_message(
+    service: str, comment: str, title: str, url: str | int, tags: str
+) -> str:
     """Shrink message to fit into service specific character limit.
 
     Use URL shortening rules and codepoint counts.
+    Parameters can be strings or their length (url only, for now).
 
     >>> long_comment = long_title = generate_countable_string(501)
     >>> shrink_message("twitter", "Comment", long_title, "http://url.com", "#tag")
@@ -332,7 +337,7 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
     >>> len(result) <= 280 and '…' in result
     True
 
-    >>> msg = shrink_message("bluesky", long_comment, long_title, "http://url.com", "#tag")
+    >>> msg = shrink_message("bluesky", long_comment, long_title, 14, "#tag")
     >>> len(msg) <= 300
     True
 
@@ -363,7 +368,11 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
         f"Message room after subtracting tags length ({len_cp(tags)}): {message_room}"
     )
 
-    url_len = len_cp(url)
+    if isinstance(url, str):
+        url_len = len_cp(url)
+    elif isinstance(url, int):
+        url_len = url
+        url = ""
     logging.info(f"URL length in codepoints: {url_len}")
 
     message_room -= url_len
@@ -379,7 +388,9 @@ def shrink_message(service: str, comment: str, title: str, url: str, tags: str) 
 
     comment_len = len_cp(comment)
     if comment_len > message_room:
-        logging.info(f"Comment too long ({comment_len}), truncating or skipping")
+        logging.info(
+            f"Comment too long ({comment_len}), truncating or skipping to fit in {message_room}"
+        )
         if message_room > 5:
             comment = f"{comment[: message_room - 1]}…"
             logging.info(f"Truncated comment length: {len_cp(comment)}")

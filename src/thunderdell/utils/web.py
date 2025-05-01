@@ -153,29 +153,33 @@ def bluesky_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
 ) -> None:
     """Update the authenticated Bluesky account with a post and optional photo."""
-    # https://docs.bsky.app/docs/advanced-guides/posts#images-embeds
-    # https://github.com/MarshalX/atproto
-
     import atproto_core
     from atproto import Client, client_utils, models
 
     BLUESKY_APP_PASSWORD = get_credential("BLUESKY_APP_PASSWORD")
     BLUESKY_HANDLE = get_credential("BLUESKY_HANDLE")
 
+    # Prepare the base text without tags
     skeet_text = (
-        shrink_message("bluesky", comment, title, len(url), tags).rstrip() + "\n"
+        shrink_message("bluesky", comment, title, len(url), len(tags)).rstrip() + "\n"
     )
 
     try:
         client = Client()
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
 
-        # Build the skeet text object conditionally adding the link if provided
-        tb = client_utils.TextBuilder().text(skeet_text)
-        if url.strip():
-            tb = tb.link(url, url)
-        skeet_obj = tb
+        skeet_obj = client_utils.TextBuilder().text(skeet_text)
 
+        if tags:
+            for tag in tags.split():
+                # Remove the # if present and add the tag properly
+                tag_text = tag.lstrip("#")
+                skeet_obj = skeet_obj.text(" ").tag(f"#{tag_text}", tag_text)
+
+        # Add URL if provided
+        if url.strip():
+            skeet_obj = skeet_obj.text(" ").link(url, url)
+        breakpoint()
         if photo_path and photo_path.is_file():
             photo_desc = get_photo_desc(photo_path)
             img_data = photo_path.read_bytes()
@@ -184,9 +188,18 @@ def bluesky_update(
                 models.AppBskyEmbedImages.Image(alt=photo_desc, image=upload.blob)
             ]
             embed = models.AppBskyEmbedImages.Main(images=images)
-            response = client.send_post(text=skeet_obj, embed=embed, langs=["en-US"])
+            response = client.send_post(
+                text=skeet_obj.build_text(),
+                facets=skeet_obj.build_facets(),
+                embed=embed,
+                langs=["en-US"],
+            )
         else:
-            response = client.send_post(text=skeet_obj, langs=["en-US"])
+            response = client.send_post(
+                text=skeet_obj.build_text(),
+                facets=skeet_obj.build_facets(),
+                langs=["en-US"],
+            )
 
         logging.debug(f"{response=}")
     except atproto_core.exceptions.AtProtocolError as err:  # type: ignore
@@ -322,12 +335,12 @@ def generate_countable_string(length: int) -> str:
 
 
 def shrink_message(
-    service: str, comment: str, title: str, url: str | int, tags: str
+    service: str, comment: str, title: str, url: str | int, tags: str | int
 ) -> str:
     """Shrink message to fit into service specific character limit.
 
     Use URL shortening rules and codepoint counts.
-    Parameters can be strings or their length (url only, for now).
+    Parameters {url, tags} can be strings or their length.
 
     >>> long_comment = long_title = generate_countable_string(501)
     >>> shrink_message("twitter", "Comment", long_title, "http://url.com", "#tag")
@@ -363,9 +376,15 @@ def shrink_message(
     limit -= PADDING
     logging.info(f"Adjusted limit after removing padding: {limit}")
 
-    message_room = limit - len_cp(tags)
+    if isinstance(tags, str):
+        tag_len = len_cp(tags)
+    elif isinstance(tags, int):
+        tag_len = tags
+        tags = ""
+    logging.info(f"tag length in codepoints: {tag_len}")
+    message_room = limit - tag_len
     logging.info(
-        f"Message room after subtracting tags length ({len_cp(tags)}): {message_room}"
+        f"Message room after subtracting tags length ({tag_len}): {message_room}"
     )
 
     if isinstance(url, str):
@@ -374,7 +393,6 @@ def shrink_message(
         url_len = url
         url = ""
     logging.info(f"URL length in codepoints: {url_len}")
-
     message_room -= url_len
     logging.info(f"Message room after subtracting URL: {message_room}")
 

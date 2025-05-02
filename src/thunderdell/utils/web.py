@@ -145,8 +145,8 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     )
 
     bluesky_update(comment, title, url, tags, photo_path)
-    # mastodon_update(comment, title, url, tags, photo_path)
-    # twitter_update(comment, title, url, tags, photo_path)
+    mastodon_update(comment, title, url, tags, photo_path)
+    twitter_update(comment, title, url, tags, photo_path)
 
 
 def bluesky_update(
@@ -179,7 +179,6 @@ def bluesky_update(
         # Add URL if provided
         if url.strip():
             skeet_obj = skeet_obj.text(" ").link(url, url)
-        breakpoint()
         if photo_path and photo_path.is_file():
             photo_desc = get_photo_desc(photo_path)
             img_data = photo_path.read_bytes()

@@ -33,7 +33,7 @@ class ScrapeTwitter(ScrapeDefault):
         TW_USERNAME = uw.get_credential("TW_USERNAME")
         TW_PASSWORD = uw.get_credential("TW_PASSWORD")
         print("Scraping X/Twitter")
-        # super().__init__(url, comment) # TODO: don't need this 2025-03-10
+        super().__init__(url, comment)
 
         if "://x.com/" not in url:
             raise RuntimeError(f"Invalid X/Twitter URL: {url}")

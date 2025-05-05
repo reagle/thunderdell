@@ -289,7 +289,7 @@ def twitter_update(
     else:
         shrunk_msg = shrink_message("twitter", comment, title, url, tags)
         result = account.tweet(shrunk_msg)
-    logging.critical(f"{result=}")
+    logging.debug(f"{result=}")
     print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
 
 
@@ -362,27 +362,28 @@ def shrink_message(
     >>> len(msg) <= 280
     True
     """
-    limits = {
+    LIMITS = {
         "twitter": 280,
         "bluesky": 300,
         "ohai": 500,  # Mastodon instance
     }
-    limit = limits[service]
+    PADDING = 7  # for comment delimiter, title quotes, and spaces
+    MININUM_ROOM = 10
+
+    limit = LIMITS[service]
     logging.info(f"Service: {service}, limit: {limit}")
 
-    PADDING = 7  # for comment delimiter, title quotes, and spaces
-
     limit -= PADDING
-    logging.info(f"Adjusted limit after removing padding: {limit}")
+    logging.debug(f"Adjusted limit after removing padding: {limit}")
 
     if isinstance(tags, str):
         tag_len = len_cp(tags)
     elif isinstance(tags, int):
         tag_len = tags
         tags = ""
-    logging.info(f"tag length in codepoints: {tag_len}")
+    logging.debug(f"tag length in codepoints: {tag_len}")
     message_room = limit - tag_len
-    logging.info(
+    logging.debug(
         f"Message room after subtracting tags length ({tag_len}): {message_room}"
     )
 
@@ -391,24 +392,25 @@ def shrink_message(
     elif isinstance(url, int):
         url_len = url
         url = ""
-    logging.info(f"URL length in codepoints: {url_len}")
+    logging.debug(f"URL length in codepoints: {url_len}")
     message_room -= url_len
-    logging.info(f"Message room after subtracting URL: {message_room}")
+    logging.debug(f"Message room after subtracting URL: {message_room}")
 
     title_len = len_cp(title)
     if title_len > message_room:
-        logging.info(f"Title too long ({title_len}), truncating to {message_room - 1}")
+        logging.debug(f"Title too long ({title_len}), truncating to {message_room - 1}")
         title = f"{title[: message_room - 1]}…"
-        logging.info(f"Truncated title length: {len_cp(title)}")
+        logging.debug(f"Truncated title length: {len_cp(title)}")
     message_room -= len_cp(title)
-    logging.info(f"Message room after subtracting title: {message_room}")
+    logging.debug(f"Message room after subtracting title: {message_room}")
 
+    # What does the code chunk below do, why message_room >5?
     comment_len = len_cp(comment)
     if comment_len > message_room:
         logging.info(
             f"Comment too long ({comment_len}), truncating or skipping to fit in {message_room}"
         )
-        if message_room > 5:
+        if message_room > MININUM_ROOM:
             comment = f"{comment[: message_room - 1]}…"
             logging.info(f"Truncated comment length: {len_cp(comment)}")
         else:

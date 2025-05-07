@@ -8,45 +8,60 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
+import asyncio
 import textwrap
-import warnings
 
 import arrow
 
-# https://github.com/trevorhobenshield/twitter-api-client/
-from twitter.scraper import Scraper
+# Import twikit instead of twitter-api-client
+from twikit import Client
 
 import thunderdell.utils.web as uw
+from thunderdell import config
 
 from .default import ScrapeDefault
 
-# twitter-api-client has some regex syntax warnings; should be raw strings
-# ... site-packages/twitter/scraper.py:549: SyntaxWarning: invalid escape sequence '\d'
-warnings.filterwarnings("ignore", category=SyntaxWarning)
-
 
 class ScrapeTwitter(ScrapeDefault):
-    """Scrape Twitter bibliographic data."""
+    """Scrape Twitter bibliographic data using twikit."""
 
     def __init__(self, url: str, comment: str):
-        TW_EMAIL = uw.get_credential("TW_EMAIL")
-        TW_USERNAME = uw.get_credential("TW_USERNAME")
-        TW_PASSWORD = uw.get_credential("TW_PASSWORD")
         print("Scraping X/Twitter")
         super().__init__(url, comment)
 
         if "://x.com/" not in url:
             raise RuntimeError(f"Invalid X/Twitter URL: {url}")
 
-        # Neither guest nor user/password sessions work reliably 2025-03-10;
-        # library suggests using cookies, which I've yet TODO
-        # scraper = Scraper(session=init_session())
-        scraper = Scraper(TW_EMAIL, TW_USERNAME, TW_PASSWORD)
-        identity = url.rsplit("/", 1)[1]
-        twitter_result = scraper.tweets_by_id([identity])
+        # Get credentials
+        TW_EMAIL = uw.get_credential("TW_EMAIL")
+        TW_USERNAME = uw.get_credential("TW_USERNAME")
+        TW_PASSWORD = uw.get_credential("TW_PASSWORD")
 
-        self.status = twitter_result[0]["data"]["tweetResult"]["result"]
-        print(f"Status retrieved: {self.status['legacy']['id_str']}")
+        self.tweet_id = url.rsplit("/", 1)[1]
+
+        try:
+            self.status = asyncio.run(
+                self._fetch_tweet(TW_USERNAME, TW_EMAIL, TW_PASSWORD)
+            )
+            print(f"Status retrieved: {self.tweet_id}")
+        except Exception as exc:
+            raise RuntimeError(f"Failed to fetch tweet: {exc}") from exc
+
+    async def _fetch_tweet(self, username: str, email: str, password: str):
+        """Fetch tweet using twikit."""
+        client = Client("en-US")
+
+        # Login with credentials and cache cookies
+        await client.login(
+            auth_info_1=username,
+            auth_info_2=email,
+            password=password,
+            cookies_file=str(config.TMP_DIR / "twitter-cookies.json"),
+            enable_ui_metrics=True,  # Reduces risk of account suspension
+        )
+
+        tweet = await client.get_tweet_by_id(self.tweet_id)
+        return tweet
 
     def get_biblio(self) -> dict[str, str]:
         return {
@@ -61,17 +76,18 @@ class ScrapeTwitter(ScrapeDefault):
         }
 
     def get_author(self) -> str:
-        user = self.status["core"]["user_results"]["result"]["legacy"]
-        return f"{user['name'].strip()} (@{user['screen_name'].strip()})"
+        return (
+            f"{self.status.user.name.strip()} (@{self.status.user.screen_name.strip()})"
+        )
 
     def get_title(self) -> str:
-        first_line = self.status["legacy"]["full_text"].split("\n")[0]
+        first_line = self.status.text.split("\n")[0]
         return textwrap.shorten(first_line, 136, placeholder="...")
 
     def get_date(self) -> str:
-        return arrow.get(
-            self.status["legacy"]["created_at"], "ddd MMM DD HH:mm:ss Z YYYY"
-        ).format("YYYYMMDD")
+        # Convert Twitter date format to YYYYMMDD
+        return arrow.get(self.status.created_at_datetime).format("YYYYMMDD")
 
     def get_excerpt(self) -> str:
-        return self.status["legacy"]["full_text"].strip()
+        # Get full tweet text
+        return self.status.text.strip()

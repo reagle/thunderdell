@@ -144,9 +144,9 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          {total_len=}"""
     )
 
-    bluesky_update(comment, title, url, tags, photo_path)
-    mastodon_update(comment, title, url, tags, photo_path)
     twitter_update(comment, title, url, tags, photo_path)
+    mastodon_update(comment, title, url, tags, photo_path)
+    bluesky_update(comment, title, url, tags, photo_path)
 
 
 def bluesky_update(
@@ -240,57 +240,59 @@ def twitter_update(
 ) -> None:
     """Update the authenticated Twitter account with a tweet and optional photo.
 
-    Twitter often won't post larger messages (even if within 280 chars) but won't raise an exception.
-    Twitter also only allows ~3 posts a day.
+    Twitter often won't post larger messages (even if within 280 chars) yet won't raise an exception.
+    Twitter also only allows ~3 posts a day via twikit.
     """
-    import orjson
-    from httpx import Client
+    import asyncio
 
-    # https://github.com/trevorhobenshield/twitter-api-client
-    from twitter.account import Account
-    from twitter.util import init_session
+    from twikit import Client, errors
 
-    TW_EMAIL = get_credential("TW_EMAIL")
-    TW_PASSWORD = get_credential("TW_PASSWORD")
-    TW_USERNAME = get_credential("TW_USERNAME")
+    async def _twitter_update_async():
+        TW_EMAIL = get_credential("TW_EMAIL")
+        TW_PASSWORD = get_credential("TW_PASSWORD")
+        TW_USERNAME = get_credential("TW_USERNAME")
 
-    # https://github.com/trevorhobenshield/twitter-api-client/issues/64
-    cookies_fp = config.TMP_DIR / "twitter.cookies"
-    # TODO: deal with expired cookies 2023-06-06
-    if cookies_fp.exists():
-        cookies = orjson.loads(cookies_fp.read_bytes())
-        session = Client(cookies=cookies)
-        account = Account(session=session)
-        logging.info(f"using existing {cookies=}")
-    else:
-        session = init_session()
-        account = Account(
-            email=TW_EMAIL, username=TW_USERNAME, password=TW_PASSWORD, save=False
-        )
-        cookies = {
-            k: v
-            for k, v in account.session.cookies.items()
-            if k in {"ct0", "auth_token"}
-        }
-        cookies_fp.write_bytes(orjson.dumps(cookies))
-        logging.info(f"using new {cookies=}")
+        client = Client(language="en-US")
 
-    if photo_path:
-        shrunk_msg = shrink_message("twitter", comment, title, "", tags)
-        result = account.tweet(
-            shrunk_msg,
-            media=[
-                {
-                    "media": str(photo_path),
-                    "alt": title or "Image",
-                }
-            ],
-        )
-    else:
-        shrunk_msg = shrink_message("twitter", comment, title, url, tags)
-        result = account.tweet(shrunk_msg)
-    logging.debug(f"{result=}")
-    print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
+        shrunk_msg = ""  # Initialize shrunk_msg
+        try:
+            await client.login(
+                auth_info_1=TW_USERNAME,
+                auth_info_2=TW_EMAIL,
+                password=TW_PASSWORD,
+                cookies_file=str(config.TMP_DIR / "twitter-cookies.json"),
+            )
+
+            if photo_path and photo_path.is_file():
+                shrunk_msg = shrink_message("twitter", comment, title, "", tags)
+                media_id = await client.upload_media(
+                    source=str(photo_path), wait_for_completion=True
+                )
+                alt_text = get_photo_desc(photo_path) or title or "Image"
+
+                await client.create_media_metadata(media_id, alt_text=alt_text)
+                tweet_response = await client.create_tweet(
+                    text=shrunk_msg, media_ids=[media_id]
+                )
+            else:
+                shrunk_msg = shrink_message("twitter", comment, title, url, tags)
+                tweet_response = await client.create_tweet(text=shrunk_msg)
+
+            logging.debug(
+                f"Tweet response: {tweet_response.id if tweet_response else 'No response'}"
+            )
+            print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
+
+        except errors.TwitterException as e:
+            print(f"Tweet failed: {e}")
+            logging.error(f"Tweet failed for message '{shrunk_msg}': {e}")
+        except Exception as e:  # noqa: BLE001
+            print(f"Tweet failed: {e}")
+            logging.error(
+                f"An unexpected error occurred during Twitter update for '{shrunk_msg}': {e}"
+            )
+
+    asyncio.run(_twitter_update_async())
 
 
 def get_photo_desc(photo_path: Path) -> str:

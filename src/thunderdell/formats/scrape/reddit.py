@@ -13,6 +13,7 @@ import logging
 import re
 import time
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 from thunderdell.change_case import sentence_case
@@ -25,6 +26,8 @@ NOW = time.localtime()
 
 class ScrapeReddit(ScrapeDefault):
     """Scrape Reddit class."""
+
+    json: list[Any]
 
     def __init__(self, url_clean, comment):
         print("Scraping reddit", end="\n")

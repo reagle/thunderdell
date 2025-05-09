@@ -53,16 +53,25 @@ def get_HTML(
     cache_control: str = "",
 ) -> tuple[bytes, etree._Element, str, requests.Response]:
     """Return [HTML content, response] of a given URL."""
-    agent_headers = {"User-Agent": "Thunderdell/BusySponge"}
-    req = requests.get(url, headers=agent_headers, verify=True)
+    session = requests.Session()
+    agent_headers = {
+        "User-Agent": "Thunderdell/BusySponge",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cookie": "cookies_accepted=true",  # Pre-set cookie acceptance
+    }
+    session.headers.update(agent_headers)
+    try:
+        response = session.get(url, timeout=15)
+    except requests.RequestException as e:
+        raise OSError("Error fetching content") from e
 
-    if "html" not in req.headers.get("content-type", ""):
+    if "html" not in response.headers.get("content-type", ""):
         raise OSError("URL content is not HTML.")
 
-    HTML_bytes = req.content
+    HTML_bytes = response.content
 
     # Detect the encoding from the response
-    encoding = req.encoding or "utf-8"
+    encoding = response.encoding or "utf-8"
 
     # Parse the HTML using the detected encoding
     parser_html = etree.HTMLParser(encoding=encoding)
@@ -71,7 +80,7 @@ def get_HTML(
     # Decode the bytes to a Unicode string using the detected encoding
     HTML_unicode = HTML_bytes.decode(encoding, "replace")
 
-    return HTML_bytes, HTML_parsed, HTML_unicode, req
+    return HTML_bytes, HTML_parsed, HTML_unicode, response
 
 
 def get_JSON(

@@ -18,6 +18,8 @@ from .default import ScrapeDefault
 
 
 class ScrapeWMMeta(ScrapeDefault):
+    """Scrape Wikimedia Meta wiki."""
+
     def __init__(self, url, comment):
         print("Scraping Wikimedia Meta;", end="\n")
         ScrapeDefault.__init__(self, url, comment)
@@ -36,7 +38,7 @@ class ScrapeWMMeta(ScrapeDefault):
             self.html_u,
         ).groups()
         month = bf.MONTH2DIGIT[month[0:3].lower()]
-        return "%d%02d%02d" % (int(year), int(month), int(day))
+        return f"{int(year)}{int(month):02d}{int(day):02d}"
 
     def get_date_old(self):  # Meta is often foobar because of proxy bugs
         _, _, cite_HTML_u, resp = get_HTML(self.get_permalink())
@@ -47,7 +49,7 @@ class ScrapeWMMeta(ScrapeDefault):
             cite_HTML_u,
         ).groups()
         month = bf.MONTH2DIGIT[month[0:3].lower()]
-        return "%d%02d%02d" % (int(year), int(month), int(day))
+        return f"{int(year)}{int(month):02d}{int(day):02d}"
 
     def get_org(self):
         return "Wikimedia"

@@ -144,7 +144,6 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          {total_len=}"""
     )
 
-    twitter_update(comment, title, url, tags, photo_path)
     mastodon_update(comment, title, url, tags, photo_path)
     bluesky_update(comment, title, url, tags, photo_path)
 
@@ -233,66 +232,6 @@ def mastodon_update(
         print(f"toot failed {len(toot)}: {toot}")
     else:
         print(f"toot worked {len(toot)}: {toot}")
-
-
-def twitter_update(
-    comment: str, title: str, url: str, tags: str, photo_path: Path | None
-) -> None:
-    """Update the authenticated Twitter account with a tweet and optional photo.
-
-    Twitter often won't post larger messages (even if within 280 chars) yet won't raise an exception.
-    Twitter also only allows ~3 posts a day via twikit.
-    """
-    import asyncio
-
-    from twikit import Client, errors
-
-    async def _twitter_update_async():
-        TW_EMAIL = get_credential("TW_EMAIL")
-        TW_PASSWORD = get_credential("TW_PASSWORD")
-        TW_USERNAME = get_credential("TW_USERNAME")
-
-        client = Client(language="en-US")
-
-        shrunk_msg = ""  # Initialize shrunk_msg
-        try:
-            await client.login(
-                auth_info_1=TW_USERNAME,
-                auth_info_2=TW_EMAIL,
-                password=TW_PASSWORD,
-                cookies_file=str(config.TMP_DIR / "twitter-cookies.json"),
-            )
-
-            if photo_path and photo_path.is_file():
-                shrunk_msg = shrink_message("twitter", comment, title, "", tags)
-                media_id = await client.upload_media(
-                    source=str(photo_path), wait_for_completion=True
-                )
-                alt_text = get_photo_desc(photo_path) or title or "Image"
-
-                await client.create_media_metadata(media_id, alt_text=alt_text)
-                tweet_response = await client.create_tweet(
-                    text=shrunk_msg, media_ids=[media_id]
-                )
-            else:
-                shrunk_msg = shrink_message("twitter", comment, title, url, tags)
-                tweet_response = await client.create_tweet(text=shrunk_msg)
-
-            logging.debug(
-                f"Tweet response: {tweet_response.id if tweet_response else 'No response'}"
-            )
-            print(f"tweet worked {len(shrunk_msg)}: {shrunk_msg}")
-
-        except errors.TwitterException as e:
-            print(f"Tweet failed: {e}")
-            logging.error(f"Tweet failed for message '{shrunk_msg}': {e}")
-        except Exception as e:  # noqa: BLE001
-            print(f"Tweet failed: {e}")
-            logging.error(
-                f"An unexpected error occurred during Twitter update for '{shrunk_msg}': {e}"
-            )
-
-    asyncio.run(_twitter_update_async())
 
 
 def get_photo_desc(photo_path: Path) -> str:

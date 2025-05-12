@@ -4,44 +4,44 @@
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2025 Joseph Reagle"
 __license__ = "GLPv3"
-__version__ = "1.0"
-
-# TODO 2023-07-07
-# - convert about to biblatex date format (d=)
-# - handle name variances (e.g., "First Last" without comma)
+__version__ = "1.5"
 
 import argparse
 import logging
-import re
 import sys
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
+
+import bibtexparser
+from bibtexparser.bparser import BibTexParser
+from bibtexparser.customization import convert_to_unicode
 
 from thunderdell.utils.web import xml_escape
 
 HOME = Path.home()
 
 
-def regex_parse(text: list[str]) -> dict[str, dict[str, str]]:
-    """Parse bibtex entries using regex."""
-    key = ""
+def bibtex_parse(text: list[str]) -> dict[str, dict[str, str]]:
+    """Parse bibtex entries using bibtexparser library."""
+    parser = BibTexParser()
+    parser.customization = convert_to_unicode
+    parser.ignore_nonstandard_types = False
+
+    # Parse the BibTeX string
+    bib_database = bibtexparser.loads("".join(text), parser)
+
+    # Convert the parsed entries to the desired output format
     entries = {}
+    for entry in bib_database.entries:
+        key = entry.pop("ID")  # Extract the citation key
+        print(f"key={key}")
 
-    key_pattern = re.compile(r"@\w*{(.*)")  # Beginning/id of bibtex entry
-    value_pattern = re.compile(r"\s*(\w+) ?= ?{(.*)},?")
+        entries[key] = {}
 
-    for line in text:
-        print(f"{line=}")
-        key_match = key_pattern.match(line)
-        if key_match:
-            key = key_match.group(1)
-            print(f"{key=}")
-            entries[key] = {}
-            continue  # Keys/IDs are assumed to be alone on single line
-        value_match = value_pattern.match(line)
-        if value_match:
-            field, value = value_match.groups()
-            print(f"{field=} {value=}")
-            entries[key][field] = value.replace("{", "").replace("}", "")
+        for field, value in entry.items():
+            if field != "ENTRYTYPE":  # Skip the entry type field
+                print(f"field={field} value={value}")
+                entries[key][field] = value
+
     return entries
 
 
@@ -102,7 +102,6 @@ def gather_citation_data(entry: dict) -> list[tuple[str, str]]:
 def write_entry(fdo, entry: dict) -> None:
     """Write a single BibTeX entry to the mindmap file."""
     # Write author node
-    breakpoint()
     author_str = format_authors(entry["author"])
     fdo.write(f"""  <node COLOR="#338800" TEXT="{author_str}">\n""")
 
@@ -202,7 +201,7 @@ def main(args: argparse.Namespace | None = None):
         except OSError:
             print(f"{file_path=} does not exist")
             continue
-        entries = regex_parse(bibtex_content.split("\n"))
+        entries = bibtex_parse(bibtex_content.split("\n"))
         process(entries, file_out)
 
 

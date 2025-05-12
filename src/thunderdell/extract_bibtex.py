@@ -16,6 +16,8 @@ import re
 import sys
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
+from thunderdell.utils.web import xml_escape
+
 HOME = Path.home()
 
 
@@ -41,26 +43,6 @@ def regex_parse(text: list[str]) -> dict[str, dict[str, str]]:
             print(f"{field=} {value=}")
             entries[key][field] = value.replace("{", "").replace("}", "")
     return entries
-
-
-def xml_escape(text: str) -> str:
-    """Remove entities and spurious whitespace.
-
-    >>> xml_escape("Hello World")
-    'Hello World'
-    >>> xml_escape("<tag>text & more</tag>")
-    '&lt;tag&gt;text &amp; more&lt;/tag&gt;'
-    >>> xml_escape('"Quoted" & <tagged>')
-    '&quot;Quoted&quot; &amp; &lt;tagged&gt;'
-    >>> xml_escape("  extra spaces  ")
-    'extra spaces'
-    >>> xml_escape("")
-    ''
-    """
-    import html
-
-    escaped_text = html.escape(text, quote=True).strip()
-    return escaped_text
 
 
 def format_authors(author_text: str) -> str:
@@ -120,6 +102,7 @@ def gather_citation_data(entry: dict) -> list[tuple[str, str]]:
 def write_entry(fdo, entry: dict) -> None:
     """Write a single BibTeX entry to the mindmap file."""
     # Write author node
+    breakpoint()
     author_str = format_authors(entry["author"])
     fdo.write(f"""  <node COLOR="#338800" TEXT="{author_str}">\n""")
 

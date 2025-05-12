@@ -29,6 +29,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipdb>=0.13.13",
+    "pytest>=7.4.0", # Add this line
 ]
 
 [project.scripts]

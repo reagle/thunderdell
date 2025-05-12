@@ -20,7 +20,7 @@ from thunderdell import config
 from thunderdell.types_thunderdell import EntryDict
 
 # from thunderdell.formats.emit.biblatex import create_biblatex_author
-from thunderdell.utils.web import escape_XML, straighten_quotes
+from thunderdell.utils.web import straighten_quotes, xml_escape
 
 
 def emit_results(
@@ -138,7 +138,7 @@ def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file
     """Move locator number to the end of the text with the biblatex key."""
     style_ref = node.get("STYLE_REF", "default")
     text = straighten_quotes(node.get("TEXT", ""))
-    text = escape_XML(text)
+    text = xml_escape(text)
     text = text.replace(  # restore my query_highlight strongs
         "&lt;strong&gt;", "<strong>"
     ).replace("&lt;/strong&gt;", "</strong>")

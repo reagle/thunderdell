@@ -17,7 +17,7 @@ from lxml import etree as l_etree
 
 from thunderdell import config
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
-from thunderdell.utils.web import escape_XML, yasn_publish
+from thunderdell.utils.web import xml_escape, yasn_publish
 
 NOW = time.localtime()
 
@@ -42,7 +42,7 @@ def log2work(args, biblio):
     else:
         hashtags = "#misc"
     logging.info(f"hashtags = '{hashtags}'")
-    html_comment = f'{comment} <a href="{escape_XML(url)}">{escape_XML(title)}</a>'
+    html_comment = f'{comment} <a href="{xml_escape(url)}">{xml_escape(title)}</a>'
     date_token = time.strftime("%y%m%d", NOW)
     digest = hashlib.md5(html_comment.encode("utf-8", "replace")).hexdigest()
     uid = "e" + date_token + "-" + digest[:5]

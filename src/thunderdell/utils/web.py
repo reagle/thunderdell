@@ -15,7 +15,6 @@ import os
 import re
 from pathlib import Path
 from typing import Any
-from xml.sax.saxutils import escape  # unescape
 
 import dotenv
 import requests  # http://docs.python-requests.org/en/latest/
@@ -384,10 +383,44 @@ def len_cp(text: str) -> int:
     return len(text.encode("utf-16-le")) // 2
 
 
-def escape_XML(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
-    """Escape XML character entities including & < >."""
+def xml_escape_sax(s: str) -> str:  # http://wiki.python.org/moin/EscapingXml
+    """Escape XML character entities including & < >.
+
+    >>> xml_escape_sax("Hello World")
+    'Hello World'
+    >>> xml_escape_sax("<tag>text & more</tag>")
+    '&lt;tag&gt;text &amp; more&lt;/tag&gt;'
+    >>> xml_escape_sax('"Quoted" & <tagged>')
+    '"Quoted" &amp; &lt;tagged&gt;'
+    >>> xml_escape_sax("  extra spaces  ")
+    '  extra spaces  '
+    >>> xml_escape_sax("")
+    ''
+    """
+    from xml.sax.saxutils import escape  # unescape
+
     extras = {"\t": "  "}
     return escape(s, extras)
+
+
+def xml_escape_html(text: str) -> str:
+    """Remove entities and spurious whitespace.
+
+    >>> xml_escape_html("Hello World")
+    'Hello World'
+    >>> xml_escape_html("<tag>text & more</tag>")
+    '&lt;tag&gt;text &amp; more&lt;/tag&gt;'
+    >>> xml_escape_html('"Quoted" & <tagged>')
+    '&quot;Quoted&quot; &amp; &lt;tagged&gt;'
+    >>> xml_escape_html("  extra spaces  ")
+    'extra spaces'
+    >>> xml_escape_html("")
+    ''
+    """
+    from html import escape
+
+    escaped_text = escape(text, quote=True).strip()
+    return escaped_text
 
 
 CURLY_TABLE = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})

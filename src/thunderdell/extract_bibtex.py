@@ -21,44 +21,72 @@ HOME = Path.home()
 
 
 def bibtex_parse(text: list[str]) -> dict[str, dict[str, str]]:
-    """Parse bibtex entries using bibtexparser library."""
+    """Parse bibtex entries using bibtexparser library.
+
+    >>> bibtex_eg = [
+    ...     '@Article{Smith2023,',
+    ...     '    author = "John Smith",',
+    ...     '    title = "Example Title",',
+    ...     '    journal = "Journal of Examples",',
+    ...     '    year = "2023",',
+    ...     '}',
+    ... ]
+    >>> bibtex_parse(bibtex_eg)
+    key=Smith2023
+    year      =2023
+    journal   =Journal of Examples
+    title     =Example Title
+    author    =John Smith
+    {'Smith2023': {'year': '2023', 'journal': 'Journal of Examples', 'title': 'Example Title', 'author': 'John Smith'}}
+    """
     parser = BibTexParser()
     parser.customization = convert_to_unicode
     parser.ignore_nonstandard_types = False
-
     # Parse the BibTeX string
     bib_database = bibtexparser.loads("".join(text), parser)
-
     # Convert the parsed entries to the desired output format
     entries = {}
     for entry in bib_database.entries:
         key = entry.pop("ID")  # Extract the citation key
         print(f"key={key}")
-
         entries[key] = {}
-
         for field, value in entry.items():
             if field != "ENTRYTYPE":  # Skip the entry type field
-                print(f"field={field} value={value}")
+                print(f"{field:10}={value}")
                 entries[key][field] = value
-
     return entries
 
 
-def format_authors(author_text: str) -> str:
-    """Format author names from BibTeX format to readable format.
+def format_authors(author_string: str) -> str:
+    """Format authors from BibTeX format to desired output format.
 
-    >>> format_authors("Doe, John")
-    'John Doe'
-    >>> format_authors("Einstein, Albert and Bohr, Niels and Curie, Marie")
-    'Albert Einstein, Niels Bohr, Marie Curie'
+    Handles both "LastName, FirstName" and "FirstName LastName" formats.
+
+    >>> format_authors("Smith, John")
+    'John Smith'
+    >>> format_authors("John Smith")
+    'John Smith'
+    >>> format_authors("Smith, John and Doe, Jane")
+    'John Smith and Jane Doe'
+    >>> format_authors("John Smith and Jane Doe")
+    'John Smith and Jane Doe'
     """
-    names = xml_escape(author_text).split(" and ")
-    reordered_names = []
-    for name in names:
-        last, first = name.split(", ")
-        reordered_names.append(first + " " + last)
-    return ", ".join(reordered_names)
+    authors = []
+
+    # Split multiple authors (delimited by " and ")
+    for name in author_string.split(" and "):
+        name = name.strip()
+
+        # Check if name is in "LastName, FirstName" format
+        if ", " in name:
+            last, first = name.split(", ", 1)
+            authors.append(f"{first} {last}")
+        else:
+            # Name is already in "FirstName LastName" format
+            authors.append(name)
+
+    # Join authors with " and "
+    return " and ".join(authors)
 
 
 def gather_citation_data(entry: dict) -> list[tuple[str, str]]:

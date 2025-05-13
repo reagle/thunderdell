@@ -207,6 +207,7 @@ def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
                     field == "eventtitle"
                     and "container-title" not in entry
                     and "booktitle" not in entry
+                    and "publisher" in entry
                 ):
                     obj["container-title"] = f"Proceedings of {value}"
                     continue

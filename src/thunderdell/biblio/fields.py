@@ -71,8 +71,8 @@ MONTH2DIGIT = {
 }
 DIGIT2MONTH = {v: k for (k, v) in MONTH2DIGIT.items()}
 
-# happy to keep using biblatex:address alias of biblatex:location
-# keep t, ot, and et straight
+# I use biblatex:address alias of biblatex:location.
+# Make sure to keep t (type), ot (report type), and et (eventtitle) straight.
 BIBLATEX_SHORTCUTS = {
     "id": "identifier",
     "a": "address",

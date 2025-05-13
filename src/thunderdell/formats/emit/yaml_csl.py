@@ -276,6 +276,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                     field == "eventtitle"
                     and "container-title" not in entry
                     and "booktitle" not in entry
+                    and "publisher" in entry
                 ):
                     args.outfd.write(f'  container-title: "Proceedings of {value}"\n')
                     continue

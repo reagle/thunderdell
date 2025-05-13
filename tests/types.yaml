@@ -52,6 +52,18 @@ references:
   publisher: "Publisher"
   title: "Chapter title"
   URL: "<http://example.com/1>"
+- id: A04d1991pt
+  type: paper-conference
+  abstract: "paper-conference (no container-title)"
+  author:
+  - family: "A04d"
+  custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
+  issued:
+    year: 1991
+  event: "Event Title"
+  title: "Paper title"
+  URL: "<http://example.com/1>"
+  event-place: "Event Venue"
 - id: A10d1992tle
   type: article-journal
   author:

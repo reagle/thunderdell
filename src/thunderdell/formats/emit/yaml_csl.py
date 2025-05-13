@@ -279,7 +279,7 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
                 ):
                     args.outfd.write(f'  container-title: "Proceedings of {value}"\n')
                     continue
-                # 'Blog' is the null value I use in the mindmap
+                # 'Blog' is the null value I use in the mindmap.
                 if field == "c_blog" and entry[field] == "Blog":
                     # netloc = urllib.parse.urlparse(entry['url']).netloc
                     # args.outfd.write(

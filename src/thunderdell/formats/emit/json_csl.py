@@ -203,13 +203,13 @@ def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
                             continue
                     obj["URL"] = value
                     continue
-                if (
-                    field == "eventtitle"
-                    and "container-title" not in entry
-                    and "booktitle" not in entry
-                ):
-                    obj["container-title"] = f"Proceedings of {value}"
-                    continue
+                # if (
+                #     field == "eventtitle"
+                #     and "container-title" not in entry
+                #     and "booktitle" not in entry
+                # ):
+                #     obj["container-title"] = f"Proceedings of {value}"
+                #     continue
                 if field == "c_blog" and entry[field] == "Blog":
                     continue
 

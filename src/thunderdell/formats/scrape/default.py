@@ -107,6 +107,8 @@ class ScrapeDefault:
             """//a[contains(@href, 'cm_cr_hreview_mr')]/text()""",
             # first of many
             """//*[1][contains(@class, 'byline')][1]//text()""",
+            # ZDNet
+            """//*[contains(@class, 'globalAuthor')]//*[contains(@class, 'link')]/text()""",
         )
         if self.html_p is not None:
             logging.info("checking author xpaths")

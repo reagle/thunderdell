@@ -40,7 +40,7 @@ class ScrapeNYT(ScrapeDefault):
         api_url = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
         url = url.split("?")[0]  # remove query parameters from the URL
         # encoded_url = urllib.parse.quote(base_url, safe='') # quote encode URL
-        query_url = f"""{api_url}?fq=web_url:(\"{url}\")&api-key={NYT_APP_KEY}"""
+        query_url = f"""{api_url}?fq=url:(\"{url}\")&api-key={NYT_APP_KEY}"""
         print(f"{query_url=}")
         self.json = get_JSON(f"{query_url}")["response"]["docs"][0]
 

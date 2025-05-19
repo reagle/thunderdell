@@ -208,13 +208,15 @@ def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> No
         if medium:
             args.outfd.write(f"  medium: {medium}\n")
 
-        # if authorless (replicated in container) then delete
+        # If author is replicated in container then delete author.
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry.get("ori_author", None) in container_values:
-            if not args.author_create:
-                del entry["author"]
-            else:
-                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
+            del entry["author"]
+
+        # Legal cases are stored with judge names, but author should be removed
+        # since they do not appear in references.
+        if entry_type == "legal_case":
+            del entry["author"]
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if field in entry and entry[field] is not None:

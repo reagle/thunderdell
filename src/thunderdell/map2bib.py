@@ -612,13 +612,6 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     and last character."""
     )
     arg_parser.add_argument(
-        "-a",
-        "--author-create",
-        default=False,
-        action="store_true",
-        help="create author for anon entries using container",
-    )
-    arg_parser.add_argument(
         "-b",
         "--biblatex",
         default=False,

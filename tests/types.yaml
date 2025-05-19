@@ -136,8 +136,6 @@ references:
   URL: "<http://example.com/2>"
 - id: A30d2012te
   type: legal_case
-  author:
-  - family: "A30d"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 2012

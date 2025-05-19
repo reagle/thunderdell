@@ -145,18 +145,22 @@ def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
             "id": entry["identifier"],
             "type": entry_type,
         }
+
+        # Address genre/media special case.
         if genre:
             obj["genre"] = genre
         if medium:
             obj["medium"] = medium
 
-        # if authorless (replicated in container) then delete
+        # Legal cases are stored with judge names, but author should be removed
+        # since they do not appear in references.
+        if entry_type == "legal_case":
+            del entry["author"]
+
+        # If author is replicated in container then delete author
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         if entry["ori_author"] in container_values:
-            if not args.author_create:
-                entry.pop("author", None)
-            else:
-                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
+            entry.pop("author", None)
 
         for _short, field in BIB_SHORTCUTS_ITEMS:
             if entry.get(field):

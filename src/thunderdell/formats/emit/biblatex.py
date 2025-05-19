@@ -215,11 +215,15 @@ def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
         # if authorless (replicated in container) then delete
         container_values = [entry[c] for c in CONTAINERS if c in entry]
         logging.info(f"{entry=}")
+
+        # If author is replicated in container then delete author.
         if entry["ori_author"] in container_values:
-            if not args.author_create:
-                del entry["author"]
-            else:
-                entry["author"] = [["", "", "".join(entry["ori_author"]), ""]]
+            del entry["author"]
+
+        # Legal cases are stored with judge names, but author should be removed
+        # since they do not appear in references.
+        if entry_type == "legal_case":
+            del entry["author"]
 
         # if an edited collection, remove author and booktitle
         if (

@@ -1,6 +1,7 @@
-src/thunderdell.egg-info/
+.DS_Store
 .aider*
 .envrc
-.DS_Store
+__pycache__
 add
 build/
+src/thunderdell.egg-info/

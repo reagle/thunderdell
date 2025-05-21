@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified server for thunderdell queries (mindmap and BusySponge)."""
+"""Unified server for thunderdell queries (mindmap and sponge)."""
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -26,10 +26,10 @@ from thunderdell.map2bib import (
     emit_results,
 )
 
-INITIAL_FILE_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+INITIAL_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <title>Reagle's Planning Page</title>
 <link rel="stylesheet" type="text/css" href="../plan.css" />
 <link rel="icon" type="image/x-icon" href="https://reagle.org/favicon.ico">
@@ -39,8 +39,8 @@ INITIAL_FILE_HEADER = """<?xml version="1.0" encoding="iso-8859-1"?>
     <form method="get" action="bq">
     <input value="Go" name="Go" type="submit" />
     <input size="25" name="query" maxlength="80" type="text" />
-    <input name="sitesearch" value="BusySponge" type="radio" /> BS
-    <input name="sitesearch" checked="checked" value="MindMap" type="radio" /> MM
+    <input name="sitesearch" value="sponge" type="radio" /> BS
+    <input name="sitesearch" checked="checked" value="mindmap" type="radio" /> MM
     </form>
 </div>"""
 
@@ -82,8 +82,8 @@ def query_mindmap(args):
 
 
 def query_busysponge(query):
-    """Query items logged to planning page made by Busy Sponge."""
-    logging.info(f"Starting query_busysponge with query: {query}")
+    """Query items logged to planning page made by busy."""
+    logging.info(f"Starting query_busysponge() with query: {query}")
     in_files = [
         config.HOME / "joseph/plan/index.html",
         config.HOME / "joseph/plan/done.html",
@@ -119,21 +119,21 @@ def query_busysponge(query):
 
 
 class BusyRequestHandler(BaseHTTPRequestHandler):
-    """Handle HTTP requests for BusySponge queries."""
+    """Handle HTTP requests for queries."""
 
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
         if parsed_path.path == "/bq":
             params = urllib.parse.parse_qs(parsed_path.query)
             query = params.get("query", [""])[0]
-            site = params.get("sitesearch", ["MindMap"])[0]
+            site = params.get("sitesearch", ["mindmap"])[0]
             if not query:
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b"Missing 'query' parameter")
                 return
 
-            if site == "MindMap":
+            if site == "mindmap":
                 # Use query_mindmap to generate results
                 args = argparse.Namespace()
                 args.query = query
@@ -258,9 +258,9 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "-s",
         "--site",
-        choices=["MindMap", "BusySponge"],
-        default="MindMap",
-        help="Site to query (default: MindMap)",
+        choices=["mindmap", "sponge"],
+        default="mindmap",
+        help="Site to query (default: mindmap)",
     )
     parser.add_argument(
         "-c",
@@ -330,8 +330,8 @@ def main(argv: list[str] | None = None):
 
     if args.query:
         logging.info(f"Running CLI query mode with query: {args.query}")
-        if args.site == "BusySponge":
-            logging.info("Querying BusySponge site")
+        if args.site == "sponge":
+            logging.info("Querying sponge website")
             result_file = query_busysponge(args.query)
             if args.browser:
                 logging.info("Opening results in browser")
@@ -340,7 +340,7 @@ def main(argv: list[str] | None = None):
                 logging.info(f"Results written to {result_file}")
                 print(f"Results written to {result_file}")
         else:
-            logging.info("Querying MindMap site")
+            logging.info("Querying mindmap website")
             query_encoded = urllib.parse.quote(args.query)
             url = f"http://localhost:{args.port}/bq?query={query_encoded}"
             logging.info(f"Opening browser to {url}")

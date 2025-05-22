@@ -482,9 +482,9 @@ def get_identifier(
     last_names = []
     name_part = ""
 
-    # Unpack first, von, late, and jr
+    # Create core of identifier as vonLast.
     for _, von, last, _ in entry["author"]:
-        last_names.append(f"{von}{last}".replace(" ", ""))
+        last_names.append(re.sub(r"\s", "", f"{von}{last}"))
 
     # Join the last names depending on how many there are: > 3 is "et al."
     if len(last_names) == 1:
@@ -568,6 +568,9 @@ def parse_names(names: str) -> list[PersonName]:
     >>> parse_names('First van der Last, First van der Last II, van Last')
     [('First', 'van der', 'Last', ''), ('First', 'van der', 'Last', 'II'), ('', 'van', 'Last', '')]
 
+    >>> parse_names('Reddit Inc.') #  non-breaking space
+    [('', '', 'Reddit Inc.', '')]
+
     """
     names_p = []
     # debug(f"names = '{names}'")
@@ -576,7 +579,7 @@ def parse_names(names: str) -> list[PersonName]:
         name = name.strip()
         # debug(f"name = '{name}'")
         first = last = von = jr = ""
-        chunks = name.strip().split()
+        chunks = name.strip().split(" ")
 
         if "van" in chunks and chunks[chunks.index("van") + 1] in (
             "den",

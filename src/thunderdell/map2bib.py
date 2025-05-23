@@ -479,22 +479,22 @@ def get_identifier(
 ) -> str:
     """Create an identifier (key) for the entry based on last names, year, and title."""
     # debug(f"1 {entry=}")
-    last_names = []
+    last_names_of_authors = []
     name_part = ""
 
     # Create core of identifier as vonLast.
     for _, von, last, _ in entry["author"]:
-        last_names.append(re.sub(r"\s", "", f"{von}{last}"))
+        last_names_of_authors.append(re.sub(r"\s", "", f"{von}{last}"))
 
     # Join the last names depending on how many there are: > 3 is "et al."
-    if len(last_names) == 1:
-        name_part = last_names[0]
-    elif len(last_names) == 2:
-        name_part = delim.join(last_names[0:2])
-    elif len(last_names) == 3:
-        name_part = delim.join(last_names[0:3])
-    elif len(last_names) > 3:
-        name_part = f"{last_names[0]}Etal"
+    if len(last_names_of_authors) == 1:
+        name_part = last_names_of_authors[0]
+    elif len(last_names_of_authors) == 2:
+        name_part = delim.join(last_names_of_authors[0:2])
+    elif len(last_names_of_authors) == 3:
+        name_part = delim.join(last_names_of_authors[0:3])
+    elif len(last_names_of_authors) > 3:
+        name_part = f"{last_names_of_authors[0]}Etal"
 
     if "date" not in entry:
         entry["date"] = PubDate(
@@ -552,6 +552,33 @@ def parse_date(when: str) -> PubDate:
     return PubDate(year, month, day, circa, time)
 
 
+# Build pattern from list of suffixes
+_SUFFIXES = ["Inc.", "Co.", "Corp.", "LLC", "Ltd."]
+_NBSP_PATTERN = re.compile(
+    r"\s(" + "|".join(re.escape(s) for s in _SUFFIXES) + r")(?=\s|$)"
+)
+
+
+def _freeplane_nbsp_hack(name: str) -> str:
+    """Convert certain phrases from being prefixed by space to &nbsp;.
+
+    Freeplane fails to save &nbsp; TODO: Remove this hack when bug fixed.
+    https://github.com/freeplane/freeplane/issues/2472
+
+    Alternative: use "‗" double low line \u2017 as nbsp and replace with nbsp.
+
+    >>> _freeplane_nbsp_hack("Company Inc.")
+    'Company Inc.'
+    >>> _freeplane_nbsp_hack("Smith Co.")
+    'Smith Co.'
+    >>> _freeplane_nbsp_hack("Co. operative")  # Won't match mid-word
+    'Co. operative'
+    >>> _freeplane_nbsp_hack("No change here")
+    'No change here'
+    """
+    return _NBSP_PATTERN.sub(r" \1", name)
+
+
 def parse_names(names: str) -> list[PersonName]:
     """Do author parsing magic to figure out name components.
 
@@ -574,6 +601,7 @@ def parse_names(names: str) -> list[PersonName]:
     """
     names_p = []
     # debug(f"names = '{names}'")
+    names = _freeplane_nbsp_hack(names)
     names_split = names.split(",")
     for name in names_split:
         name = name.strip()

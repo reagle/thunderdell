@@ -105,6 +105,7 @@ BIBLATEX_SHORTCUTS = {
     "r": "custom1",  # read date
     "sc": "school",
     "se": "series",
+    "sn": "section",  # CSL newspapers
     "t": "entry_type",  # biblatex type
     "tr": "translator",
     "ti": "title",

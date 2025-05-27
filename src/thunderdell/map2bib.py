@@ -567,13 +567,13 @@ def convert_space_to_nbsp(name: str) -> str:
 
     Alternative: use "‗" double low line \u2017 as nbsp and replace with nbsp.
 
-    >>> _freeplane_nbsp_hack("Company Inc.")
+    >>> convert_space_to_nbsp("Company Inc.")
     'Company Inc.'
-    >>> _freeplane_nbsp_hack("Smith Co.")
+    >>> convert_space_to_nbsp("Smith Co.")
     'Smith Co.'
-    >>> _freeplane_nbsp_hack("Co. operative")  # Won't match mid-word
+    >>> convert_space_to_nbsp("Co. operative")  # Won't match mid-word
     'Co. operative'
-    >>> _freeplane_nbsp_hack("No change here")
+    >>> convert_space_to_nbsp("No change here")
     'No change here'
     """
     return _NBSP_PATTERN.sub(r" \1", name)

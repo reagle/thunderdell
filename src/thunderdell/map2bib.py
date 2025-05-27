@@ -559,7 +559,7 @@ _NBSP_PATTERN = re.compile(
 )
 
 
-def _freeplane_nbsp_hack(name: str) -> str:
+def convert_space_to_nbsp(name: str) -> str:
     """Convert certain phrases from being prefixed by space to &nbsp;.
 
     Freeplane fails to save &nbsp; TODO: Remove this hack when bug fixed.
@@ -601,7 +601,7 @@ def parse_names(names: str) -> list[PersonName]:
     """
     names_p = []
     # debug(f"names = '{names}'")
-    names = _freeplane_nbsp_hack(names)
+    names = convert_space_to_nbsp(names)
     names_split = names.split(",")
     for name in names_split:
         name = name.strip()

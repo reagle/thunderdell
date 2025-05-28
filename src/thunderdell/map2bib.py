@@ -552,31 +552,22 @@ def parse_date(when: str) -> PubDate:
     return PubDate(year, month, day, circa, time)
 
 
-# Build pattern from list of suffixes
-_SUFFIXES = ["Inc.", "Co.", "Corp.", "LLC", "Ltd."]
-_NBSP_PATTERN = re.compile(
-    r"\s(" + "|".join(re.escape(s) for s in _SUFFIXES) + r")(?=\s|$)"
-)
+def convert_double_low_line_to_nbsp(name: str) -> str:
+    """Convert double underscore to non-breaking space.
 
-
-def convert_space_to_nbsp(name: str) -> str:
-    """Convert certain phrases from being prefixed by space to &nbsp;.
-
-    Freeplane fails to save &nbsp; TODO: Remove this hack when bug fixed.
+    Freeplane fails to save &nbsp; so use "‗" double low line \u2017
+    and replace with  .
+    TODO: Remove this hack and revise maps when bug fixed.
     https://github.com/freeplane/freeplane/issues/2472
 
-    Alternative: use "‗" double low line \u2017 as nbsp and replace with nbsp.
-
-    >>> convert_space_to_nbsp("Company Inc.")
+    >>> convert_double_low_line_to_nbsp("Company‗Inc.")
     'Company Inc.'
-    >>> convert_space_to_nbsp("Smith Co.")
-    'Smith Co.'
-    >>> convert_space_to_nbsp("Co. operative")  # Won't match mid-word
-    'Co. operative'
-    >>> convert_space_to_nbsp("No change here")
+    >>> convert_double_low_line_to_nbsp("Smith‗Co.‗Ltd.")
+    'Smith Co. Ltd.'
+    >>> convert_double_low_line_to_nbsp("No change here")
     'No change here'
     """
-    return _NBSP_PATTERN.sub(r" \1", name)
+    return name.replace("‗", " ")
 
 
 def parse_names(names: str) -> list[PersonName]:
@@ -601,7 +592,7 @@ def parse_names(names: str) -> list[PersonName]:
     """
     names_p = []
     # debug(f"names = '{names}'")
-    names = convert_space_to_nbsp(names)
+    names = convert_double_low_line_to_nbsp(names)
     names_split = names.split(",")
     for name in names_split:
         name = name.strip()

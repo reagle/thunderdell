@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import urllib.parse
+import warnings
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -296,6 +297,27 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def open_browser_silent(url: str) -> None:
+    """Open browser without showing stderr messages."""
+    import os
+    import platform
+    import subprocess
+
+    system = platform.system()
+    with open(os.devnull, "w") as devnull:  # noqa: PTH123
+        if system == "Darwin":  # macOS
+            subprocess.Popen(["open", url], stderr=devnull)
+        elif system == "Linux":
+            subprocess.Popen(["xdg-open", url], stderr=devnull)
+        elif system == "Windows":
+            subprocess.Popen(
+                ["cmd", "/c", "start", "", url], stderr=devnull, shell=True
+            )
+        else:
+            # Fallback to webbrowser for unknown systems
+            webbrowser.open(url)
+
+
 def main(argv: list[str] | None = None):
     """Detect running mode."""
     args = process_arguments(argv)
@@ -335,7 +357,7 @@ def main(argv: list[str] | None = None):
             result_file = query_busysponge(args.query)
             if args.browser:
                 logging.info("Opening results in browser")
-                webbrowser.open(result_file.as_uri())
+                open_browser_silent(result_file.as_uri())
             else:
                 logging.info(f"Results written to {result_file}")
                 print(f"Results written to {result_file}")
@@ -344,7 +366,7 @@ def main(argv: list[str] | None = None):
             query_encoded = urllib.parse.quote(args.query)
             url = f"http://localhost:{args.port}/bq?query={query_encoded}"
             logging.info(f"Opening browser to {url}")
-            webbrowser.open(url)
+            open_browser_silent(url)
     else:
         logging.warning("No query specified, printing help")
         argparse.ArgumentParser(

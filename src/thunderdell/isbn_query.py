@@ -334,7 +334,7 @@ def main(args: argparse.Namespace | None = None) -> None:
 
         for isbn_input in args.isbns:
             try:
-                result = query(isbn_input, session)
+                result = query(isbn_input)
                 results[isbn_input] = result
                 logging.info(f"Successfully retrieved data for ISBN: {isbn_input}")
                 print(f"ISBN: {isbn_input} | Result: {result}")

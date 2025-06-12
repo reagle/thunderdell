@@ -4,6 +4,8 @@
 http://www.crossref.org/CrossTech/2011/11/turning_dois_into_formatted_ci.html
 """
 
+from typing import Any
+
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
@@ -36,7 +38,7 @@ ACCEPTABLE_TYPES = (
 )
 
 
-def query(doi, accept="application/citeproc+json"):
+def query(doi: str, accept: str = "application/citeproc+json") -> dict[str, Any]:
     """Query the DOI Web service; returns string."""
     logging.info(f"{accept=}")
     logging.info(f"{doi=}")
@@ -112,7 +114,7 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     accept = ACCEPT_HEADERS["json"]
     if args.style:
-        accept = ACCEPT_HEADERS.get(args.style, args.style)
+        accept = ACCEPT_HEADERS.get(args.style) or args.style
     logging.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.DOI[0], accept))

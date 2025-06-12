@@ -23,7 +23,7 @@ from thunderdell.biblio.fields import (
     EXCLUDE_URLS,
     ONLINE_JOURNALS,
 )
-from thunderdell.types_thunderdell import EntryDict, PubDate
+from thunderdell.types_thunderdell import EntriesDict, PubDate
 from thunderdell.utils.text import escape_latex, normalize_whitespace
 
 #################################################################
@@ -205,7 +205,7 @@ def bibformat_title(title: str) -> str:
 #################################################################
 
 
-def emit_biblatex(args: argparse.Namespace, entries: EntryDict):
+def emit_biblatex(args: argparse.Namespace, entries: EntriesDict):
     """Emit a biblatex file."""
     # debug(f"entries = '{entries}'")
 

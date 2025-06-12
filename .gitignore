@@ -5,3 +5,4 @@ __pycache__
 add
 build/
 src/thunderdell.egg-info/
+monkeytype.sqlite3

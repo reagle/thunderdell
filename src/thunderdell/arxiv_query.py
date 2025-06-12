@@ -93,9 +93,14 @@ def main(args: argparse.Namespace | None = None) -> None:
     else:
         logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
-    accept = ACCEPT_HEADERS["atom"]
-    if args.style:
-        accept = ACCEPT_HEADERS.get(args.style, args.style)
+    # Determine accept header
+    if args.style and args.style in ACCEPT_HEADERS:
+        accept = ACCEPT_HEADERS[args.style]
+    elif args.style:
+        accept = args.style
+    else:
+        accept = ACCEPT_HEADERS["atom"]
+
     logging.info(f"accept = {accept} ")
 
     pprint.pprint(query(args.number[0], accept))

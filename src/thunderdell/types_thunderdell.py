@@ -13,7 +13,7 @@ class PubDate(NamedTuple):
     year: str
     month: str | None = None
     day: str | None = None
-    circa: str | None = None
+    circa: bool | str | None = None
     time: str | None = None
 
 

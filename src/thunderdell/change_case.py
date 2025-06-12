@@ -4,6 +4,7 @@
 http://en.wikipedia.org/wiki/Sentence_case
 https://www.zotero.org/trac/ticket/832
 """
+from pathlib import Path
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -76,7 +77,7 @@ wordset_proper_nouns = {
 proper_nouns = custom_proper_nouns | wordset_proper_nouns
 
 
-def sentence_case(text):
+def sentence_case(text: str) -> str:
     """Convert text to sentence case for APA-like citations.
 
     >>> sentence_case('My Defamation 2.0 Experience: a Story of Wikipedia')
@@ -94,7 +95,7 @@ def title_case(text):
     return change_case(text, case_direction="title")
 
 
-def change_case(text, case_direction="sentence"):
+def change_case(text: str, case_direction: str="sentence") -> str:
     """Change to sentence or title case.
 
     >>> change_case('I Am A Sentence.', 'sentence')
@@ -234,7 +235,7 @@ def safe_lower(text):
     return " ".join(new_text)
 
 
-def is_proper_noun(word):
+def is_proper_noun(word: str) -> bool:
     """Check if proper noun.
 
     A word is a proper noun if it is in that set or doesn't

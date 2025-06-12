@@ -3,12 +3,14 @@
 https://github.com/reagle/thunderdell
 """
 
+from typing import Any
+
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-
+import argparse  # http://docs.python.org/dev/library/argparse.html
 import logging
 import time
 
@@ -18,7 +20,7 @@ from thunderdell.utils.web import yasn_publish
 NOW = time.localtime()
 
 
-def log2console(args, biblio):
+def log2console(args: argparse.Namespace, biblio: dict[str, Any]) -> str:
     """Log to console."""
     TOKENS = (
         "author",

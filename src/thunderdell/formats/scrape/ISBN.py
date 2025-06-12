@@ -2,6 +2,7 @@
 
 https://github.com/reagle/thunderdell
 """
+from typing import Dict
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -17,12 +18,12 @@ from .default import ScrapeDefault
 
 
 class ScrapeISBN(ScrapeDefault):
-    def __init__(self, url, comment):
+    def __init__(self, url: str, comment: str):
         print("Scraping ISBN;", end="\n")
         self.url = url
         self.comment = comment
 
-    def get_biblio(self):
+    def get_biblio(self) -> dict[str, str]:
         from thunderdell import isbn_query
 
         logging.info(f"url = {self.url}")
@@ -69,7 +70,7 @@ class ScrapeISBN(ScrapeDefault):
             biblio["title"] = "UNKNOWN"
         return biblio
 
-    def get_author(self, bib_dict):
+    def get_author(self, bib_dict: dict[str, str]) -> str:
         names = "UNKNOWN"
         if "author" in bib_dict:
             logging.info(f"{bib_dict['author']=}")

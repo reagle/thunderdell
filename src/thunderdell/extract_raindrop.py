@@ -72,18 +72,12 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         logging.CRITICAL - (args.verbose * 10), logging.DEBUG
     )  # Default: CRITICAL
     log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = (
-        "w" if args.log_to_file else None
-    )  # Overwrite log file if logging to file
-
-    # Use basicConfig with stream for stderr or filename for file
-    if log_file:
-        logging.basicConfig(
-            filename=log_file, filemode=log_mode, level=log_level, format=log_format
-        )
+    log_config = {"level": log_level, "format": log_format}
+    if args.log_to_file:
+        log_config["filename"] = Path(sys.argv[0]).stem + ".log"
+        log_config["filemode"] = "w"
     else:
-        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+        log_config["stream"] = sys.stderr
 
     logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
     logging.debug(f"Parsed arguments: {args}")

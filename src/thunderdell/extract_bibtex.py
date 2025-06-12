@@ -39,9 +39,8 @@ def bibtex_parse(text: list[str]) -> dict[str, dict[str, str]]:
     author    =John Smith
     {'Smith2023': {'year': '2023', 'journal': 'Journal of Examples', 'title': 'Example Title', 'author': 'John Smith'}}
     """
-    parser = BibTexParser()
-    parser.customization = convert_to_unicode
-    parser.ignore_nonstandard_types = False
+    parser = BibTexParser(ignore_nonstandard_types=False)
+    parser.customization = convert_to_unicode  # type: ignore
     # Parse the BibTeX string
     bib_database = bibtexparser.loads("".join(text), parser)
     # Convert the parsed entries to the desired output format

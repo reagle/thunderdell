@@ -2,6 +2,7 @@
 
 https://github.com/reagle/thunderdell
 """
+from typing import Any, Dict
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
@@ -18,12 +19,12 @@ from .default import ScrapeDefault
 
 
 class ScrapeDOI(ScrapeDefault):
-    def __init__(self, url, comment):
+    def __init__(self, url: str, comment: str):
         print("Scraping DOI;", end="\n")
         self.url = url
         self.comment = comment
 
-    def get_biblio(self):
+    def get_biblio(self) -> dict[str, Any]:
         logging.info(f"url = {self.url}")
         json_bib = doi_query.query(self.url)
         logging.info(f"{json_bib=}")
@@ -57,7 +58,7 @@ class ScrapeDOI(ScrapeDefault):
         logging.info(f"{biblio=}")
         return biblio
 
-    def get_author(self, bib_dict):
+    def get_author(self, bib_dict: dict[str, Any]) -> str:
         names = "UNKNOWN"
         if "author" in bib_dict:
             names = ""
@@ -73,7 +74,7 @@ class ScrapeDOI(ScrapeDefault):
             names = names[2:]  # remove first comma
         return names
 
-    def get_date(self, bib_dict):
+    def get_date(self, bib_dict: dict[str, Any]) -> str:
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
         logging.info(f"{date_parts=}")

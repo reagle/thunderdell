@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 from email import policy
+from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
@@ -309,26 +310,26 @@ def main(args: argparse.Namespace | None = None) -> None:
         text: str = ""
         if file_name.suffix == ".eml":
             with file_name.open("rb") as fp:
-                msg = BytesParser(policy=policy.default).parse(fp)
-
+                msg: EmailMessage = BytesParser(policy=policy.default).parse(fp)
             text = ""
             if msg.is_multipart():
                 for part in msg.walk():
                     if part.get_content_type() == "text/plain":
                         charset = part.get_content_charset(failobj="utf-8")
-                        text += part.get_payload(decode=True).decode(charset, "replace")
+                        payload = part.get_payload(decode=True)
+                        if isinstance(payload, bytes):
+                            text += payload.decode(charset, "replace")
             else:
                 charset = msg.get_content_charset(failobj="utf-8")
-                text = msg.get_payload(decode=True).decode(charset, "replace")
-
+                payload = msg.get_payload(decode=True)
+                if isinstance(payload, bytes):
+                    text = payload.decode(charset, "replace")
             if not text:
                 raise ValueError("No text content found in the email.")
-
             logging.debug(f"TEXT IS:\n ```{text}```")
         else:
             text = file_name.read_text()
         new_text = process_text(args, text)
-
         fixed_fn = file_name.with_stem(file_name.stem + "-fixed").with_suffix(".txt")
 
         if args.output_to_file:

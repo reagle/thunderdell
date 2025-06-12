@@ -33,9 +33,9 @@ from thunderdell.formats import (
     log2opencodex,
     log2work,
 )
+from thunderdell.utils.text import pretty_tabulate_dict
 from thunderdell.utils.web import canonicalize_url
 
-NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 
 #######################################

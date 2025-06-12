@@ -4,6 +4,13 @@
 https://reagle.org/joseph/2009/01/thunderdell.html
 """
 
+from pathlib import Path
+from typing import Any
+
+import lxml.etree as et
+
+from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
+
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
@@ -18,12 +25,9 @@ import textwrap
 import urllib.parse
 import webbrowser
 from collections.abc import Callable
-from pathlib import Path
 from urllib.parse import parse_qs
 
 # import xml.etree.ElementTree as et
-import lxml.etree as et  # type: ignore[reportMissingModuleSource]  # type: ignore[reportMissingModuleSource]
-
 from thunderdell import config
 from thunderdell.biblio.fields import (
     BIB_SHORTCUTS,
@@ -40,7 +44,7 @@ from thunderdell.formats import (
     emit_wikipedia,
     emit_yaml_csl,
 )
-from thunderdell.types_thunderdell import EntriesDict, EntryDict, PersonName, PubDate
+from thunderdell.types_thunderdell import EntriesDict
 from thunderdell.utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
@@ -80,7 +84,7 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
 def build_bib(
     args: argparse.Namespace,
     file_name: Path,
-    emitter_func: Callable[[argparse.Namespace, dict], None],
+    emitter_func: Callable[[argparse.Namespace, EntriesDict], None],
 ) -> EntriesDict:
     """Build bibliography of entries from a Freeplane mindmap."""
     links = set()
@@ -122,7 +126,7 @@ def walk_freeplane(
     node: et._Element,
     mm_file: Path,
     entries: EntriesDict,
-    links,
+    links: list[Any],
 ) -> tuple[EntriesDict, list[str]]:
     """Walk the freeplane XML tree and build dictionary of entries.
 

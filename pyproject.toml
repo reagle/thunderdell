@@ -48,6 +48,9 @@ fix-mindmaps = "thunderdell.fix_mindmaps:main"
 isbn-query = "thunderdell.isbn_query:main"
 map2bib = "thunderdell.map2bib:main"
 
+[tool.uv]
+config-settings = { editable_mode = "compat" }  # Essential for src layout compatibility
+
 [tool.setuptools]
 # Add this line because your package code seems to be inside the 'src' directory
 package-dir = {"" = "src"}
@@ -145,7 +148,7 @@ python_files = ["test_*.py"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pyright]
+include = ["src"]
 reportMissingImports = false
 reportMissingTypeStubs = false
 pythonVersion = '3.12'
-

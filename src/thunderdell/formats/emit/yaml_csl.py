@@ -23,7 +23,7 @@ from thunderdell.biblio.fields import (
     CSL_TYPES,
     EXCLUDE_URLS,
 )
-from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
+from thunderdell.types_thunderdell import EntriesDict, EntryDict, PersonName, PubDate
 
 
 def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
@@ -186,7 +186,7 @@ PROTECT_PAT = re.compile(
 )
 
 
-def emit_yaml_csl(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
+def emit_yaml_csl(args: argparse.Namespace, entries: EntriesDict) -> None:
     """Emit citations in YAML/CSL for input to pandoc.
 
     See: https://reagle.org/joseph/2013/08/bib-mapping.html

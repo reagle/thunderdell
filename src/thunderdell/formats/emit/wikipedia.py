@@ -12,7 +12,7 @@ import argparse
 import calendar
 
 from thunderdell.biblio.fields import BIB_SHORTCUTS_ITEMS, BIBLATEX_WP_FIELD_MAP
-from thunderdell.types_thunderdell import EntryDict
+from thunderdell.types_thunderdell import EntriesDict
 
 
 def output_wp_names(args: argparse.Namespace, field: str, names: list):
@@ -25,7 +25,7 @@ def output_wp_names(args: argparse.Namespace, field: str, names: list):
         args.outfd.write(f"| {prefix}last{suffix} = {' '.join(name[1:])}\n")
 
 
-def emit_wikipedia(args: argparse.Namespace, entries: dict[str, EntryDict]):
+def emit_wikipedia(args: argparse.Namespace, entries: EntriesDict):
     """Emit citations in Wikipedia's {{citation}} template format.
 
     These can be used in List-defined references blocks.

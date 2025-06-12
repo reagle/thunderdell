@@ -40,7 +40,7 @@ from thunderdell.formats import (
     emit_wikipedia,
     emit_yaml_csl,
 )
-from thunderdell.types_thunderdell import EntryDict, PersonName, PubDate
+from thunderdell.types_thunderdell import EntriesDict, EntryDict, PersonName, PubDate
 from thunderdell.utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
@@ -81,11 +81,11 @@ def build_bib(
     args: argparse.Namespace,
     file_name: Path,
     emitter_func: Callable[[argparse.Namespace, dict], None],
-) -> dict[str, EntryDict]:
+) -> EntriesDict:
     """Build bibliography of entries from a Freeplane mindmap."""
     links = set()
     done = set()
-    entries: dict[str, EntryDict] = {}
+    entries: EntriesDict = {}
     mm_files = {file_name}
     while mm_files:
         mm_file = mm_files.pop()
@@ -121,9 +121,9 @@ def walk_freeplane(
     args: argparse.Namespace,
     node: et._Element,
     mm_file: Path,
-    entries: dict[str, EntryDict],
+    entries: EntriesDict,
     links,
-) -> tuple[dict[str, EntryDict], list[str]]:
+) -> tuple[EntriesDict, list[str]]:
     """Walk the freeplane XML tree and build dictionary of entries.
 
     1. a dictionary of bibliographic entries.
@@ -242,7 +242,7 @@ def walk_freeplane(
     return entries, links
 
 
-def show_pretty(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None:
+def show_pretty(args: argparse.Namespace, entries: EntriesDict) -> None:
     """Use pretty format."""
     # results_file_name = config.TMP_DIR / "pretty-print.html"
     results_file_name = Path(args.input_file.with_suffix(".html")).absolute()
@@ -266,8 +266,8 @@ def show_pretty(args: argparse.Namespace, entries: dict[str, EntryDict]) -> None
 
 
 def commit_entry(
-    args: argparse.Namespace, entry: EntryDict, entries: dict[str, EntryDict]
-) -> dict[str, EntryDict]:
+    args: argparse.Namespace, entry: EntryDict, entries: EntriesDict
+) -> EntriesDict:
     """Place an entry in the entries dictionary with default values if need be."""
     if entry != {}:
         entry.setdefault("author", [("John", "", "Doe", "")])
@@ -423,7 +423,7 @@ def identity_add_title(ident: str, title: str) -> str:
     return ident
 
 
-def identity_increment(ident: str, entries: dict[str, EntryDict]) -> str:
+def identity_increment(ident: str, entries: EntriesDict) -> str:
     """Increment numerical suffix of identity until no longer collides.
 
     >>> identity_increment('Wikipedia 2008npv',\
@@ -474,9 +474,7 @@ def clean_identifier(ident: str) -> str:
     return clean_id
 
 
-def get_identifier(
-    entry: EntryDict, entries: dict[str, EntryDict], delim: str = ""
-) -> str:
+def get_identifier(entry: EntryDict, entries: EntriesDict, delim: str = "") -> str:
     """Create an identifier (key) for the entry based on last names, year, and title."""
     # debug(f"1 {entry=}")
     last_names_of_authors = []

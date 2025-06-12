@@ -17,7 +17,7 @@ from pathlib import Path
 import lxml.etree as et  # type: ignore[reportMissingModuleSource]
 
 from thunderdell import config
-from thunderdell.types_thunderdell import EntryDict
+from thunderdell.types_thunderdell import EntriesDict, EntryDict
 
 # from thunderdell.formats.emit.biblatex import create_biblatex_author
 from thunderdell.utils.web import straighten_quotes, xml_escape
@@ -25,7 +25,7 @@ from thunderdell.utils.web import straighten_quotes, xml_escape
 
 def emit_results(
     args: argparse.Namespace,
-    entries: dict[str, EntryDict],
+    entries: EntriesDict,
 ) -> None:
     """Emit the results of the query."""
     query = args.query

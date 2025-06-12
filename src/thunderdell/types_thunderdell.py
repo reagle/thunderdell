@@ -45,3 +45,6 @@ class EntryDict(dict):
     title: str
     url: str
     urldate: PubDate
+
+
+type EntriesDict = dict[str, EntryDict]

@@ -22,7 +22,7 @@ from thunderdell.biblio.fields import (
     EXCLUDE_URLS,
 )
 from thunderdell.formats.emit.yaml_csl import guess_csl_type
-from thunderdell.types_thunderdell import EntryDict
+from thunderdell.types_thunderdell import EntriesDict
 
 
 def escape_csl(s: str | None) -> str | int | None:
@@ -132,7 +132,7 @@ def csl_protect_case(title: str) -> str:
     return PROTECT_PAT.sub(r"<span class='nocase'>\1</span>", title)
 
 
-def emit_json_csl(args: Any, entries: dict[str, EntryDict]) -> None:
+def emit_json_csl(args: Any, entries: EntriesDict) -> None:
     """Emit citations in CSL/JSON format for input to pandoc."""
     # NOTE: csljson can NOT be included as markdown document yaml metadata
     # TODO: reduce redundancies with emit_yasn

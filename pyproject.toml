@@ -24,6 +24,7 @@ dependencies = [
     "Send2Trash",
     "twikit",
     "xmltodict",
+    "unidecode>=1.4.0",
 ]
 
 [dependency-groups]

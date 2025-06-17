@@ -12,7 +12,7 @@ __version__ = "1.0"
 import logging
 from typing import Any, TypedDict, cast
 
-from thunderdell import arxiv_query
+from thunderdell import query_arxiv
 from thunderdell.change_case import sentence_case
 
 from .default import ScrapeDefault
@@ -53,7 +53,7 @@ class ScrapeArXiv(ScrapeDefault):
         except ValueError:
             query_param = self.identifier
 
-        query_result = arxiv_query.query(query_param)  # type: ignore[arg-type]
+        query_result = query_arxiv.query(query_param)  # type: ignore[arg-type]
 
         # Handle case where query returns False or other falsy value
         if not query_result or not isinstance(query_result, dict):

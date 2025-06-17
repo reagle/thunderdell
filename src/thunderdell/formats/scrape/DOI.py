@@ -2,6 +2,7 @@
 
 https://github.com/reagle/thunderdell
 """
+
 from typing import Any, Dict
 
 __author__ = "Joseph Reagle"
@@ -12,7 +13,7 @@ __version__ = "1.0"
 
 import logging
 
-from thunderdell import doi_query
+from thunderdell import query_doi
 from thunderdell.change_case import sentence_case
 
 from .default import ScrapeDefault
@@ -26,7 +27,7 @@ class ScrapeDOI(ScrapeDefault):
 
     def get_biblio(self) -> dict[str, Any]:
         logging.info(f"url = {self.url}")
-        json_bib = doi_query.query(self.url)
+        json_bib = query_doi.query(self.url)
         logging.info(f"{json_bib=}")
         biblio = {
             "permalink": self.url,

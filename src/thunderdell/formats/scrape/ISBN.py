@@ -2,6 +2,7 @@
 
 https://github.com/reagle/thunderdell
 """
+
 from typing import Dict
 
 __author__ = "Joseph Reagle"
@@ -24,10 +25,10 @@ class ScrapeISBN(ScrapeDefault):
         self.comment = comment
 
     def get_biblio(self) -> dict[str, str]:
-        from thunderdell import isbn_query
+        from thunderdell import query_isbn
 
         logging.info(f"url = {self.url}")
-        json_bib = isbn_query.query(self.url)
+        json_bib = query_isbn.query(self.url)
         logging.info(f"json_bib = '{json_bib}'")
         biblio = {
             "permalink": self.url,

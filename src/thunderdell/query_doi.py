@@ -104,7 +104,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="doi_query.log",
+            filename="query_doi.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,

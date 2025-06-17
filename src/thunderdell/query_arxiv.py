@@ -85,7 +85,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
     if args.log_to_file:
         logging.basicConfig(
-            filename="arxiv_query.log",
+            filename="query_arxiv.log",
             filemode="w",
             level=log_level,
             format=LOG_FORMAT,

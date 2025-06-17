@@ -30,15 +30,13 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipdb>=0.13.13",
-    "pytest>=7.4.0", # Add this line
+    "pytest>=7.4.0",
 ]
 
 [project.scripts]
-arxiv-query = "thunderdell.arxiv_query:main"
 busy = "thunderdell.busy:main"
-busy-query = "thunderdell.busy_query:main"
+query-busy = "thunderdell.query_busy:main"
 change-case = "thunderdell.change_case:main"
-doi-query = "thunderdell.doi_query:main"
 extract-bibtex = "thunderdell.extract_bibtex:main"
 extract-dictation = "thunderdell.extract_dictation:main"
 extract-goodreader = "thunderdell.extract_goodreader:main"
@@ -46,9 +44,10 @@ extract-kindle = "thunderdell.extract_kindle:main"
 extract-raindrop = "thunderdell.extract_raindrop:main"
 field-notes-categorize = "thunderdell.field_notes_categorize:main"
 fix-mindmaps = "thunderdell.fix_mindmaps:main"
-isbn-query = "thunderdell.isbn_query:main"
 map2bib = "thunderdell.map2bib:main"
-
+query-arxiv = "thunderdell.query_arxiv:main"
+query-doi = "thunderdell.query_doi:main"
+query-isbn = "thunderdell.query_isbn:main"
 [tool.uv]
 config-settings = { editable_mode = "compat" }  # Essential for src layout compatibility
 

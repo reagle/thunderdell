@@ -25,6 +25,7 @@ dependencies = [
     "twikit",
     "xmltodict",
     "unidecode>=1.4.0",
+    "flask",
 ]
 
 [dependency-groups]

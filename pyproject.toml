@@ -10,11 +10,12 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "arrow",
-    "bibtexparser>=1.4.3",
     "atproto",
     "BeautifulSoup4",
+    "bibtexparser>=1.4.3",
     "datefinder",
     "dotenv",
+    "flask",
     "lxml",
     "mastodon.py",
     "pyenchant",
@@ -22,10 +23,8 @@ dependencies = [
     "requests",
     "roman",
     "Send2Trash",
-    "twikit",
-    "xmltodict",
     "unidecode>=1.4.0",
-    "flask",
+    "xmltodict",
 ]
 
 [dependency-groups]

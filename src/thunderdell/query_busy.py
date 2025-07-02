@@ -111,6 +111,7 @@ def query_busysponge(query):
 @app.route("/joseph/plan/qb/")
 def qb():
     """Query the mindmap or sponge."""
+    app.logger.warning(f"Request path received by Flask: {request.path}")
     query = request.args.get("query", "")
     site = request.args.get("sitesearch", "mindmap")
 

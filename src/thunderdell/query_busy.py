@@ -27,8 +27,8 @@ from thunderdell.map2bib import (
     RESULT_FILE_HEADER,
     RESULT_FILE_QUERY_BOX,
     build_bib,
-    emit_results,
 )
+from thunderdell.formats.emit.results import emit_results
 
 app = Flask(__name__)
 

@@ -18,6 +18,7 @@ __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
 import contextlib  # https://docs.python.org/3/library/contextlib.html
+import importlib
 import logging
 import re
 import sys
@@ -37,22 +38,13 @@ from thunderdell.biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
-from thunderdell.formats import (
-    emit_biblatex,
-    emit_json_csl,
-    emit_results,
-    emit_wikipedia,
-    emit_yaml_csl,
-)
 from thunderdell.types_thunderdell import EntriesDict
 from thunderdell.utils.text import (
     pretty_tabulate_dict,
     pretty_tabulate_list,
     strip_accents,
 )
-from thunderdell.utils.web import (
-    unescape_entities,
-)
+from thunderdell.utils.web import unescape_entities
 
 # Mindmap parsing, bib building, and query emitting
 #################################################################
@@ -789,15 +781,30 @@ def main(args: argparse.Namespace | None = None) -> None:
         args.biblatex = True
     if args.pretty and file_name == config.DEFAULT_MAP:
         file_name = config.DEFAULT_PRETTY_MAP
-    if args.WP_citation:
-        emitter_func = emit_wikipedia
-    elif args.biblatex:
-        emitter_func = emit_biblatex
-    elif args.JSON_CSL:
-        emitter_func = emit_json_csl
-    else:
+
+    emitter_configs = [
+        ("query", "results"),
+        ("WP_citation", "wikipedia"),
+        ("biblatex", "biblatex"),
+        ("JSON_CSL", "json_csl"),
+        ("YAML_CSL", "yaml_csl"),
+    ]
+
+    # Find the first matching config (query has highest priority)
+    module_name = next(
+        (config[1] for config in emitter_configs if getattr(args, config[0], False)),
+        None,
+    )
+
+    # If nothing matched, use YAML_CSL as default
+    if module_name is None:
         args.YAML_CSL = True
-        emitter_func = emit_yaml_csl
+        module_name = "yaml_csl"
+
+    # Dynamic import
+    module = importlib.import_module(f"thunderdell.formats.emit.{module_name}")
+    emitter_func = getattr(module, f"emit_{module_name}")
+
     if args.defaults:
         args.chase = True
         args.output_to_file = True

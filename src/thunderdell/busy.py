@@ -61,18 +61,19 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     logging.info(f"url = '{url}'")
 
     # Structured dispatch tables with import metadata
+    SCRAPE_MODULE_PREFIX = "thunderdell.formats.scrape."
     url_scrapers = (
-        ("doi:", ("thunderdell.formats", "ScrapeDOI")),
-        ("isbn:", ("thunderdell.formats", "ScrapeISBN")),
-        ("arxiv:", ("thunderdell.formats", "ScrapeArXiv")),
-        ("https://en.wikipedia.org/w", ("thunderdell.formats", "ScrapeENWP")),
-        ("https://marc.info/", ("thunderdell.formats", "ScrapeMARC")),
-        ("https://meta.wikimedia.org/w", ("thunderdell.formats", "ScrapeWMMeta")),
-        ("https://ohai.social/", ("thunderdell.formats", "ScrapeMastodon")),
-        ("https://x.com/", ("thunderdell.formats", "ScrapeTwitter")),
-        ("https://twitter.com/", ("thunderdell.formats", "ScrapeTwitter")),
-        ("https://www.nytimes.com/", ("thunderdell.formats", "ScrapeNYT")),
-        ("https://www.reddit.com/", ("thunderdell.formats", "ScrapeReddit")),
+        ("doi:", (SCRAPE_MODULE_PREFIX + "DOI", "ScrapeDOI")),
+        ("isbn:", (SCRAPE_MODULE_PREFIX + "ISBN", "ScrapeISBN")),
+        ("arxiv:", (SCRAPE_MODULE_PREFIX + "ArXiv", "ScrapeArXiv")),
+        ("https://en.wikipedia.org/w", (SCRAPE_MODULE_PREFIX + "ENWP", "ScrapeENWP")),
+        ("https://marc.info/", (SCRAPE_MODULE_PREFIX + "MARC", "ScrapeMARC")),
+        ("https://meta.wikimedia.org/w", (SCRAPE_MODULE_PREFIX + "WMMeta", "ScrapeWMMeta")),
+        ("https://ohai.social/", (SCRAPE_MODULE_PREFIX + "Mastodon", "ScrapeMastodon")),
+        ("https://x.com/", (SCRAPE_MODULE_PREFIX + "Twitter", "ScrapeTwitter")),
+        ("https://twitter.com/", (SCRAPE_MODULE_PREFIX + "Twitter", "ScrapeTwitter")),
+        ("https://www.nytimes.com/", (SCRAPE_MODULE_PREFIX + "nytimes", "ScrapeNYT")),
+        ("https://www.reddit.com/", (SCRAPE_MODULE_PREFIX + "reddit", "ScrapeReddit")),
     )
 
     # Iterate through the dispatch table and check URL prefix and dynamically import

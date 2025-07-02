@@ -74,7 +74,7 @@ def test_results():
         entries, _ = walk_freeplane(args, doc, test_fn, entries, links=[])
 
         # Use the YAML emitter (default behavior)
-        from thunderdell.formats import emit_yaml_csl
+        from thunderdell.formats.emit.yaml_csl import emit_yaml_csl
 
         emit_yaml_csl(args, entries)
 

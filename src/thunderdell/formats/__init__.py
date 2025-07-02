@@ -9,14 +9,3 @@ from thunderdell.formats.log.mm import log2mm
 from thunderdell.formats.log.nifty import log2nifty
 from thunderdell.formats.log.opencodex import log2opencodex
 from thunderdell.formats.log.work import log2work
-from thunderdell.formats.scrape.arxiv import ScrapeArXiv
-from thunderdell.formats.scrape.default import ScrapeDefault
-from thunderdell.formats.scrape.DOI import ScrapeDOI
-from thunderdell.formats.scrape.ENWP import ScrapeENWP
-from thunderdell.formats.scrape.ISBN import ScrapeISBN
-from thunderdell.formats.scrape.MARC import ScrapeMARC
-from thunderdell.formats.scrape.mastodon import ScrapeMastodon
-from thunderdell.formats.scrape.nytimes import ScrapeNYT
-from thunderdell.formats.scrape.reddit import ScrapeReddit
-from thunderdell.formats.scrape.twitter import ScrapeTwitter
-from thunderdell.formats.scrape.WMMeta import ScrapeWMMeta

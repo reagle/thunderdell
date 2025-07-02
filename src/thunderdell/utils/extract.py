@@ -13,7 +13,9 @@ import logging
 
 import requests
 
-from thunderdell import formats
+from thunderdell.formats.scrape.DOI import ScrapeDOI
+from thunderdell.formats.scrape.ISBN import ScrapeISBN
+from thunderdell.formats.log.console import log2console
 
 
 class args:
@@ -25,8 +27,8 @@ class args:
 def get_bib_preamble(token: str) -> list[str]:
     """Call out to get and format biblio information using ISBN/DOI APIs."""
     logging.info(f"{token=}")
-    scrape_token = formats.ScrapeDOI if token.startswith("10") else formats.ScrapeISBN
+    scrape_token = ScrapeDOI if token.startswith("10") else ScrapeISBN
     biblio = scrape_token(f"{token}", "").get_biblio()
     biblio["tags"] = ""
-    result = [formats.log2console(args, biblio).strip()]
+    result = [log2console(args, biblio).strip()]
     return result

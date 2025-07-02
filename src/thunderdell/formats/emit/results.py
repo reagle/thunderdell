@@ -234,7 +234,7 @@ def get_url_query(token: str) -> str:
     # urllib won't accept unicode
     token = urllib.parse.quote(token.encode("utf-8"))
     # debug(f"token = '{token}' type = '{type(token)}'")
-    url_query = escape("qb/?query=%s") % token
+    url_query = escape("/joseph/plan/qb/?query=%s") % token
     # debug(f"url_query = '{url_query}' type = '{type(url_query)}'")
     return url_query
 

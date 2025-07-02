@@ -1,8 +1,12 @@
-.DS_Store
+*.log
 .aider*
+.DS_Store
 .envrc
 __pycache__
 add
 build/
-src/thunderdell.egg-info/
+error_log
+log/
 monkeytype.sqlite3
+src/thunderdell.egg-info/
+tmp/

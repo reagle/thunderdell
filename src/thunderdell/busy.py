@@ -24,15 +24,13 @@ from collections.abc import Callable
 
 from thunderdell.biblio import fields as bf
 from thunderdell.biblio.keywords import LIST_OF_KEYSHORTCUTS
-from thunderdell.formats import (
-    ScrapeDefault,
-    log2console,
-    log2goatee,
-    log2mm,
-    log2nifty,
-    log2opencodex,
-    log2work,
-)
+from thunderdell.formats.log.console import log2console
+from thunderdell.formats.log.goatee import log2goatee
+from thunderdell.formats.log.mm import log2mm
+from thunderdell.formats.log.nifty import log2nifty
+from thunderdell.formats.log.opencodex import log2opencodex
+from thunderdell.formats.log.work import log2work
+from thunderdell.formats.scrape.default import ScrapeDefault
 from thunderdell.utils.text import pretty_tabulate_dict
 from thunderdell.utils.web import canonicalize_url
 

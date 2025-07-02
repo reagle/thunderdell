@@ -42,7 +42,7 @@ INITIAL_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 </head>
 <body xml:lang="en" lang="en">
 <div>
-    <form method="get" action="/joseph/plan/qb">
+    <form method="get" action="/joseph/plan/qb/">
     <input value="Go" name="Go" type="submit" />
     <input size="25" name="query" maxlength="80" type="text" />
     <input name="sitesearch" value="sponge" type="radio" /> BS
@@ -108,7 +108,7 @@ def query_busysponge(query):
     return f"{INITIAL_FILE_HEADER}{out_str}</body></html>"
 
 
-@app.route("/joseph/plan/qb")
+@app.route("/joseph/plan/qb/")
 def qb():
     """Query the mindmap or sponge."""
     query = request.args.get("query", "")
@@ -244,7 +244,7 @@ def main(argv: list[str] | None = None):
             logging.info(f"Server already running on port {args.port}.")
 
         query_encoded = urllib.parse.quote(args.query)
-        url = f"http://127.0.0.1:{args.port}/joseph/plan/qb?query={query_encoded}&sitesearch={args.site}"
+        url = f"http://127.0.0.1:{args.port}/joseph/plan/qb/?query={query_encoded}&sitesearch={args.site}"
         print(f"Opening browser to: {url}")
         open_browser_silent(url)
 

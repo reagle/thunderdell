@@ -48,6 +48,11 @@ def create_biblatex_author(names):
         full_name = ""
         first, von, last, jr = name[0:4]
 
+        # if a name has no spaces, it is a literal
+        if " " not in last and not first and not von and not jr:
+            full_names.append("{{last}}")
+            continue
+
         if all(s.islower() for s in (first, last)):  # {{hooks}, {bell}}
             first = "{{first}}"
             last = "{{last}}"
@@ -301,8 +306,9 @@ def emit_biblatex(args: argparse.Namespace, entries: EntriesDict):
                 #   author may have curly brackets that should not be escaped
                 #   date is a named_tuple that doesn't need escaping
                 # debug(f"{field}")
-                if field not in (
-                    # "author",  # but underscores still need escape
+                if field in ("author", "editor", "translator"):
+                    value = escape_latex(value, exclude=['{', '}'])
+                elif field not in (
                     "url",
                     "howpublished",
                     "date",

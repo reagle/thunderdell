@@ -55,14 +55,19 @@ def do_csl_person(person: Sequence[str]) -> dict[str, str]:
     """
     given, particle, family, suffix = person
     person_dict: dict[str, str] = {}
-    if family:
-        person_dict["family"] = family
-    if given:
-        person_dict["given"] = given
-    if suffix:
-        person_dict["suffix"] = suffix
-    if particle:
-        person_dict["non-dropping-particle"] = particle
+
+    # if a name has no spaces, it is a literal
+    if " " not in family and not given and not particle and not suffix:
+        person_dict["literal"] = family
+    else:
+        if family:
+            person_dict["family"] = family
+        if given:
+            person_dict["given"] = given
+        if suffix:
+            person_dict["suffix"] = suffix
+        if particle:
+            person_dict["non-dropping-particle"] = particle
     return person_dict
 
 

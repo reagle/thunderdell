@@ -3,7 +3,7 @@ references:
 - id: A51995tf
   type: no-type
   author:
-  - family: "A5"
+  - literal: "A5"
   custom2: "/Users/reagle/dev/thunderdell/tests/author-child.mm"
   issued:
     year: 1995
@@ -11,7 +11,7 @@ references:
 - id: A61996ts
   type: no-type
   author:
-  - family: "A6"
+  - literal: "A6"
   custom2: "/Users/reagle/dev/thunderdell/tests/author-child.mm"
   issued:
     year: 1996
@@ -19,7 +19,7 @@ references:
 - id: A71997ts
   type: no-type
   author:
-  - family: "A7"
+  - literal: "A7"
   custom2: "/Users/reagle/dev/thunderdell/tests/author-child.mm"
   issued:
     year: 1997

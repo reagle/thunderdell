@@ -1,10 +1,9 @@
 ---
 references:
-- id: Org1995to
+- id: SomeOrg1995to
   type: no-type
   author:
-  - family: "Org"
-    given: "Some"
+  - literal: "Some Org"
   custom2: "/Users/reagle/dev/thunderdell/tests/authorless.mm"
   issued:
     year: 1995

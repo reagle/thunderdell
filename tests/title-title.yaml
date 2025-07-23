@@ -3,7 +3,7 @@ references:
 - id: A11995to
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1995
@@ -11,7 +11,7 @@ references:
 - id: A11996ts
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1996
@@ -19,7 +19,7 @@ references:
 - id: A11996ts1
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1996
@@ -27,7 +27,7 @@ references:
 - id: A11996tt
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1996
@@ -35,7 +35,7 @@ references:
 - id: A11997ta
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1997
@@ -43,7 +43,7 @@ references:
 - id: A11997ts
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1997
@@ -51,7 +51,7 @@ references:
 - id: A11998tgh
   type: no-type
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-title.mm"
   issued:
     year: 1998

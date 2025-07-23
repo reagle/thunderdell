@@ -3,8 +3,8 @@ references:
 - id: A5A61995tfs
   type: no-type
   author:
-  - family: "A5"
-  - family: "A6"
+  - literal: "A5"
+  - literal: "A6"
   custom2: "/Users/reagle/dev/thunderdell/tests/authors.mm"
   issued:
     year: 1995

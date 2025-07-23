@@ -4,7 +4,7 @@ references:
   type: no-type
   abstract: "no-type (misc)"
   author:
-  - family: "A00d"
+  - literal: "A00d"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1991
@@ -14,7 +14,7 @@ references:
   publisher-place: "Address"
   abstract: "chapter (inbook) in single author work"
   author:
-  - family: "A01d"
+  - literal: "A01d"
   container-title: "Book Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -27,14 +27,14 @@ references:
   publisher-place: "Address"
   abstract: "chapter (incollection) in multi-author work"
   author:
-  - family: "A02d"
+  - literal: "A02d"
   container-title: "Collection Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1998
     month: 08
   editor:
-  - family: "Editor"
+  - literal: "Editor"
   publisher: "Publisher"
   title: "Chapter title"
   URL: "<http://www.humanities.uci.edu/mposter/syllabi/readings/nakamura.html>"
@@ -43,7 +43,7 @@ references:
   publisher-place: "Address"
   abstract: "paper-conference (inproceedings)"
   author:
-  - family: "A03d"
+  - literal: "A03d"
   chapter-number: "5"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -56,7 +56,7 @@ references:
   type: paper-conference
   abstract: "paper-conference (no container-title)"
   author:
-  - family: "A04d"
+  - literal: "A04d"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1991
@@ -67,7 +67,7 @@ references:
 - id: A10d1992tle
   type: article-journal
   author:
-  - family: "A10d"
+  - literal: "A10d"
   container-title: "Journal Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -77,7 +77,7 @@ references:
 - id: A11d1993tle
   type: article-magazine
   author:
-  - family: "A11d"
+  - literal: "A11d"
   container-title: "Magazine Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -87,7 +87,7 @@ references:
 - id: A12d1994tle
   type: article-newspaper
   author:
-  - family: "A12d"
+  - literal: "A12d"
   container-title: "Newspaper Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -97,7 +97,7 @@ references:
 - id: A13d1996tle
   type: entry-dictionary
   author:
-  - family: "A13d"
+  - literal: "A13d"
   container-title: "Dictionary Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -107,7 +107,7 @@ references:
 - id: A14d1997tle
   type: entry-encyclopedia
   author:
-  - family: "A14d"
+  - literal: "A14d"
   container-title: "Encylcopedia Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -117,7 +117,7 @@ references:
 - id: A15d1999tle
   type: post-weblog
   author:
-  - family: "A15d"
+  - literal: "A15d"
   container-title: "Blog Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
@@ -127,7 +127,7 @@ references:
 - id: A16d2000tle
   type: webpage
   author:
-  - family: "A16d"
+  - literal: "A16d"
   container-title: "Website Title"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:

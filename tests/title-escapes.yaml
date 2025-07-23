@@ -3,7 +3,7 @@ references:
 - id: Wikipedia2009beg
   type: webpage
   author:
-  - family: "Wikipedia"
+  - literal: "Wikipedia"
   custom2: "/Users/reagle/dev/thunderdell/tests/title-escapes.mm"
   issued:
     year: 2009

@@ -15,29 +15,39 @@ from typing import Any
 from unidecode import unidecode
 
 
-def escape_latex(text: str) -> str:
+def escape_latex(text: str, exclude: list[str] | None = None) -> str:
     r"""Escape special LaTeX characters.
 
     >>> escape_latex('100% & $5 #tag')
     '100\\% \\& \\$5 \\#tag'
     >>> escape_latex('under_score {curly} ~tilde')
     'under\\_score \\{curly\\} \\~{}tilde'
+    >>> escape_latex('under_score {curly} ~tilde', exclude=['{', '}'])
+    'under\\_score {curly} \\~{}tilde'
     """
-    return f"{text}".translate(
-        str.maketrans(
-            {
-                "$": r"\$",
-                "&": r"\&",
-                "%": r"\%",
-                "#": r"\#",
-                "_": r"\_",
-                "{": r"\{",
-                "}": r"\}",
-                "~": r"\~{}",
-                "^": r"\^{}",
-            }
-        )
-    )
+    if exclude is None:
+        exclude = []
+
+    latex_chars = {
+        "$": r"\$",
+        "&": r"\&",
+        "%": r"\%",
+        "#": r"\#",
+        "_": r"\_",
+        "{": r"\{",
+        "}": r"\}",
+        "~": r"\~{}",
+        "^": r"\^{}",
+    }
+
+    # Remove characters from latex_chars that are in the exclude list
+    translation_table = {
+        ord(char): escaped_char
+        for char, escaped_char in latex_chars.items()
+        if char not in exclude
+    }
+
+    return f"{text}".translate(translation_table)
 
 
 def normalize_whitespace(text: str) -> str:

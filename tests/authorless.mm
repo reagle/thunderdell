@@ -88,7 +88,7 @@
 </map_styles>
 </hook>
 <node TEXT="foo" POSITION="right" ID="ID_409003424">
-<node TEXT="Some Org" STYLE_REF="author" ID="ID_1401586764" COLOR="#338800">
+<node TEXT="Some‗Org" STYLE_REF="author" ID="ID_1401586764" COLOR="#338800">
 <node TEXT="Title one" STYLE_REF="title" ID="ID_17112185" COLOR="#090f6b">
 <node TEXT="d=1995 or=Some Org" STYLE_REF="cite" ID="ID_1664108970" COLOR="#ff33b8"/>
 </node>

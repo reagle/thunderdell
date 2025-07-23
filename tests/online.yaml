@@ -3,7 +3,7 @@ references:
 - id: A11991to
   type: article
   author:
-  - family: "A1"
+  - literal: "A1"
   custom2: "/Users/reagle/dev/thunderdell/tests/online.mm"
   issued:
     year: 1991
@@ -12,7 +12,7 @@ references:
 - id: A21992tt
   type: webpage
   author:
-  - family: "A2"
+  - literal: "A2"
   custom2: "/Users/reagle/dev/thunderdell/tests/online.mm"
   issued:
     year: 1992

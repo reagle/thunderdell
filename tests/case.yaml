@@ -21,7 +21,7 @@ references:
 - id: Suitable_Zucchini6742020ahs
   type: post
   author:
-  - family: "Suitable_Zucchini674"
+  - literal: "Suitable_Zucchini674"
   container-title: "<span class='nocase'>r/AmItheButtface</span>"
   custom2: "/Users/reagle/dev/thunderdell/tests/case.mm"
   issued:

@@ -127,13 +127,17 @@ def emit_yaml_people(people: list[PersonName]) -> str:
     lines = []
     for person in people:
         given, particle, family, suffix = person
-        lines.append(f"  - family: {escape_yaml(family)}")
-        if given:
-            lines.append(f"    given: {escape_yaml(given)}")
-        if suffix:
-            lines.append(f"    suffix: {escape_yaml(suffix)}")
-        if particle:
-            lines.append(f"    non-dropping-particle: {escape_yaml(particle)}")
+        # if a name has no spaces, it is a literal
+        if " " not in family and not given and not particle and not suffix:
+            lines.append(f"  - literal: {escape_yaml(family)}")
+        else:
+            lines.append(f"  - family: {escape_yaml(family)}")
+            if given:
+                lines.append(f"    given: {escape_yaml(given)}")
+            if suffix:
+                lines.append(f"    suffix: {escape_yaml(suffix)}")
+            if particle:
+                lines.append(f"    non-dropping-particle: {escape_yaml(particle)}")
     return "\n".join(lines)
 
 

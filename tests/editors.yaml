@@ -3,7 +3,7 @@ references:
 - id: A11991to
   type: chapter
   author:
-  - family: "A1"
+  - literal: "A1"
   container-title: "Book One"
   custom2: "/Users/reagle/dev/thunderdell/tests/editors.mm"
   issued:
@@ -17,7 +17,7 @@ references:
 - id: A21992tt
   type: chapter
   author:
-  - family: "A2"
+  - literal: "A2"
   container-title: "Book Two"
   custom2: "/Users/reagle/dev/thunderdell/tests/editors.mm"
   issued:

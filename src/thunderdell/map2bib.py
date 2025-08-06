@@ -65,8 +65,8 @@ RESULT_FILE_QUERY_BOX = """    <title>Results for '%s'</title>
     <form method="get" action="/joseph/plan/qb/">
     <input type="submit" value="Go" name="Go" /> <input type="text" size="25"
     name="query" maxlength="80" /> <input type="radio" name="sitesearch"
-    value="BusySponge" /> BS <input type="radio" name="sitesearch"
-    checked="checked" value="MindMap" /> MM</form>
+    value="sponge" /> BS <input type="radio" name="sitesearch"
+    checked="checked" value="mindmap" /> MM</form>
 </div>
 <h2>Results for '%s'</h2>
 <ul class="RESULT_FILE_QUERY_BOX">

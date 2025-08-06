@@ -58,6 +58,33 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
         else:
             raise RuntimeError(f"Unknown entry_type = {e_t}")
 
+    # - id: FengZhuMalloch2018acc
+    #   type: article-journal
+    #   abstract: "reviews research on online advice across concepts, seeking, giving, and factors."
+    #   author:
+    #   - family: "Feng"
+    #     given: "Bo"
+    #   - family: "Zhu"
+    #     given: "Xun"
+    #   - family: "Malloch"
+    #     given: "Yining Zhou"
+    #   container-title: "The Oxford Handbook of Advice"
+    #   chapter-number: "18"
+    #   custom2: "/Users/reagle/e/clear/data/2web/reagle.org/joseph/2020/advice/advice-2.mm"
+    #   issued:
+    #     year: 2018
+    #     month: 05
+    #     day: 08
+    #   DOI: "10.1093/oxfordhb/9780190630188.013.17"
+    #   keyword: "advice"
+    #   publisher: "Oxford University Press"
+    #   title: "Advice communication in cyberspace"
+    #   URL: "<http://dx.doi.org/10.1093/oxfordhb/9780190630188.013.17>"
+    #   accessed:
+    #     year: 2020
+    #     month: 05
+    #     day: 18
+
     ## Guess unknown entry_type based on existence of bibliographic fields
     types_from_fields = (
         # CONTAINER BASED TYPES
@@ -69,19 +96,19 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
         ("post", ["c_forum"]),
         ("post-weblog", ["c_blog"]),
         ("webpage", ["c_web"]),
-        # PAPERS
-        ("article-journal", ["doi"]),
-        ("article-journal", ["journal"]),
-        ("paper-conference", ["eventtitle"]),
-        ("paper-conference", ["booktitle", "editor", "organization"]),
-        ("paper-conference", ["venue"]),
+        # REPORTS
+        ("report", ["institution"]),
         # BOOKS
         ("chapter", ["chapter"]),
         ("chapter", ["booktitle"]),
         ("book", ["author", "title", "publisher"]),
         ("book", ["isbn"]),
-        # REPORTS
-        ("report", ["institution"]),
+        # PAPERS
+        ("article-journal", ["journal"]),
+        ("paper-conference", ["eventtitle"]),
+        ("paper-conference", ["booktitle", "editor", "organization"]),
+        ("paper-conference", ["venue"]),
+        ("article-journal", ["doi"]),
         # OTHER
         ("webpage", ["url"]),
     )

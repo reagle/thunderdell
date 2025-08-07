@@ -160,6 +160,7 @@ class ScrapeDefault:
     def get_date(self):
         """Return date from xpath, guess from datefinder, or today's date."""
         DATE_XPATHS = (
+            """//meta[@itemprop="datePublished"]/@content""",
             """//meta[@name="date"]/@content""",
             """//meta[@name="pubdate"]/@content""",
             """//meta[@property="article:published_time"]/@content""",

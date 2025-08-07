@@ -109,6 +109,8 @@ class ScrapeDefault:
             """//*[1][contains(@class, 'byline')][1]//text()""",
             # ZDNet
             """//*[contains(@class, 'globalAuthor')]//*[contains(@class, 'link')]/text()""",
+            # YouTube
+            """//span[@itemprop='author']//link[@itemprop='name']/@content""",
         )
         if self.html_p is not None:
             logging.info("checking author xpaths")

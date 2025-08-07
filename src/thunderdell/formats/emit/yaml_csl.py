@@ -58,7 +58,7 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
         else:
             raise RuntimeError(f"Unknown entry_type = {e_t}")
 
-    ## Guess unknown entry_type based on existence of bibliographic fields
+    ## Guess unknown entry_type based on existence of all bibliographic fields
     types_from_fields = (
         # CONTAINER BASED TYPES
         ("article-journal", ["c_journal"]),
@@ -71,14 +71,15 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
         ("webpage", ["c_web"]),
         # REPORTS
         ("report", ["institution"]),
+        # PAPERS 1
+        ("article-journal", ["journal"]),
+        ("paper-conference", ["eventtitle"]),
         # BOOKS
         ("chapter", ["chapter"]),
         ("chapter", ["booktitle"]),
         ("book", ["author", "title", "publisher"]),
         ("book", ["isbn"]),
-        # PAPERS
-        ("article-journal", ["journal"]),
-        ("paper-conference", ["eventtitle"]),
+        # PAPERS 2
         ("paper-conference", ["booktitle", "editor", "organization"]),
         ("paper-conference", ["venue"]),
         ("article-journal", ["doi"]),

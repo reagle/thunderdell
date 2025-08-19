@@ -6,7 +6,6 @@ __pycache__
 add
 build/
 error_log
-log/
 monkeytype.sqlite3
 src/thunderdell.egg-info/
 tmp/

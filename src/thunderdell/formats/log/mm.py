@@ -66,8 +66,11 @@ def log2mm(args: argparse.Namespace, biblio: dict):
         tags = ""
 
     mindmap = parse(str(ofile)).getroot()
-    mm_years = mindmap[0]
+    mm_years = mindmap.find("./node")
+    logging.info(f"{mm_years=}")
+    logging.info(f"{this_year=}")
     for mm_year in mm_years:
+        logging.info(f"  testing {mm_year.get("TEXT")=}")
         if mm_year.get("TEXT") == this_year:
             year_node = mm_year
             break

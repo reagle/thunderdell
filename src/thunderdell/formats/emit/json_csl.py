@@ -223,6 +223,8 @@ def emit_json_csl(args: Any, entries: EntriesDict) -> None:
                 if field == "c_blog" and entry[field] == "Blog":
                     continue
 
+                if field == "pages":
+                    value = value.replace("-", "–")
                 if field in CONTAINERS:
                     field = "container-title"
                     value = csl_protect_case(value)

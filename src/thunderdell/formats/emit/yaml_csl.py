@@ -294,6 +294,9 @@ def emit_yaml_csl(args: argparse.Namespace, entries: EntriesDict) -> None:
                     #     f'  container-title: "Personal"\n')
                     continue
 
+                if field == "pages":
+                    value = value.replace("-", "–")
+
                 # logging.debug(f"{field=}")
                 if field in CONTAINERS:
                     # logging.debug(f"in CONTAINERS")

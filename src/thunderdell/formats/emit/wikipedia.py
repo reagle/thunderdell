@@ -84,6 +84,8 @@ def emit_wikipedia(args: argparse.Namespace, entries: EntriesDict):
                     value = date
                 elif field == "title" and "booktitle" in entry:  # TODO: capital case?
                     field = "chapter"
+                if field == "pages":
+                    value = value.replace("-", "–")
                 if field in BIBLATEX_WP_FIELD_MAP:
                     field = BIBLATEX_WP_FIELD_MAP[field]
                 args.outfd.write(f"| {field} = {value}\n")

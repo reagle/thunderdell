@@ -163,10 +163,14 @@ def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file
                         f"unknown locator '{entry['pagination']}' "
                         + f"for '{entry['title']}' in '{entry['custom2']}'"
                     )
-                locator = f"{prefix} {locator}"
+                locator = f"{prefix} {locator.replace('-', '–')}"
             else:
                 # If no pagination specified, assume page number
-                locator = f", pp. {locator}" if "-" in locator else f", p. {locator}"
+                locator = (
+                    f", pp. {locator.replace('-', '–')}"
+                    if "-" in locator
+                    else f", p. {locator}"
+                )
         cite = f" [@{entry['identifier'].replace(' ', '')}{locator}]"
 
     hypertext = text

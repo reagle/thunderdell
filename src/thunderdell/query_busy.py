@@ -23,12 +23,12 @@ from pathlib import Path
 from flask import Flask, request
 
 from thunderdell import config
+from thunderdell.formats.emit.results import emit_results
 from thunderdell.map2bib import (
     RESULT_FILE_HEADER,
     RESULT_FILE_QUERY_BOX,
     build_bib,
 )
-from thunderdell.formats.emit.results import emit_results
 
 app = Flask(__name__)
 
@@ -53,6 +53,10 @@ INITIAL_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 
 def query_mindmap(args):
     """Query mindmap and generate HTML results string."""
+    # Strip leading '@' if present
+    if args.query.startswith("@"):
+        args.query = args.query[1:]
+
     output = []
     output.append(RESULT_FILE_HEADER)
     output.append(RESULT_FILE_QUERY_BOX % (args.query, args.query))
@@ -121,7 +125,6 @@ def qb():
     if site == "mindmap":
         args = argparse.Namespace()
         args.query = query
-        args.query_c = re.compile(re.escape(query), re.IGNORECASE)
         args.chase = True
         args.input_file = config.DEFAULT_MAP
         args.long_url = False

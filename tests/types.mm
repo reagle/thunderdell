@@ -1,7 +1,10 @@
 <map version="freeplane 1.12.1">
 <!--To view this file, download free mind mapping software Freeplane from https://www.freeplane.org -->
+<bookmarks>
+    <bookmark nodeId="ID_677537544" name="Root" opensAsRoot="true"/>
+</bookmarks>
 <node TEXT="test" FOLDED="false" ID="ID_677537544" CREATED="1747168932899" MODIFIED="1747168932899"><hook NAME="MapStyle">
-    <properties fit_to_viewport="false;" show_icons="BESIDE_NODES" show_tags="UNDER_NODES"/>
+    <properties show_tags="UNDER_NODES" fit_to_viewport="false;" show_icons="BESIDE_NODES" show_note_icons="true" show_icon_for_attributes="true" showTagCategories="false"/>
     <tags category_separator="::"/>
 
 <map_styles>
@@ -162,6 +165,11 @@
 <node TEXT="A16d" STYLE_REF="author" ID="ID_1290238764" CREATED="1747168932904" MODIFIED="1747168932904" COLOR="#338800">
 <node TEXT="Title" STYLE_REF="title" ID="ID_1518902011" CREATED="1747168932904" MODIFIED="1747168932904" LINK="http://example.com/2" COLOR="#090f6b">
 <node TEXT="cw=Website Title d=2000" STYLE_REF="cite" ID="ID_439095765" CREATED="1747168932904" MODIFIED="1747168932904" COLOR="#ff33b8"/>
+</node>
+</node>
+<node TEXT="A17d" STYLE_REF="author" ID="ID_1838725870" CREATED="1747168932904" MODIFIED="1755808837273" COLOR="#338800">
+<node TEXT="Title" STYLE_REF="title" ID="ID_1152736620" CREATED="1747168932904" MODIFIED="1747168932904" LINK="http://example.com/2" COLOR="#090f6b">
+<node TEXT="cp=Post Title d=2001" STYLE_REF="cite" ID="ID_849015849" CREATED="1747168932904" MODIFIED="1755809552335" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

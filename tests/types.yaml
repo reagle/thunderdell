@@ -134,6 +134,16 @@ references:
     year: 2000
   title: "Title"
   URL: "<http://example.com/2>"
+- id: A17d2001tle
+  type: post
+  author:
+  - literal: "A17d"
+  container-title: "Post Title"
+  custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
+  issued:
+    year: 2001
+  title: "Title"
+  URL: "<http://example.com/2>"
 - id: A30d2012te
   type: legal_case
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"

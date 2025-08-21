@@ -129,9 +129,10 @@ CSL_SHORTCUTS = {
     "cn": "c_newspaper",
     "cd": "c_dictionary",
     "cy": "c_encyclopedia",
-    "cf": "c_forum",  # for post
+    "cf": "c_forum",
     "cb": "c_blog",
     "cw": "c_web",
+    "cp": "c_post",  # for comment/update without title
 }
 
 BIB_SHORTCUTS = BIBLATEX_SHORTCUTS.copy()
@@ -225,8 +226,8 @@ CSL_BIBLATEX_TYPE_MAP = {
     "pamphlet":                 "booklet",
     "paper-conference":         "inproceedings",
     "personal_communication":   "letter",
-    "post":                     "online",
-    "post-weblog":              "online",
+    "post":                     "online", # untitled online messages
+    "post-weblog":              "online", # titled online messages
     "webpage":                  "online"
 }
 

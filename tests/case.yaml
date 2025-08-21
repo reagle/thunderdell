@@ -1,17 +1,17 @@
 ---
 references:
 - id: Gosh2012piw
-  type: webpage
+  type: post
   author:
   - family: "Gosh"
     given: "Daniel"
+  container-title: "Twitter"
   custom2: "/Users/reagle/dev/thunderdell/tests/case.mm"
   issued:
     year: 2012
     month: 07
     day: 10
   keyword: "comment"
-  publisher: "Twitter"
   title: "the point i was making before ..."
   URL: "<https://twitter.com/danieltosh/status/222796636559130624>"
   accessed:
@@ -19,7 +19,7 @@ references:
     month: 08
     day: 28
 - id: Suitable_Zucchini6742020ahs
-  type: post
+  type: post-weblog
   author:
   - literal: "Suitable_Zucchini674"
   container-title: "<span class='nocase'>r/AmItheButtface</span>"

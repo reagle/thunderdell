@@ -10,6 +10,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
+import io
 import logging
 import re
 import socket
@@ -64,23 +65,16 @@ def query_mindmap(args):
     file_name = Path(args.input_file).absolute()
     args.direct_query = True
 
-    class StringEmitter:
-        def __init__(self):
-            self.buffer = []
-
-        def write(self, s):
-            self.buffer.append(s)
-
-        def get_value(self):
-            return "".join(self.buffer)
-
-    string_emitter = StringEmitter()
-    args.results_file = string_emitter
+    # The emit_results function expects a file-like object to write to.
+    # io.StringIO provides an in-memory text buffer that behaves like a file,
+    # allowing us to capture the output as a string for the HTTP response.
+    string_io = io.StringIO()
+    args.results_file = string_io
 
     entries = build_bib(args, file_name, emit_results)
     emit_results(args, entries)
 
-    output.append(string_emitter.get_value())
+    output.append(string_io.getvalue())
     output.append("</ul></body></html>\n")
     return "".join(output)
 

@@ -4,7 +4,7 @@
     <bookmark nodeId="ID_677537544" name="Root" opensAsRoot="true"/>
 </bookmarks>
 <node TEXT="test" FOLDED="false" ID="ID_677537544" CREATED="1747168932899" MODIFIED="1747168932899"><hook NAME="MapStyle">
-    <properties show_tags="UNDER_NODES" fit_to_viewport="false;" show_icons="BESIDE_NODES" show_note_icons="true" show_icon_for_attributes="true" showTagCategories="false"/>
+    <properties show_icon_for_attributes="true" show_tags="UNDER_NODES" show_note_icons="true" fit_to_viewport="false;" show_icons="BESIDE_NODES" showTagCategories="false"/>
     <tags category_separator="::"/>
 
 <map_styles>
@@ -170,6 +170,11 @@
 <node TEXT="A17d" STYLE_REF="author" ID="ID_1838725870" CREATED="1747168932904" MODIFIED="1755808837273" COLOR="#338800">
 <node TEXT="Title" STYLE_REF="title" ID="ID_1152736620" CREATED="1747168932904" MODIFIED="1747168932904" LINK="http://example.com/2" COLOR="#090f6b">
 <node TEXT="cp=Post Title d=2001" STYLE_REF="cite" ID="ID_849015849" CREATED="1747168932904" MODIFIED="1755809552335" COLOR="#ff33b8"/>
+</node>
+</node>
+<node TEXT="A18d" STYLE_REF="author" ID="ID_636551694" CREATED="1747168932904" MODIFIED="1755871709710" COLOR="#338800">
+<node TEXT="Title" STYLE_REF="title" ID="ID_1623056942" CREATED="1747168932904" MODIFIED="1747168932904" LINK="http://example.com/2" COLOR="#090f6b">
+<node TEXT="cf=Forum Title d=2002" STYLE_REF="cite" ID="ID_1531168831" CREATED="1747168932904" MODIFIED="1755871718507" COLOR="#ff33b8"/>
 </node>
 </node>
 </node>

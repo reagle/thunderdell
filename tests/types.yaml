@@ -122,6 +122,7 @@ references:
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1999
+  genre: "(blog)"
   title: "Title"
   URL: "<http://example.com/2>"
 - id: A16d2000tle
@@ -142,6 +143,16 @@ references:
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 2001
+  title: "Title"
+  URL: "<http://example.com/2>"
+- id: A18d2002tle
+  type: post-weblog
+  author:
+  - literal: "A18d"
+  container-title: "Forum Title"
+  custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
+  issued:
+    year: 2002
   title: "Title"
   URL: "<http://example.com/2>"
 - id: A30d2012te

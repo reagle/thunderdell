@@ -316,9 +316,11 @@ def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
     # Include full path to MM file
     entry["custom2"] = entry["_mm_file"]  # .split("/")[-1]
 
-    # Add genre for blogs
-    if "c_blog" in entry:
-        entry["genre"] = "(blog)"
+    # Removing because of inconsistent use of genre among style sheets 2025-08-22
+    # https://github.com/citation-style-language/styles/issues/7733#issuecomment-3214599556
+    # # Add genre for blogs
+    # if "c_blog" in entry:
+    #     entry["genre"] = "(blog)"
 
     # Remove private Reddit message URLs
     if "url" in entry and entry["url"].startswith("https://www.reddit.com/message"):

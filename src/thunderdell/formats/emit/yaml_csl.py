@@ -60,13 +60,14 @@ def guess_csl_type(entry: EntryDict) -> tuple[str, str | None, str | None]:
 
     ## Guess unknown entry_type based on existence of all bibliographic fields
     types_from_fields = (
-        # container-based "type" given ["field"]
+        # NOTE: ORDER MATTERS
+        # "container" inferred from ["field"]
         ("article-journal", ["c_journal"]),
         ("article-magazine", ["c_magazine"]),
         ("article-newspaper", ["c_newspaper"]),
         ("entry-dictionary", ["c_dictionary"]),
         ("entry-encyclopedia", ["c_encyclopedia"]),
-        ("post-weblog", ["c_forum"]),  # has title
+        ("post", ["c_forum"]),  # has title
         ("post-weblog", ["c_blog"]),  # has title
         ("webpage", ["c_web"]),  # has title
         ("post", ["c_post"]),  # w/out title

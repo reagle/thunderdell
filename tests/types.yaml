@@ -64,96 +64,95 @@ references:
   title: "Paper title"
   URL: "<http://example.com/1>"
   event-place: "Event Venue"
-- id: A10d1992tle
+- id: A10d1992ta
   type: article-journal
   author:
   - literal: "A10d"
-  container-title: "Journal Title"
+  container-title: "Journal Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1992
-  title: "Title"
+  title: "Title of article"
   URL: "<http://example.com/2>"
-- id: A11d1993tle
+- id: A11d1993ta
   type: article-magazine
   author:
   - literal: "A11d"
-  container-title: "Magazine Title"
+  container-title: "Magazine Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1993
-  title: "Title"
+  title: "Title of article"
   URL: "<http://example.com/2>"
-- id: A12d1994tle
+- id: A12d1994ta
   type: article-newspaper
   author:
   - literal: "A12d"
-  container-title: "Newspaper Title"
+  container-title: "Newspaper Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1994
-  title: "Title"
+  title: "Title of article"
   URL: "<http://example.com/2>"
-- id: A13d1996tle
+- id: A13d1996te
   type: entry-dictionary
   author:
   - literal: "A13d"
-  container-title: "Dictionary Title"
+  container-title: "Dictionary Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1996
-  title: "Title"
+  title: "Title of entry"
   URL: "<http://example.com/2>"
-- id: A14d1997tle
+- id: A14d1997te
   type: entry-encyclopedia
   author:
   - literal: "A14d"
-  container-title: "Encylcopedia Title"
+  container-title: "Encylcopedia Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1997
-  title: "Title"
+  title: "Title of entry"
   URL: "<http://example.com/2>"
-- id: A15d1999tle
+- id: A15d1999tp
   type: post-weblog
   author:
   - literal: "A15d"
-  container-title: "Blog Title"
+  container-title: "Blog Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 1999
-  genre: "(blog)"
-  title: "Title"
+  title: "Title of post"
   URL: "<http://example.com/2>"
-- id: A16d2000tle
+- id: A16d2000tw
   type: webpage
   author:
   - literal: "A16d"
-  container-title: "Website Title"
+  container-title: "Website Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 2000
-  title: "Title"
+  title: "Title of website"
   URL: "<http://example.com/2>"
-- id: A17d2001tle
+- id: A17d2001tc
   type: post
   author:
   - literal: "A17d"
-  container-title: "Post Title"
+  container-title: "Platform Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 2001
-  title: "Title"
+  title: "Truncated comment"
   URL: "<http://example.com/2>"
-- id: A18d2002tle
-  type: post-weblog
+- id: A18d2002tfp
+  type: post
   author:
   - literal: "A18d"
-  container-title: "Forum Title"
+  container-title: "Forum Name"
   custom2: "/Users/reagle/dev/thunderdell/tests/types.mm"
   issued:
     year: 2002
-  title: "Title"
+  title: "Title of forum post"
   URL: "<http://example.com/2>"
 - id: A30d2012te
   type: legal_case

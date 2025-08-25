@@ -477,7 +477,33 @@ def clean_identifier(ident: str) -> str:
 
 
 def get_identifier(entry: EntryDict, entries: EntriesDict, delim: str = "") -> str:
-    """Create an identifier (key) for the entry based on last names, year, and title."""
+    """Create an identifier (key) for the entry based on last names, year, and title.
+
+    >>> entry1 = {
+    ...     'author': [('John', '', 'Smith', '')],
+    ...     'date': PubDate('2021', '01', '01', None, None),
+    ...     'title': 'Machine Learning Basics',
+    ... }
+    >>> get_identifier(entry1, {})
+    'Smith2021mlb'
+
+    >>> entry2 = {
+    ...     'author': [('Jane', '', 'Doe', ''), ('Bob', '', 'Jones', '')],
+    ...     'date': PubDate('2022', '02', '02', None, None),
+    ...     'title': 'Collaborative Research Methods',
+    ... }
+    >>> get_identifier(entry2, {})
+    'DoeJones2022crm'
+
+    >>> entry3 = {
+    ...     'author': [('A', '', 'Alpha', ''), ('B', '', 'Beta', ''),
+    ...                ('C', '', 'Gamma', ''), ('D', '', 'Delta', '')],
+    ...     'date': PubDate('2023', '03', '03', None, None),
+    ...     'title': 'Team Science Approaches',
+    ... }
+    >>> get_identifier(entry3, {})
+    'AlphaEtal2023tsa'
+    """
     # debug(f"1 {entry=}")
     last_names_of_authors = []
     name_part = ""

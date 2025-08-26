@@ -285,24 +285,15 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
 
     args = arg_parser.parse_args(argv)
 
-    # Configure logging
-    log_level = logging.WARNING  # Default
-    if args.verbose == 1:
-        log_level = logging.INFO
-    elif args.verbose >= 2:
-        log_level = logging.DEBUG
-
-    log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-    log_file = Path(sys.argv[0]).stem + ".log" if args.log_to_file else None
-    log_mode = "w"
-
-    # Use basicConfig with stream for stderr or filename for file
-    if log_file:
-        logging.basicConfig(
-            filename=log_file, filemode=log_mode, level=log_level, format=log_format
-        )
-    else:
-        logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_config = {"level": log_level, "format": LOG_FORMAT}
+    if args.log_to_file:
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
+    logging.basicConfig(**log_config)
 
     # Configure requests logging level based on verbosity
     logging.getLogger("requests").setLevel(

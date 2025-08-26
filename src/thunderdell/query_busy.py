@@ -211,18 +211,15 @@ def main(argv: list[str] | None = None):
     """Detect running mode."""
     args = process_arguments(argv)
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
-    LOG_FORMAT = "%(levelname)s:%(name)s:%(message)s"
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_config = {"level": log_level, "format": LOG_FORMAT}
     if args.log_to_file:
-        print("logging to file")
-        logging.basicConfig(
-            filename="td.log", filemode="w", level=log_level, format=LOG_FORMAT
-        )
-    else:
-        root_logger = logging.getLogger()
-        if root_logger.hasHandlers():
-            root_logger.handlers.clear()
-        logging.basicConfig(level=log_level, format=LOG_FORMAT, stream=sys.stderr)
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
+    logging.basicConfig(**log_config)
 
     logging.debug(f"Arguments parsed: {args}")
 

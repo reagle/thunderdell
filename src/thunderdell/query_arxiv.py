@@ -15,6 +15,7 @@ import argparse
 import logging
 import pprint
 import sys
+from pathlib import Path
 
 import requests
 import xmltodict
@@ -81,17 +82,15 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = parse_args()
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_config = {"level": log_level, "format": LOG_FORMAT}
     if args.log_to_file:
-        logging.basicConfig(
-            filename="query_arxiv.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
-        )
-    else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
+    logging.basicConfig(**log_config)
 
     # Determine accept header
     if args.style and args.style in ACCEPT_HEADERS:

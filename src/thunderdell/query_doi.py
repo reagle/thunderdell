@@ -16,13 +16,9 @@ import json
 import logging
 import pprint
 import sys
+from pathlib import Path
 
 import requests
-
-log_level = 100  # default
-logging.critical = logging.critical
-logging.info = logging.info
-logging.debug = logging.debug
 
 # https://citation.crosscite.org/docs.html
 # Types available to output to the CLI
@@ -100,17 +96,15 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    log_level = (logging.CRITICAL) - (args.verbose * 10)
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_config = {"level": log_level, "format": LOG_FORMAT}
     if args.log_to_file:
-        logging.basicConfig(
-            filename="query_doi.log",
-            filemode="w",
-            level=log_level,
-            format=LOG_FORMAT,
-        )
-    else:
-        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
+    logging.basicConfig(**log_config)
 
     accept = ACCEPT_HEADERS["json"]
     if args.style:

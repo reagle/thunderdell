@@ -473,21 +473,14 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     # Parse arguments
     args = arg_parser.parse_args(argv)  # Use provided argv or sys.argv[1:]
 
-    # Configure logging based on verbosity
-    log_level = max(
-        logging.CRITICAL - (args.verbose * 10), logging.DEBUG
-    )  # Default: CRITICAL
-    log_format = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-
-    # Configure logging
-    log_config = {"level": log_level, "format": log_format}
-
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
+    LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
+    log_config = {"level": log_level, "format": LOG_FORMAT}
     if args.log_to_file:
-        log_config["filename"] = Path(sys.argv[0]).stem + ".log"
-        log_config["filemode"] = "w"
-    else:
-        log_config["stream"] = sys.stderr
-
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
     logging.basicConfig(**log_config)
 
     logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")

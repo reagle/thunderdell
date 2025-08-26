@@ -341,19 +341,15 @@ def main(args: argparse.Namespace | None = None):
     if args is None:
         args = process_arguments(sys.argv[1:])
 
-    # Setup logging
-    log_level = logging.CRITICAL - (args.verbose * 10) if args.verbose else logging.INFO
+    SCRIPT_STEM = Path(__file__).stem
+    # LOG_FORMAT https://loguru.readthedocs.io/en/stable/api/logger.html#record
+    log_level = logging.ERROR - (args.verbose * 10)
     LOG_FORMAT = "%(levelname).4s %(funcName).10s:%(lineno)-4d| %(message)s"
-
-    logging.basicConfig(
-        filename="extract-bibtex.log",
-        filemode="w",
-        level=log_level,
-        format=LOG_FORMAT,
-    )
-
+    log_config = {"level": log_level, "format": LOG_FORMAT}
     if args.log_to_file:
-        print("Logging to file: extract_bibtex.log")
+        log_config.update({"filename": f"{SCRIPT_STEM}.log", "filemode": "w"})
+        print(f"Logging to file: {SCRIPT_STEM}.log")
+    logging.basicConfig(**log_config)
 
     logging.info(f"Starting extract_bibtex v{__version__}")
 

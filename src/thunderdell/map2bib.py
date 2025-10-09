@@ -28,7 +28,6 @@ import webbrowser
 from collections.abc import Callable
 from urllib.parse import parse_qs
 
-# import xml.etree.ElementTree as et
 from thunderdell import config
 from thunderdell.biblio.fields import (
     BIB_SHORTCUTS,
@@ -38,6 +37,9 @@ from thunderdell.biblio.fields import (
     PARTICLES,
     SUFFIXES,
 )
+
+# import xml.etree.ElementTree as et
+from thunderdell.formats.emit.results import emit_results
 from thunderdell.types_thunderdell import EntriesDict
 from thunderdell.utils.text import (
     pretty_tabulate_dict,
@@ -892,7 +894,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
-        emitter_func = emit_results
+        # emitter_func = emit_results # already defined by module_name = next(...
 
     with contextlib.ExitStack() as stack:
         if output_path:

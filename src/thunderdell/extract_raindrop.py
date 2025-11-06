@@ -11,6 +11,7 @@ __version__ = "1.0"
 import argparse
 import logging
 import re
+import subprocess
 import sys
 import webbrowser
 from pathlib import Path
@@ -79,10 +80,29 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     else:
         log_config["stream"] = sys.stderr
 
-    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+        logging.basicConfig(**log_config)
+
+        logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
     logging.debug(f"Parsed arguments: {args}")
 
     return args
+
+
+def open_url_silent(url: str) -> None:
+    """Open a URL in a web browser silently.
+
+    Avoiding stderr output and blocking on macOS.
+    """
+    logging.info(f"Opening URL in browser: {url}")
+    try:
+        if sys.platform == "darwin":  # macOS
+            subprocess.Popen(
+                ["open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+        else:
+            webbrowser.open(url)
+    except Exception as e:
+        logging.error(f"Failed to open URL {url}: {e}")
 
 
 def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
@@ -130,10 +150,8 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
 
     # Open URL in browser and process with busy.py logic
     try:
-        webbrowser.open(url)
-        logging.info(f"Opened URL in browser: {url}")
-        # Assuming busy.get_scraper and log2mm handle their own errors/logging
-        scraper = busy.get_scraper(url, text)  # Pass URL and formatted text
+        open_url_silent(url)
+        scraper = busy.get_scraper(url, text)
         biblio = scraper.get_biblio()
         biblio["tags"] = "misc"  # default keyword
         if "excerpt" in biblio:

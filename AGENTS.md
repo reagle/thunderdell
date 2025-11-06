@@ -93,6 +93,10 @@ except (ValueError, KeyError) as e:
     logger.error(f"Processing failed: {e}")
 ```
 
+### Regular expressions
+
+Any non-trivial (more than 3 expression) regular expressions should use document re.VERBOSE format.
+
 ### Command-Line Interface
 
 Standard argparse pattern:
@@ -125,7 +129,7 @@ api_key = get_credential("SERVICE_API_KEY")
 
 Uses `.env` file for local development.
 
-## Project Structure
+## Preferred Project Structure
 
 ```
 project/

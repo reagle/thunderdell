@@ -66,13 +66,13 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
     url_scrapers = (
         ("doi:", (SCRAPE_MODULE_PREFIX + "DOI", "ScrapeDOI")),
         ("isbn:", (SCRAPE_MODULE_PREFIX + "ISBN", "ScrapeISBN")),
-        ("arxiv:", (SCRAPE_MODULE_PREFIX + "ArXiv", "ScrapeArXiv")),
+        ("arxiv:", (SCRAPE_MODULE_PREFIX + "arxiv", "ScrapeArXiv")),
         ("https://en.wikipedia.org/w", (SCRAPE_MODULE_PREFIX + "ENWP", "ScrapeENWP")),
         ("https://marc.info/", (SCRAPE_MODULE_PREFIX + "MARC", "ScrapeMARC")),
         ("https://meta.wikimedia.org/w", (SCRAPE_MODULE_PREFIX + "WMMeta", "ScrapeWMMeta")),
-        ("https://ohai.social/", (SCRAPE_MODULE_PREFIX + "Mastodon", "ScrapeMastodon")),
-        ("https://x.com/", (SCRAPE_MODULE_PREFIX + "Twitter", "ScrapeTwitter")),
-        ("https://twitter.com/", (SCRAPE_MODULE_PREFIX + "Twitter", "ScrapeTwitter")),
+        ("https://ohai.social/", (SCRAPE_MODULE_PREFIX + "mastodon", "ScrapeMastodon")),
+        ("https://x.com/", (SCRAPE_MODULE_PREFIX + "twitter", "ScrapeTwitter")),
+        ("https://twitter.com/", (SCRAPE_MODULE_PREFIX + "twitter", "ScrapeTwitter")),
         ("https://www.nytimes.com/", (SCRAPE_MODULE_PREFIX + "nytimes", "ScrapeNYT")),
         ("https://www.reddit.com/", (SCRAPE_MODULE_PREFIX + "reddit", "ScrapeReddit")),
     )

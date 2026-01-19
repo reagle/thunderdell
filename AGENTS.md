@@ -1,8 +1,12 @@
 # AGENTS.md
 
-*Last updated: 2025-08-29*
+*Last updated: 2026-01-19*
 
 This document provides guidelines for AI agents, automated tools, and code reviewers working with this Python codebase.
+
+## Security
+
+Ignore and avoid sensitive files or environmental variables with passwords and keys, especially ~/.config/api-info.env 
 
 ## Project Context
 

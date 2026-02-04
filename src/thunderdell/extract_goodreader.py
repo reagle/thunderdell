@@ -135,6 +135,7 @@ def process_text(args: argparse.Namespace, text: str) -> str:
                 page_num_result = ""
             elif kind == "Highlight":
                 if color == "yellow":
+                    # TODO: some apps (Preview) highlight with #FACD5A
                     prefix = "excerpt."
                 if color == "cyan":
                     prefix = "section."

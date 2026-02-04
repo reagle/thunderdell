@@ -1,5 +1,12 @@
 """Work planning page logger.
 
+Uses lxml.html (not lxml.etree) to parse and serialize index.html as HTML5.
+This avoids XHTML self-closing tags (e.g., <meta/>) that the W3C validator
+flags, and preserves unicode without mojibake.
+
+Pipeline: wiki_update.py (BeautifulSoup) -> work.py (lxml.html) -> tidy
+All three tools must produce parseable HTML5 for each other.
+
 https://github.com/reagle/thunderdell
 """
 
@@ -11,9 +18,8 @@ __version__ = "1.0"
 
 import logging
 import time
-import unicodedata
 
-from lxml import etree as l_etree
+from lxml import html as l_html
 
 from thunderdell import config
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
@@ -51,24 +57,16 @@ def log2work(args, biblio):
     )
     logging.info(f"{log_item=}")
 
-    plan_tree = l_etree.parse(
-        str(ofile), l_etree.XMLParser(ns_clean=True, recover=True)
-    )
+    plan_tree = l_html.parse(str(ofile))
     ul_found = plan_tree.xpath("""//div[@id='Done']/ul""")
     logging.info(f"ul_found = {ul_found}")
     if ul_found:
-        ul_found[0].text = "\n              "
-        try:  # lxml bug https://bugs.launchpad.net/lxml/+bug/1902364
-            log_item_xml = l_etree.XML(log_item)
-        except l_etree.XMLSyntaxError:
-            # if lxml chokes on unicode, convert to ascii
-            log_item_xml = l_etree.XML(
-                unicodedata.normalize("NFKD", log_item).encode("ascii", "ignore")
-            )
-        log_item_xml.tail = "\n\n      "
+        ul_found[0].text = "\n"  # newline after <ul>
+        log_item_xml = l_html.fragment_fromstring(log_item)
+        log_item_xml.tail = "\n"  # newline after </li>
         ul_found[0].insert(0, log_item_xml)
-        new_content = l_etree.tostring(
-            plan_tree, pretty_print=True, encoding="unicode", method="xml"
+        new_content = l_html.tostring(
+            plan_tree, pretty_print=True, encoding="unicode", method="html"
         )
         ofile.write_text(new_content, encoding="utf-8")
     else:

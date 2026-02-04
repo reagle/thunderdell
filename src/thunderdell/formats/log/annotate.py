@@ -67,7 +67,8 @@ def do_console_annotation(args: argparse.Namespace, biblio):
             if annotation_fn.exists():
                 annotation_fn.unlink()
             annotation_fn.write_text(initial_text, encoding="utf-8")
-        call([config.EDITOR, str(annotation_fn)])
+        editor_cmd = str(config.EDITOR).split()
+        call([*editor_cmd, str(annotation_fn)])
         return annotation_fn.read_text(encoding="utf-8").splitlines()
 
     def parse_bib(args, biblio, edited_text):

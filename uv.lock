@@ -1037,7 +1037,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "arrow" },
-    { name = "atproto" },
+    { name = "atproto", specifier = ">=0.0.65" },
     { name = "beautifulsoup4" },
     { name = "bibtexparser", specifier = ">=1.4.3" },
     { name = "datefinder" },

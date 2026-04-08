@@ -1,5 +1,6 @@
 *.log
 .aider*
+.claude/
 .DS_Store
 .envrc
 __pycache__

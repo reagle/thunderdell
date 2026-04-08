@@ -123,7 +123,11 @@ def qb():
         args.input_file = config.DEFAULT_MAP
         args.long_url = False
         args.pretty = False
-        return query_mindmap(args)
+        try:
+            return query_mindmap(args)
+        except Exception:
+            app.logger.exception("query_mindmap failed")
+            return "<h1>Error</h1><p>Mindmap query failed. Check server logs.</p>", 500
     else:
         return query_busysponge(query)
 

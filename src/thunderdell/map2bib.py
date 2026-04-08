@@ -167,7 +167,7 @@ def walk_freeplane(
                 ancestor = parent_map[ancestor]
             return ancestor
         except KeyError:
-            print(f'''ERROR: author node not found for "{title_node.get("TEXT")}"''')
+            logging.error(f'''author node not found for "{title_node.get("TEXT")}"''')
             sys.exit()
 
     def _remove_identity_hints(authors: str) -> str:
@@ -278,7 +278,7 @@ def commit_entry(
         try:
             entry = pull_citation(args, entry)  # parse a=b c=d syntax
         except Exception:
-            print(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
+            logging.error(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
             raise
         entry["identifier"] = get_identifier(entry, entries)
         entries[entry["identifier"]] = entry
@@ -378,7 +378,7 @@ def parse_pairs(entry: EntryDict) -> EntryDict:
                     # Set or overwrite the value for other keys
                     entry[key] = value
             else:
-                print(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
+                logging.warning(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
     return entry
 
 

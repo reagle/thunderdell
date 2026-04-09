@@ -93,6 +93,7 @@ lint.select = [
 lint.ignore = [
 "D102", # Missing docstring in public method
 "D203", # Incompatible with D211 (no-blank-line-before-class)
+"D213", # Incompatible with D212 (multi-line-summary-second-line)
 "D107", # Missing docstring in __init__
 "E501", # doctests need long lines
 "PLR0912", # Too many branches in function or method

@@ -140,8 +140,6 @@ def walk_freeplane(
     author_node = None
     entry = EntryDict()
 
-    parent_map = {c: p for p in node.iter() for c in p}
-
     def _query_highlight(node, query):
         """Return a modified node with matches highlighted."""
         query_lower = query.lower()
@@ -160,13 +158,16 @@ def walk_freeplane(
         return None
 
     def _get_author_node(title_node):
-        """Return the nearest ancestor that is an author node using parent_map[node]."""
+        """Return the nearest ancestor that is an author node.
+
+        Uses lxml's .getparent() (not available in stdlib xml.etree.ElementTree).
+        """
         try:
-            ancestor = parent_map[title_node]
+            ancestor = title_node.getparent()
             while ancestor.get("STYLE_REF") != "author":
-                ancestor = parent_map[ancestor]
+                ancestor = ancestor.getparent()
             return ancestor
-        except KeyError:
+        except (KeyError, AttributeError):
             logging.error(f'''author node not found for "{title_node.get("TEXT")}"''')
             sys.exit()
 

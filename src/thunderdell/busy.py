@@ -11,8 +11,8 @@ __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
 __version__ = "1.0"
 
-# TODO
-# - archive URLs to f/old/`r=`
+# TODO: when logging a URL, fetch and archive the source (e.g., PDF, HTML)
+#   to ~/e/pdfs/ (organized by year and topic) and link to the local copy.
 
 import argparse
 import logging

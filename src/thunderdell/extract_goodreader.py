@@ -100,7 +100,8 @@ def process_text(args: argparse.Namespace, text: str) -> str:
                 if page_num_parsed.isupper():
                     page_num_parsed = ord(page_num_parsed) - 96
                     is_roman = False
-                    # TODO: weird PDFs using uppercase, what's after "Z"?
+                    # TODO: some PDFs use uppercase alpha page labels (A=1..Z=26);
+                    #   handle multi-letter labels (AA, AB, ...) beyond Z.
                 else:
                     page_num_parsed = roman.fromRoman(page_num_parsed.upper())
                     is_roman = True
@@ -135,7 +136,8 @@ def process_text(args: argparse.Namespace, text: str) -> str:
                 page_num_result = ""
             elif kind == "Highlight":
                 if color == "yellow":
-                    # TODO: some apps (Preview) highlight with #FACD5A
+                    # TODO: different PDF readers use different color formats
+                    #   (e.g., Preview uses hex #FACD5A instead of "yellow").
                     prefix = "excerpt."
                 if color == "cyan":
                     prefix = "section."

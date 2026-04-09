@@ -222,7 +222,7 @@ CSL_BIBLATEX_TYPE_MAP = {
     "legal_case":               "misc",
     "manuscript":               "unpublished",
     "thesis":                   "phdthesis",
-    # "thesis":                   "mastersthesis", # TODO: duplicate key
+    # "thesis":                   "mastersthesis", # NOTE: duplicate key
     "pamphlet":                 "booklet",
     "paper-conference":         "inproceedings",
     "personal_communication":   "letter",

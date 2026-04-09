@@ -297,7 +297,9 @@ def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
     Uses this convention: "d=20030723 j=Research Policy v=32 n=7 pp=1217-1241"
 
     """
-    # TODO: for Wayback Machine, make dates circa and prefix container 2022-09-26
+    # TODO: for Wayback Machine URLs, distinguish original publication metadata
+    #   (date, container, dead URL) from the archive capture (urldate, archive-url).
+    #   CSL has archive/archive-url fields for this; biblatex has eprint/eprinttype.
 
     entry = parse_pairs(entry)
 
@@ -586,7 +588,7 @@ def convert_double_low_line_to_nbsp(name: str) -> str:
 
     Freeplane fails to save &nbsp; so use "‗" double low line \u2017
     and replace with  .
-    TODO: Remove this hack and revise maps when bug fixed.
+    Permanent workaround: Freeplane WONTFIX'd the &nbsp; bug.
     https://github.com/freeplane/freeplane/issues/2472
 
     >>> convert_double_low_line_to_nbsp("Company‗Inc.")

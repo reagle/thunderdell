@@ -40,7 +40,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
         if filename.exists():
             filename.rename(bare.with_name(f"{bare.name}1{ext}"))
 
-    def get_tentative_ident(biblio):  # TODO: import from elsewhere? 2021-07-09
+    def get_tentative_ident(biblio):
         logging.info(biblio)
         return map2bib.get_identifier(
             {

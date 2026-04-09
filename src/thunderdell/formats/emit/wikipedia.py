@@ -34,7 +34,6 @@ def emit_wikipedia(args: argparse.Namespace, entries: EntriesDict):
     See: https://en.wikipedia.org/wiki/Template:Cite
 
     """
-    # TODO: Wikipedia dates may not be YYYY-MM, only YYYY or YYYY-MM-DD
 
     # debug(f"********************")
     # debug(f"{entries=}")
@@ -82,7 +81,9 @@ def emit_wikipedia(args: argparse.Namespace, entries: EntriesDict):
                     if value.circa:
                         date = "{{circa|" + date + "}}"
                     value = date
-                elif field == "title" and "booktitle" in entry:  # TODO: capital case?
+                elif field == "title" and "booktitle" in entry:
+                    # NOTE: Wikipedia MoS expects title case for English works,
+                    #   but auto-title-casing is error-prone; passed through as-is.
                     field = "chapter"
                 if field == "pages":
                     value = value.replace("-", "–")

@@ -112,7 +112,7 @@ class ScrapeReddit(ScrapeDefault):
 
     def get_date(self):
         # date_init = time.strftime("%Y%m%d", NOW)
-        created = time.mktime(NOW)  # TODO convert to float epock time
+        created = time.mktime(NOW)
         if self.type == "post":
             created = self.json[0]["data"]["children"][0]["data"]["created"]
         if self.type == "comment":

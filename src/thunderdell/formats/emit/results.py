@@ -194,7 +194,9 @@ def pretty_print(node: et._Element, entry: EntryDict, spaces: str, results_file)
     """Pretty print a node and descendants into indented HTML."""
     if node.get("TEXT") is not None:
         reverse_print(node, entry, spaces, results_file)
-    # TODO: replace manual HTML with simpleHTMLwriter,markup.py, or yattag
+    # NOTE: lxml.html.builder was evaluated as a replacement for manual HTML
+    #   strings but dropped: _query_highlight injects <strong> into TEXT
+    #   attributes, forcing fragment parsing that's worse than f-strings.
     if len(node) > 0:
         results_file.write(f'{spaces}<li><ul class="pprint_recurse">\n')
         spaces = spaces + " "

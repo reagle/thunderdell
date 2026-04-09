@@ -140,8 +140,9 @@ def csl_protect_case(title: str) -> str:
 def emit_json_csl(args: Any, entries: EntriesDict) -> None:
     """Emit citations in CSL/JSON format for input to pandoc."""
     # NOTE: csljson can NOT be included as markdown document yaml metadata
-    # TODO: reduce redundancies with emit_yasn
-    # TODO: yaml uses markdown `*` for italics, JSON needs <i>...</i>
+    # TODO: reduce redundancies with emit_yaml_csl
+    # TODO: titles with italics use markdown `*...*` (from YAML emitter) but
+    #   CSL-JSON expects HTML `<i>...</i>` — these need to be converted.
 
     output_list = []
     for _key, entry in sorted(entries.items()):

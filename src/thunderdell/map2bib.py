@@ -5,7 +5,6 @@ https://reagle.org/joseph/2009/01/thunderdell.html
 """
 
 from pathlib import Path
-from typing import Any
 
 import lxml.etree as et
 
@@ -81,7 +80,6 @@ def build_bib(
     emitter_func: Callable[[argparse.Namespace, EntriesDict], None],
 ) -> EntriesDict:
     """Build bibliography of entries from a Freeplane mindmap."""
-    links = set()
     done = set()
     entries: EntriesDict = {}
     mm_files = {file_name}
@@ -97,7 +95,7 @@ def build_bib(
         done.add(mm_file)
         if args.chase:
             new_links = {
-                (Path(mm_file).parent / link).resolve()
+                (mm_file.parent / link).resolve()
                 for link in links
                 if not any(word in link for word in ("syllabus", "readings"))
             }
@@ -120,7 +118,7 @@ def walk_freeplane(
     node: et._Element,
     mm_file: Path,
     entries: EntriesDict,
-    links: list[Any],
+    links: list[str],
 ) -> tuple[EntriesDict, list[str]]:
     """Walk the freeplane XML tree and build dictionary of entries.
 
@@ -162,14 +160,12 @@ def walk_freeplane(
 
         Uses lxml's .getparent() (not available in stdlib xml.etree.ElementTree).
         """
-        try:
-            ancestor = title_node.getparent()
-            while ancestor.get("STYLE_REF") != "author":
-                ancestor = ancestor.getparent()
-            return ancestor
-        except (KeyError, AttributeError):
-            logging.error(f'''author node not found for "{title_node.get("TEXT")}"''')
-            sys.exit()
+        ancestor = title_node.getparent()
+        while ancestor is not None and ancestor.get("STYLE_REF") != "author":
+            ancestor = ancestor.getparent()
+        if ancestor is None:
+            raise ValueError(f'author node not found for "{title_node.get("TEXT")}"')
+        return ancestor
 
     def _remove_identity_hints(authors: str) -> str:
         """Remove identity hints from names.
@@ -178,7 +174,7 @@ def walk_freeplane(
         - 'u/' for interviewee using known username
         - 'p/' for interviewee using pseudonym.
 
-        >>> remove_identity_hints("J Smith III, u/Jane Smith, p/AnonymousUser, u/Alice123")
+        >>> _remove_identity_hints("J Smith III, u/Jane Smith, p/AnonymousUser, u/Alice123")
         'J Smith III, AnonymousUser, Alice123'
 
         """
@@ -255,7 +251,7 @@ def show_pretty(args: argparse.Namespace, entries: EntriesDict) -> None:
     args.results_file.write(
         '    <title>Pretty Mind Map</title></head><body>\n<ul class="top">\n'
     )
-    for entry in list(entries.values()):
+    for entry in entries.values():
         args.query = entry["identifier"]
         emit_results(args, entries)
     args.results_file.write("</ul></body></html>\n")
@@ -268,7 +264,7 @@ def commit_entry(
     args: argparse.Namespace, entry: EntryDict, entries: EntriesDict
 ) -> EntriesDict:
     """Place an entry in the entries dictionary with default values if need be."""
-    if entry != {}:
+    if entry:
         entry.setdefault("author", [("John", "", "Doe", "")])
         entry.setdefault("ori_author", [("John", "", "Doe", "")])
         entry.setdefault("title", "Unknown")
@@ -278,8 +274,10 @@ def commit_entry(
         # pull the citation, create an identifier, and enter in entries
         try:
             entry = pull_citation(args, entry)  # parse a=b c=d syntax
-        except Exception:
-            logging.error(f"pull_citation error on {entry['author']}: {entry['_mm_file']}")
+        except (KeyError, ValueError, IndexError):
+            logging.error(
+                f"pull_citation error on {entry.get('title', '<no title>')}: {entry['_mm_file']}"
+            )
             raise
         entry["identifier"] = get_identifier(entry, entries)
         entries[entry["identifier"]] = entry
@@ -307,7 +305,8 @@ def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
     for date_field in ["date", "custom1", "origdate"]:
         if date_field in entry:
             entry[date_field] = parse_date(entry[date_field])
-    entry["urldate"] = entry.pop("custom1", None)
+    if custom1 := entry.pop("custom1", None):
+        entry["urldate"] = custom1
 
     # Reformat other names
     for name_field in ["editor", "translator"]:
@@ -424,7 +423,7 @@ def identity_add_title(ident: str, title: str) -> str:
     if len(title_words) == 1:
         suffix = f"{title_words[0][0]}{title_words[0][-2:]}"
     else:
-        suffix = "".join([word[0] for word in title_words if word not in BORING_WORDS])
+        suffix = "".join([word[0] for word in title_words if word and word not in BORING_WORDS])
         suffix = suffix[:3]
     ident = f"{ident}{suffix}"
     return ident
@@ -441,10 +440,8 @@ def identity_increment(ident: str, entries: EntriesDict) -> str:
     """
     while ident in entries:  # if it still collides
         # debug(f"\t trying     {ident} crash w/ {entries[ident]['title']}")
-        if ident[-1].isdigit():
-            suffix = int(ident[-1])
-            suffix += 1
-            ident = f"{ident[0:-1]}{suffix}"
+        if m := re.fullmatch(r"(.*?)(\d+)", ident):
+            ident = f"{m.group(1)}{int(m.group(2)) + 1}"
         else:
             ident += "1"
         # debug(f"\t yielded    {ident}")
@@ -518,14 +515,11 @@ def get_identifier(entry: EntryDict, entries: EntriesDict, delim: str = "") -> s
         last_names_of_authors.append(re.sub(r"\s", "", f"{von}{last}"))
 
     # Join the last names depending on how many there are: > 3 is "et al."
-    if len(last_names_of_authors) == 1:
-        name_part = last_names_of_authors[0]
-    elif len(last_names_of_authors) == 2:
-        name_part = delim.join(last_names_of_authors[0:2])
-    elif len(last_names_of_authors) == 3:
-        name_part = delim.join(last_names_of_authors[0:3])
-    elif len(last_names_of_authors) > 3:
-        name_part = f"{last_names_of_authors[0]}Etal"
+    match len(last_names_of_authors):
+        case 1 | 2 | 3 as n:
+            name_part = delim.join(last_names_of_authors[:n])
+        case _:
+            name_part = f"{last_names_of_authors[0]}Etal"
 
     if "date" not in entry:
         entry["date"] = PubDate(
@@ -569,17 +563,15 @@ def parse_date(when: str) -> PubDate:
     if when.endswith("~"):
         when = when[:-1]
         circa = True
-    if len(when) == 8:
-        year = when[0:4]
-        month = when[4:6]
-        day = when[6:8]
-    elif len(when) == 6:
-        year = when[0:4]
-        month = when[4:6]
-    elif len(when) <= 4:
-        year = when[0:4]
-    else:
-        raise Exception(f"{when} is malformed")
+    match len(when):
+        case 8:
+            year, month, day = when[0:4], when[4:6], when[6:8]
+        case 6:
+            year, month = when[0:4], when[4:6]
+        case 1 | 2 | 3 | 4:
+            year = when[0:4]
+        case _:
+            raise ValueError(f"{when} is malformed")
     return PubDate(year, month, day, circa, time)
 
 
@@ -631,13 +623,12 @@ def parse_names(names: str) -> list[PersonName]:
         first = last = von = jr = ""
         chunks = name.strip().split(" ")
 
-        if "van" in chunks and chunks[chunks.index("van") + 1] in (
-            "den",
-            "der",
+        if (
+            "van" in chunks
+            and (van_idx := chunks.index("van")) + 1 < len(chunks)
+            and chunks[van_idx + 1] in ("den", "der")
         ):
-            chunks[chunks.index("van") : chunks.index("van") + 2] = [
-                "van " + chunks[chunks.index("van") + 1]
-            ]
+            chunks[van_idx : van_idx + 2] = [f"van {chunks[van_idx + 1]}"]
 
         if len(chunks) > 1:
             if chunks[-1] in SUFFIXES:
@@ -655,8 +646,6 @@ def parse_names(names: str) -> list[PersonName]:
 
 def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    import argparse
-
     arg_parser = argparse.ArgumentParser(
         description="""Outputs YAML/CSL bibliography.\n
     Note: Keys are created by appending the first letter of first
@@ -829,7 +818,7 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     # Find the first matching config (query has highest priority)
     module_name = next(
-        (config[1] for config in emitter_configs if getattr(args, config[0], False)),
+        (name for flag, name in emitter_configs if getattr(args, flag, False)),
         None,
     )
 

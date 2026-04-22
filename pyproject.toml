@@ -16,7 +16,7 @@ dependencies = [
     "datefinder",
     "dotenv",
     "flask",
-    "lxml",
+    "lxml>=6.1.0",
     "mastodon.py",
     "pyenchant",
     "python-dotenv",

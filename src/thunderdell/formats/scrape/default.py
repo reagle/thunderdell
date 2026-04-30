@@ -45,6 +45,78 @@ def winnow_dates(self) -> datetime.datetime:
     return winnowed_dates[0]
 
 
+def _split_title_org(title: str, org: str) -> tuple[str, str]:
+    """Split a page title into (title, org) by detecting a delimiter.
+
+    Separate the title by a strong|weak delimiter and test if latter half is the
+    organization (if it has certain words (blog) or is too short).
+
+    Strong delimiter (|): org in beginning → switch title and org.
+
+    >>> _split_title_org('Reagle Blog | How AI Will Change Work Forever', 'Reagle')
+    ('How AI will change work forever', 'Reagle Blog')
+
+    Strong delimiter (|): org not found, end_ratio > 0.5 → switch.
+
+    >>> _split_title_org('Short | This Is The Much Longer Part Here', 'Unknown')
+    ('This is the much longer part here', 'Short')
+
+    Weak delimiter (:): org not found → preserve full title (colons are
+    common in subtitles and should not trigger a split).
+
+    >>> _split_title_org('Student AI Use: Stupid, Sneaky, and Skillful', 'Reagle')
+    ('Student AI use: Stupid, sneaky, and skillful', 'Reagle')
+    """
+    ORG_WORDS = ["blog", "lab", "center"]
+
+    title_ori = title
+    org_ori = org
+    logging.info(f"title_ori = '{title_ori}'")
+    logging.info(f"org_ori = '{org_ori}'")
+    STRONG_DELIMTERS = re.compile(r"\s[\|—«»]\s")
+    WEAK_DELIMITERS = re.compile(r"[:;-]\s")
+    if STRONG_DELIMTERS.search(title_ori):
+        logging.info("STRONG_DELIMTERS")
+        parts = STRONG_DELIMTERS.split(title_ori)
+        strong_split = True
+    else:
+        logging.info("WEAK_DELIMITERS")
+        parts = WEAK_DELIMITERS.split(title_ori)
+        strong_split = False
+    logging.info(f"parts = '{parts}'")
+    if len(parts) >= 2:
+        beginning, end = " : ".join(parts[0:-1]), parts[-1]
+        title, org = beginning, end
+        title_c14n = title.replace(" ", "").lower()
+        org_c14n = org.replace(" ", "").lower()
+        if org_ori.lower() in org_c14n.lower():
+            logging.info("org_ori.lower() in org_c14n.lower(): pass")
+            title, org = " ".join(parts[0:-1]), parts[-1]
+        elif org_ori.lower() in title_c14n:
+            logging.info("org_ori.lower() in title_c14n: switch")
+            title, org = parts[-1], " ".join(parts[0:-1])
+        elif strong_split:
+            logging.info(f"{beginning=}, {end=}")
+            end_ratio = float(len(end)) / len(beginning + end)
+            logging.info(
+                f" end_ratio: {len(end):d} / {len(beginning + end):d} = {end_ratio:.2f}"
+            )
+            # if beginning has org_word or end is large (>50%): switch
+            if end_ratio > 0.5 or any(word.lower() in beginning for word in ORG_WORDS):
+                logging.info("ratio and org_word: switch")
+                title = end
+                org = beginning
+        else:
+            # Weak delimiter (e.g., ":") and org not found in either
+            # part: colons are common in subtitles, so preserve the
+            # full title rather than risking a false split.
+            logging.info("weak delimiter, org not found: preserve full title")
+            title, org = title_ori, org_ori
+        title = sentence_case(title.strip())
+        org = org.strip()
+    return title, org
+
+
 class ScrapeDefault:
     """Default and base class scraper."""
 
@@ -77,7 +149,7 @@ class ScrapeDefault:
             "comment": self.comment,
             "url": self.url,
         }
-        biblio["title"], biblio["c_web"] = self.split_title_org()
+        biblio["title"], biblio["c_web"] = self.get_title_org()
         for site, container, container_type in SITE_CONTAINER_MAP:
             if site in biblio["url"]:
                 logging.info(f"{container=}")
@@ -210,55 +282,9 @@ class ScrapeDefault:
                 title = smart_to_markdown(title)
         return title
 
-    def split_title_org(self):
-        """Split the title from the org.
-
-        Separate the title by a delimiter and test if latter half is the
-        organization (if it has certain words (blog) or is too short).
-        """
-        ORG_WORDS = ["blog", "lab", "center"]
-
-        title = title_ori = self.get_title()
-        logging.info(f"title_ori = '{title_ori}'")
-        org = org_ori = self.get_org()
-        logging.info(f"org_ori = '{org_ori}'")
-        STRONG_DELIMTERS = re.compile(r"\s[\|—«»]\s")
-        WEAK_DELIMITERS = re.compile(r"[:;-]\s")
-        if STRONG_DELIMTERS.search(title_ori):
-            logging.info("STRONG_DELIMTERS")
-            parts = STRONG_DELIMTERS.split(title_ori)
-        else:
-            logging.info("WEAK_DELIMITERS")
-            parts = WEAK_DELIMITERS.split(title_ori)
-        logging.info(f"parts = '{parts}'")
-        if len(parts) >= 2:
-            beginning, end = " : ".join(parts[0:-1]), parts[-1]
-            title, org = beginning, end
-            title_c14n = title.replace(" ", "").lower()
-            org_c14n = org.replace(" ", "").lower()
-            if org_ori.lower() in org_c14n.lower():
-                logging.info("org_ori.lower() in org_c14n.lower(): pass")
-                title, org = " ".join(parts[0:-1]), parts[-1]
-            elif org_ori.lower() in title_c14n:
-                logging.info("org_ori.lower() in title_c14n: switch")
-                title, org = parts[-1], " ".join(parts[0:-1])
-            else:
-                logging.info(f"{beginning=}, {end=}")
-                end_ratio = float(len(end)) / len(beginning + end)
-                logging.info(
-                    " end_ratio: %d / %d = %.2f"
-                    % (len(end), len(beginning + end), end_ratio)
-                )
-                # if beginning has org_word or end is large (>50%): switch
-                if end_ratio > 0.5 or any(
-                    word.lower() in beginning for word in ORG_WORDS
-                ):
-                    logging.info("ratio and org_word: switch")
-                    title = end
-                    org = beginning
-            title = sentence_case(title.strip())
-            org = org.strip()
-        return title, org
+    def get_title_org(self):
+        """Return (title, org) by delegating to the pure helper."""
+        return _split_title_org(self.get_title(), self.get_org())
 
     def get_org(self):
         if self.url.startswith("file:"):

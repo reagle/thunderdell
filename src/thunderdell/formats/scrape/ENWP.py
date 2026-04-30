@@ -29,7 +29,7 @@ class ScrapeENWP(ScrapeDefault):
     def get_author(self):
         return "Wikipedia"
 
-    def split_title_org(self):
+    def get_title_org(self):
         return self.get_title(), self.get_org()
 
     def get_title(self):

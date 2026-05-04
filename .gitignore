@@ -1,12 +1,2 @@
-*.log
-.aider*
-.claude/
-.DS_Store
-.envrc
-__pycache__
-add
-build/
-error_log
 monkeytype.sqlite3
 src/thunderdell.egg-info/
-tmp/

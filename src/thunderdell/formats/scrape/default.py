@@ -10,6 +10,7 @@ __version__ = "1.0"
 
 
 import datetime
+import json
 import logging
 import re
 import string
@@ -157,8 +158,20 @@ class ScrapeDefault:
                 del biblio["c_web"]
         return biblio
 
-    def get_author(self):
+    def get_author(self) -> str:
         """Return guess of article author."""
+        return (
+            self._get_author_from_xpath()
+            or self._get_author_from_json_ld()
+            or self._get_author_from_regex()
+            or "UNKNOWN"
+        )
+
+    def _get_author_from_xpath(self) -> str | None:
+        """Check HTML meta tags and semantic attributes for author.
+
+        <meta name="author" content="Jane Smith">
+        """
         # sadly, lxml doesn't support xpath 2.0 and lower-case()
         AUTHOR_XPATHS = (
             """//meta[@name='DC.Contributor']/@content""",
@@ -184,52 +197,87 @@ class ScrapeDefault:
             # YouTube
             """//span[@itemprop='author']//link[@itemprop='name']/@content""",
         )
-        if self.html_p is not None:
-            logging.info("checking author xpaths")
-            for path in AUTHOR_XPATHS:
-                logging.info(f"trying = '{path}'")
-                xpath_result = self.html_p.xpath(path)
-                if xpath_result:
-                    logging.info(f"{xpath_result=}; {path=}")
-                    author = string.capwords(" ".join(xpath_result).strip())
-                    if author.lower().startswith("by "):
-                        author = author[3:]
-                    author = author.replace(" And ", ", ")
-                    logging.info(f"{author=}; {path=}")
-                    if author != "":
-                        return author
-                    else:
-                        continue
+        if self.html_p is None:
+            return None
+        logging.info("checking author xpaths")
+        for path in AUTHOR_XPATHS:
+            logging.info(f"trying = '{path}'")
+            xpath_result = self.html_p.xpath(path)
+            if xpath_result:
+                logging.info(f"{xpath_result=}; {path=}")
+                author = string.capwords(" ".join(xpath_result).strip())
+                if author.lower().startswith("by "):
+                    author = author[3:]
+                author = author.replace(" And ", ", ")
+                logging.info(f"{author=}; {path=}")
+                if author:
+                    return author
+        return None
 
-        if self.text:
-            AUTHOR_REGEXS = (
-                r"by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
-                r"^\W*(?:posted )?by[:]? (.*)",
-                r"\d\d\d\d.{,6}? by ([a-z ]*)",
-                r"\s{3,}by[:]? (.*)",
-            )
-            # info(self.text)
-            logging.info("checking regexs")
-            for regex in AUTHOR_REGEXS:
-                logging.info(f"trying = '{regex}'")
-                dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
-                if dmatch:
-                    logging.info(f'matched: "{regex}"')
-                    author = dmatch.group(1).strip()
-                    MAX_MATCH = 30
-                    if " and " in author:
+    def _get_author_from_json_ld(self) -> str | None:
+        """Check JSON-LD structured data for Schema.org author name.
+
+        <script type="application/ld+json">
+            {"@type": "NewsArticle", "author": {"name": "Jane Smith"}}
+        </script>
+        """
+        if self.html_p is None:
+            return None
+        blobs = self.html_p.xpath("//script[@type='application/ld+json']/text()")
+        if not isinstance(blobs, list):
+            return None
+        for blob in blobs:
+            try:
+                data = json.loads(str(blob))
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(data, dict):
+                continue
+            for node in [data, *data.get("@graph", [])]:
+                if not isinstance(node, dict):
+                    continue
+                author = node.get("author")
+                if isinstance(author, list) and author:
+                    author = author[0]
+                if isinstance(author, dict) and (
+                    name := author.get("name", "").strip()
+                ):
+                    logging.info(f"json-ld author = '{name}'")
+                    return string.capwords(name)
+        return None
+
+    def _get_author_from_regex(self) -> str | None:
+        """Check page text for byline patterns.
+
+        "by Jane Smith, posted on May 2024"
+        """
+        if not self.text:
+            return None
+        AUTHOR_REGEXS = (
+            r"by ([a-z ]*?)(?:-|, |/ | at | on | posted ).{,35}?\d\d\d\d",
+            r"^\W*(?:posted )?by[:]? (.*)",
+            r"\d\d\d\d.{,6}? by ([a-z ]*)",
+            r"\s{3,}by[:]? (.*)",
+        )
+        logging.info("checking regexs")
+        for regex in AUTHOR_REGEXS:
+            logging.info(f"trying = '{regex}'")
+            dmatch = re.search(regex, self.text, re.IGNORECASE | re.MULTILINE)
+            if dmatch:
+                logging.info(f'matched: "{regex}"')
+                author = dmatch.group(1).strip()
+                MAX_MATCH = 30
+                if " and " in author:
+                    MAX_MATCH += 35
+                    if ", " in author:
                         MAX_MATCH += 35
-                        if ", " in author:
-                            MAX_MATCH += 35
-                    logging.info(f"author = '{dmatch.group()}'")
-                    if len(author) > 4 and len(author) < MAX_MATCH:
-                        return string.capwords(author)
-                    else:
-                        logging.info(f"length {len(author)} is <4 or > {MAX_MATCH}")
-                else:
-                    logging.info(f'failed: "{regex}"')
-
-        return "UNKNOWN"
+                logging.info(f"author = '{dmatch.group()}'")
+                if len(author) > 4 and len(author) < MAX_MATCH:
+                    return string.capwords(author)
+                logging.info(f"length {len(author)} is <4 or > {MAX_MATCH}")
+            else:
+                logging.info(f'failed: "{regex}"')
+        return None
 
     def get_date(self):
         """Return date from xpath, guess from datefinder, or today's date."""

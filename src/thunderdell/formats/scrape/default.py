@@ -236,14 +236,13 @@ class ScrapeDefault:
             for node in [data, *data.get("@graph", [])]:
                 if not isinstance(node, dict):
                     continue
-                author = node.get("author")
-                if isinstance(author, list) and author:
-                    author = author[0]
-                if isinstance(author, dict) and (
-                    name := author.get("name", "").strip()
-                ):
-                    logging.info(f"json-ld author = '{name}'")
-                    return string.capwords(name)
+                match node.get("author"):
+                    case {"name": str(name)} if name.strip():
+                        logging.info(f"json-ld author = '{name}'")
+                        return string.capwords(name.strip())
+                    case [{"name": str(name)}, *_] if name.strip():
+                        logging.info(f"json-ld author = '{name}'")
+                        return string.capwords(name.strip())
         return None
 
     def _get_author_from_regex(self) -> str | None:

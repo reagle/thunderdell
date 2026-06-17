@@ -18,6 +18,7 @@ dependencies = [
     "flask",
     "lxml>=6.1.0",
     "mastodon.py",
+    "praw",
     "pyenchant",
     "python-dotenv",
     "requests",

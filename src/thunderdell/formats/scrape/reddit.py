@@ -13,11 +13,12 @@ import logging
 import re
 import time
 from datetime import datetime
-from typing import Any
 from urllib.parse import urlparse, urlunparse
 
+import praw
+
+import thunderdell.utils.web as uw
 from thunderdell.change_case import sentence_case
-from thunderdell.utils.web import get_JSON
 
 from .default import ScrapeDefault
 
@@ -26,8 +27,6 @@ NOW = time.localtime()
 
 class ScrapeReddit(ScrapeDefault):
     """Scrape Reddit class."""
-
-    json: list[Any]
 
     def __init__(self, url_clean, comment):
         print("Scraping reddit", end="\n")
@@ -43,23 +42,38 @@ class ScrapeReddit(ScrapeDefault):
             re.VERBOSE,
         )
 
+        reddit = praw.Reddit(
+            user_agent=uw.get_credential("REDDIT_USER_AGENT"),
+            client_id=uw.get_credential("REDDIT_CLIENT_ID"),
+            client_secret=uw.get_credential("REDDIT_CLIENT_SECRET"),
+            username=uw.get_credential("REDDIT_USERNAME"),
+            password=uw.get_credential("REDDIT_PASSWORD"),
+        )
+
         self.type = "unknown"
         url_parsed = urlparse(url_clean)._replace(query="", fragment="")
         url_clean = urlunparse(url_parsed)
-        self.json = get_JSON(f"{url_clean}.json")
+
         if match := RE_REDDIT_URL.match(url_clean):
             self.url_dict = match.groupdict()
             logging.info(f"{self.url_dict=}")
             if self.url_dict["cid"]:
                 self.type = "comment"
+                self.reddit_obj = reddit.comment(id=self.url_dict["cid"])
+                self.submission = self.reddit_obj.submission
             elif self.url_dict["pid"]:
                 self.type = "post"
+                self.reddit_obj = reddit.submission(url=url_clean)
+                self.submission = self.reddit_obj
             elif self.url_dict["root"]:
-                if self.url_dict["root"].startswith("r/"):
+                root = self.url_dict["root"]
+                if root.startswith("r/"):
                     self.type = "subreddit"
-                elif self.url_dict["root"].startswith("u/"):
+                    self.reddit_obj = reddit.subreddit(root[2:])
+                elif root.startswith(("u/", "user/")):
                     self.type = "user"
-                if self.url_dict["root"].startswith("wiki/"):
+                    self.reddit_obj = reddit.redditor(root.split("/", 1)[1])
+                elif root.startswith("wiki/"):
                     self.type = "wiki"
         else:
             raise TypeError("Unknown type of Reddit resource.")
@@ -74,7 +88,6 @@ class ScrapeReddit(ScrapeDefault):
             "excerpt": self.get_excerpt(),
             "comment": self.comment,
             "url": self.url,
-            # "organization": self.get_org(),
         }
         container = "c_web"
         if self.type in ("post", "comment"):
@@ -85,7 +98,6 @@ class ScrapeReddit(ScrapeDefault):
     def get_org(self):
         logging.info("GETTING ORG")
         organization = "Reddit"
-        logging.info(f"{self.type=}")
         if self.type in ["post", "comment"]:
             organization = self.url_dict["root"]
         logging.info(f"{organization=}")
@@ -93,42 +105,34 @@ class ScrapeReddit(ScrapeDefault):
 
     def get_author(self):
         author = "Reddit"
-        if self.type == "post":
-            author = self.json[0]["data"]["children"][0]["data"]["author"]
-        if self.type == "comment":
-            logging.info(f"{self.json[1]=}")
-            author = self.json[1]["data"]["children"][0]["data"]["author"]
+        if self.type in ("post", "comment"):
+            author = self.reddit_obj.author.name if self.reddit_obj.author else "[deleted]"
         logging.info(f"{author=}")
-        return author.strip()
+        return author
 
     def get_title(self):
         title = "UNKNOWN"
         if self.type == "subreddit":
             title = self.url_dict["root"]
-        elif self.type in ["post", "comment"]:
-            title = sentence_case(self.json[0]["data"]["children"][0]["data"]["title"])
+        elif self.type in ("post", "comment"):
+            title = sentence_case(self.submission.title)
         logging.info(f"{title=}")
         return title.strip()
 
     def get_date(self):
-        # date_init = time.strftime("%Y%m%d", NOW)
         created = time.mktime(NOW)
-        if self.type == "post":
-            created = self.json[0]["data"]["children"][0]["data"]["created"]
-        if self.type == "comment":
-            created = self.json[1]["data"]["children"][0]["data"]["created"]
-        date = datetime.fromtimestamp(created).strftime("%Y%m%d")
-        return date.strip()
+        if self.type in ("post", "comment"):
+            created = self.reddit_obj.created_utc
+        return datetime.fromtimestamp(created).strftime("%Y%m%d")
 
     def get_excerpt(self):
         excerpt = ""
         if self.type == "post":
-            post_data = self.json[0]["data"]["children"][0]["data"]
-            if "selftext" in post_data:
-                excerpt = post_data["selftext"]  # self post
-            elif "url_overridden_by_dest" in post_data:
-                excerpt = post_data["url_overridden_by_dest"]  # link post
+            if self.reddit_obj.selftext:
+                excerpt = self.reddit_obj.selftext
+            elif hasattr(self.reddit_obj, "url"):
+                excerpt = self.reddit_obj.url
         elif self.type == "comment":
-            excerpt = self.json[1]["data"]["children"][0]["data"]["body"]
+            excerpt = self.reddit_obj.body
         logging.info(f"returning {excerpt}")
         return excerpt.strip()

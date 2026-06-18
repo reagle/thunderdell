@@ -52,6 +52,8 @@ query-doi = "thunderdell.query_doi:main"
 query-isbn = "thunderdell.query_isbn:main"
 [tool.uv]
 config-settings = { editable_mode = "compat" }  # Essential for src layout compatibility
+# Force cryptography upgrade past atproto's <47 pin to resolve security advisory
+override-dependencies = ["cryptography>=49.0.0"]
 
 [tool.setuptools]
 # Add this line because your package code seems to be inside the 'src' directory

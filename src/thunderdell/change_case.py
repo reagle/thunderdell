@@ -16,7 +16,6 @@ import logging
 import re
 import string
 import sys
-from pathlib import Path
 
 # from thunderdell.config import PROJECT_ROOT
 from thunderdell.config import PROPER_NOUNS_FN, WORD_LIST_FN
@@ -144,6 +143,86 @@ def change_case(text: str, case_direction: str="sentence") -> str:
         .replace(" . ", ". ")
         .replace(" ? ", "? ")
     )
+
+
+# Ordered alternatives, longest/most-specific first. Each captured group is an
+# opaque literal that must pass through case conversion untouched. Text in the
+# gaps *between* matches is the visible prose that gets case-converted.
+MARKDOWN_LITERAL_RE = re.compile(
+    r"""
+      (`[^`]+`)            # inline code span
+    | (\[-?@[^\]]+\])      # pandoc citation, e.g. [@Key2020] or [-@Key2020]
+    | (\]\([^)]*\))        # link/image tail: ](url) or ](url "title")
+    | (\]\{[^}]*\})        # bracketed-span attribute tail: ]{.class}
+    | (\]\[[^\]]*\])       # reference-link tail: ][ref]
+    | (\{[^}]*\})          # standalone attribute block, e.g. {.img_left}
+    | (<[^>]+>)            # raw inline HTML tag
+    | (\$[^$]+\$)          # inline math
+    | ([\[\]*_~])          # lone markdown delimiter characters
+    | (\s+)                # runs of whitespace
+    """,
+    re.VERBOSE,
+)
+
+# Visible-word tokens ending in one of these open a new phrase: the next visible
+# word is capitalized (mirrors change_case()'s ":.?" phrase rule).
+PHRASE_ENDERS = (":", ".", "?")
+
+
+def _tokenize_markdown(text: str) -> list[tuple[bool, str]]:
+    """Split markdown into (is_word, token) pairs.
+
+    ``is_word`` is True only for visible prose between markup; markup literals,
+    delimiters, and whitespace are returned verbatim with ``is_word`` False.
+
+    >>> _tokenize_markdown("hi *there*")
+    [(True, 'hi'), (False, ' '), (False, '*'), (True, 'there'), (False, '*')]
+    """
+    tokens: list[tuple[bool, str]] = []
+    pos = 0
+    for match in MARKDOWN_LITERAL_RE.finditer(text):
+        if match.start() > pos:  # visible prose before this literal
+            tokens.append((True, text[pos : match.start()]))
+        tokens.append((False, match.group()))
+        pos = match.end()
+    if pos < len(text):  # trailing visible prose
+        tokens.append((True, text[pos:]))
+    return tokens
+
+
+def change_case_markdown(text: str, case_direction: str = "sentence") -> str:
+    """Change case of markdown, leaving markup (links, citations, attributes) intact.
+
+    Only the visible words a reader sees are converted; URLs, citation keys,
+    pandoc attribute blocks, inline code, and raw HTML pass through untouched.
+    A leading ATX heading marker is preserved so the first visible word is
+    capitalized.
+
+    >>> change_case_markdown("## cooperation needs attention {.img_left}", "title")
+    '## Cooperation Needs Attention {.img_left}'
+    >>> change_case_markdown("[cooperation needs attention](http://X)", "sentence")
+    '[Cooperation needs attention](http://X)'
+    >>> change_case_markdown("are you tech savvy? [@Sidibe2015mat]", "sentence")
+    'Are you tech savvy? [@Sidibe2015mat]'
+    >>> change_case_markdown("the *best* idea in here", "title")
+    'The *Best* Idea in Here'
+    >>> change_case_markdown("using `code` here", "title")
+    'Using `code` Here'
+    """
+    marker_match = re.match(r"#{1,6}\s+", text)
+    marker = marker_match.group() if marker_match else ""
+    body = text[len(marker) :]
+
+    new_tokens = []
+    is_first = True
+    for is_word, token in _tokenize_markdown(body):
+        if not is_word:
+            new_tokens.append(token)
+            continue
+        new_tokens.append(change_case_word(token, is_first, case_direction))
+        is_first = token.rstrip().endswith(PHRASE_ENDERS)
+
+    return marker + "".join(new_tokens)
 
 
 def change_case_word(word: str, is_first: bool, case_direction: str) -> str:
@@ -292,6 +371,13 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         help="Capitalize safely, e.g., preserve abbreviations",
     )
     arg_parser.add_argument(
+        "-m",
+        "--markdown",
+        action="store_true",
+        default=False,
+        help="treat input as markdown; leave links/citations/attributes/code intact",
+    )
+    arg_parser.add_argument(
         "-o",
         "--out-filename",
         type=Path,
@@ -346,7 +432,8 @@ def main(args: argparse.Namespace | None = None):
     case_type = "title" if args.title_case else "sentence"
     logging.debug(f"{args.text=}")
     logging.debug(f"case_type = {case_type}")
-    print(change_case(args.text, case_type))
+    converter = change_case_markdown if args.markdown else change_case
+    print(converter(args.text, case_type))
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@
 
 """Run tests against golden YAML results; useful for detecting inadvertent changes."""
 
-from thunderdell.change_case import change_case
+from thunderdell.change_case import change_case, change_case_markdown
 
 CASES = """
 1My Defamation 2.0 Experience: A Story of Wikipedia and a Boy
@@ -62,5 +62,34 @@ def test_change_case():
         assert result == expect
 
 
+# (case_direction, input, expected) triples exercising markup preservation.
+MARKDOWN_CASES = [
+    # links: visible text cased, URL frozen
+    ("title", "[cooperation needs attention](http://X)",
+     "[Cooperation Needs Attention](http://X)"),
+    ("sentence", "[Cooperation Needs Attention](http://X)",
+     "[Cooperation needs attention](http://X)"),
+    # citations are opaque
+    ("sentence", "Are you tech savvy? [@Sidibe2015mat]",
+     "Are you tech savvy? [@Sidibe2015mat]"),
+    # pandoc attribute block on a heading; ATX marker preserved
+    ("title", "## cooperation needs attention {.img_left}",
+     "## Cooperation Needs Attention {.img_left}"),
+    ("sentence", "## Cooperation Needs Attention {.img_left}",
+     "## Cooperation needs attention {.img_left}"),
+    # emphasis delimiters frozen, content cased; BORING word stays lowercase
+    ("title", "the *best* idea in here", "The *Best* Idea in Here"),
+    # inline code is opaque
+    ("title", "using `code` here", "Using `code` Here"),
+]
+
+
+def test_change_case_markdown():
+    """Tests markdown-aware case conversion leaves markup intact."""
+    for direction, test, expect in MARKDOWN_CASES:
+        assert change_case_markdown(test, direction) == expect
+
+
 if __name__ == "__main__":
     test_change_case()
+    test_change_case_markdown()

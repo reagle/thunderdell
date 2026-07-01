@@ -67,6 +67,16 @@ def _split_title_org(title: str, org: str) -> tuple[str, str]:
 
     >>> _split_title_org('Student AI Use: Stupid, Sneaky, and Skillful', 'Reagle')
     ('Student AI use: Stupid, sneaky, and skillful', 'Reagle')
+
+    Strong delimiter (·): GitHub middot separator keeps the issue title
+    rather than truncating at the colon in "[Feature request]:".
+
+    >>> _split_title_org(
+    ...     '[Feature request]: Allow separate reset times '
+    ...     '· Issue #1820 · hovancik/stretchly · GitHub',
+    ...     'Github',
+    ... )
+    ('[feature request]: Allow separate reset times issue #1820 hovancik/stretchly', 'GitHub')
     """
     ORG_WORDS = ["blog", "lab", "center"]
 
@@ -74,7 +84,7 @@ def _split_title_org(title: str, org: str) -> tuple[str, str]:
     org_ori = org
     logging.info(f"title_ori = '{title_ori}'")
     logging.info(f"org_ori = '{org_ori}'")
-    STRONG_DELIMTERS = re.compile(r"\s[\|—«»]\s")
+    STRONG_DELIMTERS = re.compile(r"\s[\|—«»·]\s")
     WEAK_DELIMITERS = re.compile(r"[:;-]\s")
     if STRONG_DELIMTERS.search(title_ori):
         logging.info("STRONG_DELIMTERS")

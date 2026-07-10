@@ -43,6 +43,29 @@ def get_credential(key: str) -> str:
     return value
 
 
+def resolve_encoding(
+    content_type: str, response_encoding: str, apparent_encoding: str
+) -> str:
+    """Pick the encoding to decode HTML bytes with.
+
+    requests defaults response.encoding to ISO-8859-1 when the server's
+    Content-Type omits a charset, which mangles UTF-8 pages (e.g. curly
+    quotes become mojibake like "Donâ€™t"). Only trust
+    response_encoding when the server declared a charset explicitly;
+    otherwise sniff the actual encoding.
+
+    >>> resolve_encoding("text/html; charset=utf-8", "utf-8", "ISO-8859-1")
+    'utf-8'
+    >>> resolve_encoding("text/html", "ISO-8859-1", "utf-8")
+    'utf-8'
+    >>> resolve_encoding("text/html", "", "")
+    'utf-8'
+    """
+    if "charset=" in content_type.lower():
+        return response_encoding or "utf-8"
+    return apparent_encoding or "utf-8"
+
+
 def get_HTML(
     url: str,
     referer: str = "",
@@ -69,8 +92,11 @@ def get_HTML(
 
     HTML_bytes = response.content
 
-    # Detect the encoding from the response
-    encoding = response.encoding or "utf-8"
+    encoding = resolve_encoding(
+        response.headers.get("content-type", ""),
+        response.encoding or "",
+        response.apparent_encoding or "",
+    )
 
     # Parse the HTML using the detected encoding
     parser_html = etree.HTMLParser(encoding=encoding)

@@ -326,6 +326,8 @@ def is_proper_noun(word: str) -> bool:
     False
     >>> is_proper_noun('r/AmItheButtface')
     True
+    >>> is_proper_noun("Don't")
+    False
 
     """
     logging.debug(f"    word = '{word}'")
@@ -334,7 +336,10 @@ def is_proper_noun(word: str) -> bool:
     if len(parts) > 1:
         logging.debug("    recursing")
         return any(is_proper_noun(part) for part in parts)
-    word = "".join(ch for ch in word if ch not in set(string.punctuation))
+    # Strip only leading/trailing punctuation; internal punctuation (e.g. the
+    # apostrophe in "Don't") must survive so the word still matches how
+    # contractions are spelled in the wordlist.
+    word = word.strip(string.punctuation)
     if word in proper_nouns:  # in list of proper nouns?
         logging.debug("    word in proper_nouns: True")
         return True

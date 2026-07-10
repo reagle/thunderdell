@@ -335,8 +335,12 @@ class ScrapeDefault:
             if tmatch:
                 title = tmatch.group(1).strip()
                 title = unescape_entities(title)
-                title = sentence_case(title)
+                # Straighten curly quotes before sentence-casing: is_proper_noun()
+                # looks up words against a wordlist that uses straight
+                # apostrophes, so a curly-quoted contraction like "Don’t"
+                # would otherwise fail to match "don't" and stay capitalized.
                 title = smart_to_markdown(title)
+                title = sentence_case(title)
         return title
 
     def get_title_org(self):

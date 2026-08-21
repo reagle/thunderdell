@@ -276,7 +276,9 @@ def emit_yaml_csl(args: argparse.Namespace, entries: EntriesDict) -> None:
                         elif "pages" in entry:
                             # logging.debug("  skipping url, paginated item")
                             continue
-                    # logging.debug(f"  writing url in pointy brackets WITHOUT escape_yaml")
+                    # logging.debug(
+                    #     f"  writing url in pointy brackets WITHOUT escape_yaml"
+                    # )
                     # Placing URL in pointy brackets is useful and avoids having
                     # to escape specific characters.
                     args.outfd.write(f'  URL: "<{value}>"\n')

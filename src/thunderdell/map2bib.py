@@ -380,7 +380,9 @@ def parse_pairs(entry: EntryDict) -> EntryDict:
                     # Set or overwrite the value for other keys
                     entry[key] = value
             else:
-                logging.warning(f"Key error on {short}, {entry['title']}, {entry['_mm_file']}")
+                logging.warning(
+                    f"Key error on {short}, {entry['title']}, {entry['_mm_file']}"
+                )
     return entry
 
 
@@ -423,7 +425,9 @@ def identity_add_title(ident: str, title: str) -> str:
     if len(title_words) == 1:
         suffix = f"{title_words[0][0]}{title_words[0][-2:]}"
     else:
-        suffix = "".join([word[0] for word in title_words if word and word not in BORING_WORDS])
+        suffix = "".join(
+            [word[0] for word in title_words if word and word not in BORING_WORDS]
+        )
         suffix = suffix[:3]
     ident = f"{ident}{suffix}"
     return ident

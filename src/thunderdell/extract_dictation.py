@@ -402,7 +402,8 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         mm_fd.write("</node>\n</map>\n")  # Close root node and map
 
         logging.info(f"Final entry state before potential publish: {current_entry=}")
-        # Publish if requested and required fields are present in the *last* entry processed
+        # Publish if requested and required fields are present in the *last*
+        # entry processed
         if args.publish and all(
             k in current_entry for k in ["summary", "title", "url"]
         ):

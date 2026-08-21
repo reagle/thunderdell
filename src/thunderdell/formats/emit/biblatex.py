@@ -307,7 +307,7 @@ def emit_biblatex(args: argparse.Namespace, entries: EntriesDict):
                 #   date is a named_tuple that doesn't need escaping
                 # debug(f"{field}")
                 if field in ("author", "editor", "translator"):
-                    value = escape_latex(value, exclude=['{', '}'])
+                    value = escape_latex(value, exclude=["{", "}"])
                 elif field not in (
                     "url",
                     "howpublished",

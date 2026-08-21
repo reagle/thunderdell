@@ -106,7 +106,9 @@ class ScrapeReddit(ScrapeDefault):
     def get_author(self):
         author = "Reddit"
         if self.type in ("post", "comment"):
-            author = self.reddit_obj.author.name if self.reddit_obj.author else "[deleted]"
+            author = (
+                self.reddit_obj.author.name if self.reddit_obj.author else "[deleted]"
+            )
         logging.info(f"{author=}")
         return author
 

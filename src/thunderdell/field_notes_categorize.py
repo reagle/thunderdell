@@ -71,7 +71,8 @@ def categorize_mindmap(old_fn: Path) -> None:
                 f"No 'kw=' found or extracted for node: {node_text[:50]}..."
             )
 
-        # Navigate up to the ancestor 'author' node (assuming structure: author > title > cite)
+        # Navigate up to the ancestor 'author' node (assuming structure:
+        # author > title > cite)
         title_node = node.getparent()
         if title_node is None:
             logging.warning(

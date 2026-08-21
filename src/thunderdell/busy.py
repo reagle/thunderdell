@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Log and annotate a URL to loggers with data from scraper.
 
-Log and annotate a URL to loggers (e.g., mindmap, blogs) with meta/bibliographic data about the URL from a scraper.
+Log and annotate a URL to loggers (e.g., mindmap, blogs) with
+meta/bibliographic data about the URL from a scraper.
 
 https://reagle.org/joseph/2009/01/thunderdell.html
 """
@@ -69,7 +70,10 @@ def get_scraper(url: str, comment: str) -> ScrapeDefault:
         ("arxiv:", (SCRAPE_MODULE_PREFIX + "arxiv", "ScrapeArXiv")),
         ("https://en.wikipedia.org/w", (SCRAPE_MODULE_PREFIX + "ENWP", "ScrapeENWP")),
         ("https://marc.info/", (SCRAPE_MODULE_PREFIX + "MARC", "ScrapeMARC")),
-        ("https://meta.wikimedia.org/w", (SCRAPE_MODULE_PREFIX + "WMMeta", "ScrapeWMMeta")),
+        (
+            "https://meta.wikimedia.org/w",
+            (SCRAPE_MODULE_PREFIX + "WMMeta", "ScrapeWMMeta"),
+        ),
         ("https://ohai.social/", (SCRAPE_MODULE_PREFIX + "mastodon", "ScrapeMastodon")),
         ("https://x.com/", (SCRAPE_MODULE_PREFIX + "twitter", "ScrapeTwitter")),
         ("https://twitter.com/", (SCRAPE_MODULE_PREFIX + "twitter", "ScrapeTwitter")),

@@ -4,6 +4,7 @@
 http://en.wikipedia.org/wiki/Sentence_case
 https://www.zotero.org/trac/ticket/832
 """
+
 from pathlib import Path
 
 __author__ = "Joseph Reagle"
@@ -94,7 +95,7 @@ def title_case(text):
     return change_case(text, case_direction="title")
 
 
-def change_case(text: str, case_direction: str="sentence") -> str:
+def change_case(text: str, case_direction: str = "sentence") -> str:
     """Change to sentence or title case.
 
     >>> change_case('I Am A Sentence.', 'sentence')

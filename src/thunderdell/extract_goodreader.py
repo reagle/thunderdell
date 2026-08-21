@@ -49,7 +49,7 @@ RE_PAGE_NUM = re.compile(
 
 
 def process_text(args: argparse.Namespace, text: str) -> str:
-    """Process text for annotation kind, color, and page number, joining lines as needed."""
+    """Process text for annotation kind, color, and page number, joining lines."""
     """
     | first_specified | first_parsed | offset | parsed | result |
     |-----------------|--------------|--------|--------|--------|
@@ -170,7 +170,10 @@ def add_doi_isbn_info(text_joined: str) -> list[str]:
 def clean_pdf_ocr(text: str) -> str:
     """Remove OCR artifacts of junk hyphens and missing spaces.
 
-    >>> clean_pdf_ocr('Do follow-ups for your coworker until lu-nch-bre-ak --- he sometimesloses focus.')
+    >>> clean_pdf_ocr(
+    ...     'Do follow-ups for your coworker until lu-nch-bre-ak --- '
+    ...     'he sometimesloses focus.'
+    ... )
     'Do follow-ups for your coworker until lunch-break --- he sometimes loses focus.'
     """
     new_text = remove_junk_hyphens(text)

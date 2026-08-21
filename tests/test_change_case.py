@@ -65,18 +65,33 @@ def test_change_case():
 # (case_direction, input, expected) triples exercising markup preservation.
 MARKDOWN_CASES = [
     # links: visible text cased, URL frozen
-    ("title", "[cooperation needs attention](http://X)",
-     "[Cooperation Needs Attention](http://X)"),
-    ("sentence", "[Cooperation Needs Attention](http://X)",
-     "[Cooperation needs attention](http://X)"),
+    (
+        "title",
+        "[cooperation needs attention](http://X)",
+        "[Cooperation Needs Attention](http://X)",
+    ),
+    (
+        "sentence",
+        "[Cooperation Needs Attention](http://X)",
+        "[Cooperation needs attention](http://X)",
+    ),
     # citations are opaque
-    ("sentence", "Are you tech savvy? [@Sidibe2015mat]",
-     "Are you tech savvy? [@Sidibe2015mat]"),
+    (
+        "sentence",
+        "Are you tech savvy? [@Sidibe2015mat]",
+        "Are you tech savvy? [@Sidibe2015mat]",
+    ),
     # pandoc attribute block on a heading; ATX marker preserved
-    ("title", "## cooperation needs attention {.img_left}",
-     "## Cooperation Needs Attention {.img_left}"),
-    ("sentence", "## Cooperation Needs Attention {.img_left}",
-     "## Cooperation needs attention {.img_left}"),
+    (
+        "title",
+        "## cooperation needs attention {.img_left}",
+        "## Cooperation Needs Attention {.img_left}",
+    ),
+    (
+        "sentence",
+        "## Cooperation Needs Attention {.img_left}",
+        "## Cooperation needs attention {.img_left}",
+    ),
     # emphasis delimiters frozen, content cased; BORING word stays lowercase
     ("title", "the *best* idea in here", "The *Best* Idea in Here"),
     # inline code is opaque

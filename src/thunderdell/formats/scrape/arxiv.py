@@ -109,7 +109,9 @@ class ScrapeArXiv(ScrapeDefault):
 
         >>> scraper = ScrapeArXiv("arXiv:2301.00001", "test")
         Scraping arXiv;
-        >>> scraper.dict_bib = {"author": [{"name": "John Doe"}, {"name": "Jane Smith"}]}
+        >>> scraper.dict_bib = {
+        ...     "author": [{"name": "John Doe"}, {"name": "Jane Smith"}]
+        ... }
         >>> scraper.get_author()
         'John Doe, Jane Smith'
         >>> scraper.dict_bib = {"author": {"name": "Seth Drake"}}

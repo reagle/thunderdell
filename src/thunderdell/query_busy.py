@@ -228,15 +228,23 @@ def main(argv: list[str] | None = None):
     logging.debug(f"Arguments parsed: {args}")
 
     if args.server:
-        # Internal mode to run the server process
-        app.run(debug=True, port=args.port)
+        # Internal mode to run the server process.
+        # Spawned detached from a terminal, so no debug reloader: its
+        # ensure_echo_on() does a tcsetattr on our inherited tty, which
+        # raises SIGTTOU/EIO from a background process group.
+        app.run(debug=False, port=args.port, use_reloader=False)
 
     elif args.query:
         # CLI/client mode
         if not is_port_in_use(args.port):
             logging.info(f"Server not running on port {args.port}. Starting it.")
             command = [sys.executable, __file__, "--server", f"--port={args.port}"]
-            subprocess.Popen(command, close_fds=True)
+            subprocess.Popen(
+                command,
+                close_fds=True,
+                start_new_session=True,
+                stdin=subprocess.DEVNULL,
+            )
             logging.info(f"Server process started with command: {' '.join(command)}")
             time.sleep(2)  # Give server time to start
         else:

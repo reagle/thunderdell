@@ -38,13 +38,19 @@ class ScrapeENWP(ScrapeDefault):
         return title.replace(" - Wikipedia", "")
 
     def get_permalink(self):
-        if "oldid" not in self.url and "=Special:" not in self.url:
-            permalink = self.url.split("/wiki/")[0] + re.search(
-                '''<li id="t-permalink".*?><a href="(.*?)"''', self.html_u
-            ).group(1)
+        # Fall back to the URL if the page (or skin) has no permalink item
+        if (
+            "oldid" not in self.url
+            and "=Special:" not in self.url
+            and (
+                match := re.search(
+                    '''<li id="t-permalink".*?><a href="(.*?)"''', self.html_u or ""
+                )
+            )
+        ):
+            permalink = self.url.split("/wiki/")[0] + match.group(1)
             return unescape_entities(permalink)
-        else:
-            return self.url
+        return self.url
 
     def get_date(self):
         """Find date within span."""

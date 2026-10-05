@@ -32,11 +32,14 @@ class ScrapeWMMeta(ScrapeDefault):
         return title.replace(" - Meta", "")
 
     def get_date(self):  # Meta is often foobar because of proxy bugs
-        day, month, year = re.search(
+        match = re.search(
             r"""<li id="footer-info-lastmod"> This page was last edited """
             + r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
-            self.html_u,
-        ).groups()
+            self.html_u or "",
+        )
+        if match is None:  # no footer: use the generic meta/datefinder/today logic
+            return ScrapeDefault.get_date(self)
+        day, month, year = match.groups()
         month = bf.MONTH2DIGIT[month[0:3].lower()]
         return f"{int(year)}{int(month):02d}{int(day):02d}"
 
@@ -59,6 +62,9 @@ class ScrapeWMMeta(ScrapeDefault):
 
     def get_permalink(self):
         url_host = self.url.split("/wiki/")[0]
-        url_path = self.html_p.xpath("""//li[@id="t-permalink"]/a/@href""")[0]
-        permalink = url_host + url_path
+        xpath = """//li[@id="t-permalink"]/a/@href"""
+        url_paths = self.html_p.xpath(xpath) if self.html_p is not None else []
+        if not isinstance(url_paths, list) or not url_paths:
+            return self.url
+        permalink = url_host + str(url_paths[0])
         return unescape_entities(permalink)

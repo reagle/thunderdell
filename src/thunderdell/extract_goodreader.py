@@ -98,10 +98,8 @@ def process_text(args: argparse.Namespace, text: str) -> str:
                 is_roman = False
             elif page_num_parsed.isalpha():
                 if page_num_parsed.isupper():
-                    page_num_parsed = ord(page_num_parsed) - 96
+                    page_num_parsed = upper_page_label(page_num_parsed)
                     is_roman = False
-                    # TODO: some PDFs use uppercase alpha page labels (A=1..Z=26);
-                    #   handle multi-letter labels (AA, AB, ...) beyond Z.
                 else:
                     page_num_parsed = roman.fromRoman(page_num_parsed.upper())
                     is_roman = True
@@ -144,13 +142,32 @@ def process_text(args: argparse.Namespace, text: str) -> str:
                     page_num_result = ""
         else:
             logging.debug(f"testing {is_roman=}")
-            if page_num_result and is_roman:
-                page_num_result = roman.toRoman(page_num_result).lower()
+            # A local, so a highlight's second line does not re-romanize the page
+            page_shown = page_num_result
+            if page_shown and is_roman:
+                page_shown = roman.toRoman(int(page_shown)).lower()
             fixed_line = smart_to_markdown(clean_pdf_ocr(line))
-            logging.debug(f"{page_num_result} {prefix} {fixed_line}".strip())
-            text_new.append(f"{page_num_result} {prefix} {fixed_line}".strip())
+            logging.debug(f"{page_shown} {prefix} {fixed_line}".strip())
+            text_new.append(f"{page_shown} {prefix} {fixed_line}".strip())
 
     return "\n".join(text_new)
+
+
+def upper_page_label(label: str) -> int:
+    """Convert an uppercase page label to a number: roman if valid, else A=1, AA=27.
+
+    >>> [upper_page_label(label) for label in ("A", "Z", "AA", "XII", "IV")]
+    [1, 26, 27, 12, 4]
+    """
+    if len(label) > 1:
+        try:
+            return roman.fromRoman(label)
+        except roman.InvalidRomanNumeralError:
+            pass
+    number = 0
+    for letter in label:
+        number = number * 26 + ord(letter) - ord("A") + 1
+    return number
 
 
 def add_doi_isbn_info(text_joined: str) -> list[str]:
@@ -358,12 +375,10 @@ def main(args: argparse.Namespace | None = None) -> None:
                 subprocess.call(["open", "-a", "Freeplane.app", mm_file_name])
 
             if args.trash or input("\nTrash file? 'y' for yes,\n") == "y":
-                detrius = [
-                    file_name.stem + ".eml",
-                    file_name.stem + "-fixed.txt",
-                    file_name.stem + ".mm",
-                ]
-                send2trash(detrius)
+                # Full paths beside the input, not bare names in the current
+                # directory, and only those that exist (.mm only if made).
+                detrius = [file_name, fixed_fn, file_name.with_suffix(".mm")]
+                send2trash([fn for fn in detrius if fn.exists()])
         else:
             print(new_text)
 

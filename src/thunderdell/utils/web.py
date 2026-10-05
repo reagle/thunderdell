@@ -388,7 +388,8 @@ def shrink_message(
     title_len = len_cp(title)
     if title_len > message_room:
         logging.debug(f"Title too long ({title_len}), truncating to {message_room - 1}")
-        title = f"{title[: message_room - 1]}…"
+        # With no room left (a very long URL) a negative slice kept most of the title
+        title = f"{title[: message_room - 1]}…" if message_room > 1 else ""
         logging.debug(f"Truncated title length: {len_cp(title)}")
     message_room -= len_cp(title)
     logging.debug(f"Message room after subtracting title: {message_room}")

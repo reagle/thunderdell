@@ -65,11 +65,16 @@ class ScrapeDOI(ScrapeDefault):
             names = ""
             for name_dic in bib_dict["author"]:
                 logging.info(f"name_dic = '{name_dic}'")
+                # Crossref may give only "family", only "name" (organizations), or a
+                # "literal" that is not "Last, First".
                 if "literal" in name_dic:
-                    name_reverse = name_dic["literal"].split(", ")
-                    joined_name = f"{name_reverse[1]} {name_reverse[0]}"
+                    last, _, first = name_dic["literal"].partition(", ")
+                    joined_name = f"{first} {last}".strip()
+                elif "family" in name_dic:
+                    given = name_dic.get("given", "")
+                    joined_name = f"{given} {name_dic['family']}".strip()
                 else:
-                    joined_name = f"{name_dic['given']} {name_dic['family']}"
+                    joined_name = name_dic.get("name", "UNKNOWN")
                 logging.info(f"joined_name = '{joined_name}'")
                 names = names + ", " + joined_name
             names = names[2:]  # remove first comma

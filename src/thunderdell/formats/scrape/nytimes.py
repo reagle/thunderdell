@@ -12,7 +12,7 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 
@@ -28,8 +28,6 @@ from .default import ScrapeDefault
 
 NOW = time.localtime()
 
-NYT_APP_KEY = uw.get_credential("NYT_APP_KEY")
-
 
 class ScrapeNYT(ScrapeDefault):
     """Scraper for NYT."""
@@ -40,8 +38,12 @@ class ScrapeNYT(ScrapeDefault):
         api_url = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
         url = url.split("?")[0]  # remove query parameters from the URL
         # encoded_url = urllib.parse.quote(base_url, safe='') # quote encode URL
-        query_url = f"""{api_url}?fq=url:(\"{url}\")&api-key={NYT_APP_KEY}"""
+        # Fetched here, not at import, so importing the module (as pytest does)
+        # never prompts for or requires the key.
+        nyt_app_key = uw.get_credential("NYT_APP_KEY")
+        query_url = f"""{api_url}?fq=url:(\"{url}\")"""
         print(f"{query_url=}")
+        query_url += f"&api-key={nyt_app_key}"
         self.json = get_JSON(f"{query_url}")["response"]["docs"][0]
 
     def get_biblio(self):

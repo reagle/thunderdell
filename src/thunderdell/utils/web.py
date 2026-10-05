@@ -30,6 +30,9 @@ log = logging.getLogger("utils_web")
 def get_credential(key: str) -> str:
     """Retrieve credential from environ, file, or solicitation."""
     ENV_FN = Path.home() / ".config" / "api-info.env"
+    if not ENV_FN.exists():  # first run on this machine
+        ENV_FN.parent.mkdir(parents=True, exist_ok=True)
+        ENV_FN.touch(mode=0o600)
     # Make sure the file is not public for security's sake
     if ENV_FN.stat().st_mode & 0o777 != 0o600:
         print(f"WARNING: {ENV_FN} is not 0o600; fixing")

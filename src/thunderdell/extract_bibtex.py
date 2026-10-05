@@ -3,24 +3,25 @@
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2025 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.5"
 
 import argparse
 import logging
+import re
 import sys
 from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import convert_to_unicode
+from bibtexparser.customization import convert_to_unicode, splitname
 
 # Import functions from map2bib.py
 from thunderdell.map2bib import (
     get_identifier,
     parse_date,
-    parse_names,
 )
+from thunderdell.types_thunderdell import PersonName
 from thunderdell.utils.web import xml_escape
 
 HOME = Path.home()
@@ -41,7 +42,8 @@ def bibtex_parse(text: str) -> dict[str, dict[str, str]]:
         return f"@{match.group(1)}{{{placeholder},\n"
 
     # Pattern: @type{ followed directly by a field (not a citation key)
-    pattern = r"@(\w+)\s*\{\s*\n?\s*(?=[a-z]+\s*=)"
+    # (but not @string, @preamble or @comment, which never have one).
+    pattern = r"@(?!(?:string|preamble|comment)\b)(\w+)\s*\{\s*\n?\s*(?=[a-z]+\s*=)"
     text = re.sub(pattern, add_placeholder, text, flags=re.IGNORECASE)
 
     if counter > 0:
@@ -121,17 +123,56 @@ def format_authors(author_string: str) -> str:
     return " and ".join(authors)
 
 
+def bibtex_names(author_string: str) -> list[PersonName]:
+    r"""Split a BibTeX author field into (first, von, last, jr) name tuples.
+
+    Multi-word last names are joined with a no-break space, as map2bib.parse_names
+    yields for a mindmap's "‗", so both produce the same citation keys.
+
+    >>> bibtex_names("Smith, John and Doe, Jane")
+    [('John', '', 'Smith', ''), ('Jane', '', 'Doe', '')]
+    >>> bibtex_names("Von Krogh, George and Ludwig van Beethoven")
+    [('George', '', 'Von\xa0Krogh', ''), ('Ludwig', 'van', 'Beethoven', '')]
+    >>> bibtex_names("{Wikimedia Foundation}")
+    [('', '', 'Wikimedia\xa0Foundation', '')]
+    """
+    names = []
+    for raw in re.split(r"\s+and\s+", author_string.strip()):
+        parts = {
+            k: [chunk.strip("{}") for chunk in v] for k, v in splitname(raw).items()
+        }
+        last = "\xa0".join(parts["last"]).replace(" ", "\xa0")
+        first, von, jr = (" ".join(parts[k]) for k in ("first", "von", "jr"))
+        names.append((first, von, last, jr))
+    return names
+
+
+def mindmap_names(names: list[PersonName]) -> str:
+    r"""Write name tuples as a mindmap author node, which map2bib.parse_names reads.
+
+    >>> mindmap_names([('George', '', 'Von\xa0Krogh', ''), ('Jane', '', 'Doe', 'Jr.')])
+    'George Von‗Krogh, Jane Doe Jr.'
+    """
+    return ", ".join(
+        " ".join(part.replace("\xa0", "‗") for part in name if part) for name in names
+    )
+
+
 def gather_citation_data(entry: dict) -> list[tuple[str, str]]:
     """Extract and format citation data from a BibTeX entry.
 
-    >>> gather_citation_data({"year": "2023", "journal": "Nature"})
-    [('y', '2023'), ('j', 'Nature')]
+    map2bib has no y= or m= shortcut, so the year and month go out as d=YYYYMM
+    from the date prepare_date_for_entry parsed.
+
+    >>> from thunderdell.types_thunderdell import PubDate
+    >>> gather_citation_data({"date": PubDate("2023", "03"), "journal": "Nature"})
+    [('d', '202303'), ('j', 'Nature')]
+    >>> gather_citation_data({"date": PubDate("0000"), "journal": "Nature"})
+    [('j', 'Nature')]
     """
     # Field mapping with desired order
     # I could import from elsewhere but I want this ordering
     field_mapping = [
-        ("year", "y"),
-        ("month", "m"),
         ("booktitle", "bt"),
         ("editor", "e"),
         ("publisher", "p"),
@@ -148,6 +189,8 @@ def gather_citation_data(entry: dict) -> list[tuple[str, str]]:
     ]
 
     cite = []
+    if (date := entry.get("date")) and date.year != "0000":
+        cite.append(("d", f"{date.year}{date.month or ''}{date.day or ''}"))
     for field, abbrev in field_mapping:
         if field in entry:
             value = entry[field]
@@ -168,33 +211,32 @@ def write_entry(fdo, key: str, entry: dict) -> None:
         if isinstance(entry["author"], str):
             author_str = format_authors(entry["author"])
         else:
-            # Reconstruct from parsed tuples
-            names = [
-                " ".join(part for part in name_parts if part)
-                for name_parts in entry["author"]
-            ]
-            author_str = " and ".join(names)
+            author_str = mindmap_names(entry["author"])
     else:
         author_str = "Unknown"
 
     # Write author node
-    fdo.write(f'  <node COLOR="#338800" TEXT="{xml_escape(author_str)}">\n')
+    fdo.write(
+        f'  <node STYLE_REF="author" COLOR="#338800" TEXT="{xml_escape(author_str)}">\n'
+    )
 
     # Write title node
     title = xml_escape(entry.get("title", "Unknown"))
     if "url" in entry:
         fdo.write(
-            f'    <node COLOR="#090f6b" LINK="{xml_escape(entry["url"])}" '
+            f'    <node STYLE_REF="title" COLOR="#090f6b" LINK="{xml_escape(entry["url"])}" '
             f'TEXT="{title}">\n'
         )
     else:
-        fdo.write(f'    <node COLOR="#090f6b" TEXT="{title}">\n')
+        fdo.write(f'    <node STYLE_REF="title" COLOR="#090f6b" TEXT="{title}">\n')
 
     # Write citation data
     cite = gather_citation_data(entry)
     cite_parts = [f"key={key}"] + [f"{abbrev}={value}" for abbrev, value in cite]
     cite_str = " ".join(cite_parts)
-    fdo.write(f'      <node COLOR="#ff33b8" TEXT="{xml_escape(cite_str)}"/>\n')
+    fdo.write(
+        f'      <node STYLE_REF="cite" COLOR="#ff33b8" TEXT="{xml_escape(cite_str)}"/>\n'
+    )
 
     # Write abstract if available
     if "abstract" in entry:
@@ -209,6 +251,14 @@ def write_entry(fdo, key: str, entry: dict) -> None:
 def prepare_date_for_entry(entry: dict) -> None:
     """Parse and set date field in entry from year/month fields."""
     from datetime import datetime
+
+    # biblatex uses date = {1998-03} instead of year/month
+    if "year" not in entry and (
+        match := re.match(r"(\d{4})(?:-(\d{2}))?", entry.get("date", ""))
+    ):
+        entry["year"] = match[1]
+        if match[2] and "month" not in entry:
+            entry["month"] = match[2]
 
     if "year" in entry:
         year = entry["year"]
@@ -254,7 +304,7 @@ def process(entries: dict, file_path: Path) -> None:
             # Parse author names if needed for get_identifier
             if "author" in entry and isinstance(entry["author"], str):
                 logging.debug(f"Parsing author string: {entry['author']}")
-                entry["author"] = parse_names(entry["author"])
+                entry["author"] = bibtex_names(entry["author"])
                 logging.debug(f"Parsed authors: {entry['author']}")
             elif "author" not in entry:
                 logging.warning(f"No author found for {temp_key}, using default")

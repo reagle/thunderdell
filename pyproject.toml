@@ -3,7 +3,8 @@ name = "thunderdell"
 version = "1.0.1"
 description = "Bibliographic management toolkit"
 readme = "README.md"
-license = {file = "GPLv3"}
+license = "GPL-3.0-or-later"
+license-files = ["COPYRIGHT"]
 authors = [
     {name = "Joseph Reagle"}
 ]
@@ -20,7 +21,6 @@ dependencies = [
     # common_strings, leaving bare month macros like "jan" unexpanded.
     "bibtexparser>=1.4.3,<2",
     "datefinder",
-    "dotenv",
     "flask",
     "lxml>=6.1.0",
     "mastodon.py",
@@ -51,13 +51,12 @@ extract-goodreader = "thunderdell.extract_goodreader:main"
 extract-kindle = "thunderdell.extract_kindle:main"
 extract-raindrop = "thunderdell.extract_raindrop:main"
 field-notes-categorize = "thunderdell.field_notes_categorize:main"
-fix-mindmaps = "thunderdell.fix_mindmaps:main"
 map2bib = "thunderdell.map2bib:main"
 query-arxiv = "thunderdell.query_arxiv:main"
 query-doi = "thunderdell.query_doi:main"
 query-isbn = "thunderdell.query_isbn:main"
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.uv]

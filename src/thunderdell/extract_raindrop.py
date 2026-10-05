@@ -80,9 +80,9 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     else:
         log_config["stream"] = sys.stderr
 
-        logging.basicConfig(**log_config)
+    logging.basicConfig(**log_config)
 
-        logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
+    logging.debug(f"Log level set to: {logging.getLevelName(log_level)}")
     logging.debug(f"Parsed arguments: {args}")
 
     return args
@@ -105,8 +105,8 @@ def open_url_silent(url: str) -> None:
         logging.error(f"Failed to open URL {url}: {e}")
 
 
-def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
-    """Process a single file for highlights and annotations."""
+def process_single_file(args: argparse.Namespace, file_path: Path) -> bool:
+    """Process a single file for highlights and annotations; True if logged."""
     logging.info(f"Processing file: {file_path}")
     url = ""
     comment_lines: list[str] = [""]  # Start with an empty line for potential summary
@@ -115,10 +115,10 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
         file_content = file_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         logging.error(f"File not found: {file_path}. Skipping.")
-        return
+        return False
     except Exception as e:
         logging.exception(f"Error reading file {file_path}: {e}")
-        return
+        return False
 
     # First pass: find the URL
     for line in file_content.splitlines():
@@ -127,8 +127,8 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
             logging.info(f"URL found: {url}")
             break  # Stop after finding the first URL
     else:
-        logging.warning(f"No URL found in {file_path}. Skipping processing logic.")
-        return  # Cannot proceed without a URL
+        logging.error(f"No URL found in {file_path}. Skipping processing logic.")
+        return False  # Cannot proceed without a URL
 
     # Second pass: process lines for comments/excerpts
     for line in file_content.splitlines():
@@ -160,6 +160,8 @@ def process_single_file(args: argparse.Namespace, file_path: Path) -> None:
         logging.info(f"Successfully processed and logged to mindmap for {url}")
     except Exception as e:
         logging.exception(f"Error during scraping or mindmap logging for {url}: {e}")
+        return False
+    return True
 
 
 def main(args: argparse.Namespace | None = None) -> None:
@@ -170,9 +172,16 @@ def main(args: argparse.Namespace | None = None) -> None:
     logging.info("==================================")
     logging.info(f"Starting processing with args: {args}")
 
-    files_to_process = args.file_names
-    for file_path in files_to_process:
-        process_single_file(args, file_path)
+    # Only offer to trash files whose highlights were logged; failures are logged
+    # below the default level, so say so here rather than lose them silently.
+    files_to_process = []
+    for file_path in args.file_names:
+        if process_single_file(args, file_path):
+            files_to_process.append(file_path)
+        else:
+            print(f"Not logged, keeping: {file_path} (rerun with -V for why)")
+    if not files_to_process:
+        return
 
     # Ask user about trashing processed files *after* all files are processed
     try:

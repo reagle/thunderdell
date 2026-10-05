@@ -5,10 +5,11 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
+import json
 import re
 import urllib.parse
 from html import escape
@@ -21,6 +22,35 @@ from thunderdell.types_thunderdell import EntriesDict, EntryDict
 
 # from thunderdell.formats.emit.biblatex import create_biblatex_author
 from thunderdell.utils.web import straighten_quotes, xml_escape
+
+
+def html_text(text: str) -> str:
+    """Escape text for HTML, keeping the <strong> tags query highlighting adds.
+
+    >>> html_text("AT&T <b> and <strong>Smith</strong>")
+    'AT&amp;T &lt;b&gt; and <strong>Smith</strong>'
+    """
+    return (
+        escape(text)
+        .replace("&lt;strong&gt;", "<strong>")
+        .replace("&lt;/strong&gt;", "</strong>")
+    )
+
+
+def copy_button(text: str) -> str:
+    """Return a list item whose ⧉ button copies text to the clipboard.
+
+    The text goes in as a JSON string literal, escaped for the attribute, so quotes
+    and apostrophes in titles cannot break out of the JavaScript.
+
+    >>> copy_button("O'Neil").split('"')[5]  # the onclick attribute
+    'navigator.clipboard.writeText(&quot;O&#x27;Neil&quot;); return false;'
+    """
+    plain = text.replace("<strong>", "").replace("</strong>", "")
+    onclick = escape(
+        f"navigator.clipboard.writeText({json.dumps(plain, ensure_ascii=False)}); return false;"
+    )
+    return f'<li class="mdn"><a href="#" onclick="{onclick}">⧉</a> {html_text(text)}\n'
 
 
 def emit_results(
@@ -47,7 +77,7 @@ def emit_results(
             results_file.write(f'{spaces}<ul class="tit_tree">\n')
             spaces = spaces + " "
             results_file.write(
-                f'{spaces}<li style="text-align: right">[<a href="{MM_mm_file}">{base_mm_file}</a>]</li>\n',
+                f'{spaces}<li style="text-align: right">[<a href="{escape(MM_mm_file)}">{html_text(base_mm_file)}</a>]</li>\n',
             )
             fl_names = ", ".join(name[0] + " " + name[2] for name in entry["author"])
             title_mdn = f"{title}"
@@ -55,18 +85,14 @@ def emit_results(
                 title_mdn = f"[{title}]({url})"
 
             # For ease of use, JavaScript ⧉ button copies
-            JS_CLICK_TO_COPY = (
-                """<li class="mdn">"""
-                """<a href="javascript:document.addEventListener("""
-                """'click', () => {{navigator.clipboard.writeText('%s');"""
-                """}});">⧉</a> %s\n"""
-            )
             mdn_cite = f"[@{identifier}]"
-            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_cite), mdn_cite))
+            results_file.write(copy_button(mdn_cite))
             mdn_footnote = f"[^{identifier}]:  {fl_names}, {date[0]},  «{title_mdn}»"
-            results_file.write(JS_CLICK_TO_COPY % (escape(mdn_footnote), mdn_footnote))
+            results_file.write(copy_button(mdn_footnote))
 
-            results_file.write(f'{spaces}<li class="author">{fl_names}</li>\n')
+            results_file.write(
+                f'{spaces}<li class="author">{html_text(fl_names)}</li>\n'
+            )
             pretty_print(entry["_title_node"], entry, spaces, results_file)
             results_file.write(f"{spaces}</ul><!--tit_tree-->\n")
             results_file.write(f"{spaces}</li>\n")
@@ -83,7 +109,7 @@ def emit_results(
                 spaces,
                 results_file,
             )
-            results_file.write(f'<li class="cite">{cite}</li>')
+            results_file.write(f'<li class="cite">{html_text(cite)}</li>')
             if len(entry["_node_results"]) > 0:
                 results_file.write(f"{spaces}<li>\n")
                 spaces = spaces + " "
@@ -108,7 +134,7 @@ def emit_results(
                 spaces,
                 results_file,
             )
-            results_file.write(f'<li class="cite">{cite}</li>')
+            results_file.write(f'<li class="cite">{html_text(cite)}</li>')
         elif "_title_result" in entry:
             title = entry["_title_result"].get("TEXT")
             print_entry(
@@ -223,11 +249,16 @@ def print_entry(
     """Print entry."""
     identifier_html = (
         '<li class="identifier_html">'
-        f'<a href="{get_url_query(identifier)}">{identifier}</a>'
+        f'<a href="{get_url_query(identifier)}">{html_text(identifier)}</a>'
     )
-    title_html = f'<a class="title_html" href="{get_url_query(title)}">{title}</a>'
-    link_html = f'[<a class="link_html" href="{url}">url</a>]' if url else ""
-    from_html = f'from <a class="from_html" href="{MM_mm_file}">{base_mm_file}</a>'
+    title_html = (
+        f'<a class="title_html" href="{get_url_query(title)}">{html_text(title)}</a>'
+    )
+    link_html = f'[<a class="link_html" href="{escape(url)}">url</a>]' if url else ""
+    from_html = (
+        f'from <a class="from_html" href="{escape(MM_mm_file)}">'
+        f"{html_text(base_mm_file)}</a>"
+    )
     results_file.write(
         f"{spaces}{identifier_html}, <em>{title_html}</em> {link_html} [{from_html}]"
     )
@@ -246,10 +277,14 @@ def get_url_query(token: str) -> str:
 
 
 def get_url_MM(file_name: str) -> str:
-    """Return URL for the source MindMap based on whether CGI or cmdline."""
-    if __name__ == "__main__":
-        return file_name
-    else:  # CGI
-        file_path = Path(file_name).absolute()
-        client_path = file_path.relative_to(config.HOME)
-        return f"file://{config.CLIENT_HOME / client_path}"
+    """Return a file:// URL for the source mindmap, as seen from the client.
+
+    Maps under the server's home are re-rooted at CLIENT_HOME; others (e.g., the
+    tests folder of an installed copy) keep their absolute path.
+    """
+    file_path = Path(file_name).absolute()
+    try:
+        file_path = config.CLIENT_HOME / file_path.relative_to(config.HOME)
+    except ValueError:
+        pass
+    return f"file://{file_path}"

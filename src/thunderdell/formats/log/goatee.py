@@ -31,7 +31,7 @@ def log2goatee(args, biblio):
 
     PHOTO_RE = re.compile(r".*/photo/gallery/(\d\d\d\d/\d\d)/\d\d-\d\d\d\d-(.*)\.jpe?g")
     photo_match = False
-    if "goatee.net/photo/" in url:
+    if url and "goatee.net/photo/" in url:  # url is None for a plain post
         photo_match = re.match(PHOTO_RE, url)
         if photo_match:
             blog_title = re.match(PHOTO_RE, url).group(2)

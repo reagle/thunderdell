@@ -137,9 +137,12 @@ def walk_freeplane(
     """
     author_node = None
     entry = EntryDict()
+    highlighted: set = set()  # nodes already given <strong>, e.g. shared authors
 
     def _query_highlight(node, query):
         """Return a modified node with matches highlighted."""
+        if node in highlighted:  # an author with several titles: highlight once
+            return node
         query_lower = query.lower()
         text = node.get("TEXT")
         text_lower = text.lower()
@@ -152,6 +155,7 @@ def walk_freeplane(
                 f"{text[end_index:]}"
             )
             node.set("TEXT", result)
+            highlighted.add(node)
             return node
         return None
 
@@ -204,7 +208,10 @@ def walk_freeplane(
                 # Because entries are based on unique titles, author processing
                 # is deferred until now when a new title is found.
                 author_node = _get_author_node(d)
-                entry["ori_author"] = unescape_entities(author_node.get("TEXT", ""))
+                # Without any <strong> a previous title's query highlight added
+                author_text = author_node.get("TEXT", "")
+                author_text = author_text.replace("<strong>", "").replace("</strong>", "")
+                entry["ori_author"] = unescape_entities(author_text)
                 entry["author"] = parse_names(
                     _remove_identity_hints(entry["ori_author"])
                 )

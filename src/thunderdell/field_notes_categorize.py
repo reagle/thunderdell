@@ -7,6 +7,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 import argparse
+import copy
 import logging
 import re
 import sys
@@ -105,6 +106,18 @@ def categorize_mindmap(old_fn: Path) -> None:
     # Use the output filename as the root node text
     root_node = et.SubElement(new_map, "node", TEXT=str(cat_fn.name))
 
+    placed: set = set()  # author nodes already copied once, keeping their IDs
+
+    def copy_author(node: et._Element) -> et._Element:
+        """Copy an author node; drop Freeplane IDs after the first copy."""
+        node_copy = copy.deepcopy(node)
+        if node in placed:
+            for element in node_copy.iter():
+                if "ID" in element.attrib:
+                    del element.attrib["ID"]
+        placed.add(node)
+        return node_copy
+
     # Sort categories alphabetically (case-insensitive) and add nodes
     # Use tuple for case-insensitive sort key
     for keyword, node_list in sorted(
@@ -112,8 +125,9 @@ def categorize_mindmap(old_fn: Path) -> None:
     ):
         logging.debug(f"Adding category '{keyword}' with {len(node_list)} nodes.")
         cat_node = et.SubElement(root_node, "node", TEXT=keyword)
-        # Add all author nodes belonging to this category
-        cat_node.extend(node_list)
+        # Copy each author node (once per category): appending an lxml element moves
+        # it, so an author with works in several categories ended up only in the last.
+        cat_node.extend(copy_author(node) for node in dict.fromkeys(node_list))
 
     # Write the new mindmap file
     try:

@@ -40,6 +40,8 @@ def create_biblatex_author(names):
     >>> create_biblatex_author([('First Middle', 'von', 'Last', 'Jr.'),\
         ('First', '', 'Last', 'II')])
     'von Last, Jr., First Middle and Last, II, First'
+    >>> create_biblatex_author([('', '', 'Wikipedia', ''), ('bell', '', 'hooks', '')])
+    '{Wikipedia} and {hooks}, {bell}'
 
     """
     full_names = []
@@ -50,12 +52,12 @@ def create_biblatex_author(names):
 
         # if a name has no spaces, it is a literal
         if " " not in last and not first and not von and not jr:
-            full_names.append("{{last}}")
+            full_names.append(f"{{{last}}}")
             continue
 
         if all(s.islower() for s in (first, last)):  # {{hooks}, {bell}}
-            first = "{{first}}"
-            last = "{{last}}"
+            first = f"{{{first}}}"
+            last = f"{{{last}}}"
 
         if von != "":
             full_name += von + " "
@@ -181,7 +183,7 @@ def bibformat_title(title: str) -> str:
                 cased_title.append(word)
             elif word in WORDS2PROTECT:
                 # debug(f"protecting lower '{word}'")
-                cased_title.append("{{word}}")
+                cased_title.append(f"{{{word}}}")
             elif word[0].isupper():
                 # debug(f"protecting title '{word}'")
                 cased_title.append(f"{{{my_title(word)}}}")

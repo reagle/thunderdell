@@ -355,14 +355,19 @@ def parse_pairs(entry: EntryDict) -> EntryDict:
     >>> BIB_SHORTCUTS = {"d": "date", "j": "journal", "v": "volume", "n": "number", "pp": "pages"}
     >>> parse_pairs(entry)
     {'cite': 'd=20030723 j=Research Policy v=32 n=7 pp=1217-1241', 'title': 'Test', '_mm_file': 'test.mm', 'date': '20030723', 'journal': 'Research Policy', 'volume': '32', 'number': '7', 'pages': '1217-1241'}
+    >>> entry = {"cite": "d=2020 url=https://x.org/?a=b&c=d urld=20240101", "title": "T"}
+    >>> {k: v for k, v in parse_pairs(entry).items() if k in ("date", "url", "urldate")}
+    {'date': '2020', 'url': 'https://x.org/?a=b&c=d', 'urldate': '20240101'}
 
     """
     if citation := entry.get("cite"):
+        # A key starts the cite or follows whitespace, so an "=" inside a value (a
+        # URL's query string) stays in the value; keys may be 4 letters (urld).
         CITE_RE = re.compile(
             r"""
-            (\w{1,3})=([^=]+)  # key = value
+            (?:^|(?<=\s))(\w{1,4})=(.*?)  # key = value
             (?=                # positive lookahead (don't consume characters)
-                \s+\w{1,3}=|$  # space(s), another key-value pair OR end of string
+                \s+\w{1,4}=|$  # space(s), another key-value pair OR end of string
             )
             """,
             re.VERBOSE,

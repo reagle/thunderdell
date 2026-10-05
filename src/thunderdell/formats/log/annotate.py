@@ -82,7 +82,8 @@ def do_console_annotation(args: argparse.Namespace, biblio):
         biblio["comment"] = ""
 
         print(f"@{tentative_id}\n")
-        EQUAL_PAT = re.compile(r"(\w{1,3})=")
+        # As map2bib.parse_pairs: keys follow whitespace, so "=" in a URL stays put
+        EQUAL_PAT = re.compile(r"(?:^|(?<=\s))(\w{1,4})=")
         for line in edited_text:
             logging.info(f"{line=}")
             line = line.replace("\u200b", "")  # Instapaper export artifact
@@ -99,7 +100,7 @@ def do_console_annotation(args: argparse.Namespace, biblio):
             elif line.startswith("s."):
                 biblio["comment"] = line[2:].strip()
                 logging.info(f"{biblio['comment']=}")
-            elif "=" in line[0:3]:  # citation only if near start of line
+            elif "=" in line[0:5]:  # citation only if near start of line (urld=)
                 cites = EQUAL_PAT.split(line)[1:]
                 # 2 refs to an iterable are '*' unpacked and rezipped
                 cite_pairs = list(zip(*[iter(cites)] * 2, strict=True))

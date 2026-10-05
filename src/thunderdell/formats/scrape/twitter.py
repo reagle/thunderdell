@@ -5,10 +5,11 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import logging
+import re
 import textwrap
 
 from thunderdell.utils.web import get_HTML, get_text
@@ -21,6 +22,8 @@ class ScrapeTwitter(ScrapeDefault):
 
     def __init__(self, url: str, comment: str):
         print("Scraping X/Twitter via nitter.net")
+        # busy routes twitter.com here too; it is the same site as x.com.
+        url = re.sub(r"://(?:www\.|mobile\.)?twitter\.com/", "://x.com/", url, count=1)
         if "://x.com/" not in url:
             raise RuntimeError(f"Invalid X/Twitter URL: {url}")
         self.url = url

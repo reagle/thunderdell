@@ -46,7 +46,7 @@ class ScrapeISBN(ScrapeDefault):
             if value in (None, [], ""):
                 pass
             elif key == "author":
-                biblio["author"] = self.get_author(json_bib)
+                biblio["author"] = self.author_from_json(json_bib)
             elif key == "year":
                 biblio["date"] = json_bib["year"]
             elif key == "isbn":
@@ -71,14 +71,14 @@ class ScrapeISBN(ScrapeDefault):
             biblio["title"] = "UNKNOWN"
         return biblio
 
-    def get_author(self, bib_dict: dict[str, str]) -> str:
+    def author_from_json(self, bib_dict: dict[str, str]) -> str:
         names = "UNKNOWN"
         if "author" in bib_dict:
             logging.info(f"{bib_dict['author']=}")
             names = bib_dict["author"]
         return names
 
-    def get_date(self, bib_dict):
+    def date_from_json(self, bib_dict):
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
         logging.info(f"{date_parts=}")

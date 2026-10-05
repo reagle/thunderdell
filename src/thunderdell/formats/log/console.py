@@ -40,9 +40,9 @@ def log2console(args: argparse.Namespace, biblio: dict[str, Any]) -> str:
         "url",
     )
     logging.info(f"biblio = '{biblio}'")
+    tags_expanded = ""
     if biblio["tags"]:
-        tags = biblio["tags"].strip().split(" ")
-        tags_expanded = ""
+        tags: list[str] = biblio["tags"].strip().split(" ")
         for tag in tags:
             tag = KEY_SHORTCUTS.get(tag, tag)
             tags_expanded += tag + " "

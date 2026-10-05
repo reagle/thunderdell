@@ -57,7 +57,7 @@ def log2mm(args: argparse.Namespace, biblio: dict):
             citation += f"{bf.BIB_FIELDS[key]}={value} "
     citation += f" r={date_read} "
     if biblio["tags"]:
-        tags = biblio["tags"]
+        tags: str = biblio["tags"]
         for tag in tags.strip().split(" "):
             keyword = KEY_SHORTCUTS.get(tag, tag)
             citation += "kw=" + keyword + " "
@@ -66,7 +66,8 @@ def log2mm(args: argparse.Namespace, biblio: dict):
         tags = ""
 
     mindmap = parse(str(ofile)).getroot()
-    mm_years = mindmap.find("./node")
+    if (mm_years := mindmap.find("./node")) is None:
+        raise ValueError(f"{ofile} has no top-level node")
     logging.info(f"{mm_years=}")
     logging.info(f"{this_year=}")
     for mm_year in mm_years:

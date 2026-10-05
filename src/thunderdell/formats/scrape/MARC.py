@@ -39,14 +39,22 @@ class ScrapeMARC(ScrapeDefault):
         return author
 
     def get_title(self):
-        subject = re.search("""Subject: *(.*)""", self.html_u).group(1)
-        if subject.startswith("<a href"):
-            subject = re.search("""<a href=".*?">(.*?)</a>""", subject).group(1)
+        if (match := re.search("""Subject: *(.*)""", self.html_u)) is None:
+            return "UNKNOWN"
+        subject = match.group(1)
+        if subject.startswith("<a href") and (
+            linked := re.search("""<a href=".*?">(.*?)</a>""", subject)
+        ):
+            subject = linked.group(1)
         subject = subject.replace("[Wikipedia-l] ", "").replace("[WikiEN-l] ", "")
         return subject
 
     def get_date(self):
-        mdate = re.search("""Date: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        if (
+            match := re.search("""Date: *<a href=".*?">(.*?)</a>""", self.html_u)
+        ) is None:
+            return ScrapeDefault.get_date(self)
+        mdate = match.group(1)
         try:
             date = time.strptime(mdate, "%Y-%m-%d %I:%M:%S")
         except ValueError:
@@ -54,7 +62,9 @@ class ScrapeMARC(ScrapeDefault):
         return time.strftime("%Y%m%d", date)
 
     def get_org(self):
-        return re.search("""List: *<a href=".*?">(.*?)</a>""", self.html_u).group(1)
+        if match := re.search("""List: *<a href=".*?">(.*?)</a>""", self.html_u):
+            return match.group(1)
+        return ScrapeDefault.get_org(self)
 
     def get_excerpt(self):
         excerpt = ""

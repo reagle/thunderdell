@@ -112,6 +112,26 @@ def get_HTML(
     return HTML_bytes, HTML_parsed, HTML_unicode, response
 
 
+def xpath_strings(tree: etree._Element | None, path: str) -> list[str]:
+    """Return the string results (text() or @attr) of an XPath query; [] if none.
+
+    lxml types xpath() as returning almost anything (float, bool, elements,
+    tuples), so this narrows it to the strings these scrapers ask for.
+
+    >>> tree = etree.fromstring("<p><a href='x'>A</a><a>B</a></p>")
+    >>> xpath_strings(tree, "//a/text()"), xpath_strings(tree, "//a/@href")
+    (['A', 'B'], ['x'])
+    >>> xpath_strings(None, "//a/text()")
+    []
+    """
+    if tree is None:
+        return []
+    result = tree.xpath(path)
+    if not isinstance(result, list):
+        return []
+    return [str(item) for item in result if isinstance(item, str)]
+
+
 def get_JSON(
     url,
     referer="",
@@ -488,7 +508,7 @@ def unescape_entities(text: str) -> str:
                 return match.group(0)  # Return the original match if invalid
         else:
             # Handle named entities; html5 keys mostly include the ";" (rsquo;)
-            return html.entities.html5.get(entity + ";", match.group(0))
+            return html.entities.html5.get(entity + ";") or match.group(0)
 
     entity_RE = re.compile(r"&([#\w]+);")
     return entity_RE.sub(fixup_chars, text)

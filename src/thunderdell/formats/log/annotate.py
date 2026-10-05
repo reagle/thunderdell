@@ -20,6 +20,7 @@ from thunderdell import config, map2bib
 from thunderdell.biblio import fields as bf
 from thunderdell.biblio.keywords import KEY_SHORTCUTS
 from thunderdell.change_case import title_case
+from thunderdell.types_thunderdell import EntryDict
 
 NOW = time.localtime()
 
@@ -43,19 +44,21 @@ def do_console_annotation(args: argparse.Namespace, biblio):
     def get_tentative_ident(biblio):
         logging.info(biblio)
         return map2bib.get_identifier(
-            {
-                "author": map2bib.parse_names(biblio["author"]),
-                "title": biblio["title"],
-                # 'date': biblio['date'][0:4],
-                "date": Date(
-                    year=biblio["date"][0:4],
-                    month=None,
-                    day=None,
-                    circa=None,
-                    time=None,
-                ),
-                "_mm_file": "CONSOLE",
-            },
+            EntryDict(
+                {
+                    "author": map2bib.parse_names(biblio["author"]),
+                    "title": biblio["title"],
+                    # 'date': biblio['date'][0:4],
+                    "date": Date(
+                        year=biblio["date"][0:4],
+                        month=None,
+                        day=None,
+                        circa=None,
+                        time=None,
+                    ),
+                    "_mm_file": "CONSOLE",
+                }
+            ),
             {},
         )
 

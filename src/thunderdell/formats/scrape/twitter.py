@@ -12,7 +12,7 @@ import logging
 import re
 import textwrap
 
-from thunderdell.utils.web import get_HTML, get_text
+from thunderdell.utils.web import get_HTML, get_text, xpath_strings
 
 from .default import ScrapeDefault
 
@@ -35,7 +35,8 @@ class ScrapeTwitter(ScrapeDefault):
             )
         except OSError as e:
             logging.warning(f"{e} unable to get_HTML {self.nitter_url=}")
-            self.html_b = self.html_p = self.html_u = self.resp = None
+            self.html_b = self.html_p = self.resp = None
+            self.html_u = ""
         self.text = None
         if self.html_b:
             self.text = get_text(self.nitter_url)
@@ -53,11 +54,10 @@ class ScrapeTwitter(ScrapeDefault):
         }
 
     def get_author(self) -> str:
-        if self.html_p is not None:
-            author_meta = self.html_p.xpath("//meta[@property='og:title']/@content")
-            if author_meta:
-                author = author_meta[0].split(" / ")[0].strip()
-                return author
+        if author_meta := xpath_strings(
+            self.html_p, "//meta[@property='og:title']/@content"
+        ):
+            return author_meta[0].split(" / ")[0].strip()
         return "UNKNOWN"
 
     def get_title(self) -> str:
@@ -69,26 +69,26 @@ class ScrapeTwitter(ScrapeDefault):
         return "UNKNOWN TITLE"
 
     def get_date(self) -> str:
-        if self.html_p is not None:
-            # span with class "tweet-date" and a child a element text
-            date_spans = self.html_p.xpath("//span[@class='tweet-date']/a/text()")
-            if date_spans:
-                date_str = date_spans[0].strip()
-                # Try to parse date string to YYYYMMDD
-                from thunderdell.utils.dates import parse_date
+        # span with class "tweet-date" and a child a element text
+        if date_spans := xpath_strings(
+            self.html_p, "//span[@class='tweet-date']/a/text()"
+        ):
+            date_str = date_spans[0].strip()
+            # Try to parse date string to YYYYMMDD
+            from thunderdell.utils.dates import parse_date
 
-                parsed_date = parse_date(date_str)
-                if parsed_date:
-                    return parsed_date
+            parsed_date = parse_date(date_str)
+            if parsed_date:
+                return parsed_date
         # fallback to default date
         import time
 
         return time.strftime("%Y%m%d")
 
     def get_excerpt(self) -> str:
-        if self.html_p is not None:
-            # meta property="og:description" content="tweet text"
-            desc_meta = self.html_p.xpath("//meta[@property='og:description']/@content")
-            if desc_meta:
-                return desc_meta[0].strip()
+        # meta property="og:description" content="tweet text"
+        if desc_meta := xpath_strings(
+            self.html_p, "//meta[@property='og:description']/@content"
+        ):
+            return desc_meta[0].strip()
         return ""

@@ -76,7 +76,7 @@ class ScrapeENWP(ScrapeDefault):
         return "Wikipedia"
 
     def get_excerpt(self):
-        lines = self.text.split("\n")
+        lines = (self.text or "").split("\n")
         for line in lines:
             line = line.strip()
             if (len(line) > 280 and "This page documents" not in line) or (

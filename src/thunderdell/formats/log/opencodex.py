@@ -29,10 +29,10 @@ def log2opencodex(args, biblio):
     category = "social"
     tags = ""
     if biblio["tags"]:
-        tags = biblio["tags"].strip().split(" ")
-        category = KEY_SHORTCUTS.get(tags[0], tags[0])
+        tag_list: list[str] = biblio["tags"].strip().split(" ")
+        category = KEY_SHORTCUTS.get(tag_list[0], tag_list[0])
         tags_expanded = ""
-        for tag in tags:
+        for tag in tag_list:
             tag = KEY_SHORTCUTS.get(tag, tag)
             tags_expanded += tag + ","
         tags = tags_expanded[0:-1]  # removes last comma

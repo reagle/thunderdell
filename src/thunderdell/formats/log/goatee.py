@@ -34,7 +34,7 @@ def log2goatee(args, biblio):
     if url and "goatee.net/photo/" in url:  # url is None for a plain post
         photo_match = re.match(PHOTO_RE, url)
         if photo_match:
-            blog_title = re.match(PHOTO_RE, url).group(2)
+            blog_title = photo_match.group(2)
             filename = blog_title
             blog_title = blog_title.replace("-", " ")
     filename = filename.strip().replace(" ", "-").replace("'", "")

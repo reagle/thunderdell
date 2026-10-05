@@ -23,7 +23,12 @@ from thunderdell.biblio.fields import SITE_CONTAINER_MAP
 from thunderdell.change_case import sentence_case
 from thunderdell.utils.dates import parse_date
 from thunderdell.utils.text import smart_to_markdown
-from thunderdell.utils.web import get_HTML, get_text, unescape_entities
+from thunderdell.utils.web import (
+    get_HTML,
+    get_text,
+    unescape_entities,
+    xpath_strings,
+)
 
 NOW = time.localtime()
 MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
@@ -146,12 +151,8 @@ class ScrapeDefault:
                 url, cache_control="no-cache"
             )
         except OSError:
-            self.html_b, self.html_p, self.html_u, self.resp = (
-                None,
-                None,
-                None,
-                None,
-            )
+            self.html_b, self.html_p, self.resp = None, None, None
+            self.html_u = ""  # str, so regex searches need no None check
 
         self.text = None
         if self.html_b:
@@ -218,7 +219,7 @@ class ScrapeDefault:
         logging.info("checking author xpaths")
         for path in AUTHOR_XPATHS:
             logging.info(f"trying = '{path}'")
-            xpath_result = self.html_p.xpath(path)
+            xpath_result = xpath_strings(self.html_p, path)
             if xpath_result:
                 logging.info(f"{xpath_result=}; {path=}")
                 author = string.capwords(" ".join(xpath_result).strip())
@@ -308,7 +309,7 @@ class ScrapeDefault:
             logging.info("checking date xpaths")
             for path in DATE_XPATHS:
                 logging.info(f"trying = '{path}'")
-                xpath_result = self.html_p.xpath(path)
+                xpath_result = xpath_strings(self.html_p, path)
                 if xpath_result:
                     logging.info(f"'{xpath_result=}'; '{path=}'")
                     date = parse_date(xpath_result[0])

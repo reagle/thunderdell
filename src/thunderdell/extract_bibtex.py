@@ -53,10 +53,12 @@ def bibtex_parse(text: str) -> dict[str, dict[str, str]]:
         )
 
     # Configure parser
-    parser = BibTexParser(common_strings=True)
-    parser.ignore_nonstandard_types = False
-    parser.homogenize_fields = False
-    parser.customization = convert_to_unicode
+    parser = BibTexParser(
+        common_strings=True,
+        ignore_nonstandard_types=False,
+        homogenize_fields=False,
+        customization=convert_to_unicode,
+    )
 
     # Parse BibTeX
     try:

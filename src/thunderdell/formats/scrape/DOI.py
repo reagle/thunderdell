@@ -39,9 +39,9 @@ class ScrapeDOI(ScrapeDefault):
             if value in (None, [], ""):
                 pass
             elif key == "author":
-                biblio["author"] = self.get_author(json_bib)
+                biblio["author"] = self.author_from_json(json_bib)
             elif key == "issued":
-                biblio["date"] = self.get_date(json_bib)
+                biblio["date"] = self.date_from_json(json_bib)
             elif key == "page":
                 biblio["pages"] = json_bib["page"]
             elif key == "container-title":
@@ -59,7 +59,7 @@ class ScrapeDOI(ScrapeDefault):
         logging.info(f"{biblio=}")
         return biblio
 
-    def get_author(self, bib_dict: dict[str, Any]) -> str:
+    def author_from_json(self, bib_dict: dict[str, Any]) -> str:
         names = "UNKNOWN"
         if "author" in bib_dict:
             names = ""
@@ -80,7 +80,7 @@ class ScrapeDOI(ScrapeDefault):
             names = names[2:]  # remove first comma
         return names
 
-    def get_date(self, bib_dict: dict[str, Any]) -> str:
+    def date_from_json(self, bib_dict: dict[str, Any]) -> str:
         # "issued":{"date-parts":[[2007,3]]}
         date_parts = bib_dict["issued"]["date-parts"][0]
         logging.info(f"{date_parts=}")

@@ -12,7 +12,7 @@ __version__ = "1.0"
 import re
 
 from thunderdell.biblio import fields as bf
-from thunderdell.utils.web import get_HTML, unescape_entities
+from thunderdell.utils.web import unescape_entities, xpath_strings
 
 from .default import ScrapeDefault
 
@@ -43,17 +43,6 @@ class ScrapeWMMeta(ScrapeDefault):
         month = bf.MONTH2DIGIT[month[0:3].lower()]
         return f"{int(year)}{int(month):02d}{int(day):02d}"
 
-    def get_date_old(self):  # Meta is often foobar because of proxy bugs
-        _, _, cite_HTML_u, resp = get_HTML(self.get_permalink())
-        # in browser, id="lastmod", but python gets id="footer-info-lastmod"
-        day, month, year = re.search(
-            r"""<li id="footer-info-lastmod"> This page was last edited """
-            + r"""on (\d{1,2}) (\w+) (\d\d\d\d)""",
-            cite_HTML_u,
-        ).groups()
-        month = bf.MONTH2DIGIT[month[0:3].lower()]
-        return f"{int(year)}{int(month):02d}{int(day):02d}"
-
     def get_org(self):
         return "Wikimedia"
 
@@ -62,9 +51,8 @@ class ScrapeWMMeta(ScrapeDefault):
 
     def get_permalink(self):
         url_host = self.url.split("/wiki/")[0]
-        xpath = """//li[@id="t-permalink"]/a/@href"""
-        url_paths = self.html_p.xpath(xpath) if self.html_p is not None else []
-        if not isinstance(url_paths, list) or not url_paths:
+        url_paths = xpath_strings(self.html_p, """//li[@id="t-permalink"]/a/@href""")
+        if not url_paths:
             return self.url
-        permalink = url_host + str(url_paths[0])
+        permalink = url_host + url_paths[0]
         return unescape_entities(permalink)

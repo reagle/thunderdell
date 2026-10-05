@@ -9,6 +9,7 @@ __license__ = "GLPv3"
 __version__ = "1.0"
 
 
+import argparse
 import logging
 
 import requests
@@ -18,10 +19,7 @@ from thunderdell.formats.scrape.ISBN import ScrapeISBN
 from thunderdell.formats.log.console import log2console
 
 
-class args:
-    """Initialize args."""
-
-    publish = False  # don't tweet at this level
+args = argparse.Namespace(publish=False)  # don't tweet at this level
 
 
 def get_bib_preamble(token: str) -> list[str]:

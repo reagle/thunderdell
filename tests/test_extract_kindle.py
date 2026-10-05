@@ -10,12 +10,18 @@
 Run in parent folder as `pytest tests`.
 """
 
+from thunderdell import extract_kindle
 from thunderdell.config import TESTS_FOLDER  # Path object
 from thunderdell.extract_kindle import process_html  # parse_args
 
 
-def test_process_html():
+def test_process_html(monkeypatch):
     """Tests the processing of a Kindle HTML export."""
+    # The ISBN lookup hits Google Books, which rate-limits (429); use its expected
+    # first line so the test runs offline and checks only the HTML parsing.
+    expected_txt = (TESTS_FOLDER / "kindle-expected.txt").read_text()
+    preamble = expected_txt.split("\n", 1)[0]
+    monkeypatch.setattr(extract_kindle, "get_bib_preamble", lambda _isbn: [preamble])
     # test_args = []
     # args = parse_args(test_args)
 
@@ -26,7 +32,6 @@ def test_process_html():
     # print(f"{result=}")
 
     (TESTS_FOLDER / "kindle-result.txt").write_text(result_txt)
-    expected_txt = (TESTS_FOLDER / "kindle-expected.txt").read_text()
     # print(f"{expected=}")
     assert result_txt == expected_txt
 

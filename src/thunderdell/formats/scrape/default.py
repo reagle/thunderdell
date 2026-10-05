@@ -41,6 +41,8 @@ def winnow_dates(self) -> datetime.datetime:
     winnowed_dates = []
 
     for date in datefinder.find_dates(self.text):
+        if not isinstance(date, datetime.datetime):  # source=True gives tuples
+            continue
         # An aware date ("... 10:00 UTC") can't be compared with naive now; that
         # TypeError used to abort the loop and discard every date found.
         if date.tzinfo is not None:

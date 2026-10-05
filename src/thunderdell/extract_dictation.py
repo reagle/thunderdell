@@ -3,7 +3,7 @@
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import argparse
@@ -100,13 +100,21 @@ def close_sections(
 
 
 def parse_citation_pairs(line: str) -> list[tuple[str, str]]:
-    """Parse citation key-value pairs from a line."""
-    # Split by "key =", keeping delimiters; filter out empty strings
-    parts = [p.strip() for p in re.split(r"(\w+\s*=)", line) if p]
-    # Group keys and values
+    """Parse citation key-value pairs from a line.
+
+    A key must start the line or follow whitespace, so an "=" inside a value (a
+    URL's query string) stays in the value.
+
+    >>> parse_citation_pairs("author = Ann Lee title = A Title url = https://ex.com/?id=5")
+    [('author', 'Ann Lee'), ('title', 'A Title'), ('url', 'https://ex.com/?id=5')]
+    >>> parse_citation_pairs("author = Ann Lee date =")
+    [('author', 'Ann Lee'), ('date', '')]
+    """
+    # With a capture group, re.split gives [before, key1, value1, key2, value2, ...]
+    parts = re.split(r"(?:^|\s)(\w+)\s*=", line)
     return [
-        (parts[i].replace("=", "").strip(), parts[i + 1])
-        for i in range(0, len(parts), 2)
+        (key.strip(), value.strip())
+        for key, value in zip(parts[1::2], parts[2::2], strict=True)
     ]
 
 
@@ -272,9 +280,12 @@ def process_content_line(mm_fd: TextIO, line: str) -> None:
     line_text = line
     line_no = ""
 
-    # Process page numbers (improved regex)
-    page_pattern = r"^([\dcdilmxv]+(?:-[\dcdilmxv]+)?)\s+(.*?)(?:-([\dcdilmxv]+))?$"
-    if match := re.match(page_pattern, line, re.I):
+    # Process page numbers: digits or a well-formed roman numeral, so words made
+    # of roman letters ("Mild", "Civil") are not taken as pages. A capital "I"
+    # starting a sentence is the pronoun, not page i.
+    page = r"(?:\d+|(?=[cdilmxv])m{0,3}(?:cm|cd|d?c{0,3})(?:xc|xl|l?x{0,3})(?:ix|iv|v?i{0,3}))"
+    page_pattern = rf"^({page}(?:-{page})?)\s+(.*?)(?:-({page}))?$"
+    if not line.startswith("I ") and (match := re.match(page_pattern, line, re.I)):
         line_no = match.group(1)
         if end_range := match.group(3):  # Handle optional end range like '1-2' or '1-x'
             line_no += f"-{end_range}"
@@ -321,7 +332,10 @@ def build_mm_from_txt(
             f"""  <node STYLE_REF="annotation" TEXT="{clean(summary_text)}"/>\n"""
         )
 
-    elif match := re.match(r"(part|chapter|section|subsection)(.*)", line, re.I):
+    # Not followed by a letter, so "Particularly ..." or "Sections of ..." is text.
+    elif match := re.match(
+        r"(part|chapter|section|subsection)(?![a-z])(.*)", line, re.I
+    ):
         element_type, content = match.groups()
         new_state = process_structure_element(mm_fd, element_type, content, state)
 

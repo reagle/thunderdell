@@ -25,7 +25,7 @@ import textwrap
 import urllib.parse
 import webbrowser
 from collections.abc import Callable
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 from thunderdell import config
 from thunderdell.biblio.fields import (
@@ -210,7 +210,9 @@ def walk_freeplane(
                 author_node = _get_author_node(d)
                 # Without any <strong> a previous title's query highlight added
                 author_text = author_node.get("TEXT", "")
-                author_text = author_text.replace("<strong>", "").replace("</strong>", "")
+                author_text = author_text.replace("<strong>", "").replace(
+                    "</strong>", ""
+                )
                 entry["ori_author"] = unescape_entities(author_text)
                 entry["author"] = parse_names(
                     _remove_identity_hints(entry["ori_author"])
@@ -339,11 +341,11 @@ def pull_citation(args: argparse.Namespace, entry: EntryDict) -> EntryDict:
         entry.pop("urldate", None)
 
     # Process Wikipedia perma/oldid
-    if "url" in entry and "oldid" in entry["url"]:
+    # Only an oldid query parameter, not "oldid" anywhere in the URL (no "?" crashed)
+    if "url" in entry and "oldid" in (
+        queries := parse_qs(urlparse(entry["url"]).query)
+    ):
         url = entry["url"]
-        url = url.rsplit("#", 1)[0]  # remove fragment
-        query = url.split("?", 1)[1]
-        queries = parse_qs(query)
         oldid = queries["oldid"][0]
         entry["shorttitle"] = f"{entry['title']} (oldid={oldid})"
         if not args.long_url:  # short URLs

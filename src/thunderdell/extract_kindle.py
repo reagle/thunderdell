@@ -43,7 +43,7 @@ def process_html(content: str) -> str:
     RE_ISBN = re.compile(r"978(?:-?\d){10}")
 
     RE_COLOR_PAGE = re.compile(
-        r"(?P<color>yellow|blue)</span>\) .*? (?P<type>Page|Location)"
+        r"(?P<color>\w+)</span>\) .*? (?P<type>Page|Location)"
         + r" (?P<page>[\dcdilmxv]+)",
     )
     color = ""
@@ -77,15 +77,19 @@ def process_html(content: str) -> str:
             except AttributeError:
                 color = "black"
         elif "noteText" in str(div):
-            note = smart_to_markdown(str(div)[27:-7])
+            # The div's inner HTML, not a fixed slice that assumed the export's
+            # exact newline and indentation.
+            note = smart_to_markdown(div.decode_contents().strip())
             match color:
+                case "":  # before the first heading (ISBN, epigraph)
+                    pass
                 case "blue":
                     note = title_case(note)
                     text_new.append(f"section. {note}")
-                case "yellow":
-                    text_new.append(f"{page} excerpt. {note}")
-                case "black":
+                case "black":  # a typed note, not a highlight
                     text_new.append(f"-- {note}")
+                case _:  # yellow, pink, orange: all excerpts
+                    text_new.append(f"{page} excerpt. {note}")
 
     return "\n".join(text_new)
 

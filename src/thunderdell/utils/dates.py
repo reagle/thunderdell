@@ -5,7 +5,7 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 
@@ -24,11 +24,19 @@ def parse_date(date_str: str, date_format: str = "%Y%m%d") -> str:
     '20210216'
     >>> parse_date("2021-02-16T11:20:00Z")
     '20210216'
+    >>> parse_date("Mar 5, 2024 · 3:04 PM UTC")  # nitter
+    '20240305'
+    >>> parse_date("")  # unparseable gives "", which callers treat as no date
+    ''
     """
     if date_str.isdigit() and len(date_str) == 10:
         # Epoch timestamp in seconds
         dt_result = datetime.fromtimestamp(int(date_str))
     else:
         # ISO-like or other format
-        dt_result = du.parse(date_str)
+        try:
+            dt_result = du.parse(date_str.replace("·", " "))
+        except (du.ParserError, OverflowError) as err:
+            logging.info(f"cannot parse date {date_str!r}: {err}")
+            return ""
     return dt_result.strftime(date_format)

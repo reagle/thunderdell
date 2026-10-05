@@ -15,6 +15,8 @@ import time
 from pathlib import Path
 from typing import Any, TextIO
 
+from send2trash import send2trash
+
 from thunderdell.biblio.fields import (
     BIB_FIELDS,  # dict of field to its shortcut
     BIB_SHORTCUTS,  # dict of shortcuts to a field
@@ -358,6 +360,9 @@ def build_mm_from_txt(
 
 def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
     """Create a mindmap file from the given text."""
+    if mm_file_name.exists():  # perhaps hand-edited; keep it recoverable
+        print(f"Moving existing {mm_file_name} to the trash")
+        send2trash(mm_file_name)
     with mm_file_name.open("w", encoding="utf-8", errors="replace") as mm_fd:
         entry: EntryDict = {"keyword": []}
 

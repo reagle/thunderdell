@@ -15,6 +15,7 @@ from pathlib import Path  # https://docs.python.org/3/library/pathlib.html
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import convert_to_unicode, splitname
+from send2trash import send2trash
 
 # Import functions from map2bib.py
 from thunderdell.map2bib import (
@@ -334,6 +335,9 @@ def process(entries: dict, file_path: Path) -> None:
         return
 
     try:
+        if file_path.exists():  # perhaps hand-edited; keep it recoverable
+            print(f"Moving existing {file_path} to the trash")
+            send2trash(file_path)
         with file_path.open("w") as fdo:
             # Write header
             fdo.write("""<map version="1.11.1">\n<node TEXT="Readings">\n""")

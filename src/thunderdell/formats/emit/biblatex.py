@@ -295,7 +295,9 @@ def emit_biblatex(args: argparse.Namespace, entries: EntriesDict):
                     date = date + "~" if value.circa else date
                     value = date
 
-                    if args.bibtex:
+                    # Once, for the publication date; urldate and origdate also pass
+                    # through here and were writing duplicate year fields.
+                    if args.bibtex and field == "date":
                         if entry["date"].year:
                             args.outfd.write(f"   year = {{{entry['date'].year}}},\n")
                         if entry["date"].month:

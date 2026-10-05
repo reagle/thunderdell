@@ -5,7 +5,7 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 
@@ -173,7 +173,7 @@ def emit_json_csl(args: Any, entries: EntriesDict) -> None:
                 value = entry[field]
                 if field in ("identifier", "entry_type"):  # already done above
                     continue
-                if field in ("issue"):  # done below with date/season
+                if field == "issue":  # done below with date/season
                     continue
 
                 if field == "title":
@@ -190,7 +190,8 @@ def emit_json_csl(args: Any, entries: EntriesDict) -> None:
                     obj[field] = [do_csl_person(person) for person in value]
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    if value == "0000":
+                    # Undated entries carry PubDate("0000"); omit them so CSL says n.d.
+                    if getattr(value, "year", value) == "0000":
                         continue
                     if field == "date":
                         season = entry.get("issue", None)
@@ -201,8 +202,6 @@ def emit_json_csl(args: Any, entries: EntriesDict) -> None:
                         obj["accessed"] = do_csl_date(value)
                     continue
 
-                if field == "urldate" and "url" not in entry:
-                    continue  # no url, no 'read on'
                 if field == "url":
                     if any(ban for ban in EXCLUDE_URLS if ban in value):
                         continue

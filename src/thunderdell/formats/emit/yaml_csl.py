@@ -8,7 +8,7 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import argparse
@@ -243,8 +243,8 @@ def emit_yaml_csl(args: argparse.Namespace, entries: EntriesDict) -> None:
                     args.outfd.write(emit_yaml_people(value) + "\n")
                     continue
                 if field in ("date", "origdate", "urldate"):
-                    # logging.debug(f'field = {field}')
-                    if value == "0000":
+                    # Undated entries carry PubDate("0000"); omit them so CSL says n.d.
+                    if getattr(value, "year", value) == "0000":
                         continue
                     if field == "date":
                         # logging.debug(f"value = '{value}'")
@@ -260,8 +260,6 @@ def emit_yaml_csl(args: argparse.Namespace, entries: EntriesDict) -> None:
                         args.outfd.write(emit_yaml_date(value) + "\n")
                     continue
 
-                if field == "urldate" and "url" not in entry:
-                    continue  # no url, no 'read on'
                 if field == "url":
                     # logging.debug(f"url = {value}")
                     if any(ban in value for ban in EXCLUDE_URLS):

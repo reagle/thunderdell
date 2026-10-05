@@ -468,6 +468,8 @@ def unescape_entities(text: str) -> str:
     '<div>foo</div>'
     >>> unescape_entities("Copyright &copy; 2023 &#x263A;")
     'Copyright © 2023 ☺'
+    >>> unescape_entities("A &hellip; B &mdash; C&rsquo;s")
+    'A … B — C’s'
     >>> unescape_entities("Unknown &entity;")
     'Unknown &entity;'
     """
@@ -484,8 +486,8 @@ def unescape_entities(text: str) -> str:
             except ValueError:
                 return match.group(0)  # Return the original match if invalid
         else:
-            # Handle named entities
-            return html.entities.html5.get(entity, match.group(0))
+            # Handle named entities; html5 keys mostly include the ";" (rsquo;)
+            return html.entities.html5.get(entity + ";", match.group(0))
 
     entity_RE = re.compile(r"&([#\w]+);")
     return entity_RE.sub(fixup_chars, text)

@@ -350,12 +350,20 @@ class ScrapeDefault:
     def get_org(self):
         if self.url.startswith("file:"):
             return "local file"
-        org_chunks = urlparse(self.url).netloc.split(".")
+        # hostname, not netloc: no port or user. A one-label host (localhost) is
+        # its own org; ("www") was a substring test, not a tuple.
+        org_chunks = (urlparse(self.url).hostname or "").split(".")
         if org_chunks == [""]:
             org = ""
-        elif org_chunks[0] in ("www"):
+        elif len(org_chunks) == 1:
+            org = org_chunks[0]
+        elif org_chunks[0] == "www":
             org = org_chunks[1]
-        elif org_chunks[-2] in ("wordpress", "blogspot", "wikia"):
+        elif len(org_chunks) > 2 and org_chunks[-2] in (
+            "wordpress",
+            "blogspot",
+            "wikia",
+        ):
             org = org_chunks[-3]
         else:
             org = org_chunks[-2]

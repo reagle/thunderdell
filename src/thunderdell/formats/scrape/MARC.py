@@ -21,10 +21,12 @@ class ScrapeMARC(ScrapeDefault):
         ScrapeDefault.__init__(self, url, comment)
 
     def get_author(self):
-        try:
-            author = re.search("""From: *<a href=".*?">(.*?)</a>""", self.html_u)
-        except AttributeError:
-            author = re.search("""From: *(.*)""", self.html_u)
+        # re.search returns None rather than raising, so fall back with `or`.
+        author = re.search(
+            """From: *<a href=".*?">(.*?)</a>""", self.html_u
+        ) or re.search("""From: *(.*)""", self.html_u)
+        if author is None:
+            return "UNKNOWN"
         author = author.group(1)
         author = (
             author.replace(" () ", "@")

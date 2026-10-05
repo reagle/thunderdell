@@ -32,10 +32,10 @@ def query(number: int, accept: str = "application/atom+xml") -> dict | bool:
     headers = {"Accept": accept}
     url = f"http://export.arxiv.org/api/query?id_list={number}"
     logging.info(f"{url=}")
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, timeout=30)
     requested_content_type = accept.split(";")[0]
     logging.debug(f"{r=}")
-    returned_content_type = r.headers["content-type"]
+    returned_content_type = r.headers.get("content-type", "")
     logging.info("{returned_content_type=}; {requested_content_type=}")
     if requested_content_type in returned_content_type:
         xml_bib = r.content

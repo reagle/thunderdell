@@ -41,9 +41,9 @@ def query(doi: str, accept: str = "application/citeproc+json") -> dict[str, Any]
     headers = {"Accept": accept}
     url = f"http://dx.doi.org/{doi}"
     logging.info(f"{url=}")
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, timeout=30)
     logging.debug(f"{r=} {r.content=}")
-    returned_content_type = r.headers["content-type"].split(";")[0].strip()
+    returned_content_type = r.headers.get("content-type", "").split(";")[0].strip()
     if returned_content_type in ACCEPTABLE_TYPES:
         json_bib = json.loads(r.content)
         logging.info(f"{json_bib=}")

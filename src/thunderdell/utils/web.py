@@ -125,11 +125,11 @@ def get_JSON(
     AGENT_HEADERS = {"User-Agent": "Thunderdell/BusySponge"}
     # info(f"{url=}")
     try:
-        r = requests.get(url, headers=AGENT_HEADERS, verify=True)
+        r = requests.get(url, headers=AGENT_HEADERS, verify=True, timeout=30)
         r.raise_for_status()
     except requests.exceptions.RequestException as exc:
         raise SystemExit(f"{exc}") from exc
-    returned_content_type = r.headers["content-type"].split(";")[0]
+    returned_content_type = r.headers.get("content-type", "").split(";")[0]
     # info(f"{requested_content_type=} == {returned_content_type=}?")
     if requested_content_type == returned_content_type:
         return json.loads(r.content)

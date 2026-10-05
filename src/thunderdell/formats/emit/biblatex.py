@@ -96,7 +96,7 @@ def guess_biblatex_type(entry):
         if e_t in BIBLATEX_TYPES:
             return e_t
         elif e_t in CSL_TYPES:
-            return CSL_BIBLATEX_TYPE_MAP[e_t]
+            return CSL_BIBLATEX_TYPE_MAP.get(e_t, "misc")
         else:
             raise RuntimeError(f"Unknown entry_type = {e_t}")
 

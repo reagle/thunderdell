@@ -231,7 +231,25 @@ CSL_BIBLATEX_TYPE_MAP = {
     "webpage":                  "online"
 }
 
-BIBLATEX_CSL_TYPE_MAP = {v: k for k, v in list(CSL_BIBLATEX_TYPE_MAP.items())}
+# Written out rather than inverted from CSL_BIBLATEX_TYPE_MAP: that map is many-to-one,
+# so inverting it kept only the last CSL type per biblatex value ("misc" became
+# "legal_case", "incollection" became "entry") and left most biblatex types unmapped.
+# The theses are handled in yaml_csl.guess_csl_type, which also sets their genre.
+BIBLATEX_CSL_TYPE_MAP = {
+    "booklet":                  "pamphlet",
+    "collection":               "book",
+    "inbook":                   "chapter",
+    "incollection":             "chapter",
+    "inproceedings":            "paper-conference",
+    "manual":                   "report",
+    "mastersthesis":            "thesis",
+    "misc":                     "article",
+    "online":                   "webpage",
+    "periodical":               "book",
+    "phdthesis":                "thesis",
+    "proceedings":              "book",
+    "unpublished":              "manuscript",
+}
 
 BIBLATEX_CSL_FIELD_MAP = {
     "address":              "publisher-place",

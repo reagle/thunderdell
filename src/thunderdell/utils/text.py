@@ -112,10 +112,15 @@ def html_to_text(text: str) -> str:
     'Hello world!'
     >>> html_to_text('<div>Line 1<br/>Line 2</div>')
     'Line 1Line 2'
+    >>> html_to_text('<p>Tom&nbsp;&amp; Jerry<br>again</p>')  # HTML, not XML
+    'Tom\xa0& Jerryagain'
     """
-    import xml.etree.ElementTree
+    import lxml.html
 
-    return "".join(xml.etree.ElementTree.fromstring(text).itertext())
+    if not text.strip():
+        return ""
+    # An HTML parser: the XML one rejected &nbsp; and unclosed tags such as <br>
+    return lxml.html.fragment_fromstring(text, create_parent="div").text_content()
 
 
 def truncate_text(text: str, length: int) -> str:

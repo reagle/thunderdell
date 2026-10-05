@@ -99,6 +99,9 @@ def query_busysponge(query):
     li_pattern = re.compile(li_expression, re.DOTALL | re.IGNORECASE)
 
     for file in in_files:
+        if not file.exists():  # a 500 with a traceback otherwise
+            logging.warning(f"Planning page not found: {file}")
+            continue
         content = file.read_text(encoding="utf-8", errors="replace")
         lis = li_pattern.findall(content)
         for li in lis:

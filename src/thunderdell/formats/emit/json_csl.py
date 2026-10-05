@@ -177,13 +177,14 @@ def emit_json_csl(args: Any, entries: EntriesDict) -> None:
                     continue
 
                 if field == "title":
-                    escaped_value = escape_csl(value)
-                    if isinstance(escaped_value, str):
-                        title = csl_protect_case(escaped_value)
-                    else:
-                        title = str(escaped_value)
+                    # Protect case on the raw title; json.dump does the escaping.
+                    # (Protecting the JSON-escaped text could put a span inside an
+                    # escape such as \n, which then failed to decode.)
+                    escaped_value = escape_csl(value)  # all-digit titles become int
                     obj["title"] = (
-                        json.loads(title) if isinstance(title, str) else title
+                        csl_protect_case(value)
+                        if isinstance(escaped_value, str)
+                        else escaped_value
                     )
                     continue
                 if field in ("author", "editor", "translator"):

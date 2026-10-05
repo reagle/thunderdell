@@ -31,11 +31,13 @@ def log2nifty(args, biblio):
 
     content = ofile.read_text(encoding="utf-8")
 
-    INSERTION_RE = re.compile('(<dl style="clear: left;">)')
-    newcontent = INSERTION_RE.sub(
-        f"\\1 \n  {log_item}", content, re.DOTALL | re.IGNORECASE
+    INSERTION_RE = re.compile('(<dl style="clear: left;">)', re.IGNORECASE)
+    # A function replacement keeps backslashes in the title or comment literal.
+    # (The flags used to be passed as sub's count argument.)
+    newcontent, count = INSERTION_RE.subn(
+        lambda match: f"{match[1]} \n  {log_item}", content, count=1
     )
-    if newcontent:
+    if count:
         ofile.write_text(newcontent, encoding="utf-8")
     else:
         raise RuntimeError("Sorry, output regexp substitution failed.")

@@ -5,7 +5,7 @@ https://github.com/reagle/thunderdell
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import html.entities
@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -133,11 +134,21 @@ def get_JSON(
         raise OSError(f"URL content is not JSON. {url=}")
 
 
-def get_text(url: str) -> str:
-    """Textual version of url."""
-    import os
-
-    return str(os.popen(f'w3m -O utf8 -cols 10000 -dump "{url}"').read())
+def get_text(url: str, timeout: float = 60) -> str:
+    """Textual version of url, or "" if w3m fails."""
+    # An argument list, not a shell string: URLs can contain $(...) and backticks.
+    try:
+        result = subprocess.run(
+            ["w3m", "-O", "utf8", "-cols", "10000", "-dump", url],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as err:
+        log.warning(f"w3m failed on {url}: {err}")
+        return ""
+    return result.stdout
 
 
 def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:

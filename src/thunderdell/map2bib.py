@@ -902,7 +902,16 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args.query:
         args.query = " ".join(args.query)
         args.query = urllib.parse.unquote(args.query)
-        # emitter_func = emit_results # already defined by module_name = next(...
+        # build_bib leaves query output to its caller, so render the results page
+        # as query_busy does and open it, rather than silently printing nothing.
+        from thunderdell.query_busy import query_mindmap  # it imports map2bib
+
+        args.input_file = file_name
+        results_fn = config.TMP_DIR / "query-results.html"
+        results_fn.write_text(query_mindmap(args), encoding="utf-8")
+        print(f"Results written to {results_fn}")
+        webbrowser.open(results_fn.as_uri())
+        return
 
     with contextlib.ExitStack() as stack:
         if output_path:

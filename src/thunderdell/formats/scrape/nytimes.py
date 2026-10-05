@@ -44,7 +44,9 @@ class ScrapeNYT(ScrapeDefault):
         query_url = f"""{api_url}?fq=url:(\"{url}\")"""
         print(f"{query_url=}")
         query_url += f"&api-key={nyt_app_key}"
-        self.json = get_JSON(f"{query_url}")["response"]["docs"][0]
+        if not (docs := get_JSON(f"{query_url}")["response"]["docs"]):
+            raise RuntimeError(f"NYT article search found nothing for {url}")
+        self.json = docs[0]
 
     def get_biblio(self):
         biblio = {

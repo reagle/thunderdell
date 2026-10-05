@@ -41,6 +41,10 @@ def winnow_dates(self) -> datetime.datetime:
     winnowed_dates = []
 
     for date in datefinder.find_dates(self.text):
+        # An aware date ("... 10:00 UTC") can't be compared with naive now; that
+        # TypeError used to abort the loop and discard every date found.
+        if date.tzinfo is not None:
+            date = date.astimezone().replace(tzinfo=None)
         if date <= now and date >= fifty_years_ago:
             winnowed_dates.append(date)
     return winnowed_dates[0]

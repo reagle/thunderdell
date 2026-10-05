@@ -56,6 +56,10 @@ map2bib = "thunderdell.map2bib:main"
 query-arxiv = "thunderdell.query_arxiv:main"
 query-doi = "thunderdell.query_doi:main"
 query-isbn = "thunderdell.query_isbn:main"
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [tool.uv]
 config-settings = { editable_mode = "compat" }  # Essential for src layout compatibility
 # Force cryptography upgrade past atproto's <47 pin to resolve security advisory
@@ -175,6 +179,9 @@ filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pyright]
 include = ["src"]
-reportMissingImports = false
+venvPath = "."
+venv = ".venv"
+extraPaths = ["src"]
+reportMissingImports = true
 reportMissingTypeStubs = false
 pythonVersion = '3.12'

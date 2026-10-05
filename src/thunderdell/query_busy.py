@@ -6,10 +6,11 @@ This module can be run as a local web server or as a command-line tool.
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 import argparse
+import html
 import io
 import logging
 import re
@@ -36,6 +37,7 @@ app = Flask(__name__)
 INITIAL_FILE_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
+<head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <title>Reagle's Planning Page</title>
 <link rel="stylesheet" type="text/css" href="../plan.css" />
@@ -60,7 +62,8 @@ def query_mindmap(args):
 
     output = []
     output.append(RESULT_FILE_HEADER)
-    output.append(RESULT_FILE_QUERY_BOX % (args.query, args.query))
+    query_html = html.escape(args.query)
+    output.append(RESULT_FILE_QUERY_BOX % (query_html, query_html))
 
     file_name = Path(args.input_file).absolute()
     args.direct_query = True
@@ -87,7 +90,11 @@ def query_busysponge(query):
     ]
 
     out_str = ""
-    query_pattern = re.compile(query, re.DOTALL | re.IGNORECASE)
+    try:
+        query_pattern = re.compile(query, re.DOTALL | re.IGNORECASE)
+    except re.error as err:
+        msg = f"<p>Invalid pattern '{html.escape(query)}': {html.escape(str(err))}</p>"
+        return f"{INITIAL_FILE_HEADER}{msg}</body></html>"
     li_expression = r'<li class="event".*?>\d\d\d\d\d\d:.*?</li>'
     li_pattern = re.compile(li_expression, re.DOTALL | re.IGNORECASE)
 
@@ -101,7 +108,7 @@ def query_busysponge(query):
     if out_str:
         out_str = f"<ol>{out_str}</ol>"
     else:
-        out_str = f"<p>No results for query '{query}'</p>"
+        out_str = f"<p>No results for query '{html.escape(query)}'</p>"
 
     return f"{INITIAL_FILE_HEADER}{out_str}</body></html>"
 
@@ -119,7 +126,7 @@ def qb():
     if site == "mindmap":
         args = argparse.Namespace()
         args.query = query
-        args.chase = True
+        args.chase = request.args.get("chase", "1") != "0"
         args.input_file = config.DEFAULT_MAP
         args.long_url = False
         args.pretty = False
@@ -159,6 +166,36 @@ def open_browser_silent(url: str) -> None:
             webbrowser.open(url)
 
 
+def start_server(args: argparse.Namespace, timeout: float = 15.0) -> bool:
+    """Spawn a detached server and wait until it accepts connections."""
+    command = [sys.executable, __file__, "--server", f"--port={args.port}"]
+    if args.verbose:
+        command.append("-" + "V" * args.verbose)
+    if args.log_to_file:
+        command.append("--log-to-file")
+    # Detached from our terminal: no stdin, and its banner and request logs
+    # go to the log file (with -L) or nowhere, not into the user's shell.
+    proc = subprocess.Popen(
+        command,
+        close_fds=True,
+        start_new_session=True,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    logging.info(f"Server process started with command: {' '.join(command)}")
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if is_port_in_use(args.port):
+            return True
+        if proc.poll() is not None:
+            logging.error(f"Server exited with code {proc.returncode}")
+            return False
+        time.sleep(0.1)
+    logging.error(f"Server not listening on port {args.port} after {timeout}s")
+    return False
+
+
 def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command-line arguments and return Namespace."""
     parser = argparse.ArgumentParser(
@@ -180,11 +217,10 @@ def process_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         help="Site to query (default: mindmap)",
     )
     parser.add_argument(
-        "-c",
         "--chase",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help="Chase links between mindmaps",
+        help="Chase links between mindmaps (default: chase)",
     )
     parser.add_argument(
         "--server",
@@ -238,20 +274,15 @@ def main(argv: list[str] | None = None):
         # CLI/client mode
         if not is_port_in_use(args.port):
             logging.info(f"Server not running on port {args.port}. Starting it.")
-            command = [sys.executable, __file__, "--server", f"--port={args.port}"]
-            subprocess.Popen(
-                command,
-                close_fds=True,
-                start_new_session=True,
-                stdin=subprocess.DEVNULL,
-            )
-            logging.info(f"Server process started with command: {' '.join(command)}")
-            time.sleep(2)  # Give server time to start
+            if not start_server(args):
+                sys.exit(f"Could not start server on port {args.port}; try -V -L.")
         else:
             logging.info(f"Server already running on port {args.port}.")
 
         query_encoded = urllib.parse.quote(args.query)
         url = f"http://127.0.0.1:{args.port}/joseph/plan/qb/?query={query_encoded}&sitesearch={args.site}"
+        if not args.chase:
+            url += "&chase=0"
         print(f"Opening browser to: {url}")
         open_browser_silent(url)
 

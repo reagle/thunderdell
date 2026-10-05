@@ -9,6 +9,7 @@ __version__ = "1.0"
 import argparse
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -102,9 +103,9 @@ def open_query(isbn: str, session: requests.Session) -> BibDict | None:
                 "Attempting year extraction."
             )
             # Fallback: try to extract just the year if parsing fails
-            year_match = arrow.get(pub_date, ["YYYY", "YYYY-MM", "MM-YYYY"])
-            if year_match:
-                bib_entry["date"] = year_match.format("YYYY")
+            # ("March 2003", "c1999"); arrow.get would just raise ParserError again.
+            if year_match := re.search(r"\b\d{4}\b|(?<=c)\d{4}\b", pub_date):
+                bib_entry["date"] = year_match.group()
             else:
                 logging.error(f"Failed to extract year from '{pub_date}'")
 

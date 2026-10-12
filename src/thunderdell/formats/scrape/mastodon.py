@@ -19,6 +19,8 @@ from .default import ScrapeDefault
 
 
 class ScrapeMastodon(ScrapeDefault):
+    """Scrape a Mastodon post."""
+
     def __init__(self, url, comment):
         print("Scraping mastodon", end="\n")
         ScrapeDefault.__init__(self, url, comment)

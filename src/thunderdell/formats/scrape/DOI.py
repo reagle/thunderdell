@@ -20,6 +20,8 @@ from .default import ScrapeDefault
 
 
 class ScrapeDOI(ScrapeDefault):
+    """Scrape the metadata registered for a DOI."""
+
     def __init__(self, url: str, comment: str):
         print("Scraping DOI;", end="\n")
         self.url = url

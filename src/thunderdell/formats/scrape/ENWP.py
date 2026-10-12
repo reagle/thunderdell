@@ -22,6 +22,8 @@ NOW = time.localtime()
 
 
 class ScrapeENWP(ScrapeDefault):
+    """Scrape an English Wikipedia article."""
+
     def __init__(self, url, comment):
         print("Scraping en.Wikipedia;", end="\n")
         ScrapeDefault.__init__(self, url, comment)

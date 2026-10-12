@@ -163,12 +163,14 @@ EPILOG = """
 
 
 def print_usage(message: str) -> None:
+    """Print a message followed by the usage description and epilog."""
     print(message)
     print(DESCRIPTION)
     print(EPILOG)
 
 
 def main():
+    """Parse arguments, then scrape and log the resource."""
     import sys
 
     arg_parser = argparse.ArgumentParser(

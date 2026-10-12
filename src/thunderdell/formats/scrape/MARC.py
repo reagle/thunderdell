@@ -16,6 +16,8 @@ from .default import ScrapeDefault
 
 
 class ScrapeMARC(ScrapeDefault):
+    """Scrape a MARC library record."""
+
     def __init__(self, url, comment):
         print("Scraping MARC;", end="\n")
         ScrapeDefault.__init__(self, url, comment)

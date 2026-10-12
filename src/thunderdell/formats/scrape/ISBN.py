@@ -17,6 +17,8 @@ from .default import ScrapeDefault
 
 
 class ScrapeISBN(ScrapeDefault):
+    """Scrape a book by its ISBN."""
+
     def __init__(self, url: str, comment: str):
         print("Scraping ISBN;", end="\n")
         self.url = url

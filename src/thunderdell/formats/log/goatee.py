@@ -23,7 +23,7 @@ def log2goatee(args, biblio):
     """Start at a blog entry at goatee."""
     GOATEE_ROOT = config.HOME / "data/2web/goatee.net/content/"
     logging.info(f"{biblio['comment']=}")
-    blog_title, sep, blog_body = biblio["comment"].partition(". ")
+    blog_title, _sep, blog_body = biblio["comment"].partition(". ")
 
     this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
     url = biblio.get("url", None)

@@ -106,7 +106,7 @@ def smart_to_markdown(text: str) -> str:
 
 
 def html_to_text(text: str) -> str:
-    """Extract text content from HTML.
+    r"""Extract text content from HTML.
 
     >>> html_to_text('<p>Hello <b>world</b>!</p>')
     'Hello world!'

@@ -22,7 +22,7 @@ def log2opencodex(args, biblio):
     """Start at a blog entry at opencodex."""
     blog_title = blog_body = ""
     CODEX_ROOT = config.HOME / "data/2web/reagle.org/joseph/content/"
-    this_year, this_month, this_day = time.strftime("%Y %m %d", NOW).split()
+    this_year, _this_month, _this_day = time.strftime("%Y %m %d", NOW).split()
     blog_title = " ".join(biblio["title"].split(" ")[0:3])
     entry = biblio["comment"]
 

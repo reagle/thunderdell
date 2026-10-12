@@ -55,7 +55,7 @@ class ScrapeENWP(ScrapeDefault):
     def get_date(self):
         """Find date within span."""
         if "oldid" not in self.url and "=Special:" not in self.url:
-            _, _, versioned_HTML_u, resp = get_HTML(self.get_permalink())
+            _, _, versioned_HTML_u, _resp = get_HTML(self.get_permalink())
             span_match = re.search(
                 r"""<span id="mw-revision-date">(.*?), (\d{1,2}) (\w+) """
                 r"""(\d\d\d\d)</span>""",
@@ -64,7 +64,7 @@ class ScrapeENWP(ScrapeDefault):
             if span_match:
                 _, day, month, year = span_match.groups()
                 month = bf.MONTH2DIGIT[month[0:3].lower()]
-                return "%d%02d%02d" % (int(year), int(month), int(day))
+                return f"{int(year):d}{int(month):02d}{int(day):02d}"
             if url_date := re.search(r"/(\d{4})-(\d{2})-(\d{2})/", self.url):
                 year, month, day = url_date.groups()
                 return f"{year}{month}{day}"

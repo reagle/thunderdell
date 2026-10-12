@@ -318,7 +318,6 @@ def build_mm_from_txt(
     if not line or line in ("\r", "\n"):
         return state, entry
 
-    started, in_part, in_chapter, in_section, in_subsection = state
     new_state = state
     new_entry = entry
 
@@ -345,14 +344,8 @@ def build_mm_from_txt(
         mm_fd.write(f"""          <node STYLE_REF="default" TEXT="{clean(line)}"/>\n""")
 
     else:  # Default case: process as content (page number, excerpt, paraphrase)
-        # Ensure content is placed within the current structure level
-        indent = "  " * (2 + sum([in_part, in_chapter, in_section, in_subsection]))
-        # Temporarily adjust process_content_line or add logic here if needed
-        # to handle indentation based on state. For now, assuming it writes
-        # at the deepest level. A better approach might be to pass indent level.
-        # Let's assume process_content_line writes at a fixed indent for now.
-        # A better refactor would adjust indentation based on state.
-        # For now, we'll keep the original fixed indent in process_content_line.
+        # process_content_line writes at a fixed indent; it does not yet follow
+        # the structure level (part, chapter, section, subsection).
         process_content_line(mm_fd, line)
 
     return new_state, new_entry
@@ -364,8 +357,6 @@ def create_mm(args: argparse.Namespace, text: str, mm_file_name: Path) -> None:
         print(f"Moving existing {mm_file_name} to the trash")
         send2trash(mm_file_name)
     with mm_file_name.open("w", encoding="utf-8", errors="replace") as mm_fd:
-        entry: EntryDict = {"keyword": []}
-
         # Initialize state variables
         state: MindmapState = (
             False,

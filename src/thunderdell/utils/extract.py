@@ -12,12 +12,9 @@ __version__ = "1.0"
 import argparse
 import logging
 
-import requests
-
+from thunderdell.formats.log.console import log2console
 from thunderdell.formats.scrape.DOI import ScrapeDOI
 from thunderdell.formats.scrape.ISBN import ScrapeISBN
-from thunderdell.formats.log.console import log2console
-
 
 args = argparse.Namespace(publish=False)  # don't tweet at this level
 

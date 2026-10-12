@@ -3,8 +3,6 @@
 https://github.com/reagle/thunderdell
 """
 
-from typing import Dict
-
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
 __license__ = "GLPv3"
@@ -84,10 +82,10 @@ class ScrapeISBN(ScrapeDefault):
         logging.info(f"{date_parts=}")
         if len(date_parts) == 3:
             year, month, day = date_parts
-            date = "%d%02d%02d" % (int(year), int(month), int(day))
+            date = f"{int(year):d}{int(month):02d}{int(day):02d}"
         elif len(date_parts) == 2:
             year, month = date_parts
-            date = "%d%02d" % (int(year), int(month))
+            date = f"{int(year):d}{int(month):02d}"
         elif len(date_parts) == 1:
             date = str(date_parts[0])
         else:

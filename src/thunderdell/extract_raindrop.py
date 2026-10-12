@@ -101,7 +101,7 @@ def open_url_silent(url: str) -> None:
             )
         else:
             webbrowser.open(url)
-    except Exception as e:
+    except (OSError, webbrowser.Error) as e:
         logging.error(f"Failed to open URL {url}: {e}")
 
 

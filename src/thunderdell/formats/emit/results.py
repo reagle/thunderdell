@@ -184,7 +184,7 @@ def reverse_print(node: et._Element, entry: EntryDict, spaces: str, results_file
             # biblatex: page, column, line, verse, section, paragraph
             # kindle: location
             if "pagination" in entry:
-                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"], None)
+                prefix = LOCATOR_PREFIX_MAP.get(entry["pagination"])
                 if prefix is None:
                     raise Exception(
                         f"unknown locator '{entry['pagination']}' "

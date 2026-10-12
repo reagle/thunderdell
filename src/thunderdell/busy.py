@@ -19,7 +19,6 @@ import argparse
 import logging
 import re
 import sys
-import time
 import urllib.parse
 from collections.abc import Callable
 from pathlib import Path
@@ -129,7 +128,7 @@ def get_logger(text: str) -> tuple[Callable, dict]:
             "o": log2opencodex,
             "g": log2goatee,
         }
-        function = function_map.get(params["scheme"], None)
+        function = function_map.get(params["scheme"])
 
         if function:
             return function, params

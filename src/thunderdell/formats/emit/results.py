@@ -9,6 +9,7 @@ __license__ = "GPLv3"
 __version__ = "1.0"
 
 import argparse  # http://docs.python.org/dev/library/argparse.html
+import functools
 import json
 import re
 import urllib.parse
@@ -276,11 +277,15 @@ def get_url_query(token: str) -> str:
     return url_query
 
 
+@functools.cache
 def get_url_MM(file_name: str) -> str:
     """Return a file:// URL for the source mindmap, as seen from the client.
 
     Maps under the server's home are re-rooted at CLIENT_HOME; others (e.g., the
     tests folder of an installed copy) keep their absolute path.
+
+    Cached because it is called once per entry, but there are only a few hundred
+    distinct mindmaps.
     """
     file_path = Path(file_name).absolute()
     try:

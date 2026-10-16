@@ -9,7 +9,7 @@ https://reagle.org/joseph/2009/01/thunderdell.html
 
 __author__ = "Joseph Reagle"
 __copyright__ = "Copyright (C) 2009-2023 Joseph Reagle"
-__license__ = "GLPv3"
+__license__ = "GPLv3"
 __version__ = "1.0"
 
 # TODO: when logging a URL, fetch and archive the source (e.g., PDF, HTML)
@@ -35,15 +35,13 @@ from thunderdell.formats.scrape.default import ScrapeDefault
 from thunderdell.utils.text import pretty_tabulate_dict
 from thunderdell.utils.web import canonicalize_url
 
-MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-
 #######################################
 # Dispatchers
 #######################################
 
 
 def get_scraper(url: str, comment: str) -> ScrapeDefault:
-    """Use the URL to specify a screen scraper, e.g.,.
+    """Use the URL to specify a screen scraper (see examples below).
 
     busy.py c .test https://en.wikipedia.org/wiki/Joseph_M._Reagle_Jr.
     busy.py c .test https://meta.wikimedia.org/wiki/Steward_requests/Bot_status
@@ -99,14 +97,12 @@ def get_logger(text: str) -> tuple[Callable, dict]:
     # tags must be prefixed by dot; URL no longer required
     LOG_REGEX = re.compile(
         r"(?P<scheme>\w) (?P<tags>(\.\w+ )+)?"
-        + r"(?P<url>(arxiv|doi|isbn|http|file)\S* ?)?(?P<comment>.*)",
+        + r"(?P<url>(arxiv:|doi:|isbn:|https?:|file:)\S* ?)?(?P<comment>.*)",
         re.IGNORECASE,
     )
 
-    if LOG_REGEX.match(text):
-        params = {}
-        if (match := LOG_REGEX.match(text)) is not None:
-            params = match.groupdict()
+    if (match := LOG_REGEX.match(text)) is not None:
+        params = match.groupdict()
         if params.get("tags"):
             params["tags"] = params["tags"].replace(".", "")
         if params.get("url"):
@@ -136,14 +132,14 @@ def get_logger(text: str) -> tuple[Callable, dict]:
             print_usage(f"""Sorry, unknown scheme: '{params["scheme"]}'.""")
     else:
         print_usage(f"Sorry, I can't parse the argument: '{text}'.")
-    sys.exit()
+    sys.exit(1)
 
 
 #######################################
 # Miscellaneous
 #######################################
 
-DESCRIPTION = DESCRIPTION = "Given a URL, tag, scrape, and log it."
+DESCRIPTION = "Given a URL, tag, scrape, and log it."
 
 EPILOG = """
   blog codex:    b o [pra|soc|tec] TAGS URL|DOI|ISBN TITLE. BODY
@@ -157,7 +153,7 @@ EPILOG = """
     ', '  begins paraphrase
     '-- ' begins note
     'key=value' for metadata; e.g.,
-      au=John Smith ti=Greatet Book Ever d=2001 cb=Blogger.com et=cb
+      au=John Smith ti=Greatest Book Ever d=2001 cb=Blogger.com et=cb
       Entry types (et=cb) values must be typed as container shortcut.
 """
 
@@ -171,11 +167,9 @@ def print_usage(message: str) -> None:
 
 def main():
     """Parse arguments, then scrape and log the resource."""
-    import sys
-
     arg_parser = argparse.ArgumentParser(
         prog="b",
-        usage="%(prog)s [options] [URL] logger [keyword] [text]",
+        usage="%(prog)s [options] scheme [.tags] [URL] [comment]",
         description=DESCRIPTION,
         epilog=EPILOG,
         formatter_class=argparse.RawTextHelpFormatter,
@@ -214,7 +208,7 @@ def main():
         "--verbose",
         action="count",
         default=0,
-        help="increase verbosity from critical though error, warning, info, and debug",
+        help="increase verbosity from critical through error, warning, info, and debug",
     )
     arg_parser.add_argument(
         "--version",

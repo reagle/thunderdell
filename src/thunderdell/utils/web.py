@@ -14,6 +14,7 @@ import logging
 import os
 import re
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -26,10 +27,12 @@ from thunderdell.biblio.keywords import KEY_SHORTCUTS
 
 log = logging.getLogger("utils_web")
 
+CREDENTIALS_FN = Path.home() / ".config" / "api-info.env"
+
 
 def get_credential(key: str) -> str:
     """Retrieve credential from environ, file, or solicitation."""
-    ENV_FN = Path.home() / ".config" / "api-info.env"
+    ENV_FN = CREDENTIALS_FN
     if not ENV_FN.exists():  # first run on this machine
         ENV_FN.parent.mkdir(parents=True, exist_ok=True)
         ENV_FN.touch(mode=0o600)
@@ -174,6 +177,9 @@ def get_text(url: str, timeout: float = 60) -> str:
     return result.stdout
 
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+
+
 def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -> None:
     """Send annotated URL to social networks."""
     logging.info(f"'{comment=}', {title=}, {subtitle=}, {url=}, {tags=}")
@@ -189,10 +195,11 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
     )
     if subtitle:
         title = f"{title}: {subtitle}"
-    if url[-4:] in (".jpg", ".png"):
+    if url.lower().endswith(IMAGE_EXTENSIONS):
         if "goatee.net/photo" in url:
             title = ""
-            tags = "#photo #" + url.rsplit("/")[-1][8:-4].replace("-", " #")
+            photo_stem = url.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+            tags = "#photo #" + photo_stem[8:].replace("-", " #")
             photo_path = config.HOME / "f" / url[19:]
         if url.startswith("file://"):
             url.replace("file:///", "file://")
@@ -212,8 +219,77 @@ def yasn_publish(comment: str, title: str, subtitle: str, url: str, tags: str) -
          {total_len=}"""
     )
 
-    mastodon_update(comment, title, url, tags, photo_path)
+    # Instagram needs a public URL, so reuse the photo Mastodon now hosts
+    photo_url = mastodon_update(comment, title, url, tags, photo_path)
     bluesky_update(comment, title, url, tags, photo_path)
+    if photo_url.lower().endswith((".jpg", ".jpeg")):  # Instagram takes only JPEGs
+        instagram_update(f"{comment} {tags}".strip(), photo_url)
+
+
+def instagram_update(caption: str, photo_url: str) -> None:
+    """Post a publicly reachable JPEG to the authenticated Instagram account.
+
+    Uses the Instagram API with Instagram Login: create a media container
+    from the photo's URL, then publish it.
+    """
+    INSTAGRAM_ACCESS_TOKEN = get_credential("INSTAGRAM_ACCESS_TOKEN")
+    INSTAGRAM_USER_ID = get_credential("INSTAGRAM_USER_ID")
+    api = f"https://graph.instagram.com/{INSTAGRAM_USER_ID}"
+    auth = {"access_token": INSTAGRAM_ACCESS_TOKEN}
+
+    try:
+        container = requests.post(
+            f"{api}/media",
+            data={"image_url": photo_url, "caption": caption, **auth},
+            timeout=60,
+        )
+        container.raise_for_status()
+        container_id = container.json()["id"]
+        for _ in range(30):  # Instagram fetches and processes the photo first
+            status = requests.get(
+                f"https://graph.instagram.com/{container_id}",
+                params={"fields": "status_code", **auth},
+                timeout=30,
+            )
+            status.raise_for_status()
+            if status.json().get("status_code") != "IN_PROGRESS":
+                break
+            time.sleep(2)
+        published = requests.post(
+            f"{api}/media_publish",
+            data={"creation_id": container_id, **auth},
+            timeout=60,
+        )
+        published.raise_for_status()
+    except requests.RequestException as err:
+        detail = err.response.text if err.response is not None else ""
+        print(f"instagram failed: {err} {detail}")
+    else:
+        print(f"instagram worked {len(caption)}: {caption}")
+        instagram_refresh_token(INSTAGRAM_ACCESS_TOKEN)
+
+
+def instagram_refresh_token(token: str) -> None:
+    """Extend the Instagram token another 60 days and save it.
+
+    Refreshing only works on an unexpired token at least 24 hours old,
+    so a failure is logged rather than raised.
+    """
+    try:
+        response = requests.get(
+            "https://graph.instagram.com/refresh_access_token",
+            params={"grant_type": "ig_refresh_token", "access_token": token},
+            timeout=30,
+        )
+        response.raise_for_status()
+    except requests.RequestException as err:
+        log.warning(f"instagram token refresh failed: {err}")
+        return
+    new_token = response.json()["access_token"]
+    dotenv.set_key(CREDENTIALS_FN, "INSTAGRAM_ACCESS_TOKEN", new_token)
+    os.environ["INSTAGRAM_ACCESS_TOKEN"] = new_token
+    days = response.json().get("expires_in", 0) // 86400
+    log.info(f"instagram token refreshed; expires in {days} days")
 
 
 def bluesky_update(
@@ -277,8 +353,11 @@ def bluesky_update(
 
 def mastodon_update(
     comment: str, title: str, url: str, tags: str, photo_path: Path | None
-) -> None:
-    """Update the authenticated Mastodon account with a tweet and optional photo."""
+) -> str:
+    """Update the authenticated Mastodon account with a toot and optional photo.
+
+    Return the public URL of the posted photo, or "" if there is none.
+    """
     import mastodon  # https://mastodonpy.readthedocs.io/en/stable/
 
     MASTODON_APP_BASE = get_credential("MASTODON_APP_BASE")
@@ -288,18 +367,24 @@ def mastodon_update(
         access_token=OHAI_ACCESS_TOKEN, api_base_url=MASTODON_APP_BASE
     )
     toot = shrink_message("ohai", comment, title, url, tags)
+    photo_url = ""
     try:
         if photo_path and photo_path.is_file():
             photo_desc = get_photo_desc(photo_path)
-            media = ohai.media_post(media_file=str(photo_path), description=photo_desc)
+            media = ohai.media_post(
+                media_file=str(photo_path), description=photo_desc, synchronous=True
+            )
             ohai.status_post(status=toot, media_ids=media)
+            photo_url = media.url or ""
         else:
             ohai.status_post(status=toot)
     except mastodon.MastodonError as err:
         print(err)
         print(f"toot failed {len(toot)}: {toot}")
+        return ""
     else:
         print(f"toot worked {len(toot)}: {toot}")
+    return photo_url
 
 
 def get_photo_desc(photo_path: Path) -> str:

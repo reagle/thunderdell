@@ -106,11 +106,15 @@ def escape_yaml(s: str) -> str:
     '"hello \'world\'"'
     >>> escape_yaml('')
     ''
+    >>> escape_yaml('para one\n\npara two')
+    '"para one\\n\\npara two"'
     """
     if s:  # faster to just quote than testing for tokens
         s = s.replace('"', r"'")
         # s = s.replace("#", r"\#") # this was introducing slashes in URLs
         s = s.replace("@", r"\\@")  # single slash caused bugs in past
+        # raw newlines (Freeplane's &#10;) break unindented continuation lines
+        s = s.replace("\r\n", "\n").replace("\n", r"\n")
         s = f'"{s}"'
     return s
 
